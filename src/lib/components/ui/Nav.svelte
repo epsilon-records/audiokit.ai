@@ -8,7 +8,7 @@
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center py-6">
       <a href="/" class="text-white font-mono font-bold text-xl">EPSILON</a>
-      <ul class="flex gap-8">
+      <ul class="flex gap-8 text-lg">
         <li>
           <a href="/releases" class="hover:text-red-400 text-white transition-colors">Releases</a>
         </li>
