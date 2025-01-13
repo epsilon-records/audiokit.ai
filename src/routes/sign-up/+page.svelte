@@ -1,7 +1,12 @@
 <script lang="ts">
-	import SignUp from 'clerk-sveltekit/client/SignUp.svelte'
+  import SignUp from 'clerk-sveltekit/client/SignUp.svelte';
+  import { mode } from 'mode-watcher';
+  import { neobrutalism, dark } from '@clerk/themes';
 </script>
 
-<div>
-	<SignUp redirectUrl="/admin" />
+<div class="m-4 flex flex-col items-center">
+  <SignUp
+    appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
+    redirectUrl="/dashboard"
+  />
 </div>
