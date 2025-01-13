@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { pb } from '$lib/pocketbase';
     let { data } = $props<{ data: { releases: any[] } }>();
 </script>
 
@@ -14,7 +15,7 @@
                 >
                     <div class="aspect-square overflow-hidden border border-[#00ff00]">
                         <img 
-                            src={release.cover_art?.[0] ? pb.files.getURL(release, release.cover_art[0]) : '/default-release.jpg'} 
+                            src={release.cover_artwork?.[0] ? pb.files.getURL(release, release.cover_artwork[0]) : '/default-release.jpg'} 
                             alt={release.title}
                             class="w-full h-full object-cover transition-transform group-hover:scale-105"
                         />

@@ -3,13 +3,14 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
     try {
-        const records = await pb.collection('releases').getList(1, 50, {
+        const records = await pb.collection('releases').getFullList({
+            filter: 'slug != "" && slug != null',
             sort: '-release_date',
             expand: 'artist',
         });
         
         return {
-            releases: records.items
+            releases: records
         };
     } catch (err) {
         console.error('Error fetching releases:', err);
