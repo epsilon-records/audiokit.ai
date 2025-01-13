@@ -1,10 +1,7 @@
 <script lang="ts">
   import UserButton from 'clerk-sveltekit/client/UserButton.svelte';
-  import OrganizationSwitcher from 'clerk-sveltekit/client/OrganizationSwitcher.svelte';
   import SignedIn from 'clerk-sveltekit/client/SignedIn.svelte';
   import SignedOut from 'clerk-sveltekit/client/SignedOut.svelte';
-  import { mode } from 'mode-watcher';
-  import { neobrutalism, dark } from '@clerk/themes';
 </script>
 
 <nav class="absolute top-0 w-full z-20">
@@ -27,12 +24,6 @@
         </li>
         <SignedIn>
           <li>
-            <OrganizationSwitcher
-              appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
-              hidePersonal={true}
-              afterCreateOrganizationUrl="/profile"
-              afterSelectOrganizationUrl="/profile"
-            />
             <UserButton afterSignOutUrl="/" />
           </li>
         </SignedIn>
