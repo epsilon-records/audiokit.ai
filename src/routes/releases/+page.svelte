@@ -1,5 +1,5 @@
 <script lang="ts">
-    export let data;
+    let { data } = $props<{ data: { releases: any[] } }>();
 </script>
 
 <div class="min-h-screen bg-black">
