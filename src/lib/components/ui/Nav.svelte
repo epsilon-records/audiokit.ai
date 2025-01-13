@@ -23,7 +23,9 @@
           <a href="/contact" class="hover:text-red-400 text-white transition-colors">Contact</a>
         </li>
         <SignedIn>
-          <UserButton afterSignOutUrl="/" />
+          <div class="m-2 pt-1">
+            <UserButton afterSignOutUrl="/" />
+          </div>
         </SignedIn>
         <SignedOut>
           <li>
