@@ -3,11 +3,7 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async () => {
     try {
-        const records = await pb.collection('artists').getList(1, 50, {
-            headers: {
-                'Authorization': `Bearer ${process.env.POCKETBASE_API_TOKEN}`
-            }
-        });
+        const records = await pb.collection('artists').getList(1, 50);
         
         return {
             artists: records.items

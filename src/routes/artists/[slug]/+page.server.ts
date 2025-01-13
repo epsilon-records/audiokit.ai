@@ -6,10 +6,7 @@ export const load: PageServerLoad = async ({ params }) => {
     try {
         const records = await pb.collection('artists').getList(1, 1, {
             filter: `slug = "${params.slug}"`,
-            expand: 'country',
-            headers: {
-                'Authorization': `Bearer ${process.env.POCKETBASE_API_TOKEN}`
-            }
+            expand: 'country'
         });
 
         if (records.items.length === 0) {

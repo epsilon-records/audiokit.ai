@@ -6,9 +6,6 @@ export const load: PageServerLoad = async () => {
         const records = await pb.collection('releases').getList(1, 50, {
             sort: '-release_date',
             expand: 'artist',
-            headers: {
-                'Authorization': `Bearer ${process.env.VITE_API_TOKEN}`
-            }
         });
         
         return {
