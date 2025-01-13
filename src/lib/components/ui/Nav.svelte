@@ -27,7 +27,7 @@
         </SignedIn>
         <SignedOut>
           <li>
-            <a href="/login" class="hover:text-red-400 text-white transition-colors">Login</a>
+            <a href="/sign-in" class="hover:text-red-400 text-white transition-colors">Login</a>
           </li>
         </SignedOut>
       </ul>
