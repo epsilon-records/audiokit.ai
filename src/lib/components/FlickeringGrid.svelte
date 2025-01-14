@@ -1,14 +1,14 @@
 <script lang="ts">
-  import { onMount, onDestroy } from "svelte";
-  import { writable } from "svelte/store";
+  import { onMount, onDestroy } from 'svelte';
+  import { writable } from 'svelte/store';
 
   export let squareSize: number = 4;
   export let gridGap: number = 6;
   export let flickerChance: number = 0.3;
-  export let color = "rgb(0, 0, 0)";
+  export let color = 'rgb(0, 0, 0)';
   export let width: number;
   export let height: number;
-  let className = "";
+  let className = '';
   export { className as class };
 
   export let maxOpacity: number = 0.3;
@@ -19,13 +19,13 @@
   let memoizedColor: any;
 
   function toRGBA(color: string) {
-    if (typeof window === "undefined") {
+    if (typeof window === 'undefined') {
       return `rgba(0, 0, 0,`;
     }
-    const canvas = document.createElement("canvas");
+    const canvas = document.createElement('canvas');
     canvas.width = canvas.height = 1;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return "rgba(255, 0, 0,";
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return 'rgba(255, 0, 0,';
     ctx.fillStyle = color;
     ctx.fillRect(0, 0, 1, 1);
     const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
@@ -68,10 +68,10 @@
     cols: number,
     rows: number,
     squares: Float32Array,
-    dpr: number
+    dpr: number,
   ) {
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = "transparent";
+    ctx.fillStyle = 'transparent';
     ctx.fillRect(0, 0, width, height);
 
     for (let i = 0; i < cols; i++) {
@@ -82,7 +82,7 @@
           i * (squareSize + gridGap) * dpr,
           j * (squareSize + gridGap) * dpr,
           squareSize * dpr,
-          squareSize * dpr
+          squareSize * dpr,
         );
       }
     }
@@ -91,19 +91,19 @@
   let animationFrameId;
 
   onMount(() => {
-    console.log("canvas", canvas);
+    console.log('canvas', canvas);
     if (canvas) {
-      console.log("canvas", canvas);
+      console.log('canvas', canvas);
     }
     if (!canvas) {
       return;
     }
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext('2d');
     if (!ctx) {
       return;
     }
     let { canvasWidth, canvasHeight, cols, rows, squares, dpr } = setupCanvas();
-    console.log(ctx, "ctx");
+    console.log(ctx, 'ctx');
 
     let lastTime = 0;
 
@@ -113,15 +113,7 @@
       lastTime = time;
 
       updateSquares(squares, deltaTime);
-      drawGrid(
-        ctx,
-        canvasWidth * dpr,
-        canvasHeight * dpr,
-        cols,
-        rows,
-        squares,
-        dpr
-      );
+      drawGrid(ctx, canvasWidth * dpr, canvasHeight * dpr, cols, rows, squares, dpr);
       animationFrameId = requestAnimationFrame(animate);
     };
 
@@ -134,12 +126,12 @@
         console.log(entry.isIntersecting);
         isInView.set(entry.isIntersecting);
       },
-      { threshold: 0 }
+      { threshold: 0 },
     );
 
     observer.observe(canvas);
 
-    window.addEventListener("resize", handleResize);
+    window.addEventListener('resize', handleResize);
 
     const unsubscribe = isInView.subscribe((inView) => {
       if (inView) {
@@ -148,7 +140,7 @@
     });
 
     return () => {
-      window.removeEventListener("resize", handleResize);
+      window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
       observer.disconnect();
       unsubscribe();
