@@ -4,23 +4,20 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
     try {
-        const records = await pb.collection('artists').getList(1, 1, {
-            filter: `slug = "${params.slug}"`,
+        const artist = await pb.collection('artists').getFirstListItem(`slug = "${params.slug}"`, {
             expand: 'country'
         });
 
-        if (records.items.length === 0) {
-            throw error(404, 'Artist not found');
-        }
-
-        const artist = records.items[0];
         return {
             artist: {
                 ...artist,
                 country: artist.expand?.country?.name || 'Unknown'
             }
         };
-    } catch (err) {
+    } catch (err: any) {
+        if (err.status === 404) {
+            throw error(404, 'Artist not found');
+        }
         throw error(500, 'Error fetching artist');
     }
-}; 
+};
