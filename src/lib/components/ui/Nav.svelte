@@ -29,10 +29,18 @@
         </li>
         <SignedOut>
           <li>
-            <a href="/sign-in" class="hover:text-red-400 text-white transition-colors">Login</a>
+            <a
+              href="/sign-in"
+              class="btn btn-sm btn-primary text-lg hover:text-red-400 text-white transition-colors"
+              >Login</a
+            >
           </li>
           <li>
-            <a href="/sign-up" class="hover:text-red-400 text-white transition-colors">Register</a>
+            <a
+              href="/sign-up"
+              class="btn btn-sm btn-secondary text-lg hover:text-green-300 text-white transition-colors"
+              >Register</a
+            >
           </li>
         </SignedOut>
         <SignedIn>
