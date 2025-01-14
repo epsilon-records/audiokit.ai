@@ -3,6 +3,7 @@
   import { Textarea } from '$lib/components/ui/textarea';
   import type { ValidationRule } from '$lib/utils/validation';
   import { validateField } from '$lib/utils/validation';
+  import { cn } from '$lib/utils';
 
   let {
     label,
@@ -47,8 +48,7 @@
     {placeholder}
     bind:value
     on:blur={validate}
-    class="bg-background resize-none"
-    class:border-destructive={touched && error}
+    class={cn('bg-background resize-none', touched && error && 'border-destructive')}
     aria-invalid={error ? 'true' : undefined}
     {required}
   />
