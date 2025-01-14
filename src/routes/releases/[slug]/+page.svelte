@@ -3,7 +3,6 @@
   import { pb } from '$lib/pocketbase';
   import PageContainer from '$lib/components/PageContainer.svelte';
   import { Button } from '$lib/components/ui/button';
-  import BackButton from '$lib/components/BackButton.svelte';
 
   let { data } = $props<{ data: PageData }>();
 
@@ -25,16 +24,18 @@
         {data.release.title}
       </h1>
 
-      {#if data.release.tracks?.primary_artists}
+      {#if data.release.expand?.tracks}
         <div>
           <h2 class="text-sm text-[#00ffff] uppercase mb-1">Artists</h2>
           <div class="flex flex-col gap-2">
-            {#each data.release.tracks.primary_artists as artist}
+            {#each [...new Set(data.release.expand.tracks
+                  .flatMap((track) => track.expand?.primary_artists || [])
+                  .map( (artist) => JSON.stringify( { name: artist.stage_name, slug: artist.slug }, ), ))].map( (artistStr) => JSON.parse(artistStr), ) as artist}
               <a
                 href="/artists/{artist.slug}"
                 class="text-lg text-[#00ff00] hover:text-[#ff00ff] transition-colors"
               >
-                {artist.stage_name}
+                {artist.name}
               </a>
             {/each}
           </div>

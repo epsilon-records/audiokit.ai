@@ -12,11 +12,8 @@ export const load: PageServerLoad = async ({ params }) => {
             throw error(404, 'Release not found');
         }
         
-        return {
-            release: {
-                ...release,
-                primary_artists: release.tracks.primary_artists
-            }
+       return {
+            release: release
         };
     } catch (err: any) {
         throw error(500, 'Error fetching release');

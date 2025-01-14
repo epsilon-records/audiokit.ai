@@ -18,7 +18,7 @@
       </h1>
       <ArtistInfoField label="Real Name" value={data.artist.legal_name} />
       <ArtistInfoField label="Biography" value={data.artist.biography} />
-      <ArtistInfoField label="Location" value={data.artist.country} />
+      <ArtistInfoField label="Location" value={data.artist.expand?.country?.name} />
       <ArtistSocialLinks links={data.artist.socialLinks} />
     </div>
   </div>

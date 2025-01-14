@@ -14,8 +14,7 @@ export const load: PageServerLoad = async ({ params }) => {
 
         return {
             artist: {
-                ...artist,
-                country: artist.expand?.country?.name || 'Unknown'
+                ...artist
             }
         };
     } catch (err: any) {
