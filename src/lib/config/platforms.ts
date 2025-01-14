@@ -1,4 +1,4 @@
- 
+ export const musicPlatforms = [
   { id: 'spotify', label: 'Spotify', placeholder: 'Spotify Artist URL' },
   { id: 'apple_music', label: 'Apple Music', placeholder: 'Apple Music URL' },
   { id: 'soundcloud', label: 'SoundCloud', placeholder: 'SoundCloud URL' },
