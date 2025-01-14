@@ -6,12 +6,13 @@ export const load: PageServerLoad = async () => {
         const records = await pb.collection('releases').getFullList({
             filter: 'slug != "" && slug != null',
             sort: '-release_date',
-            expand: 'artists',
+            expand: 'tracks.primary_artists'
         });
         
         return {
             releases: records
         };
+
     } catch (err) {
         console.error('Error fetching releases:', err);
         return {

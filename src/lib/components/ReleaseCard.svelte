@@ -6,10 +6,12 @@
       slug: string;
       cover_artwork?: string[];
       title: string;
-      expand?: {
-        artist?: {
-          stage_name: string;
-        };
+      expand: {
+        tracks: {
+          primary_artists: {
+            stage_name: string;
+          }[];
+        }[];
       };
     };
     pb: any;
@@ -20,6 +22,16 @@
       ? pb.files.getURL(release, release.cover_artwork[0])
       : '/default-release.jpg',
   );
+
+  const artistNames = $derived(
+    [
+      ...new Set(
+        release.expand.tracks.flatMap((track: any) =>
+          track.expand.primary_artists.map((artist: any) => artist.stage_name),
+        ),
+      ),
+    ].join(' • '),
+  );
 </script>
 
 <a href="/releases/{release.slug}" class="block group">
@@ -27,7 +39,9 @@
   <h2 class="mt-4 text-xl text-[#00ff00] group-hover:text-[#ff00ff] transition-colors">
     {release.title}
   </h2>
-  {#if release.expand?.artist}
-    <p class="text-[#00ffff]">{release.expand.artist.stage_name}</p>
+  {#if artistNames}
+    <p class="text-[#00ffff] group-hover:text-[#ff00ff] transition-colors">
+      {artistNames}
+    </p>
   {/if}
 </a>
