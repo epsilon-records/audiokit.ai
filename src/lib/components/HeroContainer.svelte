@@ -19,14 +19,14 @@
   });
 </script>
 
-<section class="relative h-screen flex items-center justify-center overflow-hidden bg-black">
+<section class="relative h-screen flex items-center justify-center overflow-hidden bg-slate-100">
   <FlickeringGrid
     class="z-0 absolute inset-0 size-full"
     {width}
     {height}
     squareSize={14}
     gridGap={16}
-    color="#ffd700"
+    color="#CFFF04"
     maxOpacity={0.35}
     flickerChance={0.1}
   />

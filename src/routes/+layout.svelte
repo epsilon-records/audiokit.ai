@@ -6,6 +6,4 @@
 </script>
 
 <Nav />
-<div class="min-h-full">
-  {@render children()}
-</div>
+{@render children()}
