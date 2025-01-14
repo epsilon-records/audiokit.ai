@@ -1,8 +1,18 @@
 <script lang="ts">
-  import type { PageData } from '../security copy/$types';
+  import type { PageData } from './$types';
   import { Icon, Pencil } from 'svelte-hero-icons';
 
-  let { data }: { data: PageData } = $props();
+  let { data } = $props<{ data: PageData }>();
+  let previewSrc = $state('https://placeimg.com/80/80/people');
+
+  const showPreview = (event: Event) => {
+    const target = event.target as HTMLInputElement;
+    const files = target.files;
+
+    if (files?.[0]) {
+      previewSrc = URL.createObjectURL(files[0]);
+    }
+  };
 </script>
 
 <div class="flex flex-col w-full h-full">
@@ -17,10 +27,10 @@
           <Icon src={Pencil} class="w-4 h-4" />
         </label>
         <div class="w-32 rounded-full">
-          <img src="https://placeimg.com/80/80/people" alt="user avatar" />
+          <img src={previewSrc} alt="user avatar" />
         </div>
       </label>
-      <input type="file" name="avatar" id="avatar" value="" accept="image/*" hidden />
+      <input type="file" name="avatar" id="avatar" accept="image/*" hidden onchange={showPreview} />
     </div>
   </form>
 </div>
