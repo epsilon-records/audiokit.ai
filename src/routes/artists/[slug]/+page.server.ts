@@ -18,6 +18,7 @@ export const load: PageServerLoad = async ({ params }) => {
         if (err.status === 404) {
             throw error(404, 'Artist not found');
         }
+        console.log(err);
         throw error(500, 'Error fetching artist');
     }
 };
