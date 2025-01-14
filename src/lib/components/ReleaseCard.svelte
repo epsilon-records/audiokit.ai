@@ -36,11 +36,11 @@
 
 <a href="/releases/{release.slug}" class="block group">
   <ImageHandler src={imageUrl} alt={release.title} />
-  <h2 class="mt-4 text-xl text-[#00ff00] group-hover:text-[#ff00ff] transition-colors">
-    {release.title}
+  <h2 class="mt-4 text-xl text-slate-800 group-hover:text-[#ff00ff] transition-colors text-center">
+    {release.release_title}
   </h2>
   {#if artistNames}
-    <p class="text-purple-500 group-hover:text-[#ff00ff] transition-colors">
+    <p class="text-slate-500 group-hover:text-[#ff00ff] transition-colors text-center">
       {artistNames}
     </p>
   {/if}

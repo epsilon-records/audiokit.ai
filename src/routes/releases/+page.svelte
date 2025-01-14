@@ -8,7 +8,7 @@
 </script>
 
 <PageContainer title="Releases" bgColor="bg-orange-100" textColor="text-orange-500">
-  <GridContainer cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
+  <GridContainer cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0">
     {#each data.releases as release}
       <ReleaseCard {release} {pb} />
     {/each}

@@ -8,7 +8,7 @@
 </script>
 
 <PageContainer title="Artists" bgColor="bg-pink-100" textColor="text-pink-500">
-  <GridContainer cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+  <GridContainer cols="grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
     {#each data.artists as artist}
       {#if artist.slug}
         <ArtistCard {artist} {pb} />
