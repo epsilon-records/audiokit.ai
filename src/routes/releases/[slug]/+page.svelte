@@ -21,24 +21,35 @@
 
     <div class="flex flex-col gap-6">
       <h1 class="text-4xl font-bold tracking-wider uppercase text-[#ff00ff]">
-        {data.release.title}
+        {data.release.release_title}
+        {#if data.release.release_version}
+          <span class="text-[#00ffff]">({data.release.release_version})</span>
+        {/if}
       </h1>
 
-      {#if data.release.expand?.tracks}
+      {#if data.release.expand?.genre}
         <div>
-          <h2 class="text-sm text-[#00ffff] uppercase mb-1">Artists</h2>
-          <div class="flex flex-col gap-2">
-            {#each [...new Set(data.release.expand.tracks
-                  .flatMap((track) => track.expand?.primary_artists || [])
-                  .map( (artist) => JSON.stringify( { name: artist.stage_name, slug: artist.slug }, ), ))].map( (artistStr) => JSON.parse(artistStr), ) as artist}
-              <a
-                href="/artists/{artist.slug}"
-                class="text-lg text-[#00ff00] hover:text-[#ff00ff] transition-colors"
-              >
-                {artist.name}
-              </a>
-            {/each}
-          </div>
+          <h2 class="text-sm text-[#00ffff] uppercase mb-1">Genre</h2>
+          <p class="text-lg text-[#00ff00]">
+            {data.release.expand.genre.name}
+            {#if data.release.expand?.subgenre}
+              / {data.release.expand.subgenre.name}
+            {/if}
+          </p>
+        </div>
+      {/if}
+
+      {#if data.release.expand?.label}
+        <div>
+          <h2 class="text-sm text-[#00ffff] uppercase mb-1">Label</h2>
+          <p class="text-lg text-[#00ff00]">{data.release.expand.label.name}</p>
+        </div>
+      {/if}
+
+      {#if data.release.upc_code}
+        <div>
+          <h2 class="text-sm text-[#00ffff] uppercase mb-1">UPC</h2>
+          <p class="text-lg text-[#00ff00]">{data.release.upc_code}</p>
         </div>
       {/if}
 
@@ -55,6 +66,20 @@
           <p class="text-lg text-[#00ff00]">
             {new Date(data.release.release_date).toLocaleDateString()}
           </p>
+        </div>
+      {/if}
+
+      {#if data.release.is_compilation}
+        <div>
+          <h2 class="text-sm text-[#00ffff] uppercase mb-1">Release Type</h2>
+          <p class="text-lg text-[#00ff00]">Compilation</p>
+        </div>
+      {/if}
+
+      {#if data.release.expand?.language}
+        <div>
+          <h2 class="text-sm text-[#00ffff] uppercase mb-1">Language</h2>
+          <p class="text-lg text-[#00ff00]">{data.release.expand.language.name}</p>
         </div>
       {/if}
 
@@ -84,9 +109,8 @@
             variant="outline"
             class="border-[#00ffff] text-black hover:bg-[#00ffff] hover:text-black transition-colors"
           >
-            <a href={data.release.bandcamp} target="_blank" rel="noopener noreferrer">
-              Buy Digital
-            </a>
+            <a href={data.release.bandcamp} target="_blank" rel="noopener noreferrer">Buy Digital</a
+            >
           </Button>
         {/if}
 
@@ -95,7 +119,7 @@
             variant="outline"
             class="border-[#ff00ff] text-black hover:bg-[#ff00ff] hover:text-black transition-colors"
           >
-            <a href={data.release.vinyl} target="_blank" rel="noopener noreferrer"> Buy Vinyl </a>
+            <a href={data.release.vinyl} target="_blank" rel="noopener noreferrer">Buy Vinyl</a>
           </Button>
         {/if}
       </div>

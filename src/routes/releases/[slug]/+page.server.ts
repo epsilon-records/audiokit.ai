@@ -5,7 +5,7 @@ import type { PageServerLoad } from './$types';
 export const load: PageServerLoad = async ({ params }) => {
     try {
         const release = await pb.collection('releases').getFirstListItem(`slug = "${params.slug}"`, {
-            expand: 'tracks.primary_artists'
+            expand: 'label,genre,subgenre,tracks.primary_artists'
         });
 
         if (!release) {
