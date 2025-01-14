@@ -40,7 +40,7 @@
     {release.title}
   </h2>
   {#if artistNames}
-    <p class="text-[#00ffff] group-hover:text-[#ff00ff] transition-colors">
+    <p class="text-yellow-500 group-hover:text-[#ff00ff] transition-colors">
       {artistNames}
     </p>
   {/if}
