@@ -1,4 +1,6 @@
 <script lang="ts">
+  import ImageHandler from './ImageHandler.svelte';
+
   let { release, pb } = $props<{
     release: {
       slug: string;
@@ -12,20 +14,20 @@
     };
     pb: any;
   }>();
+
+  const imageUrl = $derived(
+    release.cover_artwork?.[0]
+      ? pb.files.getURL(release, release.cover_artwork[0])
+      : '/default-release.jpg',
+  );
 </script>
 
 <a href="/releases/{release.slug}" class="block group">
-  <div class="aspect-square overflow-hidden border border-[#00ff00]">
-    <img
-      src={release.cover_artwork?.[0]
-        ? pb.files.getURL(release, release.cover_artwork[0])
-        : '/default-release.jpg'}
-      alt={release.title}
-      class="w-full h-full object-cover transition-transform group-hover:scale-105"
-    />
-  </div>
+  <ImageHandler src={imageUrl} alt={release.title} class="border border-[#00ff00]" />
   <h2 class="mt-4 text-xl text-[#00ff00] group-hover:text-[#ff00ff] transition-colors">
     {release.title}
   </h2>
-  <p class="text-[#00ffff]">{release.expand?.artist?.stage_name}</p>
+  {#if release.expand?.artist}
+    <p class="text-[#00ffff]">{release.expand.artist.stage_name}</p>
+  {/if}
 </a>

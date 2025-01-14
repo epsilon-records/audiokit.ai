@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import SettingsContainer from '$lib/components/SettingsContainer.svelte';
+  import ProfileAvatar from '$lib/components/ProfileAvatar.svelte';
   import { Icon, Pencil } from 'svelte-hero-icons';
 
   let { data } = $props<{ data: PageData }>();
@@ -21,9 +22,9 @@
 
   <div class="space-y-4">
     <div class="flex items-center gap-4">
-      <img src={previewSrc} alt="Profile" class="w-20 h-20 rounded-full object-cover" />
+      <ProfileAvatar src={previewSrc} />
       <label class="cursor-pointer">
-        <input type="file" class="hidden" accept="image/*" on:change={showPreview} />
+        <input type="file" class="hidden" accept="image/*" onchange={showPreview} />
         <div class="flex items-center gap-2 text-sm text-primary hover:text-primary/80">
           <Icon src={Pencil} class="w-4 h-4" />
           Change Avatar

@@ -7,7 +7,7 @@
   let { data } = $props<{ data: { releases: any[] } }>();
 </script>
 
-<PageContainer title="Releases" bgColor="bg-black" textColor="text-[#00ff00]">
+<PageContainer title="Releases" bgColor="bg-teal-100" textColor="text-[#00ff00]">
   <GridContainer cols="grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
     {#each data.releases as release}
       <ReleaseCard {release} {pb} />
