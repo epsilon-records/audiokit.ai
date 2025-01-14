@@ -35,7 +35,7 @@
 </script>
 
 <a href="/releases/{release.slug}" class="block group">
-  <ImageHandler src={imageUrl} alt={release.title} class="border border-[#00ff00]" />
+  <ImageHandler src={imageUrl} alt={release.title} />
   <h2 class="mt-4 text-xl text-[#00ff00] group-hover:text-[#ff00ff] transition-colors">
     {release.title}
   </h2>
