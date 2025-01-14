@@ -4,18 +4,15 @@ import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
     try {
-        const records = await pb.collection('releases').getList(1, 1, {
-            filter: `slug = "${params.slug}"`,
+        const record = await pb.collection('releases').getFirstListItem(`slug = "${params.slug}"`, {
             expand: 'tracks.primary_artists'
         });
 
-        if (records.items.length === 0) {
+        return record;
+    } catch (err: any) {
+        if (err.status === 404) {
             throw error(404, 'Release not found');
         }
-
-        const release = records.items[0];
-        return release;
-    } catch (err) {
         throw error(500, 'Error fetching release');
     }
 };
