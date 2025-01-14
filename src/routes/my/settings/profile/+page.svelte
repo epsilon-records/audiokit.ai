@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from '../security copy/$types';
+  import { Icon, Pencil } from 'svelte-hero-icons';
 
   let { data }: { data: PageData } = $props();
 </script>
@@ -11,7 +12,10 @@
       <label for="avatar" class="label font-medium pb-1">
         <span class="label-text">Profile Picture</span>
       </label>
-      <label for="avatar" class="avatar w-32 rounded-full">
+      <label for="avatar" class="avatar w-32 rounded-full hover:cursor-pointer">
+        <label for="avatar" class="absolute -bottom-0.5 -right-0.5 hover:cursor-pointer">
+          <Icon src={Pencil} class="w-4 h-4" />
+        </label>
         <div class="w-32 rounded-full">
           <img src="https://placeimg.com/80/80/people" alt="user avatar" />
         </div>
