@@ -23,9 +23,4 @@
     aspectRatio="aspect-[3/4]"
     class="rounded-lg border border-[#CFFF04]"
   />
-  {#if artist.artist_photos && artist.artist_photos.length > 1}
-    <div class="absolute bottom-4 right-4 bg-black/50 px-3 py-1 rounded-full text-sm text-white">
-      +{artist.artist_photos.length - 1} more
-    </div>
-  {/if}
 </div>
