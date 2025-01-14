@@ -1,8 +1,8 @@
 <script lang="ts">
-  import HeroSection from '$lib/components/MainContainer.svelte';
+  import HeroContainer from '$lib/components/HeroContainer.svelte';
   import Nav from '$lib/components/Nav.svelte';
 </script>
 
 <div class="min-h-screen">
-  <HeroSection />
+  <HeroContainer />
 </div>
