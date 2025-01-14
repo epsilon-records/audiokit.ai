@@ -4,7 +4,7 @@
   import { neobrutalism, dark } from '@clerk/themes';
 </script>
 
-<div class="m-4 flex flex-col items-center">
+<div class="container relative z-10 px-4 flex flex-col items-center text-center">
   <SignIn
     appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
     redirectUrl="/my/settings/profile"
