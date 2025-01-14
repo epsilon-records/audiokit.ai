@@ -5,5 +5,8 @@
 </script>
 
 <div class="m-4 flex flex-col items-center">
-  <SignIn appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }} redirectUrl="/my" />
+  <SignIn
+    appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
+    redirectUrl="/my/settings/profile"
+  />
 </div>
