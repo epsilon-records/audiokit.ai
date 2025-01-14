@@ -6,7 +6,7 @@ export const load: PageServerLoad = async ({ params }) => {
     try {
         const records = await pb.collection('releases').getList(1, 1, {
             filter: `slug = "${params.slug}"`,
-            expand: 'tracks.primary_artists.stage_name'
+            expand: 'tracks.primary_artists'
         });
 
         if (records.items.length === 0) {
