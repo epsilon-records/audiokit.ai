@@ -65,33 +65,37 @@
         </div>
       {/if}
 
-      {#if data.release.tracklist}
+      {#if data.release.expand?.tracks}
         <div>
           <h2 class="text-sm text-[#00ffff] uppercase mb-1">Tracklist</h2>
-          <div class="text-lg text-[#00ff00]">{@html data.release.tracklist}</div>
+          <div class="flex flex-col gap-2 text-lg text-[#00ff00]">
+            {#each data.release.expand.tracks as track, i}
+              <div>
+                {i + 1}. {track.track_title}
+              </div>
+            {/each}
+          </div>
         </div>
       {/if}
 
       <div class="flex gap-4 mt-4">
-        {#if data.release.bandcamp_url}
+        {#if data.release.bandcamp}
           <Button
             variant="outline"
-            class="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black"
+            class="border-[#00ffff] text-black hover:bg-[#00ffff] hover:text-black transition-colors"
           >
-            <a href={data.release.bandcamp_url} target="_blank" rel="noopener noreferrer">
+            <a href={data.release.bandcamp} target="_blank" rel="noopener noreferrer">
               Buy Digital
             </a>
           </Button>
         {/if}
 
-        {#if data.release.vinyl_url}
+        {#if data.release.vinyl}
           <Button
             variant="outline"
-            class="border-[#00ff00] text-[#00ff00] hover:bg-[#00ff00] hover:text-black"
+            class="border-[#ff00ff] text-black hover:bg-[#ff00ff] hover:text-black transition-colors"
           >
-            <a href={data.release.vinyl_url} target="_blank" rel="noopener noreferrer">
-              Buy Vinyl
-            </a>
+            <a href={data.release.vinyl} target="_blank" rel="noopener noreferrer"> Buy Vinyl </a>
           </Button>
         {/if}
       </div>
