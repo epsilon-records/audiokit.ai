@@ -2,13 +2,12 @@
   import SignUp from 'clerk-sveltekit/client/SignUp.svelte';
   import { mode } from 'mode-watcher';
   import { neobrutalism, dark } from '@clerk/themes';
+  import AuthContainer from '$lib/components/AuthContainer.svelte';
 </script>
 
-<div class="min-h-screen flex items-center justify-center">
-  <div class="m-4">
-    <SignUp
-      appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
-      redirectUrl="/my/settings/profile"
-    />
-  </div>
-</div>
+<AuthContainer title="Sign Up">
+  <SignUp
+    appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
+    redirectUrl="/my/settings/profile"
+  />
+</AuthContainer>
