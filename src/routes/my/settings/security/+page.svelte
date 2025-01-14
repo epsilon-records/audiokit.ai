@@ -1,8 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import SettingsContainer from '$lib/components/SettingsContainer.svelte';
 
-  let { data } = $props<{ data: PageData }>();
+  let { data }: { data: PageData } = $props();
 </script>
 
 <SettingsContainer title="Security">
