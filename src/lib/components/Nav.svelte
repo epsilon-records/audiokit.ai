@@ -7,7 +7,7 @@
 <nav class="absolute top-0 w-full z-20">
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center py-6">
-      <a href="/" class="text-black font-mono font-bold text-xl">EPSILON</a>
+      <a href="/" class="text-neutral-400 font-mono font-bold text-xl">EPSILON</a>
       <ul class="flex gap-8 text-lg">
         <li>
           <a href="/distribution" class="hover:text-red-400 text-purple-500 transition-colors"
@@ -23,12 +23,12 @@
           <a href="/artists" class="hover:text-red-400 text-purple-500 transition-colors">Artists</a
           >
         </li>
-        <li>
+        <!-- <li>
           <a href="/events" class="hover:text-red-400 text-purple-500 transition-colors">Events</a>
-        </li>
-        <li>
+        </li> -->
+        <!-- <li>
           <a href="/shop" class="hover:text-red-400 text-purple-500 transition-colors">Shop</a>
-        </li>
+        </li> -->
         <li>
           <a href="/contact" class="hover:text-red-400 text-purple-500 transition-colors">Contact</a
           >
