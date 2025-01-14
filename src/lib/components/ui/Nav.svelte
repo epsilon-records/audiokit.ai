@@ -10,6 +10,11 @@
       <a href="/" class="text-white font-mono font-bold text-xl">EPSILON</a>
       <ul class="flex gap-8 text-lg">
         <li>
+          <a href="/distribution" class="hover:text-red-400 text-white transition-colors"
+            >Distribution</a
+          >
+        </li>
+        <li>
           <a href="/releases" class="hover:text-red-400 text-white transition-colors">Releases</a>
         </li>
         <li>
@@ -22,16 +27,19 @@
         <li>
           <a href="/contact" class="hover:text-red-400 text-white transition-colors">Contact</a>
         </li>
+        <SignedOut>
+          <li>
+            <a href="/sign-in" class="hover:text-red-400 text-white transition-colors">Login</a>
+          </li>
+          <li>
+            <a href="/sign-up" class="hover:text-red-400 text-white transition-colors">Register</a>
+          </li>
+        </SignedOut>
         <SignedIn>
           <li>
             <UserButton afterSignOutUrl="/" />
           </li>
         </SignedIn>
-        <SignedOut>
-          <li>
-            <a href="/sign-in" class="hover:text-red-400 text-white transition-colors">Login</a>
-          </li>
-        </SignedOut>
       </ul>
     </div>
   </div>

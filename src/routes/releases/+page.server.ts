@@ -6,7 +6,7 @@ export const load: PageServerLoad = async () => {
         const records = await pb.collection('releases').getFullList({
             filter: 'slug != "" && slug != null',
             sort: '-release_date',
-            expand: 'artist',
+            expand: 'artists',
         });
         
         return {
