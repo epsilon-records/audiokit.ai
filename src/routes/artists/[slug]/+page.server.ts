@@ -8,6 +8,10 @@ export const load: PageServerLoad = async ({ params }) => {
             expand: 'country'
         });
 
+        if (!artist) {
+            throw error(404, 'Artist not found');
+        }
+
         return {
             artist: {
                 ...artist,
@@ -15,10 +19,6 @@ export const load: PageServerLoad = async ({ params }) => {
             }
         };
     } catch (err: any) {
-        if (err.status === 404) {
-            throw error(404, 'Artist not found');
-        }
-        console.log(err);
         throw error(500, 'Error fetching artist');
     }
 };
