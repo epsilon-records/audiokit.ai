@@ -1,9 +1,10 @@
 <script lang="ts">
-  import ArtistImage from '$lib/components/artists/ArtistImage.svelte';
-  import ArtistInfoField from '$lib/components/artists/ArtistInfoField.svelte';
-  import ArtistSocialLinks from '$lib/components/artists/ArtistSocialLinks.svelte';
+  import type { PageData } from './$types';
+  import ArtistImage from '$lib/components/ArtistImage.svelte';
+  import ArtistInfoField from '$lib/components/ArtistInfoField.svelte';
+  import ArtistSocialLinks from '$lib/components/ArtistSocialLinks.svelte';
 
-  export let data;
+  let { data } = $props<{ data: PageData }>();
 </script>
 
 <div class="min-h-screen bg-black text-[#00ff00]">
