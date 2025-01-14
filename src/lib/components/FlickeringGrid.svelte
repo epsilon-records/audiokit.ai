@@ -1,22 +1,32 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
-  import { writable } from 'svelte/store';
-
-  export let squareSize: number = 4;
-  export let gridGap: number = 6;
-  export let flickerChance: number = 0.3;
-  export let color = 'rgb(0, 0, 0)';
-  export let width: number;
-  export let height: number;
-  let className = '';
-  export { className as class };
-
-  export let maxOpacity: number = 0.3;
-
+  let isInView = $state(false);
   let canvas: HTMLCanvasElement;
-  let isInView = writable(false);
+  let animationFrameId: number;
+  let memoizedColor: string;
 
-  let memoizedColor: any;
+  let {
+    squareSize = 4,
+    gridGap = 6,
+    flickerChance = 0.3,
+    color = 'rgb(0, 0, 0)',
+    width,
+    height,
+    maxOpacity = 0.3,
+    class: className = '',
+  } = $props<{
+    squareSize?: number;
+    gridGap?: number;
+    flickerChance?: number;
+    color?: string;
+    width?: number;
+    height?: number;
+    maxOpacity?: number;
+    class?: string;
+  }>();
+
+  $derived: {
+    memoizedColor = toRGBA(color);
+  }
 
   function toRGBA(color: string) {
     if (typeof window === 'undefined') {
@@ -31,8 +41,6 @@
     const [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
     return `rgba(${r}, ${g}, ${b},`;
   }
-
-  memoizedColor = toRGBA(color);
 
   function setupCanvas() {
     const canvasWidth = width || canvas.clientWidth;
@@ -88,27 +96,17 @@
     }
   }
 
-  let animationFrameId;
+  $effect(() => {
+    if (!canvas) return;
 
-  onMount(() => {
-    console.log('canvas', canvas);
-    if (canvas) {
-      console.log('canvas', canvas);
-    }
-    if (!canvas) {
-      return;
-    }
     const ctx = canvas.getContext('2d');
-    if (!ctx) {
-      return;
-    }
-    let { canvasWidth, canvasHeight, cols, rows, squares, dpr } = setupCanvas();
-    console.log(ctx, 'ctx');
+    if (!ctx) return;
 
+    let { canvasWidth, canvasHeight, cols, rows, squares, dpr } = setupCanvas();
     let lastTime = 0;
 
     const animate = (time: number) => {
-      if ($isInView === false) return;
+      if (!isInView) return;
       const deltaTime = (time - lastTime) / 1000;
       lastTime = time;
 
@@ -123,37 +121,27 @@
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        console.log(entry.isIntersecting);
-        isInView.set(entry.isIntersecting);
+        isInView = entry.isIntersecting;
+        if (isInView) {
+          animationFrameId = requestAnimationFrame(animate);
+        }
       },
       { threshold: 0 },
     );
 
     observer.observe(canvas);
-
     window.addEventListener('resize', handleResize);
-
-    const unsubscribe = isInView.subscribe((inView) => {
-      if (inView) {
-        animationFrameId = requestAnimationFrame(animate);
-      }
-    });
 
     return () => {
       window.removeEventListener('resize', handleResize);
       cancelAnimationFrame(animationFrameId);
       observer.disconnect();
-      unsubscribe();
     };
   });
-
-  //   onDestroy(() => {
-  //     cancelAnimationFrame(animationFrameId);
-  //   });
 </script>
 
 <canvas
   bind:this={canvas}
   class="size-full pointer-events-none {className}"
   style="width: {width || '100%'}; height: {height || '100%'};"
-/>
+></canvas>
