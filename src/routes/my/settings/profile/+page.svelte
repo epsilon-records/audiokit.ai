@@ -370,6 +370,6 @@
         </button>
       </div>
     </form>
-    <SuperDebug data={$form} />
+    <SuperDebug data={$data.form} />
   </div>
 </SettingsContainer>
