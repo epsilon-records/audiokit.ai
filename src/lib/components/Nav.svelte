@@ -7,22 +7,21 @@
     <div class="flex justify-between items-center py-6">
       <a href="/" class="text-yellow-500 font-mono font-bold text-xl">EPSILON</a>
       <ul class="flex gap-8 text-lg">
+        <li>
+          <a href="/distribution" class="hover:text-red-400 text-purple-500 transition-colors"
+            >Distribution</a
+          >
+        </li>
+        <li>
+          <a href="/releases" class="hover:text-red-400 text-purple-500 transition-colors"
+            >Releases</a
+          >
+        </li>
+        <li>
+          <a href="/artists" class="hover:text-red-400 text-purple-500 transition-colors">Artists</a
+          >
+        </li>
         <SignedOut>
-          <li>
-            <a href="/distribution" class="hover:text-red-400 text-purple-500 transition-colors"
-              >Distribution</a
-            >
-          </li>
-          <li>
-            <a href="/releases" class="hover:text-red-400 text-purple-500 transition-colors"
-              >Releases</a
-            >
-          </li>
-          <li>
-            <a href="/artists" class="hover:text-red-400 text-purple-500 transition-colors"
-              >Artists</a
-            >
-          </li>
           <!-- <li>
             <a href="/events" class="hover:text-red-400 text-purple-500 transition-colors">Events</a
             >
