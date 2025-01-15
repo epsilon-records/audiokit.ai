@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { PageData } from './$types';
+  import SettingsContainer from '$lib/components/SettingsContainer.svelte';
 
   let { data }: { data: PageData } = $props();
 </script>
