@@ -1,0 +1,34 @@
+export interface Artist {
+  id: string;
+  org_id?: string;
+  stage_name: string;
+  legal_name: string;
+  slug?: string;
+  is_signed?: boolean;
+  email: string;
+  phone?: string;
+  birthdate?: string;
+  artist_photos?: string[];
+  city?: string;
+  country?: string;
+  biography?: string;
+  website?: string;
+  spotify?: string;
+  apple_music?: string;
+  bandcamp?: string;
+  mixcloud?: string;
+  snapchat?: string;
+  twitch?: string;
+  youtube?: string;
+  instagram?: string;
+  facebook?: string;
+  x?: string;
+  tiktok?: string;
+  soundcloud?: string;
+  songkick?: string;
+  bandsintown?: string;
+  linkedin?: string;
+  anr?: string;
+  created?: string;
+  updated?: string;
+} 

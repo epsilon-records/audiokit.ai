@@ -5,9 +5,66 @@
   import Input from '$lib/components/Input.svelte';
   import { getImageURL } from '$lib/utils';
   import SettingsContainer from '$lib/components/SettingsContainer.svelte';
+  import Editor from '$lib/components/Editor.svelte';
+  import { countries } from '$lib/data/countries';
+  import type { Artist } from '$lib/types/artist';
 
-  let { data } = $props<{ data: { user: any } }>();
+  let { data } = $props<{ data: { user: Artist } }>();
   let loading = $state(false);
+  let errors = $state<Record<string, string>>({});
+
+  // Form validation
+  const validateForm = (formData: FormData): boolean => {
+    errors = {};
+
+    // Required fields validation
+    const stage_name = formData.get('stage_name') as string;
+    const legal_name = formData.get('legal_name') as string;
+    const email = formData.get('email') as string;
+
+    if (!stage_name?.trim()) {
+      errors.stage_name = 'Stage name is required';
+    }
+
+    if (!legal_name?.trim()) {
+      errors.legal_name = 'Legal name is required';
+    }
+
+    if (!email?.trim()) {
+      errors.email = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = 'Invalid email format';
+    }
+
+    // URL validations
+    const urlFields = [
+      'website',
+      'spotify',
+      'apple_music',
+      'bandcamp',
+      'mixcloud',
+      'snapchat',
+      'twitch',
+      'youtube',
+      'instagram',
+      'facebook',
+      'x',
+      'tiktok',
+      'soundcloud',
+      'songkick',
+      'bandsintown',
+      'linkedin',
+    ];
+
+    urlFields.forEach((field) => {
+      const value = formData.get(field) as string;
+      if (value && !value.startsWith('https://')) {
+        errors[field] = 'URL must start with https://';
+      }
+    });
+
+    return Object.keys(errors).length === 0;
+  };
 
   const showPreview = (event: Event) => {
     const target = event.target as HTMLInputElement;
@@ -24,12 +81,23 @@
 
   const submitUpdateProfile = () => {
     loading = true;
-    return async ({ result }: { result: any }) => {
+    return async ({ form, result }: { form: HTMLFormElement; result: any }) => {
+      const formData = new FormData(form);
+
+      if (!validateForm(formData)) {
+        loading = false;
+        return;
+      }
+
       switch (result.type) {
         case 'success':
           await invalidateAll();
           break;
         case 'error':
+          // Handle specific error cases
+          if (result.status === 400) {
+            errors = result.data?.errors || { form: 'Invalid form data' };
+          }
           break;
         default:
           await applyAction(result);
@@ -39,51 +107,235 @@
   };
 </script>
 
-<SettingsContainer title="Profile">
-  <svelte:fragment slot="description">Manage your profile information and avatar.</svelte:fragment>
+<SettingsContainer title="Artist Profile">
+  <svelte:fragment slot="description">
+    Manage your profile information, press photos, and social media presence.
+  </svelte:fragment>
 
   <form
     action="?/updateProfile"
     method="POST"
-    class="flex flex-col space-y-2 w-full"
+    class="flex flex-col space-y-6 w-full"
     enctype="multipart/form-data"
     use:enhance={submitUpdateProfile}
   >
-    <div class="form-control w-full max-w-lg">
-      <label for="avatar" class="label font-medium pb-1">
-        <span class="label-text text-xl">Profile Picture</span>
-      </label>
-      <label for="avatar" class="avatar w-32 rounded-full hover:cursor-pointer">
-        <label for="avatar" class="absolute -bottom-0.5 -right-0.5 hover:cursor-pointer">
-          <span class="btn btn-circle btn-sm btn-secondary">
-            <Icon src={Pencil} class="w-4 h-4" />
-          </span>
+    <!-- Basic Information Section -->
+    <div class="space-y-4">
+      <h3 class="text-lg font-semibold">Basic Information</h3>
+
+      <!-- Artist Photos -->
+      <div class="form-control w-full max-w-lg">
+        <label for="avatar" class="label font-medium pb-1">
+          <span class="label-text text-xl">Aritst Photo</span>
         </label>
-        <div class="w-32 rounded-full">
-          <img
-            src={data.user?.avatar
-              ? getImageURL(data.user?.collectionId, data.user?.id, data.user?.avatar)
-              : `https://ui-avatars.com/api/?name=${data.user?.name}`}
-            alt="user avatar"
-            id="avatar-preview"
-          />
-        </div>
-      </label>
-      <input
-        type="file"
-        name="avatar"
-        id="avatar"
-        value=""
-        accept="image/*"
-        hidden
-        onchange={showPreview}
+        <label for="avatar" class="avatar w-32 rounded-full hover:cursor-pointer">
+          <label for="avatar" class="absolute -bottom-0.5 -right-0.5 hover:cursor-pointer">
+            <span class="btn btn-circle btn-sm btn-secondary">
+              <Icon src={Pencil} class="w-4 h-4" />
+            </span>
+          </label>
+          <div class="w-32">
+            <img
+              src={data.user?.avatar
+                ? getImageURL(data.user?.collectionId, data.user?.id, data.user?.avatar)
+                : `https://ui-avatars.com/api/?name=${data.user?.name}`}
+              alt="user avatar"
+              id="avatar-preview"
+            />
+          </div>
+        </label>
+        <input
+          type="file"
+          name="avatar"
+          id="avatar"
+          value=""
+          accept="image/*"
+          hidden
+          onchange={showPreview}
+          disabled={loading}
+        />
+      </div>
+
+      <!-- Essential Fields -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          id="stage_name"
+          label="Stage Name"
+          value={data?.user?.stage_name}
+          required
+          disabled={loading}
+        />
+        <Input
+          id="legal_name"
+          label="Legal Name"
+          value={data?.user?.legal_name}
+          required
+          disabled={loading}
+        />
+        <Input
+          id="email"
+          type="email"
+          label="Email"
+          value={data?.user?.email}
+          required
+          disabled={loading}
+        />
+        <Input id="phone" type="tel" label="Phone" value={data?.user?.phone} disabled={loading} />
+        <Input
+          id="birthdate"
+          type="date"
+          label="Birth Date"
+          value={data?.user?.birthdate}
+          disabled={loading}
+        />
+      </div>
+    </div>
+
+    <!-- Location Section -->
+    <div class="space-y-4">
+      <h3 class="text-lg font-semibold">Location</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input id="city" label="City" value={data?.user?.city} disabled={loading} />
+        <select
+          id="country"
+          name="country"
+          class="select select-bordered w-full"
+          disabled={loading}
+        >
+          <option value="">Select Country</option>
+          {#each countries as country}
+            <option value={country.code} selected={data.user?.country === country.code}>
+              {country.name}
+            </option>
+          {/each}
+        </select>
+      </div>
+    </div>
+
+    <!-- Biography Section -->
+    <div class="space-y-4">
+      <h3 class="text-lg font-semibold">Biography</h3>
+      <Editor
+        id="biography"
+        value={data?.user?.biography}
         disabled={loading}
+        placeholder="Tell your story..."
       />
     </div>
-    <Input id="name" label="Name" value={data?.user?.name} disabled={loading} />
-    <div class="w-full max-w-lg pt-3">
-      <button class="btn btn-primary w-full max-w-lg" type="submit" disabled={loading}>
-        Update Profile
+
+    <!-- Social Media Links -->
+    <div class="space-y-4">
+      <h3 class="text-lg font-semibold">Social Media & Platforms</h3>
+
+      <!-- Music Platforms -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          id="website"
+          type="url"
+          label="Website"
+          value={data?.user?.website}
+          disabled={loading}
+        />
+        <Input
+          id="spotify"
+          type="url"
+          label="Spotify"
+          value={data?.user?.spotify}
+          disabled={loading}
+        />
+        <Input
+          id="apple_music"
+          type="url"
+          label="Apple Music"
+          value={data?.user?.apple_music}
+          disabled={loading}
+        />
+        <Input
+          id="bandcamp"
+          type="url"
+          label="Bandcamp"
+          value={data?.user?.bandcamp}
+          disabled={loading}
+        />
+        <Input
+          id="soundcloud"
+          type="url"
+          label="SoundCloud"
+          value={data?.user?.soundcloud}
+          disabled={loading}
+        />
+        <Input
+          id="mixcloud"
+          type="url"
+          label="Mixcloud"
+          value={data?.user?.mixcloud}
+          disabled={loading}
+        />
+      </div>
+
+      <!-- Social Networks -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          id="instagram"
+          type="url"
+          label="Instagram"
+          value={data?.user?.instagram}
+          disabled={loading}
+        />
+        <Input
+          id="facebook"
+          type="url"
+          label="Facebook"
+          value={data?.user?.facebook}
+          disabled={loading}
+        />
+        <Input id="x" type="url" label="X (Twitter)" value={data?.user?.x} disabled={loading} />
+        <Input
+          id="tiktok"
+          type="url"
+          label="TikTok"
+          value={data?.user?.tiktok}
+          disabled={loading}
+        />
+        <Input
+          id="youtube"
+          type="url"
+          label="YouTube"
+          value={data?.user?.youtube}
+          disabled={loading}
+        />
+        <Input
+          id="twitch"
+          type="url"
+          label="Twitch"
+          value={data?.user?.twitch}
+          disabled={loading}
+        />
+      </div>
+
+      <!-- Event Platforms -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Input
+          id="songkick"
+          type="url"
+          label="Songkick"
+          value={data?.user?.songkick}
+          disabled={loading}
+        />
+        <Input
+          id="bandsintown"
+          type="url"
+          label="Bandsintown"
+          value={data?.user?.bandsintown}
+          disabled={loading}
+        />
+      </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="w-full max-w-lg pt-6">
+      <button class="btn btn-primary w-full" type="submit" disabled={loading}>
+        {loading ? 'Updating Profile...' : 'Update Profile'}
       </button>
     </div>
   </form>
