@@ -21,7 +21,7 @@
     <h3>{$message}</h3>
   {/if}
   <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
-  <div class="space-y-4 bg-teal-100 rounded-lg border border-teal-200 px-8">
+  <div class="space-y-4 bg-teal-100 rounded-lg border-2 border-teal-200 px-8">
     <form
       method="POST"
       class="flex flex-col space-y-6 w-full"
