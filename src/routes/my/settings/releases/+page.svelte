@@ -14,7 +14,7 @@
         <p>
           No releases found. <a
             href="/my/settings/releases/create"
-            class="text-primary font-semibold hover:underline">Create your first release</a
+            class="text-primary font-bold hover:underline">Create your first release</a
           > to get started.
         </p>
       </div>
