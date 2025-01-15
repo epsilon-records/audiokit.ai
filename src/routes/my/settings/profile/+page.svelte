@@ -256,6 +256,7 @@
           id="apple_music"
           type="url"
           label="Apple Music"
+          placeholder="https://music.apple.com/artist/..."
           value={data?.user?.apple_music}
           disabled={loading}
         />
@@ -263,6 +264,7 @@
           id="spotify"
           type="url"
           label="Spotify"
+          placeholder="https://open.spotify.com/artist/..."
           value={data?.user?.spotify}
           disabled={loading}
         />
@@ -270,6 +272,7 @@
           id="soundcloud"
           type="url"
           label="SoundCloud"
+          placeholder="https://soundcloud.com/..."
           value={data?.user?.soundcloud}
           disabled={loading}
         />
@@ -277,6 +280,7 @@
           id="bandcamp"
           type="url"
           label="Bandcamp"
+          placeholder="https://artist.bandcamp.com"
           value={data?.user?.bandcamp}
           disabled={loading}
         />
@@ -284,6 +288,7 @@
           id="youtube"
           type="url"
           label="YouTube"
+          placeholder="https://youtube.com/@..."
           value={data?.user?.youtube}
           disabled={loading}
         />
@@ -291,6 +296,7 @@
           id="mixcloud"
           type="url"
           label="Mixcloud"
+          placeholder="https://mixcloud.com/..."
           value={data?.user?.mixcloud}
           disabled={loading}
         />
@@ -305,6 +311,7 @@
           id="instagram"
           type="url"
           label="Instagram"
+          placeholder="https://instagram.com/..."
           value={data?.user?.instagram}
           disabled={loading}
         />
@@ -312,22 +319,31 @@
           id="facebook"
           type="url"
           label="Facebook"
+          placeholder="https://facebook.com/..."
           value={data?.user?.facebook}
           disabled={loading}
         />
-        <Input id="x" type="url" label="X (Twitter)" value={data?.user?.x} disabled={loading} />
+        <Input
+          id="x"
+          type="url"
+          label="X (Twitter)"
+          placeholder="https://x.com/..."
+          value={data?.user?.x}
+          disabled={loading}
+        />
         <Input
           id="tiktok"
           type="url"
           label="TikTok"
+          placeholder="https://tiktok.com/@..."
           value={data?.user?.tiktok}
           disabled={loading}
         />
-
         <Input
           id="twitch"
           type="url"
           label="Twitch"
+          placeholder="https://twitch.tv/..."
           value={data?.user?.twitch}
           disabled={loading}
         />
@@ -342,6 +358,7 @@
           id="songkick"
           type="url"
           label="Songkick"
+          placeholder="https://songkick.com/artists/..."
           value={data?.user?.songkick}
           disabled={loading}
         />
@@ -349,6 +366,7 @@
           id="bandsintown"
           type="url"
           label="Bandsintown"
+          placeholder="https://bandsintown.com/a/..."
           value={data?.user?.bandsintown}
           disabled={loading}
         />
