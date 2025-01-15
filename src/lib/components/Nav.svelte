@@ -1,6 +1,6 @@
 <script lang="ts">
   import { UserButton, SignedIn, SignedOut } from 'svelte-clerk';
-  import { Menu, X } from 'svelte-hero-icons';
+  import { Icon, Bars3, XMark } from 'svelte-hero-icons';
   import { fade, slide } from 'svelte/transition';
 
   let isOpen = $state(false);
@@ -38,12 +38,12 @@
       <!-- Mobile menu button -->
       <button
         class="menu-button lg:hidden text-purple-500 hover:text-red-400 transition-colors"
-        on:click={toggleMenu}
+        onclick={toggleMenu}
       >
         {#if isOpen}
-          <X class="w-6 h-6" />
+          <Icon src={XMark} class="w-6 h-6" />
         {:else}
-          <Menu class="w-6 h-6" />
+          <Icon src={Bars3} class="w-6 h-6" />
         {/if}
       </button>
 
@@ -103,21 +103,21 @@
             <a
               href="/distribution"
               class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-              on:click={() => (isOpen = false)}>Distribution</a
+              onclick={() => (isOpen = false)}>Distribution</a
             >
           </li>
           <li>
             <a
               href="/releases"
               class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-              on:click={() => (isOpen = false)}>Releases</a
+              onclick={() => (isOpen = false)}>Releases</a
             >
           </li>
           <li>
             <a
               href="/artists"
               class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-              on:click={() => (isOpen = false)}>Artists</a
+              onclick={() => (isOpen = false)}>Artists</a
             >
           </li>
           <SignedOut>
@@ -125,14 +125,14 @@
               <a
                 href="/sign-in"
                 class="block py-2 btn btn-sm btn-primary text-lg hover:text-red-400 text-white transition-colors"
-                on:click={() => (isOpen = false)}>Login</a
+                onclick={() => (isOpen = false)}>Login</a
               >
             </li>
             <li>
               <a
                 href="/sign-up"
                 class="block py-2 btn btn-sm btn-secondary text-lg hover:text-green-300 text-white transition-colors"
-                on:click={() => (isOpen = false)}>Register</a
+                onclick={() => (isOpen = false)}>Register</a
               >
             </li>
           </SignedOut>
@@ -141,7 +141,7 @@
               <a
                 href="/dashboard"
                 class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-                on:click={() => (isOpen = false)}>Dashboard</a
+                onclick={() => (isOpen = false)}>Dashboard</a
               >
             </li>
             <li class="py-2">
