@@ -1,6 +1,5 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { pb } from '$lib/pocketbase';
 
 export const load = (async ({ locals }) => {
 	if (!locals.auth?.userId) {
