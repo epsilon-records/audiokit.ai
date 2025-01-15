@@ -1,6 +1,5 @@
 <script lang="ts">
   import { page } from '$app/state';
-  import { UserProfile } from 'svelte-clerk';
 
   let { pathname } = $derived(page.url);
 
