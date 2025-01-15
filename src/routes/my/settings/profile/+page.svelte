@@ -15,6 +15,7 @@
   let { data } = $props<{ data: { user: Artist } }>();
   let loading = $state(false);
   let errors = $state<Record<string, string>>({});
+  let switcherElement: HTMLElement;
 
   // Form validation
   const validateForm = (formData: FormData): boolean => {
@@ -108,6 +109,12 @@
       loading = false;
     };
   };
+
+  function handleContainerClick(event: MouseEvent) {
+    if (event.target === event.currentTarget) {
+      switcherElement?.click();
+    }
+  }
 </script>
 
 <SettingsContainer title="Artist Profile">
@@ -124,8 +131,15 @@
   >
     <div class="space-y-4">
       <h3 class="text-2xl font-semibold">Select Artist</h3>
-      <div class="border border-neutral-900 bg-white rounded-lg max-w-48">
+      <div
+        class="border border-neutral-900 bg-white rounded-lg cursor-pointer"
+        onclick={handleContainerClick}
+        onkeydown={(e) => e.key === 'Enter' && handleContainerClick(e)}
+        role="button"
+        tabindex="0"
+      >
         <OrganizationSwitcher
+          bind:this={switcherElement}
           appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
           hidePersonal={true}
           afterCreateOrganizationUrl="/my/settings/profile"
