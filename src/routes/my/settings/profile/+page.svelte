@@ -21,8 +21,13 @@
     <h3>{$message}</h3>
   {/if}
   <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
-  <div class="space-y-4 bg-teal-100 rounded-lg border-2 border-teal-200 px-8 pb-8">
-    <form method="POST" class="flex flex-col space-y-6" enctype="multipart/form-data" use:enhance>
+  <div class="space-y-4 bg-teal-100 rounded-lg border-2 border-teal-200 px-8 pb-8 max-w-screen-lg">
+    <form
+      method="POST"
+      class="flex flex-col space-y-6 max-w-screen-lg"
+      enctype="multipart/form-data"
+      use:enhance
+    >
       <!-- Hidden Fields -->
       <div>
         <Field {form} name="id">
@@ -494,9 +499,9 @@
       <div class="w-full pt-8 px-2">
         <button class="btn btn-primary text-pink-100" type="submit"> Update Profile </button>
       </div>
-    </form>
 
-    <!-- Debug Data -->
-    <SuperDebug data={$formData} />
+      <!-- Debug Data -->
+      <SuperDebug data={$formData} />
+    </form>
   </div>
 </SettingsContainer>

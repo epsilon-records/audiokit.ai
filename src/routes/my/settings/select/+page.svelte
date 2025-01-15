@@ -8,7 +8,7 @@
 
 <SettingsContainer title="Select Artist">
   <svelte:fragment slot="description">Select the artist profile you want to edit.</svelte:fragment>
-  <div class="space-y-4 bg-pink-100 rounded-lg border-2 border-pink-200 p-6">
+  <div class="space-y-4 bg-pink-100 rounded-lg border-2 border-pink-200 p-6 max-w-screen-lg">
     <h3 class="text-2xl font-semibold">Choose Profile</h3>
     <div class="rounded-lg">
       <OrganizationSwitcher
@@ -19,7 +19,7 @@
       />
     </div>
     <p class="text-muted-foreground">
-      Choose the artist profile you want to edit. You can switch between different artists or <a
+      Choose the artist profile you want to edit or <a
         href="/my/settings/create"
         class="text-cyan-400 font-bold hover:text-cyan-600 transition-colors hover:underline"
         >create a new artist profile</a
