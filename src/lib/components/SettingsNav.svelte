@@ -10,9 +10,9 @@
   ];
 </script>
 
-<ul class="menu bg-base-100 w-56 p-2 rounded-box">
+<ul class="menu bg-green-100 w-56 p-2 rounded-box">
   {#each navigation as item}
-    <li>
+    <li class="p-2 text-xl">
       <a href={item.href} class="font-medium {pathname === item.href ? 'active' : ''}">
         {item.label}
       </a>

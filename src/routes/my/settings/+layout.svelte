@@ -5,7 +5,7 @@
   let { children } = $props();
 </script>
 
-<PageContainer title="Settings" bgColor="bg-background" textColor="text-foreground">
+<PageContainer title="Settings" bgColor="bg-green-100" textColor="text-foreground">
   <div class="flex w-full h-full space-x-4">
     <SettingsNav />
     <div class="w-full">
