@@ -19,7 +19,7 @@
   });
 </script>
 
-<section class="relative h-screen flex items-center justify-center overflow-hidden bg-slate-100">
+<section class="relative h-screen flex items-center justify-center overflow-hidden bg-white">
   <FlickeringGrid
     class="z-0 absolute inset-0 size-full"
     {width}

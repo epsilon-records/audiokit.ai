@@ -50,8 +50,8 @@
       <!-- Desktop menu -->
       <ul class="hidden lg:flex gap-8 text-lg">
         <li>
-          <a href="/distribution" class="hover:text-red-400 text-purple-500 transition-colors"
-            >Distribution</a
+          <a href="/services" class="hover:text-red-400 text-purple-500 transition-colors"
+            >Services</a
           >
         </li>
         <li>
@@ -101,9 +101,9 @@
         <ul class="container mx-auto px-4 py-4 flex flex-col gap-4">
           <li>
             <a
-              href="/distribution"
+              href="/services"
               class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-              onclick={() => (isOpen = false)}>Distribution</a
+              onclick={() => (isOpen = false)}>Services</a
             >
           </li>
           <li>
