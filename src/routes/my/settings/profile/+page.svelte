@@ -10,7 +10,8 @@
   import { OrganizationSwitcher } from 'svelte-clerk';
   import { mode } from 'mode-watcher';
   import { neobrutalism, dark } from '@clerk/themes';
-  import { SuperDebug } from 'sveltekit-superforms';
+  import SuperDebug from 'sveltekit-superforms';
+
   let { data } = $props<{ data: { user: Artist } }>();
   let loading = $state(false);
   let errors = $state<Record<string, string>>({});
@@ -369,6 +370,6 @@
         </button>
       </div>
     </form>
-    <SuperDebug {data=$form} />
+    <SuperDebug data={$form} />
   </div>
 </SettingsContainer>
