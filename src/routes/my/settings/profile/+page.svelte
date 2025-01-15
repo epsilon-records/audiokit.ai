@@ -10,7 +10,8 @@
   import { Field, Control, Label, Description, FieldErrors } from 'formsnap';
   import { artistSchema } from '$lib/schemas/artist';
 
-  let { data } = $props<{ form: any }>();
+  let { data } = $props();
+
   const form = superForm(data.form, {
     resetForm: false,
     validators: zodClient(artistSchema),
@@ -19,8 +20,8 @@
 </script>
 
 <SettingsContainer title="Edit Profile">
-  {#if $message}
-    <h3>{$message}</h3>
+  {#if message}
+    <h3>{message}</h3>
   {/if}
   <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
   <div class="space-y-4 bg-white rounded-lg border border-gray-200 p-6">
@@ -45,7 +46,30 @@
       enctype="multipart/form-data"
       use:enhance
     >
-      Basic Information Section
+      <!-- Hidden Fields -->
+      <Field {form} name="id">
+        <Control>
+          {#snippet children({ props })}
+            <input {...props} type="hidden" bind:value={$formData.id} />
+          {/snippet}
+        </Control>
+      </Field>
+      <Field {form} name="org_id">
+        <Control>
+          {#snippet children({ props })}
+            <input {...props} type="hidden" bind:value={$formData.org_id} />
+          {/snippet}
+        </Control>
+      </Field>
+      <Field {form} name="test_org_id">
+        <Control>
+          {#snippet children({ props })}
+            <input {...props} type="hidden" bind:value={$formData.test_org_id} />
+          {/snippet}
+        </Control>
+      </Field>
+
+      <!-- Basic Information Section -->
       <div class="divider divider-accent text-2xl">Artist Profile</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <Field {form} name="stage_name">
@@ -331,6 +355,20 @@
           </Control>
           <FieldErrors />
         </Field>
+        <Field {form} name="linkedin">
+          <Control>
+            {#snippet children({ props })}
+              <Label>LinkedIn</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.linkedin}
+                placeholder="https://linkedin.com/in/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
       </div>
 
       <!-- Event Platforms -->
@@ -373,6 +411,6 @@
     </form>
 
     <!-- Debug Data -->
-    <SuperDebug data={$form} />
+    <SuperDebug data={$formData} />
   </div>
 </SettingsContainer>

@@ -3,15 +3,15 @@ import { z } from 'zod';
 export const artistSchema = z.object({
     id: z.string().length(15).regex(/^[a-z0-9]+$/),
     org_id: z.string().optional(),
+    test_org_id: z.string().optional(),
     stage_name: z.string().min(1),
     legal_name: z.string().min(1),
     is_signed: z.boolean().optional(),
     email: z.string().email(),
     phone: z.string().optional(),
-    // birthdate: z.string().optional(), // Date will be handled as string in form
-    // artist_photos: z.any().optional(), // File handling
+    birthdate: z.string().optional(), // Added for form handling
     city: z.string().optional(),
-    // country: z.string().optional(), // Relation ID
+    country: z.string().optional(), // Added for form handling
     biography: z.string().optional(),
     
     // URLs with domain validation where specified
@@ -32,7 +32,6 @@ export const artistSchema = z.object({
     bandsintown: z.string().url().regex(/^https?:\/\/bandsintown\.com/).optional().or(z.literal('')),
     linkedin: z.string().url().regex(/^https?:\/\/linkedin\.com/).optional().or(z.literal('')),
     
-    // anr: z.string().optional(), // Relation ID
     created: z.string().optional(),
     updated: z.string().optional()
 });
