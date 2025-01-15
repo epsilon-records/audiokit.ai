@@ -14,7 +14,7 @@
       <OrganizationSwitcher
         appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
         hidePersonal={true}
-        afterCreateOrganizationUrl="/my/settings/profile/create"
+        afterCreateOrganizationUrl="/my/settings/profile"
         afterSelectOrganizationUrl="/my/settings/profile"
       />
     </div>
