@@ -53,7 +53,7 @@
           <li>
             <a
               href="/my/settings/profile"
-              class="hover:text-red-400 text-purple-500 transition-colors">Settings</a
+              class="hover:text-red-400 text-purple-500 transition-colors">Dashboard</a
             >
           </li>
           <li>
