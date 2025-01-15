@@ -7,9 +7,5 @@
 </script>
 
 <SettingsContainer title="Account">
-  <svelte:fragment slot="description">
-    Manage your account settings and preferences.
-  </svelte:fragment>
-
   <UserProfile />
 </SettingsContainer>
