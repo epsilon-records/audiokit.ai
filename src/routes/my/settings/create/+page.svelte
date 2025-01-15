@@ -4,6 +4,6 @@
 </script>
 
 <SettingsContainer title="New Artist">
-  <svelte:fragment slot="description">Manage your team settings.</svelte:fragment>
+  <svelte:fragment slot="description">Create a new artist profile.</svelte:fragment>
   <CreateOrganization />
 </SettingsContainer>
