@@ -12,7 +12,7 @@ export const load = (async ({ locals }) => {
 		redirect(302, '/my/settings/create');
 	}
 	const artists = await pb.collection('artists').getList(1, 1, {
-		filter: `org_id = "${locals.auth.orgId}" || test_org_id = "${locals.auth.orgId}"`,
+		filter: `org_id = "${locals.auth.orgId}"`,
 	});
 	let artist;
 	if (artists.totalItems === 0) {
@@ -32,9 +32,14 @@ export const actions = {
     if (!form.valid) {
       return fail(400, { form });
     }
-
-    // TODO: Do something with the validated form.data
-
-    return message(form, 'Form posted successfully!');
+	try {
+		// TODO: Do something with the validated form.data
+		throw new Error('test');
+		//return message(form, 'Saved successfully!');
+    } catch (error) {
+      return message(form, 'Failed to update profile. Please try again.', { 
+        status: 500
+      });
+    }
   }
 };

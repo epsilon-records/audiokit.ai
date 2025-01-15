@@ -14,12 +14,20 @@
     validators: zodClient(artistSchema),
     dataType: 'json',
   });
-  const { form: formData, enhance, message } = form;
+  const { form: formData, message, enhance } = form;
 </script>
 
 <SettingsContainer title="Edit Profile">
   {#if $message}
-    <h3>{$message}</h3>
+    <div class="mb-4">
+      <span
+        class={`badge ${
+          $message.status == 200 ? 'badge-success' : 'badge-error'
+        } px-4 py-3 text-lg font-medium`}
+      >
+        {$message}
+      </span>
+    </div>
   {/if}
   <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
   <div class="space-y-4 bg-teal-100 rounded-lg border-2 border-teal-200 px-8 pb-8 max-w-screen-lg">
@@ -42,13 +50,6 @@
           <Control>
             {#snippet children({ props })}
               <input {...props} type="hidden" bind:value={$formData.org_id} />
-            {/snippet}
-          </Control>
-        </Field>
-        <Field {form} name="test_org_id">
-          <Control>
-            {#snippet children({ props })}
-              <input {...props} type="hidden" bind:value={$formData.test_org_id} />
             {/snippet}
           </Control>
         </Field>

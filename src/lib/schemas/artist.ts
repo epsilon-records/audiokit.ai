@@ -3,7 +3,6 @@ import { z } from 'zod';
 export const artistSchema = z.object({
     id: z.string().length(15).regex(/^[a-z0-9]+$/),
     org_id: z.string().optional(),
-    test_org_id: z.string().optional(),
     stage_name: z.string().min(1),
     legal_name: z.string().min(1),
     is_signed: z.boolean().optional(),
