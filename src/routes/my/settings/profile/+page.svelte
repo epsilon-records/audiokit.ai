@@ -53,6 +53,13 @@
             {/snippet}
           </Control>
         </Field>
+        <Field {form} name="is_signed">
+          <Control>
+            {#snippet children({ props })}
+              <input {...props} type="hidden" bind:value={$formData.is_signed} />
+            {/snippet}
+          </Control>
+        </Field>
       </div>
 
       <!-- Basic Information Section -->
@@ -70,7 +77,7 @@
                 />
               {/snippet}
             </Control>
-            <Description class="text-sm">This is your public artist name.</Description>
+            <Description class="text-sm">This is your public artist stage name.</Description>
             <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
@@ -176,7 +183,7 @@
       </div>
 
       <!-- Location Section -->
-      <div class="divider divider-accent text-2xl">Origin Location</div>
+      <div class="divider divider-accent text-2xl">Current Location</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <div class="form-control w-full max-w-lg mb-2">
           <Field {form} name="city">

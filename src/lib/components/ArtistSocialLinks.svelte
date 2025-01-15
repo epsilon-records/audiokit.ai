@@ -32,6 +32,7 @@
         platform,
         url: data.url as string,
         path: data.icon.path,
+        label: platform.replace('_', ' '),
       })),
   );
 </script>
