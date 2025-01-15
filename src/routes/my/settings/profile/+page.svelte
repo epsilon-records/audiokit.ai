@@ -20,8 +20,8 @@
 </script>
 
 <SettingsContainer title="Edit Profile">
-  {#if message}
-    <h3>{message}</h3>
+  {#if $message}
+    <h3>{$message}</h3>
   {/if}
   <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
   <div class="space-y-4 bg-white rounded-lg border border-gray-200 p-6">
@@ -47,41 +47,53 @@
       use:enhance
     >
       <!-- Hidden Fields -->
-      <Field {form} name="id">
-        <Control>
-          {#snippet children({ props })}
-            <input {...props} type="hidden" bind:value={$formData.id} />
-          {/snippet}
-        </Control>
-      </Field>
-      <Field {form} name="org_id">
-        <Control>
-          {#snippet children({ props })}
-            <input {...props} type="hidden" bind:value={$formData.org_id} />
-          {/snippet}
-        </Control>
-      </Field>
-      <Field {form} name="test_org_id">
-        <Control>
-          {#snippet children({ props })}
-            <input {...props} type="hidden" bind:value={$formData.test_org_id} />
-          {/snippet}
-        </Control>
-      </Field>
+      <div class="form-control w-full max-w-lg mb-2">
+        <Field {form} name="id">
+          <Control>
+            {#snippet children({ props })}
+              <input {...props} type="hidden" bind:value={$formData.id} />
+            {/snippet}
+          </Control>
+        </Field>
+      </div>
+      <div class="form-control w-full max-w-lg mb-2">
+        <Field {form} name="org_id">
+          <Control>
+            {#snippet children({ props })}
+              <input {...props} type="hidden" bind:value={$formData.org_id} />
+            {/snippet}
+          </Control>
+        </Field>
+      </div>
+      <div class="form-control w-full max-w-lg mb-2">
+        <Field {form} name="test_org_id">
+          <Control>
+            {#snippet children({ props })}
+              <input {...props} type="hidden" bind:value={$formData.test_org_id} />
+            {/snippet}
+          </Control>
+        </Field>
+      </div>
 
       <!-- Basic Information Section -->
       <div class="divider divider-accent text-2xl">Artist Profile</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Field {form} name="stage_name">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Artist Name</Label>
-              <input {...props} bind:value={$formData.stage_name} />
-            {/snippet}
-          </Control>
-          <Description>This is your public artist name.</Description>
-          <FieldErrors />
-        </Field>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="stage_name">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Artist Name</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  bind:value={$formData.stage_name}
+                />
+              {/snippet}
+            </Control>
+            <Description>This is your public artist name.</Description>
+            <FieldErrors />
+          </Field>
+        </div>
         <!-- Artist Photos -->
         <div class="form-control w-full max-w-lg">
           <label for="avatar" class="label font-medium pb-1">
@@ -110,60 +122,95 @@
       <!-- Essential Fields -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Legal Details</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Field {form} name="legal_name">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Legal Name</Label>
-              <input {...props} bind:value={$formData.legal_name} />
-            {/snippet}
-          </Control>
-          <Description>Be sure to use your real name.</Description>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="phone">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Phone</Label>
-              <input {...props} type="tel" bind:value={$formData.phone} />
-            {/snippet}
-          </Control>
-          <Description>Used for urgent booking communications only.</Description>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="email">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Email</Label>
-              <input {...props} type="email" bind:value={$formData.email} required />
-            {/snippet}
-          </Control>
-          <Description>It's preferred that you use your company email.</Description>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="birthdate">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Birth Date</Label>
-              <input {...props} type="date" bind:value={$formData.birthdate} />
-            {/snippet}
-          </Control>
-          <Description>Required for age-restricted venues and events.</Description>
-          <FieldErrors />
-        </Field>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="legal_name">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Legal Name</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  bind:value={$formData.legal_name}
+                />
+              {/snippet}
+            </Control>
+            <Description>Be sure to use your real name.</Description>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="phone">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Phone</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="tel"
+                  bind:value={$formData.phone}
+                />
+              {/snippet}
+            </Control>
+            <Description>Used for urgent booking communications only.</Description>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="email">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Email</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="email"
+                  bind:value={$formData.email}
+                  required
+                />
+              {/snippet}
+            </Control>
+            <Description>It's preferred that you use your company email.</Description>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="birthdate">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Birth Date</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="date"
+                  bind:value={$formData.birthdate}
+                />
+              {/snippet}
+            </Control>
+            <Description>Required for age-restricted venues and events.</Description>
+            <FieldErrors />
+          </Field>
+        </div>
       </div>
 
       <!-- Location Section -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Origin Location</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Field {form} name="city">
-          <Control>
-            {#snippet children({ props })}
-              <Label>City</Label>
-              <input {...props} type="text" bind:value={$formData.city} />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="city">
+            <Control>
+              {#snippet children({ props })}
+                <Label>City</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="text"
+                  bind:value={$formData.city}
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
         <div class="form-control w-full">
           <label for="country" class="label font-medium pb-1">
             <span class="label-text text-lg">Country</span>
@@ -182,226 +229,275 @@
       <!-- Biography Section -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Artist Biography</div>
       <div class="space-y-4 px-2">
-        <Field {form} name="website">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Artist Website</Label>
-              <input {...props} type="url" bind:value={$formData.website} />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="website">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Artist Website</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.website}
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
       </div>
 
       <!-- Music Platforms -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Music Platforms</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Field {form} name="apple_music">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Apple Music</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.apple_music}
-                placeholder="https://music.apple.com/artist/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="spotify">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Spotify</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.spotify}
-                placeholder="https://open.spotify.com/artist/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="soundcloud">
-          <Control>
-            {#snippet children({ props })}
-              <Label>SoundCloud</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.soundcloud}
-                placeholder="https://soundcloud.com/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="bandcamp">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Bandcamp</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.bandcamp}
-                placeholder="https://artist.bandcamp.com"
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="youtube">
-          <Control>
-            {#snippet children({ props })}
-              <Label>YouTube</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.youtube}
-                placeholder="https://youtube.com/@..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="mixcloud">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Mixcloud</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.mixcloud}
-                placeholder="https://mixcloud.com/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="apple_music">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Apple Music</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.apple_music}
+                  placeholder="https://music.apple.com/artist/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="spotify">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Spotify</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.spotify}
+                  placeholder="https://open.spotify.com/artist/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="soundcloud">
+            <Control>
+              {#snippet children({ props })}
+                <Label>SoundCloud</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.soundcloud}
+                  placeholder="https://soundcloud.com/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="bandcamp">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Bandcamp</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.bandcamp}
+                  placeholder="https://artist.bandcamp.com"
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="youtube">
+            <Control>
+              {#snippet children({ props })}
+                <Label>YouTube</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.youtube}
+                  placeholder="https://youtube.com/@..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="mixcloud">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Mixcloud</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.mixcloud}
+                  placeholder="https://mixcloud.com/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
       </div>
 
       <!-- Social Networks -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Social Networks</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Field {form} name="instagram">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Instagram</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.instagram}
-                placeholder="https://instagram.com/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="facebook">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Facebook</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.facebook}
-                placeholder="https://facebook.com/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="x">
-          <Control>
-            {#snippet children({ props })}
-              <Label>X (Twitter)</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.x}
-                placeholder="https://x.com/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="tiktok">
-          <Control>
-            {#snippet children({ props })}
-              <Label>TikTok</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.tiktok}
-                placeholder="https://tiktok.com/@..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="twitch">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Twitch</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.twitch}
-                placeholder="https://twitch.tv/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="linkedin">
-          <Control>
-            {#snippet children({ props })}
-              <Label>LinkedIn</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.linkedin}
-                placeholder="https://linkedin.com/in/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="instagram">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Instagram</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.instagram}
+                  placeholder="https://instagram.com/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="facebook">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Facebook</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.facebook}
+                  placeholder="https://facebook.com/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="x">
+            <Control>
+              {#snippet children({ props })}
+                <Label>X (Twitter)</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.x}
+                  placeholder="https://x.com/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="tiktok">
+            <Control>
+              {#snippet children({ props })}
+                <Label>TikTok</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.tiktok}
+                  placeholder="https://tiktok.com/@..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="twitch">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Twitch</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.twitch}
+                  placeholder="https://twitch.tv/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="linkedin">
+            <Control>
+              {#snippet children({ props })}
+                <Label>LinkedIn</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.linkedin}
+                  placeholder="https://linkedin.com/in/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
       </div>
 
       <!-- Event Platforms -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Event Platforms</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Field {form} name="songkick">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Songkick</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.songkick}
-                placeholder="https://songkick.com/artists/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
-        <Field {form} name="bandsintown">
-          <Control>
-            {#snippet children({ props })}
-              <Label>Bandsintown</Label>
-              <input
-                {...props}
-                type="url"
-                bind:value={$formData.bandsintown}
-                placeholder="https://bandsintown.com/a/..."
-              />
-            {/snippet}
-          </Control>
-          <FieldErrors />
-        </Field>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="songkick">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Songkick</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.songkick}
+                  placeholder="https://songkick.com/artists/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
+        <div class="form-control w-full max-w-lg mb-2">
+          <Field {form} name="bandsintown">
+            <Control>
+              {#snippet children({ props })}
+                <Label>Bandsintown</Label>
+                <input
+                  {...props}
+                  class="input input-bordered bg-white text-gray-900"
+                  type="url"
+                  bind:value={$formData.bandsintown}
+                  placeholder="https://bandsintown.com/a/..."
+                />
+              {/snippet}
+            </Control>
+            <FieldErrors />
+          </Field>
+        </div>
       </div>
 
       <!-- Submit Button -->
