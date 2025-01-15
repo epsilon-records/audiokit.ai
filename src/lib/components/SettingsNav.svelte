@@ -16,10 +16,10 @@
 <ul class="menu bg-green-100 w-56 p-2 rounded-box">
   <li class="p-2 text-xl">
     <OrganizationSwitcher
-      appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
+      appearance={{ baseTheme: neobrutalism }}
       hidePersonal={true}
-      afterCreateOrganizationUrl="/profile"
-      afterSelectOrganizationUrl="/profile"
+      afterCreateOrganizationUrl="/my/settings/profile"
+      afterSelectOrganizationUrl="/my/settings/profile"
     />
   </li>
   {#each navigation as item}
