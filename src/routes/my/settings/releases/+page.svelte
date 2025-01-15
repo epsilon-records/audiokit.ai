@@ -20,14 +20,14 @@
           >
             <div class="aspect-square relative">
               <img
-                src={release.coverArt || '/images/placeholder-release.jpg'}
-                alt={release.title}
+                src={release.cover_artwork[0] || '/images/placeholder-release.jpg'}
+                alt={release.release_title}
                 class="object-cover w-full h-full rounded-t-lg"
               />
             </div>
             <div class="p-4 space-y-2">
-              <h3 class="font-semibold truncate">{release.title}</h3>
-              <p class="text-sm text-muted-foreground">{release.releaseDate}</p>
+              <h3 class="font-semibold truncate">{release.release_title}</h3>
+              <p class="text-sm text-muted-foreground">{release.release_date}</p>
               <div class="flex justify-between items-center mt-4">
                 <span
                   class={cn(
