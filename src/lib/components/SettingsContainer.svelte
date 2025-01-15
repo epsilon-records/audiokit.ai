@@ -11,7 +11,5 @@
       <slot name="description" />
     </div>
   </div>
-  <div class="border border-slate-500 rounded-lg p-4">
-    <slot />
-  </div>
+  <slot />
 </div>

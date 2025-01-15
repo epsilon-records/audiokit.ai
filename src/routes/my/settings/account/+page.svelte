@@ -1,8 +1,9 @@
 <script lang="ts">
-  import SettingsClerkContainer from '$lib/components/SettingsClerkContainer.svelte';
+  import SettingsContainer from '$lib/components/SettingsContainer.svelte';
   import { UserProfile } from 'svelte-clerk';
 </script>
 
-<SettingsClerkContainer>
+<SettingsContainer title="Account Settings">
+  <svelte:fragment slot="description">Manage your account settings.</svelte:fragment>
   <UserProfile />
-</SettingsClerkContainer>
+</SettingsContainer>

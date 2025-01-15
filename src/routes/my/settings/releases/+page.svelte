@@ -4,12 +4,12 @@
   import { Icon, Pencil } from 'svelte-hero-icons';
   import Input from '$lib/components/Input.svelte';
   import { getImageURL } from '$lib/utils';
-  import SettingsContainer from '$lib/components/SettingsContainer.svelte';
   import { countries } from '$lib/data/countries';
   import type { Artist } from '$lib/types/artist';
   import { OrganizationSwitcher } from 'svelte-clerk';
   import { mode } from 'mode-watcher';
   import { neobrutalism, dark } from '@clerk/themes';
+  import SettingsContainer from '$lib/components/SettingsContainer.svelte';
 
   let { data } = $props<{ data: { user: Artist } }>();
   let loading = $state(false);
@@ -109,8 +109,8 @@
   };
 </script>
 
-<SettingsContainer title="Edit Profile">
-  <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
+<SettingsContainer title="Manage Releases">
+  <svelte:fragment slot="description">Manage your releases and tracks.</svelte:fragment>
   <div class="space-y-4 bg-white rounded-lg border border-gray-200 p-6">
     <h3 class="text-2xl font-semibold">Select Artist</h3>
     <div class="rounded-lg">
