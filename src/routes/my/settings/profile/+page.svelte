@@ -12,6 +12,7 @@
   const form = superForm(data.form, {
     resetForm: false,
     validators: zodClient(artistSchema),
+    dataType: 'json',
   });
   const { form: formData, enhance, message } = form;
 </script>
