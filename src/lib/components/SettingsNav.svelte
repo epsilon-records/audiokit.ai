@@ -20,6 +20,6 @@
     </li>
   {/each}
   <li class="p-2 text-xl">
-    <UserProfile />
+    <UserProfile routing="path" path="/my/settings/account" />
   </li>
 </ul>
