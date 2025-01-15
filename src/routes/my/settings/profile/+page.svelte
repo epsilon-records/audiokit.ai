@@ -5,7 +5,6 @@
   import Input from '$lib/components/Input.svelte';
   import { getImageURL } from '$lib/utils';
   import SettingsContainer from '$lib/components/SettingsContainer.svelte';
-  import Editor from '$lib/components/Editor.svelte';
   import { countries } from '$lib/data/countries';
   import type { Artist } from '$lib/types/artist';
   import { OrganizationSwitcher } from 'svelte-clerk';
