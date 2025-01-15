@@ -19,7 +19,4 @@
       </a>
     </li>
   {/each}
-  <li class="p-2 text-xl">
-    <UserProfile />
-  </li>
 </ul>

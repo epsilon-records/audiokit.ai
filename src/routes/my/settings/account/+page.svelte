@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import SettingsContainer from '$lib/components/SettingsContainer.svelte';
+  import { UserProfile } from 'svelte-clerk';
 
   let { data } = $props<{ data: PageData }>();
 </script>
@@ -10,5 +11,5 @@
     Manage your account settings and preferences.
   </svelte:fragment>
 
-  <!-- Account settings form -->
+  <UserProfile />
 </SettingsContainer>
