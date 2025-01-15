@@ -124,12 +124,14 @@
   >
     <div class="space-y-4">
       <h3 class="text-2xl font-semibold">Select Artist</h3>
-      <OrganizationSwitcher
-        appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
-        hidePersonal={true}
-        afterCreateOrganizationUrl="/my/settings/profile"
-        afterSelectOrganizationUrl="/my/settings/profile"
-      />
+      <div class="border border-accent rounded-lg p-4">
+        <OrganizationSwitcher
+          appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
+          hidePersonal={true}
+          afterCreateOrganizationUrl="/my/settings/profile"
+          afterSelectOrganizationUrl="/my/settings/profile"
+        />
+      </div>
       <p class="text-muted-foreground">
         Choose the artist profile you want to edit. You can switch between different artists or
         create a new artist profile.
