@@ -2,7 +2,6 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { cubicOut } from "svelte/easing";
 import type { TransitionConfig } from "svelte/transition";
-import { webcrypto } from 'node:crypto';
 
 export function cn(...inputs: ClassValue[]) {
 	return twMerge(clsx(inputs));
@@ -68,7 +67,7 @@ export const serializeNonPOJOs = (obj: any) => {
 
 export const generateUsername = (name: string) => {
 	const array = new Uint8Array(2);
-	webcrypto.getRandomValues(array);
+	crypto.getRandomValues(array);
 	const id = Array.from(array)
 		.map(b => b.toString(16).padStart(2, '0'))
 		.join('');
