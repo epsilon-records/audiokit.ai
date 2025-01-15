@@ -134,7 +134,7 @@
       method="POST"
       class="flex flex-col space-y-6 w-full"
       enctype="multipart/form-data"
-      use:enhance={submitUpdateProfile}
+      use:enhance
     >
       <!-- Basic Information Section -->
       <div class="divider divider-accent text-2xl">Artist Profile</div>
