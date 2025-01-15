@@ -2,17 +2,9 @@
   import { enhance, applyAction } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
   import { Icon, Pencil } from 'svelte-hero-icons';
-  import Input from '$lib/components/Input.svelte';
+  import { Input } from '$lib/components';
   import { getImageURL } from '$lib/utils';
-
-  interface PageData {
-    user: {
-      avatar?: string;
-      collectionId: string;
-      id: string;
-      name: string;
-    };
-  }
+  import type { PageData } from './$types';
 
   let { data } = $props<{ data: PageData }>();
   let loading = $state(false);
@@ -30,17 +22,19 @@
 
   const submitUpdateProfile = () => {
     loading = true;
-    return async ({ result }: { result: any }) => {
-      switch (result.type) {
-        case 'success':
-          await invalidateAll();
-          break;
-        case 'error':
-          break;
-        default:
-          await applyAction(result);
-      }
-      loading = false;
+    return ({ result }: { result: any }) => {
+      Promise.resolve().then(async () => {
+        switch (result.type) {
+          case 'success':
+            await invalidateAll();
+            break;
+          case 'error':
+            break;
+          default:
+            await applyAction(result);
+        }
+        loading = false;
+      });
     };
   };
 </script>
