@@ -1,11 +1,11 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import SettingsContainer from '$lib/components/SettingsContainer.svelte';
+  import SettingsClerkContainer from '$lib/components/SettingsClerkContainer.svelte';
   import { UserProfile } from 'svelte-clerk';
 
   let { data } = $props<{ data: PageData }>();
 </script>
 
-<SettingsContainer title="Account">
+<SettingsClerkContainer>
   <UserProfile />
-</SettingsContainer>
+</SettingsClerkContainer>
