@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { PageData } from './$types';
   import SettingsContainer from '$lib/components/SettingsContainer.svelte';
-  import { Input } from '$lib/components/ui/Input.svelte';
+  import Input from '$lib/components/Input.svelte';
 
   let { data }: { data: PageData } = $props();
 </script>
