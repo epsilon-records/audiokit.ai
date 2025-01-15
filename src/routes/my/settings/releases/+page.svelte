@@ -1,6 +1,7 @@
 <script lang="ts">
   import SettingsContainer from '$lib/components/SettingsContainer.svelte';
   import { cn } from '$lib/utils';
+  import { pb } from '$lib/pocketbase';
 
   let { data } = $props();
 </script>
@@ -20,7 +21,9 @@
           >
             <div class="aspect-square relative">
               <img
-                src={release.cover_artwork[0] || '/images/placeholder-release.jpg'}
+                src={release.cover_artwork?.[0]
+                  ? pb.files.getURL(release, release.cover_artwork[0])
+                  : '/default-release.jpg'}
                 alt={release.release_title}
                 class="object-cover w-full h-full rounded-t-lg"
               />
