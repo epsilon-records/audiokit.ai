@@ -48,12 +48,15 @@ export const load = (async ({ locals }) => {
 	if (!locals.auth?.userId || !locals.auth?.orgId) {
         throw error(401, 'Unauthorized');
     }
-	const artist = await pb.collection('artists').getOne(locals.auth.orgId);
-	if (!artist) {
-		throw error(404, 'Profile not found');
-	}
-	const form = await superValidate(artist, zod(artistSchema));
-	return { form };
+    const artists = await pb.collection('artists').getList(1, 1, {
+        filter: `org_id = "${locals.auth.orgId}"`,
+    });
+    if (!artists?.items?.length) {
+        throw error(404, 'Profile not found');
+    }
+    const artist = artists.items[0];
+    const form = await superValidate(artist, zod(artistSchema));
+    return { form };
 }) satisfies PageServerLoad;
 
 export const actions = {
