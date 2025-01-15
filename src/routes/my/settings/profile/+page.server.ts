@@ -14,10 +14,17 @@ export const load = (async ({ locals }) => {
 	const artists = await pb.collection('artists').getList(1, 1, {
 		filter: `org_id = "${locals.auth.orgId}" || test_org_id = "${locals.auth.orgId}"`,
 	});
+	let artist;
 	if (artists.totalItems === 0) {
-		throw error(404, 'Profile not found');
+		artist = await pb.collection('artists').create({
+			org_id: locals.auth.orgId,
+			stage_name: '',
+			legal_name: '',
+			email: '',
+		});
+	} else {
+		artist = artists.items[0];
 	}
-	const artist = artists.items[0];
 	const form = await superValidate(artist, zod(artistSchema));
 	return { form };
 }) satisfies PageServerLoad;
