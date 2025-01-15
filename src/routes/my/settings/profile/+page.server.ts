@@ -11,14 +11,13 @@ const artistSchema = z.object({
 	org_id: z.string().optional(),
 	stage_name: z.string().min(1),
 	legal_name: z.string().min(1),
-	slug: z.string().optional(),
 	is_signed: z.boolean().optional(),
 	email: z.string().email(),
 	phone: z.string().optional(),
-	birthdate: z.string().optional(), // Date will be handled as string in form
-	artist_photos: z.any().optional(), // File handling
+	// birthdate: z.string().optional(), // Date will be handled as string in form
+	// artist_photos: z.any().optional(), // File handling
 	city: z.string().optional(),
-	country: z.string().optional(), // Relation ID
+	// country: z.string().optional(), // Relation ID
 	biography: z.string().optional(),
 	
 	// URLs with domain validation where specified
@@ -39,7 +38,7 @@ const artistSchema = z.object({
 	bandsintown: z.string().url().regex(/^https?:\/\/bandsintown\.com/).optional().or(z.literal('')),
 	linkedin: z.string().url().regex(/^https?:\/\/linkedin\.com/).optional().or(z.literal('')),
 	
-	anr: z.string().optional(), // Relation ID
+	// anr: z.string().optional(), // Relation ID
 	created: z.string().optional(),
 	updated: z.string().optional()
 });
@@ -48,29 +47,15 @@ export const load = (async ({ locals }) => {
 	if (!locals.auth?.userId || !locals.auth?.orgId) {
         throw error(401, 'Unauthorized');
     }
-    try {
-        console.log('Searching for artist with org_id:', locals.auth.orgId);
-        
-        const artists = await pb.collection('artists').getList(1, 1, {
-            filter: `org_id = "${locals.auth.orgId}"`,
-        });
-        
-        console.log('PocketBase response:', {
-            totalItems: artists.totalItems,
-            items: artists.items
-        });
-
-        if (artists.totalItems === 0) {
-            throw error(404, 'Profile not found');
-        }
-        
-        const artist = structuredClone(artists.items[0]);
-        const form = await superValidate(artist, zod(artistSchema));
-        return { form };
-    } catch (err) {
-        console.error('Error fetching artist profile:', err);
-        throw error(500, 'Failed to load profile');
-    }
+	const artists = await pb.collection('artists').getList(1, 1, {
+		filter: `org_id = "${locals.auth.orgId}"`,
+	});
+	if (artists.totalItems === 0) {
+		throw error(404, 'Profile not found');
+	}
+	const artist = structuredClone(artists.items[0]);
+	const form = await superValidate(artist, zod(artistSchema));
+	return { form };
 }) satisfies PageServerLoad;
 
 export const actions = {
