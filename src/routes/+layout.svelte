@@ -5,7 +5,7 @@
   import type { Snippet } from 'svelte';
   import { goto } from '$app/navigation';
 
-  const { children }: { children: Snippet } = $props();
+  let { children } = $props<{ children: Snippet }>();
 
   // Configure router functions for Clerk
   const routerPush = (to: string) => goto(to);

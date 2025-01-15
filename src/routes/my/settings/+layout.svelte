@@ -1,8 +1,9 @@
 <script lang="ts">
   import PageContainer from '$lib/components/PageContainer.svelte';
   import DashboardNav from '$lib/components/DashboardNav.svelte';
+  import type { Snippet } from 'svelte';
 
-  let { children } = $props();
+  let { children } = $props<{ children: Snippet }>();
 </script>
 
 <PageContainer title="Dashboard" bgColor="bg-green-100" textColor="text-foreground">
