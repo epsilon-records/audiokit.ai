@@ -23,24 +23,14 @@
   const submitUpdateProfile = () => {
     loading = true;
     return ({ result }: { result: any }) => {
-      switch (result.type) {
-        case 'success':
-          invalidateAll()
-            .catch(console.error)
-            .finally(() => {
-              loading = false;
-            });
-          break;
-        case 'error':
-          loading = false;
-          break;
-        default:
-          applyAction(result)
-            .catch(console.error)
-            .finally(() => {
-              loading = false;
-            });
-      }
+      Promise.resolve().then(async () => {
+        if (result.type === 'success') {
+          await invalidateAll();
+        } else {
+          await applyAction(result);
+        }
+        loading = false;
+      });
     };
   };
 </script>
