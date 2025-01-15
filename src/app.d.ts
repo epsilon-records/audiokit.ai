@@ -7,6 +7,7 @@ declare global {
 		interface Locals {
 			pb: PocketBase;
 			user: any;
+			auth: import('@clerk/backend').Auth;
 		}
 	}
 }

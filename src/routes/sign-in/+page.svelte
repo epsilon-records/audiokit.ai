@@ -1,5 +1,5 @@
 <script lang="ts">
-  import SignIn from 'clerk-sveltekit/client/SignIn.svelte';
+  import { SignIn } from 'svelte-clerk';
   import { mode } from 'mode-watcher';
   import { neobrutalism, dark } from '@clerk/themes';
   import AuthContainer from '$lib/components/AuthContainer.svelte';
