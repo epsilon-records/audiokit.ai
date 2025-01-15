@@ -53,11 +53,9 @@ export const load = (async ({ locals }) => {
         const artists = await pb.collection('artists').getList(1, 1, {
             filter: `org_id = "${locals.auth.orgId}"`,
         });
-        
-        if (!artists?.items?.length) {
+        if (!artists?.items || artists.items.length === 0) {
             throw error(404, 'Profile not found');
         }
-        
         const artist = artists.items[0];
         const form = await superValidate(artist, zod(artistSchema));
         return { form };
