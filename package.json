@@ -47,6 +47,7 @@
     "@tiptap/starter-kit": "^2.11.2",
     "@types/node": "^22.10.5",
     "bottleneck": "^2.19.5",
+    "clerk": "^0.8.3",
     "csv-parse": "^5.6.0",
     "mode-watcher": "^0.5.0",
     "pocketbase": "^0.25.0",

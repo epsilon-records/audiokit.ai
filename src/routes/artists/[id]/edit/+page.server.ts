@@ -1,11 +1,9 @@
 import { error } from "@sveltejs/kit";
-
 import { artistSchema } from "$lib/schemas/artist";
 import { fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms/server';
 import { zod } from 'sveltekit-superforms/adapters';
 import { pb } from '$lib/pocketbase';
-import type { RequestEvent } from '@sveltejs/kit';
 
 export const load = async ({ params }) => {
     const artist = await pb.collection('artists').getOne(params.id);
