@@ -1,6 +1,8 @@
 import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { pb } from '$lib/pocketbase';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import { releaseSchema } from '$lib/schemas/release';
 
 export const load = (async ({ locals }) => {
 	if (!locals.auth?.userId) {
@@ -8,5 +10,6 @@ export const load = (async ({ locals }) => {
 	} else if (!locals.auth?.orgId) {
 		redirect(302, '/my/settings/create');
 	}
-	return {};
+	const form = await superValidate(zod(releaseSchema));
+	return { form };
 }) satisfies PageServerLoad;
