@@ -16,7 +16,7 @@
 <ul class="menu bg-green-100 w-56 p-2 rounded-box">
   <li class="p-2 text-xl">
     <OrganizationSwitcher
-      appearance={{ baseTheme: neobrutalism }}
+      appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
       hidePersonal={true}
       afterCreateOrganizationUrl="/my/settings/profile"
       afterSelectOrganizationUrl="/my/settings/profile"
