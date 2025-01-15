@@ -12,15 +12,13 @@
   import { neobrutalism, dark } from '@clerk/themes';
   import SuperDebug from 'sveltekit-superforms';
 
-  let { data } = $props<{ data: { user: Artist } }>();
+  let { data } = $props<{ data: { user: Artist; form: any } }>();
   let loading = $state(false);
   let errors = $state<Record<string, string>>({});
 
-  // Form validation
-  const validateForm = (formData: FormData): boolean => {
+  function validateForm(formData: FormData) {
     errors = {};
 
-    // Required fields validation
     const stage_name = formData.get('stage_name') as string;
     const legal_name = formData.get('legal_name') as string;
     const email = formData.get('email') as string;
@@ -39,7 +37,6 @@
       errors.email = 'Invalid email format';
     }
 
-    // URL validations
     const urlFields = [
       'website',
       'spotify',
@@ -67,9 +64,9 @@
     });
 
     return Object.keys(errors).length === 0;
-  };
+  }
 
-  const showPreview = (event: Event) => {
+  function showPreview(event: Event) {
     const target = event.target as HTMLInputElement;
     const files = target.files;
 
@@ -80,9 +77,9 @@
         preview.src = src;
       }
     }
-  };
+  }
 
-  const submitUpdateProfile = () => {
+  function submitUpdateProfile() {
     loading = true;
     return async ({ form, result }: { form: HTMLFormElement; result: any }) => {
       const formData = new FormData(form);
@@ -97,7 +94,6 @@
           await invalidateAll();
           break;
         case 'error':
-          // Handle specific error cases
           if (result.status === 400) {
             errors = result.data?.errors || { form: 'Invalid form data' };
           }
@@ -107,7 +103,7 @@
       }
       loading = false;
     };
-  };
+  }
 </script>
 
 <SettingsContainer title="Edit Profile">
@@ -372,6 +368,6 @@
     </form>
 
     <!-- Debug Data -->
-    <SuperDebug data={$data.form} />
+    <SuperDebug data={data.form} />
   </div>
 </SettingsContainer>
