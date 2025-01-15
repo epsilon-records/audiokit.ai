@@ -1,28 +1,29 @@
-<script>
+<script lang="ts">
   import { enhance, applyAction } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
   import { Icon, Pencil } from 'svelte-hero-icons';
-  import { Input } from '$lib/components';
+  import Input from '$lib/components/Input.svelte';
   import { getImageURL } from '$lib/utils';
 
-  export let data;
-  let loading;
+  let { data } = $props<{ data: { user: any } }>();
+  let loading = $state(false);
 
-  $: loading = false;
-  const showPreview = (event) => {
-    const target = event.target;
+  const showPreview = (event: Event) => {
+    const target = event.target as HTMLInputElement;
     const files = target.files;
 
-    if (files.length > 0) {
+    if (files && files.length > 0) {
       const src = URL.createObjectURL(files[0]);
-      const preview = document.getElementById('avatar-preview');
-      preview.src = src;
+      const preview = document.querySelector<HTMLImageElement>('#avatar-preview');
+      if (preview) {
+        preview.src = src;
+      }
     }
   };
 
   const submitUpdateProfile = () => {
     loading = true;
-    return async ({ result }) => {
+    return async ({ result }: { result: any }) => {
       switch (result.type) {
         case 'success':
           await invalidateAll();
@@ -73,7 +74,7 @@
         value=""
         accept="image/*"
         hidden
-        on:change={showPreview}
+        onchange={showPreview}
         disabled={loading}
       />
     </div>
