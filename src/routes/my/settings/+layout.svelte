@@ -6,9 +6,9 @@
   let { children } = $props();
 </script>
 
-<OrganizationSwitcher />
 <PageContainer title="Settings" bgColor="bg-green-100" textColor="text-foreground">
   <div class="flex w-full h-full space-x-4">
+    <OrganizationSwitcher />
     <SettingsNav />
     <div class="w-full">
       {@render children()}
