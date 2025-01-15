@@ -124,7 +124,7 @@
   >
     <div class="space-y-4">
       <h3 class="text-2xl font-semibold">Select Artist</h3>
-      <div class="border border-neutral-900 bg-white rounded-lg max-w-sm">
+      <div class="border border-neutral-900 bg-white rounded-lg max-w-none">
         <OrganizationSwitcher
           appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
           hidePersonal={true}
