@@ -101,7 +101,7 @@
 
         <div class="flex items-center justify-between">
           <span class="font-semibold text-lg">{service.price}</span>
-          <Button variant="outline">Learn More</Button>
+          <Button variant="outline" href="/faq">Learn More</Button>
         </div>
       </div>
     {/each}
@@ -115,8 +115,17 @@
       services.
     </p>
     <div class="flex flex-col sm:flex-row gap-4 justify-center">
-      <Button size="lg" class="text-lg px-8">Get Started Now</Button>
-      <Button size="lg" variant="outline" class="text-lg px-8">Schedule a Call</Button>
+      <Button size="lg" class="text-lg px-8" href="/sign-up">Get Started Now</Button>
+      <Button
+        size="lg"
+        variant="outline"
+        class="text-lg px-8"
+        href="https://calendly.com/natehouk"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Schedule a Call
+      </Button>
     </div>
   </div>
 </div>
