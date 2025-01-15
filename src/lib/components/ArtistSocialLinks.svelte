@@ -32,7 +32,6 @@
         platform,
         url: data.url as string,
         path: data.icon.path,
-        label: platform.replace('_', ' '),
       })),
   );
 </script>
@@ -52,7 +51,7 @@
           <span class="text-sm">website</span>
         </a>
       {/if}
-      {#each socialLinks as { url, path, label }}
+      {#each socialLinks as { platform, url, path }}
         <a
           href={url}
           target="_blank"
@@ -66,7 +65,7 @@
           >
             <path fill="currentColor" d={path} />
           </svg>
-          <span class="text-sm">{label}</span>
+          <span class="text-sm">{platform}</span>
         </a>
       {/each}
     </div>
