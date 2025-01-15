@@ -10,7 +10,7 @@ export const load = (async ({ locals }) => {
         throw error(401, 'Unauthorized');
     }
 	const releases = await pb.collection('releases').getList(1, 1, {
-		filter: `org_id = "${locals.auth.orgId}" || test_org_id = "${locals.auth.orgId}"`,
+		filter: `org_id = "${locals.auth.orgId}"`,
 	});
 	if (releases.totalItems === 0) {
 		throw error(404, 'Release not found');
