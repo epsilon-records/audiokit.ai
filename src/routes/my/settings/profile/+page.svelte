@@ -4,7 +4,7 @@
   import { Icon, Pencil } from 'svelte-hero-icons';
   import Input from '$lib/components/Input.svelte';
   import { getImageURL } from '$lib/utils';
-  import SettingsContainer from '$lib/components/SettingsContainer.svelte';
+  import SettingsClerkContainer from '$lib/components/SettingsClerkContainer.svelte';
   import { countries } from '$lib/data/countries';
   import type { Artist } from '$lib/types/artist';
   import { OrganizationSwitcher } from 'svelte-clerk';
@@ -109,10 +109,22 @@
   };
 </script>
 
-<SettingsContainer title="Artist Profile">
-  <svelte:fragment slot="description">
-    Manage your profile information, press photos, and social media presence.
-  </svelte:fragment>
+<SettingsClerkContainer>
+  <div class="space-y-4">
+    <h3 class="text-2xl font-semibold">Select Artist</h3>
+    <div class="rounded-lg">
+      <OrganizationSwitcher
+        appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
+        hidePersonal={true}
+        afterCreateOrganizationUrl="/my/settings/profile"
+        afterSelectOrganizationUrl="/my/settings/profile"
+      />
+    </div>
+    <p class="text-muted-foreground">
+      Choose the artist profile you want to edit. You can switch between different artists or create
+      a new artist profile.
+    </p>
+  </div>
 
   <form
     action="?/updateProfile"
@@ -121,98 +133,82 @@
     enctype="multipart/form-data"
     use:enhance={submitUpdateProfile}
   >
-    <div class="space-y-4">
-      <h3 class="text-2xl font-semibold">Select Artist</h3>
-      <div class="bg-blue-100 rounded-lg">
-        <OrganizationSwitcher
-          appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
-          hidePersonal={true}
-          afterCreateOrganizationUrl="/my/settings/profile"
-          afterSelectOrganizationUrl="/my/settings/profile"
+    <div class="space-y-4 bg-white rounded-lg border border-gray-200 p-6">
+      <!-- Basic Information Section -->
+      <div class="divider divider-accent text-2xl">Basic Information</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+        <Input
+          id="stage_name"
+          label="Artist Name"
+          value={data?.user?.stage_name}
+          required
+          disabled={loading}
         />
-      </div>
-      <p class="text-muted-foreground">
-        Choose the artist profile you want to edit. You can switch between different artists or
-        create a new artist profile.
-      </p>
-    </div>
-
-    <!-- Basic Information Section -->
-    <div class="divider divider-accent text-2xl pt-4">Basic Information</div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Input
-        id="stage_name"
-        label="Artist Name"
-        value={data?.user?.stage_name}
-        required
-        disabled={loading}
-      />
-      <!-- Artist Photos -->
-      <div class="form-control w-full max-w-lg">
-        <label for="avatar" class="label font-medium pb-1">
-          <span class="label-text text-lg">Artist Photo</span>
-        </label>
-        <label for="avatar" class="avatar w-32 rounded-full hover:cursor-pointer">
-          <label for="avatar" class="absolute -bottom-0.5 -right-0.5 hover:cursor-pointer">
-            <span class="btn btn-circle btn-sm btn-secondary">
-              <Icon src={Pencil} class="w-4 h-4" />
-            </span>
+        <!-- Artist Photos -->
+        <div class="form-control w-full max-w-lg">
+          <label for="avatar" class="label font-medium pb-1">
+            <span class="label-text text-lg">Artist Photo</span>
           </label>
-          <div class="w-32">
-            <img
-              src={data.user?.avatar
-                ? getImageURL(data.user?.collectionId, data.user?.id, data.user?.avatar)
-                : `https://ui-avatars.com/api/?name=${data.user?.name}`}
-              alt="user avatar"
-              id="avatar-preview"
-            />
-          </div>
-        </label>
-        <input
-          type="file"
-          name="avatar"
-          id="avatar"
-          value=""
-          accept="image/*"
-          hidden
-          onchange={showPreview}
+          <label for="avatar" class="avatar w-32 rounded-full hover:cursor-pointer">
+            <label for="avatar" class="absolute -bottom-0.5 -right-0.5 hover:cursor-pointer">
+              <span class="btn btn-circle btn-sm btn-secondary">
+                <Icon src={Pencil} class="w-4 h-4" />
+              </span>
+            </label>
+            <div class="w-32">
+              <img
+                src={data.user?.avatar
+                  ? getImageURL(data.user?.collectionId, data.user?.id, data.user?.avatar)
+                  : `https://ui-avatars.com/api/?name=${data.user?.name}`}
+                alt="user avatar"
+                id="avatar-preview"
+              />
+            </div>
+          </label>
+          <input
+            type="file"
+            name="avatar"
+            id="avatar"
+            value=""
+            accept="image/*"
+            hidden
+            onchange={showPreview}
+            disabled={loading}
+          />
+        </div>
+      </div>
+
+      <!-- Essential Fields -->
+      <div class="divider divider-accent text-2xl pt-16 mt-8">Legal Details</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+        <Input
+          id="legal_name"
+          label="Legal Name"
+          value={data?.user?.legal_name}
+          required
+          disabled={loading}
+        />
+        <Input
+          id="email"
+          type="email"
+          label="Email"
+          value={data?.user?.email}
+          required
+          disabled={loading}
+        />
+        <Input id="phone" type="tel" label="Phone" value={data?.user?.phone} disabled={loading} />
+        <Input
+          id="birthdate"
+          type="date"
+          label="Birth Date"
+          value={data?.user?.birthdate}
           disabled={loading}
         />
       </div>
-    </div>
 
-    <!-- Essential Fields -->
-    <div class="divider divider-accent text-2xl pt-8">Legal Details</div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <Input
-        id="legal_name"
-        label="Legal Name"
-        value={data?.user?.legal_name}
-        required
-        disabled={loading}
-      />
-      <Input
-        id="email"
-        type="email"
-        label="Email"
-        value={data?.user?.email}
-        required
-        disabled={loading}
-      />
-      <Input id="phone" type="tel" label="Phone" value={data?.user?.phone} disabled={loading} />
-      <Input
-        id="birthdate"
-        type="date"
-        label="Birth Date"
-        value={data?.user?.birthdate}
-        disabled={loading}
-      />
-    </div>
-
-    <!-- Location Section -->
-    <div class="divider divider-accent text-2xl">Origin Location</div>
-    <div class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Location Section -->
+      <div class="divider divider-accent text-2xl pt-16 mt-8">Origin Location</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <Input id="city" label="City" value={data?.user?.city} disabled={loading} />
         <div class="form-control w-full">
           <label for="country" class="label font-medium pb-1">
@@ -233,24 +229,22 @@
           </select>
         </div>
       </div>
-    </div>
 
-    <!-- Biography Section -->
-    <div class="divider divider-accent text-2xl pt-8">Artist Biography</div>
-    <div class="space-y-4">
-      <Input
-        id="website"
-        type="url"
-        label="Artist Website"
-        value={data?.user?.website}
-        disabled={loading}
-      />
-    </div>
+      <!-- Biography Section -->
+      <div class="divider divider-accent text-2xl pt-16 mt-8">Artist Biography</div>
+      <div class="space-y-4 px-2">
+        <Input
+          id="website"
+          type="url"
+          label="Artist Website"
+          value={data?.user?.website}
+          disabled={loading}
+        />
+      </div>
 
-    <!-- Music Platforms -->
-    <div class="divider divider-accent text-2xl pt-8">Music Platforms</div>
-    <div class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Music Platforms -->
+      <div class="divider divider-accent text-2xl pt-16 mt-8">Music Platforms</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <Input
           id="apple_music"
           type="url"
@@ -300,12 +294,10 @@
           disabled={loading}
         />
       </div>
-    </div>
 
-    <!-- Social Networks -->
-    <div class="divider divider-accent text-2xl pt-8">Social Networks</div>
-    <div class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Social Networks -->
+      <div class="divider divider-accent text-2xl pt-16 mt-8">Social Networks</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <Input
           id="instagram"
           type="url"
@@ -347,12 +339,10 @@
           disabled={loading}
         />
       </div>
-    </div>
 
-    <!-- Event Platforms -->
-    <div class="divider divider-accent text-2xl pt-8">Event Platforms</div>
-    <div class="space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <!-- Event Platforms -->
+      <div class="divider divider-accent text-2xl pt-16 mt-8">Event Platforms</div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <Input
           id="songkick"
           type="url"
@@ -370,13 +360,13 @@
           disabled={loading}
         />
       </div>
-    </div>
 
-    <!-- Submit Button -->
-    <div class="w-full max-w-lg pt-6">
-      <button class="btn btn-primary text-pink-100" type="submit" disabled={loading}>
-        {loading ? 'Updating Profile...' : 'Update Profile'}
-      </button>
+      <!-- Submit Button -->
+      <div class="w-full pt-8 px-2">
+        <button class="btn btn-primary text-pink-100" type="submit" disabled={loading}>
+          {loading ? 'Updating Profile...' : 'Update Profile'}
+        </button>
+      </div>
     </div>
   </form>
-</SettingsContainer>
+</SettingsClerkContainer>

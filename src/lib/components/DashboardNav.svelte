@@ -4,8 +4,8 @@
   let { pathname } = $derived(page.url);
 
   const navigation = [
-    { label: 'Create', href: '/my/settings/create/' },
     { label: 'Profile', href: '/my/settings/profile/' },
+    { label: 'Create', href: '/my/settings/create/' },
     { label: 'Team', href: '/my/settings/team/' },
     { label: 'Account', href: '/my/settings/account/' },
   ];
