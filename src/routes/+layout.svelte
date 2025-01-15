@@ -2,6 +2,7 @@
   import '../app.css';
   import { ClerkProvider } from 'svelte-clerk';
   import Nav from '$lib/components/Nav.svelte';
+  import Footer from '$lib/components/Footer.svelte';
   import type { Snippet } from 'svelte';
   import { goto } from '$app/navigation';
 
@@ -18,5 +19,8 @@
   publishableKey={import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY}
 >
   <Nav />
-  {@render children()}
+  <main class="min-h-[calc(100vh-64px)]">
+    {@render children()}
+  </main>
+  <Footer />
 </ClerkProvider>
