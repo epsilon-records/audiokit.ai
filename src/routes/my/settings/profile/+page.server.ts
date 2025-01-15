@@ -1,7 +1,7 @@
-import { superValidate } from 'sveltekit-superforms/server';
+import { message, superValidate } from 'sveltekit-superforms/server';
 import { zod } from 'sveltekit-superforms/adapters';
-import { error } from '@sveltejs/kit';
-import type { Actions, PageServerLoad } from './$types';
+import { error, fail } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
 import { z } from 'zod';
 import { pb } from '$lib/pocketbase';
 
@@ -53,106 +53,20 @@ export const load = (async ({ locals }) => {
 	if (artists.totalItems === 0) {
 		throw error(404, 'Profile not found');
 	}
-	
-	// Clean the data to match schema
 	const artist = structuredClone(artists.items[0]);
-	const cleanedData = {
-		id: artist.id,
-		org_id: artist.org_id,
-		stage_name: artist.stage_name,
-		legal_name: artist.legal_name,
-		is_signed: artist.is_signed,
-		email: artist.email,
-		phone: artist.phone || '',
-		city: artist.city || '',
-		biography: artist.biography || '',
-		website: artist.website || '',
-		spotify: artist.spotify || '',
-		apple_music: artist.apple_music || '',
-		bandcamp: artist.bandcamp || '',
-		mixcloud: artist.mixcloud || '',
-		snapchat: artist.snapchat || '',
-		twitch: artist.twitch || '',
-		youtube: artist.youtube || '',
-		instagram: artist.instagram || '',
-		facebook: artist.facebook || '',
-		x: artist.x || '',
-		tiktok: artist.tiktok || '',
-		soundcloud: artist.soundcloud || '',
-		songkick: artist.songkick || '',
-		bandsintown: artist.bandsintown || '',
-		linkedin: artist.linkedin || '',
-		created: artist.created,
-		updated: artist.updated
-	};
-	
-	const form = await superValidate(cleanedData, zod(artistSchema));
+	const form = await superValidate(artist, zod(artistSchema));
 	return { form };
 }) satisfies PageServerLoad;
 
 export const actions = {
-	// updateProfile: async ({ request, locals }) => {
-	// 	if (!user?.id) {
-	// 		throw error(401, 'Unauthorized');
-	// 	}
+  default: async ({ request }) => {
+    const form = await superValidate(request, zod(artistSchema));
+    if (!form.valid) {
+      return fail(400, { form });
+    }
 
-	// 	const form = await superValidate(request, zod(profileSchema));
+    // TODO: Do something with the validated form.data
 
-	// 	if (!form.valid) {
-	// 		return { form };
-	// 	}
-
-	// 	try {
-	// 		const formData = new FormData();
-			
-	// 		// Process nested objects and flatten them for PocketBase
-	// 		const processData = (obj: Record<string, any>, prefix = '') => {
-	// 			Object.entries(obj).forEach(([key, value]) => {
-	// 				const fieldName = prefix ? `${prefix}_${key}` : key;
-					
-	// 				if (value && typeof value === 'object' && !(value instanceof File)) {
-	// 					processData(value, fieldName);
-	// 				} else if (value !== null && value !== undefined && value !== '') {
-	// 					formData.append(fieldName, value);
-	// 				}
-	// 			});
-	// 		};
-
-	// 		processData(form.data);
-
-	// 		// Handle avatar upload separately
-	// 		const avatar = formData.get('avatar');
-	// 		if (avatar instanceof File && avatar.size === 0) {
-	// 			formData.delete('avatar');
-	// 		}
-
-	// 		// Update user profile
-	// 		const updatedUser = await locals.pb
-	// 			.collection('users')
-	// 			.update(locals.user.id, formData);
-
-	// 		// Update session data
-	// 		locals.user = {
-	// 			...locals.user,
-	// 			...updatedUser
-	// 		};
-
-	// 		return {
-	// 			form: {
-	// 				...form,
-	// 				message: { type: 'success', text: 'Profile updated successfully' }
-	// 			},
-	// 			user: updatedUser
-	// 		};
-
-	// 	} catch (err) {
-	// 		console.error('Profile update error:', err);
-	// 		return {
-	// 			form: {
-	// 				...form,
-	// 				message: { type: 'error', text: 'Failed to update profile' }
-	// 			}
-	// 		};
-	// 	}
-	// }
-} satisfies Actions;
+    return message(form, 'Form posted successfully!');
+  }
+};
