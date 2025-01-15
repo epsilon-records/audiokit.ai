@@ -21,7 +21,7 @@
     <h3>{$message}</h3>
   {/if}
   <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
-  <div class="space-y-4 bg-teal-100 rounded-lg border border-gray-200 p-6">
+  <div class="space-y-4 bg-teal-100 rounded-lg border border-gray-200 px-8">
     <form
       method="POST"
       class="flex flex-col space-y-6 w-full"
@@ -98,7 +98,7 @@
       </div>
 
       <!-- Essential Fields -->
-      <div class="divider divider-accent text-2xl pt-16 mt-8">Legal Details</div>
+      <div class="divider divider-accent text-2xl">Legal Details</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <div class="form-control w-full max-w-lg mb-2">
           <Field {form} name="legal_name">
@@ -174,7 +174,7 @@
       </div>
 
       <!-- Location Section -->
-      <div class="divider divider-accent text-2xl pt-16 mt-8">Origin Location</div>
+      <div class="divider divider-accent text-2xl">Origin Location</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <div class="form-control w-full max-w-lg mb-2">
           <Field {form} name="city">
@@ -205,7 +205,7 @@
       </div>
 
       <!-- Biography Section -->
-      <div class="divider divider-accent text-2xl pt-16 mt-8">Artist Biography</div>
+      <div class="divider divider-accent text-2xl">Artist Biography</div>
       <div class="space-y-4 px-2">
         <div class="form-control w-full max-w-lg mb-2">
           <Field {form} name="website">
@@ -227,7 +227,7 @@
       </div>
 
       <!-- Music Platforms -->
-      <div class="divider divider-accent text-2xl pt-16 mt-8">Music Platforms</div>
+      <div class="divider divider-accent text-2xl">Music Platforms</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <div class="form-control w-full max-w-lg mb-2">
           <Field {form} name="apple_music">
@@ -340,7 +340,7 @@
       </div>
 
       <!-- Social Networks -->
-      <div class="divider divider-accent text-2xl pt-16 mt-8">Social Networks</div>
+      <div class="divider divider-accent text-2xl">Social Networks</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <div class="form-control w-full max-w-lg mb-2">
           <Field {form} name="instagram">
@@ -453,7 +453,7 @@
       </div>
 
       <!-- Event Platforms -->
-      <div class="divider divider-accent text-2xl pt-16 mt-8">Event Platforms</div>
+      <div class="divider divider-accent text-2xl">Event Platforms</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
         <div class="form-control w-full max-w-lg mb-2">
           <Field {form} name="songkick">
