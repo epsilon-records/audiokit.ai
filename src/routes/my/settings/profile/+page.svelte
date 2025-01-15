@@ -8,6 +8,9 @@
   import Editor from '$lib/components/Editor.svelte';
   import { countries } from '$lib/data/countries';
   import type { Artist } from '$lib/types/artist';
+  import { OrganizationSwitcher } from 'svelte-clerk';
+  import { mode } from 'mode-watcher';
+  import { neobrutalism, dark } from '@clerk/themes';
 
   let { data } = $props<{ data: { user: Artist } }>();
   let loading = $state(false);
@@ -119,14 +122,34 @@
     enctype="multipart/form-data"
     use:enhance={submitUpdateProfile}
   >
-    <!-- Basic Information Section -->
     <div class="space-y-4">
-      <h3 class="text-lg font-semibold">Basic Information</h3>
+      <h3 class="text-lg font-semibold">Select Artist</h3>
+      <p class="text-muted-foreground">
+        Choose the artist profile you want to edit. You can switch between different artists or
+        create a new artist profile.
+      </p>
+      <OrganizationSwitcher
+        appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
+        hidePersonal={true}
+        afterCreateOrganizationUrl="/my/settings/profile"
+        afterSelectOrganizationUrl="/my/settings/profile"
+      />
+    </div>
 
+    <!-- Basic Information Section -->
+    <div class="divider divider-accent text-xl pt-4">Basic Information</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Input
+        id="stage_name"
+        label="Artist Name"
+        value={data?.user?.stage_name}
+        required
+        disabled={loading}
+      />
       <!-- Artist Photos -->
       <div class="form-control w-full max-w-lg">
         <label for="avatar" class="label font-medium pb-1">
-          <span class="label-text text-xl">Aritst Photo</span>
+          <span class="label-text text-lg">Artist Photo</span>
         </label>
         <label for="avatar" class="avatar w-32 rounded-full hover:cursor-pointer">
           <label for="avatar" class="absolute -bottom-0.5 -right-0.5 hover:cursor-pointer">
@@ -155,85 +178,83 @@
           disabled={loading}
         />
       </div>
+    </div>
 
-      <!-- Essential Fields -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          id="stage_name"
-          label="Stage Name"
-          value={data?.user?.stage_name}
-          required
-          disabled={loading}
-        />
-        <Input
-          id="legal_name"
-          label="Legal Name"
-          value={data?.user?.legal_name}
-          required
-          disabled={loading}
-        />
-        <Input
-          id="email"
-          type="email"
-          label="Email"
-          value={data?.user?.email}
-          required
-          disabled={loading}
-        />
-        <Input id="phone" type="tel" label="Phone" value={data?.user?.phone} disabled={loading} />
-        <Input
-          id="birthdate"
-          type="date"
-          label="Birth Date"
-          value={data?.user?.birthdate}
-          disabled={loading}
-        />
-      </div>
+    <!-- Essential Fields -->
+    <div class="divider divider-accent text-xl pt-8">Legal Details</div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <Input
+        id="legal_name"
+        label="Legal Name"
+        value={data?.user?.legal_name}
+        required
+        disabled={loading}
+      />
+      <Input
+        id="email"
+        type="email"
+        label="Email"
+        value={data?.user?.email}
+        required
+        disabled={loading}
+      />
+      <Input id="phone" type="tel" label="Phone" value={data?.user?.phone} disabled={loading} />
+      <Input
+        id="birthdate"
+        type="date"
+        label="Birth Date"
+        value={data?.user?.birthdate}
+        disabled={loading}
+      />
     </div>
 
     <!-- Location Section -->
+    <div class="divider divider-accent text-xl">Origin Location</div>
     <div class="space-y-4">
-      <h3 class="text-lg font-semibold">Location</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input id="city" label="City" value={data?.user?.city} disabled={loading} />
-        <select
-          id="country"
-          name="country"
-          class="select select-bordered w-full"
-          disabled={loading}
-        >
-          <option value="">Select Country</option>
-          {#each countries as country}
-            <option value={country.code} selected={data.user?.country === country.code}>
-              {country.name}
-            </option>
-          {/each}
-        </select>
+        <div class="form-control w-full">
+          <label for="country" class="label font-medium pb-1">
+            <span class="label-text text-lg">Country</span>
+          </label>
+          <select
+            id="country"
+            name="country"
+            class="select select-bordered w-full"
+            disabled={loading}
+          >
+            <option value="">Select Country</option>
+            {#each countries as country}
+              <option value={country.code} selected={data.user?.country === country.code}>
+                {country.name}
+              </option>
+            {/each}
+          </select>
+        </div>
       </div>
     </div>
 
     <!-- Biography Section -->
+    <div class="divider divider-accent text-xl pt-8">Artist Biography</div>
     <div class="space-y-4">
-      <h3 class="text-lg font-semibold">Biography</h3>
-      <Editor
-        id="biography"
-        value={data?.user?.biography}
+      <Input
+        id="website"
+        type="url"
+        label="Artist Website"
+        value={data?.user?.website}
         disabled={loading}
-        placeholder="Tell your story..."
       />
     </div>
 
-    <!-- Social Media Links -->
+    <!-- Music Platforms -->
+    <div class="divider divider-accent text-xl pt-8">Music Platforms</div>
     <div class="space-y-4">
-      <h3 class="text-lg font-semibold">Social Media & Platforms</h3>
-
-      <!-- Music Platforms -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          id="website"
+          id="apple_music"
           type="url"
-          label="Website"
-          value={data?.user?.website}
+          label="Apple Music"
+          value={data?.user?.apple_music}
           disabled={loading}
         />
         <Input
@@ -244,10 +265,10 @@
           disabled={loading}
         />
         <Input
-          id="apple_music"
+          id="soundcloud"
           type="url"
-          label="Apple Music"
-          value={data?.user?.apple_music}
+          label="SoundCloud"
+          value={data?.user?.soundcloud}
           disabled={loading}
         />
         <Input
@@ -258,10 +279,10 @@
           disabled={loading}
         />
         <Input
-          id="soundcloud"
+          id="youtube"
           type="url"
-          label="SoundCloud"
-          value={data?.user?.soundcloud}
+          label="YouTube"
+          value={data?.user?.youtube}
           disabled={loading}
         />
         <Input
@@ -272,8 +293,11 @@
           disabled={loading}
         />
       </div>
+    </div>
 
-      <!-- Social Networks -->
+    <!-- Social Networks -->
+    <div class="divider divider-accent text-xl pt-8">Social Networks</div>
+    <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           id="instagram"
@@ -297,13 +321,7 @@
           value={data?.user?.tiktok}
           disabled={loading}
         />
-        <Input
-          id="youtube"
-          type="url"
-          label="YouTube"
-          value={data?.user?.youtube}
-          disabled={loading}
-        />
+
         <Input
           id="twitch"
           type="url"
@@ -312,8 +330,11 @@
           disabled={loading}
         />
       </div>
+    </div>
 
-      <!-- Event Platforms -->
+    <!-- Event Platforms -->
+    <div class="divider divider-accent text-xl pt-8">Event Platforms</div>
+    <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
           id="songkick"
