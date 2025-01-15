@@ -14,7 +14,7 @@
         <p>
           No releases found. <a
             href="/my/settings/releases/create"
-            class="text-cyan-400 font-bold hover:text-cyan-600 transition-colors hover:underline"
+            class="text-green-400 font-bold hover:text-green-600 transition-colors hover:underline"
             >Create your first release</a
           > to get started.
         </p>
