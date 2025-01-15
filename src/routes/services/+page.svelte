@@ -29,7 +29,7 @@
       description: 'Professional guidance to elevate your music career',
       features: ['1-on-1 mentoring', 'Brand development', 'Release strategy', 'Network access'],
       icon: '⭐',
-      price: 'From $199/month',
+      price: 'From $199/release',
       color: 'green',
     },
     {
