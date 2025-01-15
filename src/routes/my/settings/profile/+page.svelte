@@ -2,7 +2,7 @@
   import { enhance, applyAction } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
   import { Icon, Pencil } from 'svelte-hero-icons';
-  import { Input } from '$lib/components';
+  import Input from '$lib/components/Input.svelte';
   import { getImageURL } from '$lib/utils';
   import type { PageData } from './$types';
 
