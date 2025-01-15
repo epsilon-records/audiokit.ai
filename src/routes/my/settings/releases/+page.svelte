@@ -8,7 +8,7 @@
 
 <SettingsContainer title="Manage Releases">
   <svelte:fragment slot="description">Manage your artist releases.</svelte:fragment>
-  <div class="space-y-4 bg-yellow-100 rounded-lg border-2 border-yellow-200 p-6">
+  <div class="space-y-4 bg-yellow-100 rounded-lg border-2 border-yellow-200 p-6 max-w-screen-lg">
     {#if data.releases.length === 0}
       <div class="text-center py-6 text-muted-foreground">
         <p>

@@ -63,7 +63,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">The main title of your release.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -79,7 +79,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Optional version or edition information.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
       </div>
@@ -101,7 +101,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">When will this release be available?</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -117,7 +117,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your internal catalog reference number.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -133,7 +133,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Universal Product Code for distribution.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
       </div>
@@ -154,7 +154,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Describe your release in detail.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
       </div>
@@ -177,7 +177,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Link to purchase digital release on Bandcamp.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -195,7 +195,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Link to purchase vinyl version.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
       </div>

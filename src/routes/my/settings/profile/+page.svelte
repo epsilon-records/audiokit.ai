@@ -69,7 +69,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">This is your public artist name.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <!-- Artist Photos -->
@@ -113,7 +113,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Be sure to use your real name.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -130,7 +130,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Used for urgent booking communications only.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -150,7 +150,7 @@
             <Description class="text-sm"
               >It's preferred that you use your company email.</Description
             >
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -168,7 +168,7 @@
             </Control>
             <Description class="text-sm">Required for age-restricted venues and events.</Description
             >
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
       </div>
@@ -190,7 +190,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">The city you're primarily based in.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full">
@@ -221,7 +221,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official artist website or portfolio.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
       </div>
@@ -244,7 +244,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official Apple Music artist profile.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -262,7 +262,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official Spotify artist profile.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -280,7 +280,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official SoundCloud artist profile.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -298,7 +298,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official Bandcamp artist profile.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -316,7 +316,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official YouTube artist channel.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -334,7 +334,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official Mixcloud artist profile.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
       </div>
@@ -357,7 +357,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official Instagram profile.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -375,7 +375,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official Facebook artist page.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -393,7 +393,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official X (Twitter) artist profile.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -411,7 +411,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official TikTok artist profile.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -429,7 +429,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official Twitch artist channel.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -447,7 +447,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your official LinkedIn artist profile.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
       </div>
@@ -470,7 +470,7 @@
               {/snippet}
             </Control>
             <Description class="text-sm">Your Songkick artist profile for tour dates.</Description>
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
         <div class="form-control w-full max-w-lg mb-2">
@@ -490,7 +490,7 @@
             <Description class="text-sm"
               >Your Bandsintown artist profile for tour dates.</Description
             >
-            <FieldErrors />
+            <FieldErrors class="font-bold text-destructive mt-1" />
           </Field>
         </div>
       </div>
