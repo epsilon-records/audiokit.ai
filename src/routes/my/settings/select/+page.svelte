@@ -23,7 +23,7 @@
         href="/my/settings/create"
         class="text-cyan-400 font-bold hover:text-cyan-600 transition-colors hover:underline"
         >create a new artist profile</a
-      >, also known as an organization.
+      >, also known as an organization or team.
     </p>
   </div>
 </SettingsContainer>
