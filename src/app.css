@@ -76,7 +76,3 @@
     @apply bg-background text-foreground;
   }
 }
-
-.cl-button {
-  font-size: 28px;
-}
