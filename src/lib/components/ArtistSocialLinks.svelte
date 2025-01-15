@@ -52,7 +52,7 @@
           <span class="text-sm">website</span>
         </a>
       {/if}
-      {#each socialLinks as { platform, url, path }}
+      {#each socialLinks as { url, path, label }}
         <a
           href={url}
           target="_blank"
@@ -66,7 +66,7 @@
           >
             <path fill="currentColor" d={path} />
           </svg>
-          <span class="text-sm">{platform}</span>
+          <span class="text-sm">{label}</span>
         </a>
       {/each}
     </div>
