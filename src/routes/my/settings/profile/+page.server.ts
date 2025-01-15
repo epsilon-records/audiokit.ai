@@ -48,15 +48,23 @@ export const load = (async ({ locals }) => {
 	if (!locals.auth?.userId || !locals.auth?.orgId) {
         throw error(401, 'Unauthorized');
     }
-
     try {
+        console.log('Searching for artist with org_id:', locals.auth.orgId);
+        
         const artists = await pb.collection('artists').getList(1, 1, {
             filter: `org_id = "${locals.auth.orgId}"`,
         });
-        if (!artists?.items || artists.items.length === 0) {
+        
+        console.log('PocketBase response:', {
+            totalItems: artists.totalItems,
+            items: artists.items
+        });
+
+        if (artists.totalItems === 0) {
             throw error(404, 'Profile not found');
         }
-        const artist = artists.items[0];
+        
+        const artist = structuredClone(artists.items[0]);
         const form = await superValidate(artist, zod(artistSchema));
         return { form };
     } catch (err) {
