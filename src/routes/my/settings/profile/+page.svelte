@@ -123,21 +123,21 @@
     use:enhance={submitUpdateProfile}
   >
     <div class="space-y-4">
-      <h3 class="text-lg font-semibold">Select Artist</h3>
-      <p class="text-muted-foreground">
-        Choose the artist profile you want to edit. You can switch between different artists or
-        create a new artist profile.
-      </p>
+      <h3 class="text-2xl font-semibold">Select Artist</h3>
       <OrganizationSwitcher
         appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
         hidePersonal={true}
         afterCreateOrganizationUrl="/my/settings/profile"
         afterSelectOrganizationUrl="/my/settings/profile"
       />
+      <p class="text-muted-foreground">
+        Choose the artist profile you want to edit. You can switch between different artists or
+        create a new artist profile.
+      </p>
     </div>
 
     <!-- Basic Information Section -->
-    <div class="divider divider-accent text-xl pt-4">Basic Information</div>
+    <div class="divider divider-accent text-2xl pt-4">Basic Information</div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <Input
         id="stage_name"
@@ -181,7 +181,7 @@
     </div>
 
     <!-- Essential Fields -->
-    <div class="divider divider-accent text-xl pt-8">Legal Details</div>
+    <div class="divider divider-accent text-2xl pt-8">Legal Details</div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <Input
         id="legal_name"
@@ -209,7 +209,7 @@
     </div>
 
     <!-- Location Section -->
-    <div class="divider divider-accent text-xl">Origin Location</div>
+    <div class="divider divider-accent text-2xl">Origin Location</div>
     <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input id="city" label="City" value={data?.user?.city} disabled={loading} />
@@ -235,7 +235,7 @@
     </div>
 
     <!-- Biography Section -->
-    <div class="divider divider-accent text-xl pt-8">Artist Biography</div>
+    <div class="divider divider-accent text-2xl pt-8">Artist Biography</div>
     <div class="space-y-4">
       <Input
         id="website"
@@ -247,7 +247,7 @@
     </div>
 
     <!-- Music Platforms -->
-    <div class="divider divider-accent text-xl pt-8">Music Platforms</div>
+    <div class="divider divider-accent text-2xl pt-8">Music Platforms</div>
     <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
@@ -296,7 +296,7 @@
     </div>
 
     <!-- Social Networks -->
-    <div class="divider divider-accent text-xl pt-8">Social Networks</div>
+    <div class="divider divider-accent text-2xl pt-8">Social Networks</div>
     <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
@@ -333,7 +333,7 @@
     </div>
 
     <!-- Event Platforms -->
-    <div class="divider divider-accent text-xl pt-8">Event Platforms</div>
+    <div class="divider divider-accent text-2xl pt-8">Event Platforms</div>
     <div class="space-y-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
