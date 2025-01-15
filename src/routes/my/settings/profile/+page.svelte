@@ -1,112 +1,27 @@
 <script lang="ts">
-  import { enhance, applyAction } from '$app/forms';
-  import { invalidateAll } from '$app/navigation';
   import { Icon, Pencil } from 'svelte-hero-icons';
-  import Input from '$lib/components/Input.svelte';
-  import { getImageURL } from '$lib/utils';
   import SettingsContainer from '$lib/components/SettingsContainer.svelte';
-  import { countries } from '$lib/data/countries';
-  import type { Artist } from '$lib/types/artist';
   import { OrganizationSwitcher } from 'svelte-clerk';
   import { mode } from 'mode-watcher';
   import { neobrutalism, dark } from '@clerk/themes';
+  import { zodClient } from 'sveltekit-superforms/adapters';
   import SuperDebug from 'sveltekit-superforms';
+  import { superForm } from 'sveltekit-superforms';
+  import { Field, Control, Label, Description, FieldErrors } from 'formsnap';
+  import { artistSchema } from '$lib/schemas/artist';
 
-  let { data } = $props<{ data: { user: Artist; form: any } }>();
-  let loading = $state(false);
-  let errors = $state<Record<string, string>>({});
-
-  function validateForm(formData: FormData) {
-    errors = {};
-
-    const stage_name = formData.get('stage_name') as string;
-    const legal_name = formData.get('legal_name') as string;
-    const email = formData.get('email') as string;
-
-    if (!stage_name?.trim()) {
-      errors.stage_name = 'Stage name is required';
-    }
-
-    if (!legal_name?.trim()) {
-      errors.legal_name = 'Legal name is required';
-    }
-
-    if (!email?.trim()) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      errors.email = 'Invalid email format';
-    }
-
-    const urlFields = [
-      'website',
-      'spotify',
-      'apple_music',
-      'bandcamp',
-      'mixcloud',
-      'snapchat',
-      'twitch',
-      'youtube',
-      'instagram',
-      'facebook',
-      'x',
-      'tiktok',
-      'soundcloud',
-      'songkick',
-      'bandsintown',
-      'linkedin',
-    ];
-
-    urlFields.forEach((field) => {
-      const value = formData.get(field) as string;
-      if (value && !value.startsWith('https://')) {
-        errors[field] = 'URL must start with https://';
-      }
-    });
-
-    return Object.keys(errors).length === 0;
-  }
-
-  function showPreview(event: Event) {
-    const target = event.target as HTMLInputElement;
-    const files = target.files;
-
-    if (files && files.length > 0) {
-      const src = URL.createObjectURL(files[0]);
-      const preview = document.querySelector<HTMLImageElement>('#avatar-preview');
-      if (preview) {
-        preview.src = src;
-      }
-    }
-  }
-
-  function submitUpdateProfile() {
-    loading = true;
-    return async ({ form, result }: { form: HTMLFormElement; result: any }) => {
-      const formData = new FormData(form);
-
-      if (!validateForm(formData)) {
-        loading = false;
-        return;
-      }
-
-      switch (result.type) {
-        case 'success':
-          await invalidateAll();
-          break;
-        case 'error':
-          if (result.status === 400) {
-            errors = result.data?.errors || { form: 'Invalid form data' };
-          }
-          break;
-        default:
-          await applyAction(result);
-      }
-      loading = false;
-    };
-  }
+  let { data } = $props<{ form: any }>();
+  const form = superForm(data.form, {
+    resetForm: false,
+    validators: zodClient(artistSchema),
+  });
+  const { form: formData, enhance, message } = form;
 </script>
 
 <SettingsContainer title="Edit Profile">
+  {#if $message}
+    <h3>{$message}</h3>
+  {/if}
   <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
   <div class="space-y-4 bg-white rounded-lg border border-gray-200 p-6">
     <h3 class="text-2xl font-semibold">Select Artist</h3>
@@ -123,25 +38,26 @@
       a new artist profile.
     </p>
   </div>
-
   <div class="space-y-4 bg-white rounded-lg border border-gray-200 p-6">
     <form
-      action="?/updateProfile"
       method="POST"
       class="flex flex-col space-y-6 w-full"
       enctype="multipart/form-data"
       use:enhance
     >
-      <!-- Basic Information Section -->
+      Basic Information Section
       <div class="divider divider-accent text-2xl">Artist Profile</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Input
-          id="stage_name"
-          label="Artist Name"
-          value={data?.user?.stage_name}
-          required
-          disabled={loading}
-        />
+        <Field {form} name="stage_name">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Artist Name</Label>
+              <input {...props} bind:value={$formData.stage_name} />
+            {/snippet}
+          </Control>
+          <Description>This is your public artist name.</Description>
+          <FieldErrors />
+        </Field>
         <!-- Artist Photos -->
         <div class="form-control w-full max-w-lg">
           <label for="avatar" class="label font-medium pb-1">
@@ -154,76 +70,87 @@
               </span>
             </label>
             <div class="w-32">
-              <img
+              <!-- <img
                 src={data.user?.avatar
                   ? getImageURL(data.user?.collectionId, data.user?.id, data.user?.avatar)
                   : `https://ui-avatars.com/api/?name=${data.user?.name}`}
                 alt="user avatar"
                 id="avatar-preview"
-              />
+              /> -->
             </div>
           </label>
-          <input
-            type="file"
-            name="avatar"
-            id="avatar"
-            value=""
-            accept="image/*"
-            hidden
-            onchange={showPreview}
-            disabled={loading}
-          />
+          <input type="file" name="avatar" id="avatar" value="" accept="image/*" hidden />
         </div>
       </div>
 
       <!-- Essential Fields -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Legal Details</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Input
-          id="legal_name"
-          label="Legal Name"
-          value={data?.user?.legal_name}
-          required
-          disabled={loading}
-        />
-        <Input
-          id="email"
-          type="email"
-          label="Email"
-          value={data?.user?.email}
-          required
-          disabled={loading}
-        />
-        <Input id="phone" type="tel" label="Phone" value={data?.user?.phone} disabled={loading} />
-        <Input
-          id="birthdate"
-          type="date"
-          label="Birth Date"
-          value={data?.user?.birthdate}
-          disabled={loading}
-        />
+        <Field {form} name="legal_name">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Legal Name</Label>
+              <input {...props} bind:value={$formData.legal_name} />
+            {/snippet}
+          </Control>
+          <Description>Be sure to use your real name.</Description>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="phone">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Phone</Label>
+              <input {...props} type="tel" bind:value={$formData.phone} />
+            {/snippet}
+          </Control>
+          <Description>Used for urgent booking communications only.</Description>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="email">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Email</Label>
+              <input {...props} type="email" bind:value={$formData.email} required />
+            {/snippet}
+          </Control>
+          <Description>It's preferred that you use your company email.</Description>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="birthdate">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Birth Date</Label>
+              <input {...props} type="date" bind:value={$formData.birthdate} />
+            {/snippet}
+          </Control>
+          <Description>Required for age-restricted venues and events.</Description>
+          <FieldErrors />
+        </Field>
       </div>
 
       <!-- Location Section -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Origin Location</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Input id="city" label="City" value={data?.user?.city} disabled={loading} />
+        <Field {form} name="city">
+          <Control>
+            {#snippet children({ props })}
+              <Label>City</Label>
+              <input {...props} type="text" bind:value={$formData.city} />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
         <div class="form-control w-full">
           <label for="country" class="label font-medium pb-1">
             <span class="label-text text-lg">Country</span>
           </label>
-          <select
-            id="country"
-            name="country"
-            class="select select-bordered w-full"
-            disabled={loading}
-          >
+          <select id="country" name="country" class="select select-bordered w-full">
             <option value="">Select Country</option>
-            {#each countries as country}
+            <!-- {#each countries as country}
               <option value={country.code} selected={data.user?.country === country.code}>
                 {country.name}
               </option>
-            {/each}
+            {/each} -->
           </select>
         </div>
       </div>
@@ -231,143 +158,221 @@
       <!-- Biography Section -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Artist Biography</div>
       <div class="space-y-4 px-2">
-        <Input
-          id="website"
-          type="url"
-          label="Artist Website"
-          value={data?.user?.website}
-          disabled={loading}
-        />
+        <Field {form} name="website">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Artist Website</Label>
+              <input {...props} type="url" bind:value={$formData.website} />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
       </div>
 
       <!-- Music Platforms -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Music Platforms</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Input
-          id="apple_music"
-          type="url"
-          label="Apple Music"
-          placeholder="https://music.apple.com/artist/..."
-          value={data?.user?.apple_music}
-          disabled={loading}
-        />
-        <Input
-          id="spotify"
-          type="url"
-          label="Spotify"
-          placeholder="https://open.spotify.com/artist/..."
-          value={data?.user?.spotify}
-          disabled={loading}
-        />
-        <Input
-          id="soundcloud"
-          type="url"
-          label="SoundCloud"
-          placeholder="https://soundcloud.com/..."
-          value={data?.user?.soundcloud}
-          disabled={loading}
-        />
-        <Input
-          id="bandcamp"
-          type="url"
-          label="Bandcamp"
-          placeholder="https://artist.bandcamp.com"
-          value={data?.user?.bandcamp}
-          disabled={loading}
-        />
-        <Input
-          id="youtube"
-          type="url"
-          label="YouTube"
-          placeholder="https://youtube.com/@..."
-          value={data?.user?.youtube}
-          disabled={loading}
-        />
-        <Input
-          id="mixcloud"
-          type="url"
-          label="Mixcloud"
-          placeholder="https://mixcloud.com/..."
-          value={data?.user?.mixcloud}
-          disabled={loading}
-        />
+        <Field {form} name="apple_music">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Apple Music</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.apple_music}
+                placeholder="https://music.apple.com/artist/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="spotify">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Spotify</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.spotify}
+                placeholder="https://open.spotify.com/artist/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="soundcloud">
+          <Control>
+            {#snippet children({ props })}
+              <Label>SoundCloud</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.soundcloud}
+                placeholder="https://soundcloud.com/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="bandcamp">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Bandcamp</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.bandcamp}
+                placeholder="https://artist.bandcamp.com"
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="youtube">
+          <Control>
+            {#snippet children({ props })}
+              <Label>YouTube</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.youtube}
+                placeholder="https://youtube.com/@..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="mixcloud">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Mixcloud</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.mixcloud}
+                placeholder="https://mixcloud.com/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
       </div>
 
       <!-- Social Networks -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Social Networks</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Input
-          id="instagram"
-          type="url"
-          label="Instagram"
-          placeholder="https://instagram.com/..."
-          value={data?.user?.instagram}
-          disabled={loading}
-        />
-        <Input
-          id="facebook"
-          type="url"
-          label="Facebook"
-          placeholder="https://facebook.com/..."
-          value={data?.user?.facebook}
-          disabled={loading}
-        />
-        <Input
-          id="x"
-          type="url"
-          label="X (Twitter)"
-          placeholder="https://x.com/..."
-          value={data?.user?.x}
-          disabled={loading}
-        />
-        <Input
-          id="tiktok"
-          type="url"
-          label="TikTok"
-          placeholder="https://tiktok.com/@..."
-          value={data?.user?.tiktok}
-          disabled={loading}
-        />
-        <Input
-          id="twitch"
-          type="url"
-          label="Twitch"
-          placeholder="https://twitch.tv/..."
-          value={data?.user?.twitch}
-          disabled={loading}
-        />
+        <Field {form} name="instagram">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Instagram</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.instagram}
+                placeholder="https://instagram.com/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="facebook">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Facebook</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.facebook}
+                placeholder="https://facebook.com/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="x">
+          <Control>
+            {#snippet children({ props })}
+              <Label>X (Twitter)</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.x}
+                placeholder="https://x.com/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="tiktok">
+          <Control>
+            {#snippet children({ props })}
+              <Label>TikTok</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.tiktok}
+                placeholder="https://tiktok.com/@..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="twitch">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Twitch</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.twitch}
+                placeholder="https://twitch.tv/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
       </div>
 
       <!-- Event Platforms -->
       <div class="divider divider-accent text-2xl pt-16 mt-8">Event Platforms</div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
-        <Input
-          id="songkick"
-          type="url"
-          label="Songkick"
-          placeholder="https://songkick.com/artists/..."
-          value={data?.user?.songkick}
-          disabled={loading}
-        />
-        <Input
-          id="bandsintown"
-          type="url"
-          label="Bandsintown"
-          placeholder="https://bandsintown.com/a/..."
-          value={data?.user?.bandsintown}
-          disabled={loading}
-        />
+        <Field {form} name="songkick">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Songkick</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.songkick}
+                placeholder="https://songkick.com/artists/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
+        <Field {form} name="bandsintown">
+          <Control>
+            {#snippet children({ props })}
+              <Label>Bandsintown</Label>
+              <input
+                {...props}
+                type="url"
+                bind:value={$formData.bandsintown}
+                placeholder="https://bandsintown.com/a/..."
+              />
+            {/snippet}
+          </Control>
+          <FieldErrors />
+        </Field>
       </div>
 
       <!-- Submit Button -->
       <div class="w-full pt-8 px-2">
-        <button class="btn btn-primary text-pink-100" type="submit" disabled={loading}>
-          {loading ? 'Updating Profile...' : 'Update Profile'}
-        </button>
+        <button class="btn btn-primary text-pink-100" type="submit"> Update Profile </button>
       </div>
     </form>
 
     <!-- Debug Data -->
-    <SuperDebug data={data.form} />
+    <SuperDebug data={$form} />
   </div>
 </SettingsContainer>
