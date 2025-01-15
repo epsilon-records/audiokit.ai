@@ -27,17 +27,24 @@ export const load = (async ({ locals }) => {
 }) satisfies PageServerLoad;
 
 export const actions = {
-  default: async ({ request }) => {
+  default: async ({ request, locals }) => {
     const form = await superValidate(request, zod(artistSchema));
     if (!form.valid) {
       return fail(400, { form });
     }
-	try {
-		// TODO: Do something with the validated form.data
-		throw new Error('test');
-		//return message(form, 'Saved successfully!');
-    } catch (error) {
-      return message(form, 'Failed to update profile. Please try again.', { 
+
+    try {
+      const artists = await pb.collection('artists').getList(1, 1, {
+        filter: `org_id = "${locals.auth?.orgId}"`,
+      });
+      
+      if (artists.totalItems === 0) {
+        throw error(404, 'Artist not found');
+      }
+      await pb.collection('artists').update(artists.items[0].id, form.data);
+      return message(form, 'Profile updated successfully!');
+    } catch (err) {
+      return message(form, 'Failed to update profile. Please try again.', {
         status: 500
       });
     }

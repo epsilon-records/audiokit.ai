@@ -21,9 +21,9 @@
   {#if $message}
     <div class="mb-4">
       <span
-        class={`badge ${
-          $message.status == 200 ? 'badge-success' : 'badge-error'
-        } px-4 py-3 text-lg font-medium`}
+        class="badge {$message === 'Profile updated successfully!'
+          ? 'badge-success'
+          : 'badge-error'} px-4 py-3 text-lg font-medium"
       >
         {$message}
       </span>
