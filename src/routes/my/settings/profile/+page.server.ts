@@ -48,15 +48,23 @@ export const load = (async ({ locals }) => {
 	if (!locals.auth?.userId || !locals.auth?.orgId) {
         throw error(401, 'Unauthorized');
     }
-    const artists = await pb.collection('artists').getList(1, 1, {
-        filter: `org_id = "${locals.auth.orgId}"`,
-    });
-    if (!artists?.items?.length) {
-        throw error(404, 'Profile not found');
+
+    try {
+        const artists = await pb.collection('artists').getList(1, 1, {
+            filter: `org_id = "${locals.auth.orgId}"`,
+        });
+        
+        if (!artists?.items?.length) {
+            throw error(404, 'Profile not found');
+        }
+        
+        const artist = artists.items[0];
+        const form = await superValidate(artist, zod(artistSchema));
+        return { form };
+    } catch (err) {
+        console.error('Error fetching artist profile:', err);
+        throw error(500, 'Failed to load profile');
     }
-    const artist = artists.items[0];
-    const form = await superValidate(artist, zod(artistSchema));
-    return { form };
 }) satisfies PageServerLoad;
 
 export const actions = {
