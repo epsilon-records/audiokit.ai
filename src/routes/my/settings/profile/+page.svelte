@@ -22,12 +22,7 @@
   {/if}
   <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
   <div class="space-y-4 bg-teal-100 rounded-lg border-2 border-teal-200 px-8 pb-8">
-    <form
-      method="POST"
-      class="flex flex-col space-y-6 w-full"
-      enctype="multipart/form-data"
-      use:enhance
-    >
+    <form method="POST" class="flex flex-col space-y-6" enctype="multipart/form-data" use:enhance>
       <!-- Hidden Fields -->
       <div>
         <Field {form} name="id">
