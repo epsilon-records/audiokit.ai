@@ -47,7 +47,7 @@
       use:enhance
     >
       <!-- Hidden Fields -->
-      <div class="form-control w-full max-w-lg mb-2">
+      <div>
         <Field {form} name="id">
           <Control>
             {#snippet children({ props })}
@@ -55,8 +55,6 @@
             {/snippet}
           </Control>
         </Field>
-      </div>
-      <div class="form-control w-full max-w-lg mb-2">
         <Field {form} name="org_id">
           <Control>
             {#snippet children({ props })}
@@ -64,8 +62,6 @@
             {/snippet}
           </Control>
         </Field>
-      </div>
-      <div class="form-control w-full max-w-lg mb-2">
         <Field {form} name="test_org_id">
           <Control>
             {#snippet children({ props })}
