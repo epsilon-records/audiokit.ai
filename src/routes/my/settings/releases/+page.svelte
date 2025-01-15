@@ -8,10 +8,15 @@
 
 <SettingsContainer title="Manage Releases">
   <svelte:fragment slot="description">Manage your artist releases.</svelte:fragment>
-  <div class="space-y-4 bg-yellow-100 rounded-lg border-2 border-yellow-200 p-6">
+  <div class="space-y-4 bg-yellow-100 rounded-lg border border-yellow-200 p-6">
     {#if data.releases.length === 0}
       <div class="text-center py-6 text-muted-foreground">
-        <p>No releases found. Create your first release to get started.</p>
+        <p>
+          No releases found. <a
+            href="/my/settings/releases/create"
+            class="text-primary font-semibold hover:underline">Create your first release</a
+          > to get started.
+        </p>
       </div>
     {:else}
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
