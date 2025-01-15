@@ -1,39 +1,34 @@
-import { error } from '@sveltejs/kit';
-import type { Actions } from './$types';
+import { message, superValidate } from 'sveltekit-superforms/server';
+import { zod } from 'sveltekit-superforms/adapters';
+import { error, fail } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+import { pb } from '$lib/pocketbase';
+import { artistSchema } from '$lib/schemas/artist';
+
+export const load = (async ({ locals }) => {
+	// if (!locals.auth?.userId || !locals.auth?.orgId) {
+    //     throw error(401, 'Unauthorized');
+    // }
+	// const artists = await pb.collection('artists').getList(1, 1, {
+	// 	filter: `org_id = "${locals.auth.orgId}" || test_org_id = "${locals.auth.orgId}"`,
+	// });
+	// if (artists.totalItems === 0) {
+	// 	throw error(404, 'Profile not found');
+	// }
+	// const artist = artists.items[0];
+	// const form = await superValidate(artist, zod(artistSchema));
+	// return { form };
+}) satisfies PageServerLoad;
 
 export const actions = {
-	updateProfile: async ({ request, locals }) => {
-		if (!locals?.user?.id) {
-			throw error(401, 'Unauthorized');
-		}
+//   default: async ({ request }) => {
+//     const form = await superValidate(request, zod(artistSchema));
+//     if (!form.valid) {
+//       return fail(400, { form });
+//     }
 
-		const data = await request.formData();
-		const userAvatar = data.get('avatar');
+//     // TODO: Do something with the validated form.data
 
-		// Clean up empty avatar
-		if (userAvatar instanceof File && userAvatar.size === 0) {
-			data.delete('avatar');
-		}
-
-		try {
-			const { name, avatar } = await locals.pb
-				.collection('users')
-				.update(locals.user.id, data);
-
-			// Update local user data
-			locals.user = {
-				...locals.user,
-				name,
-				avatar
-			};
-
-			return {
-				success: true,
-				data: { name, avatar }
-			};
-		} catch (err) {
-			console.error('Profile update error:', err);
-			throw error(400, 'Failed to update profile');
-		}
-	}
-} satisfies Actions;
+//     return message(form, 'Form posted successfully!');
+//   }
+};

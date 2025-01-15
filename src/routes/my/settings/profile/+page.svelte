@@ -1,9 +1,6 @@
 <script lang="ts">
   import { Icon, Pencil } from 'svelte-hero-icons';
   import SettingsContainer from '$lib/components/SettingsContainer.svelte';
-  import { OrganizationSwitcher } from 'svelte-clerk';
-  import { mode } from 'mode-watcher';
-  import { neobrutalism, dark } from '@clerk/themes';
   import { zodClient } from 'sveltekit-superforms/adapters';
   import SuperDebug from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
@@ -24,22 +21,7 @@
     <h3>{$message}</h3>
   {/if}
   <svelte:fragment slot="description">Manage your artist profile.</svelte:fragment>
-  <div class="space-y-4 bg-white rounded-lg border border-gray-200 p-6">
-    <h3 class="text-2xl font-semibold">Select Artist</h3>
-    <div class="rounded-lg">
-      <OrganizationSwitcher
-        appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
-        hidePersonal={true}
-        afterCreateOrganizationUrl="/my/settings/profile"
-        afterSelectOrganizationUrl="/my/settings/profile"
-      />
-    </div>
-    <p class="text-muted-foreground">
-      Choose the artist profile you want to edit. You can switch between different artists or create
-      a new artist profile.
-    </p>
-  </div>
-  <div class="space-y-4 bg-white rounded-lg border border-gray-200 p-6">
+  <div class="space-y-4 bg-teal-100 rounded-lg border border-gray-200 p-6">
     <form
       method="POST"
       class="flex flex-col space-y-6 w-full"

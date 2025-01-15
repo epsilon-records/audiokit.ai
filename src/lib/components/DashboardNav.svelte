@@ -6,9 +6,10 @@
   );
 
   const navigation = [
+    { label: 'Select', href: '/my/settings/select' },
+    { label: 'Create', href: '/my/settings/create' },
     { label: 'Profile', href: '/my/settings/profile' },
     { label: 'Releases', href: '/my/settings/releases' },
-    { label: 'Create', href: '/my/settings/create' },
     { label: 'Team', href: '/my/settings/team' },
     { label: 'Account', href: '/my/settings/account' },
   ];
