@@ -4,6 +4,7 @@
   import { Icon, Pencil } from 'svelte-hero-icons';
   import Input from '$lib/components/Input.svelte';
   import { getImageURL } from '$lib/utils';
+  import SettingsContainer from '$lib/components/SettingsContainer.svelte';
 
   let { data } = $props<{ data: { user: any } }>();
   let loading = $state(false);
@@ -38,7 +39,9 @@
   };
 </script>
 
-<div class="flex flex-col w-full h-full">
+<SettingsContainer title="Profile">
+  <svelte:fragment slot="description">Manage your profile information and avatar.</svelte:fragment>
+
   <form
     action="?/updateProfile"
     method="POST"
@@ -46,7 +49,6 @@
     enctype="multipart/form-data"
     use:enhance={submitUpdateProfile}
   >
-    <h3 class="text-2xl font-medium">Update Profile</h3>
     <div class="form-control w-full max-w-lg">
       <label for="avatar" class="label font-medium pb-1">
         <span class="label-text">Profile Picture</span>
@@ -85,4 +87,4 @@
       </button>
     </div>
   </form>
-</div>
+</SettingsContainer>
