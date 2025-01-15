@@ -21,7 +21,7 @@
     <p class="text-muted-foreground">
       Choose the artist profile you want to edit. You can switch between different artists or <a
         href="/my/settings/create"
-        class="text-cyan-100 font-bold hover:text-cyan-200 transition-colors hover:underline"
+        class="text-cyan-400 font-bold hover:text-cyan-600 transition-colors hover:underline"
         >create a new artist profile</a
       >, also known as an organization.
     </p>
