@@ -157,7 +157,7 @@
           <Field {form} name="birthdate">
             <Control>
               {#snippet children({ props })}
-                <Label class="text-xl">Birth Date</Label>
+                <Label class="text-xl">Birthdate</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
