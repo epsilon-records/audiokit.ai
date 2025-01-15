@@ -355,7 +355,7 @@
 
     <!-- Submit Button -->
     <div class="w-full max-w-lg pt-6">
-      <button class="btn btn-primary w-full" type="submit" disabled={loading}>
+      <button class="btn btn-accent" type="submit" disabled={loading}>
         {loading ? 'Updating Profile...' : 'Update Profile'}
       </button>
     </div>
