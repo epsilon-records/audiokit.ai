@@ -78,7 +78,7 @@
           <Field {form} name="stage_name">
             <Control>
               {#snippet children({ props })}
-                <Label>Artist Name</Label>
+                <Label class="text-xl">Artist Name</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -86,7 +86,7 @@
                 />
               {/snippet}
             </Control>
-            <Description>This is your public artist name.</Description>
+            <Description class="text-sm">This is your public artist name.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -122,7 +122,7 @@
           <Field {form} name="legal_name">
             <Control>
               {#snippet children({ props })}
-                <Label>Legal Name</Label>
+                <Label class="text-xl">Legal Name</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -130,7 +130,7 @@
                 />
               {/snippet}
             </Control>
-            <Description>Be sure to use your real name.</Description>
+            <Description class="text-sm">Be sure to use your real name.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -138,7 +138,7 @@
           <Field {form} name="phone">
             <Control>
               {#snippet children({ props })}
-                <Label>Phone</Label>
+                <Label class="text-xl">Phone</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -147,7 +147,7 @@
                 />
               {/snippet}
             </Control>
-            <Description>Used for urgent booking communications only.</Description>
+            <Description class="text-sm">Used for urgent booking communications only.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -155,7 +155,7 @@
           <Field {form} name="email">
             <Control>
               {#snippet children({ props })}
-                <Label>Email</Label>
+                <Label class="text-xl">Email</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -165,7 +165,9 @@
                 />
               {/snippet}
             </Control>
-            <Description>It's preferred that you use your company email.</Description>
+            <Description class="text-sm"
+              >It's preferred that you use your company email.</Description
+            >
             <FieldErrors />
           </Field>
         </div>
@@ -173,7 +175,7 @@
           <Field {form} name="birthdate">
             <Control>
               {#snippet children({ props })}
-                <Label>Birth Date</Label>
+                <Label class="text-xl">Birth Date</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -182,7 +184,8 @@
                 />
               {/snippet}
             </Control>
-            <Description>Required for age-restricted venues and events.</Description>
+            <Description class="text-sm">Required for age-restricted venues and events.</Description
+            >
             <FieldErrors />
           </Field>
         </div>
@@ -195,7 +198,7 @@
           <Field {form} name="city">
             <Control>
               {#snippet children({ props })}
-                <Label>City</Label>
+                <Label class="text-xl">City</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -204,6 +207,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">The city you're primarily based in.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -213,12 +217,8 @@
           </label>
           <select id="country" name="country" class="select select-bordered w-full">
             <option value="">Select Country</option>
-            <!-- {#each countries as country}
-              <option value={country.code} selected={data.user?.country === country.code}>
-                {country.name}
-              </option>
-            {/each} -->
           </select>
+          <span class="text-sm text-muted-foreground mt-1">Your primary country of residence.</span>
         </div>
       </div>
 
@@ -229,7 +229,7 @@
           <Field {form} name="website">
             <Control>
               {#snippet children({ props })}
-                <Label>Artist Website</Label>
+                <Label class="text-xl">Artist Website</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -238,6 +238,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official artist website or portfolio.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -250,7 +251,7 @@
           <Field {form} name="apple_music">
             <Control>
               {#snippet children({ props })}
-                <Label>Apple Music</Label>
+                <Label class="text-xl">Apple Music</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -260,6 +261,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official Apple Music artist profile.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -267,7 +269,7 @@
           <Field {form} name="spotify">
             <Control>
               {#snippet children({ props })}
-                <Label>Spotify</Label>
+                <Label class="text-xl">Spotify</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -277,6 +279,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official Spotify artist profile.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -284,7 +287,7 @@
           <Field {form} name="soundcloud">
             <Control>
               {#snippet children({ props })}
-                <Label>SoundCloud</Label>
+                <Label class="text-xl">SoundCloud</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -294,6 +297,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official SoundCloud artist profile.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -301,7 +305,7 @@
           <Field {form} name="bandcamp">
             <Control>
               {#snippet children({ props })}
-                <Label>Bandcamp</Label>
+                <Label class="text-xl">Bandcamp</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -311,6 +315,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official Bandcamp artist profile.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -318,7 +323,7 @@
           <Field {form} name="youtube">
             <Control>
               {#snippet children({ props })}
-                <Label>YouTube</Label>
+                <Label class="text-xl">YouTube</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -328,6 +333,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official YouTube artist channel.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -335,7 +341,7 @@
           <Field {form} name="mixcloud">
             <Control>
               {#snippet children({ props })}
-                <Label>Mixcloud</Label>
+                <Label class="text-xl">Mixcloud</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -345,6 +351,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official Mixcloud artist profile.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -357,7 +364,7 @@
           <Field {form} name="instagram">
             <Control>
               {#snippet children({ props })}
-                <Label>Instagram</Label>
+                <Label class="text-xl">Instagram</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -367,6 +374,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official Instagram profile.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -374,7 +382,7 @@
           <Field {form} name="facebook">
             <Control>
               {#snippet children({ props })}
-                <Label>Facebook</Label>
+                <Label class="text-xl">Facebook</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -384,6 +392,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official Facebook artist page.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -391,7 +400,7 @@
           <Field {form} name="x">
             <Control>
               {#snippet children({ props })}
-                <Label>X (Twitter)</Label>
+                <Label class="text-xl">X (Twitter)</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -401,6 +410,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official X (Twitter) artist profile.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -408,7 +418,7 @@
           <Field {form} name="tiktok">
             <Control>
               {#snippet children({ props })}
-                <Label>TikTok</Label>
+                <Label class="text-xl">TikTok</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -418,6 +428,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official TikTok artist profile.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -425,7 +436,7 @@
           <Field {form} name="twitch">
             <Control>
               {#snippet children({ props })}
-                <Label>Twitch</Label>
+                <Label class="text-xl">Twitch</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -435,6 +446,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official Twitch artist channel.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -442,7 +454,7 @@
           <Field {form} name="linkedin">
             <Control>
               {#snippet children({ props })}
-                <Label>LinkedIn</Label>
+                <Label class="text-xl">LinkedIn</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -452,6 +464,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your official LinkedIn artist profile.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -464,7 +477,7 @@
           <Field {form} name="songkick">
             <Control>
               {#snippet children({ props })}
-                <Label>Songkick</Label>
+                <Label class="text-xl">Songkick</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -474,6 +487,7 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm">Your Songkick artist profile for tour dates.</Description>
             <FieldErrors />
           </Field>
         </div>
@@ -481,7 +495,7 @@
           <Field {form} name="bandsintown">
             <Control>
               {#snippet children({ props })}
-                <Label>Bandsintown</Label>
+                <Label class="text-xl">Bandsintown</Label>
                 <input
                   {...props}
                   class="input input-bordered bg-white text-gray-900"
@@ -491,6 +505,9 @@
                 />
               {/snippet}
             </Control>
+            <Description class="text-sm"
+              >Your Bandsintown artist profile for tour dates.</Description
+            >
             <FieldErrors />
           </Field>
         </div>
