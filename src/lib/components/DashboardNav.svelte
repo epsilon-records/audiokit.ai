@@ -6,7 +6,6 @@
   const navigation = [
     { label: 'Create', href: '/my/settings/create/' },
     { label: 'Profile', href: '/my/settings/profile/' },
-    { label: 'Artist', href: '/my/settings/artist/' },
     { label: 'Team', href: '/my/settings/team/' },
     { label: 'Account', href: '/my/settings/account/' },
   ];
