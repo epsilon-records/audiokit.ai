@@ -33,7 +33,7 @@
 <nav class="absolute top-0 w-full z-20">
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center py-6">
-      <a href="/" class="text-yellow-500 font-mono font-bold text-xl">EPSILON</a>
+      <a href="/" class="text-orange-500 font-mono font-bold text-xl">EPSILON</a>
 
       <!-- Mobile menu button -->
       <button
