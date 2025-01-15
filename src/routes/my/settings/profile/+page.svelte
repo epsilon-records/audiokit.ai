@@ -368,6 +368,6 @@
     </form>
 
     <!-- Debug Data -->
-    <SuperDebug data={data.form} />
+    <SuperDebug {data} />
   </div>
 </SettingsContainer>
