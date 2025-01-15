@@ -4,10 +4,11 @@
   let { pathname } = $derived(page.url);
 
   const navigation = [
-    { label: 'Create Artist', href: '/my/settings/create/' },
-    { label: 'Artist Profile', href: '/my/settings/profile/' },
-    { label: 'Team Settings', href: '/my/settings/team/' },
-    { label: 'Account Settings', href: '/my/settings/account/' },
+    { label: 'Create', href: '/my/settings/create/' },
+    { label: 'Profile', href: '/my/settings/profile/' },
+    { label: 'Artist', href: '/my/settings/artist/' },
+    { label: 'Team', href: '/my/settings/team/' },
+    { label: 'Account', href: '/my/settings/account/' },
   ];
 </script>
 
