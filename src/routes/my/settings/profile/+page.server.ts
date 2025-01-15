@@ -2,7 +2,6 @@ import { message, superValidate } from 'sveltekit-superforms/server';
 import { zod } from 'sveltekit-superforms/adapters';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { z } from 'zod';
 import { pb } from '$lib/pocketbase';
 import { artistSchema } from '$lib/schemas/artist';
 
@@ -11,7 +10,7 @@ export const load = (async ({ locals }) => {
         throw error(401, 'Unauthorized');
     }
 	const artists = await pb.collection('artists').getList(1, 1, {
-		filter: `org_id = "${locals.auth.orgId}"`,
+		filter: `org_id = "${locals.auth.orgId}" || test_org_id = "${locals.auth.orgId}"`,
 	});
 	if (artists.totalItems === 0) {
 		throw error(404, 'Profile not found');
