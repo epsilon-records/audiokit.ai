@@ -18,9 +18,6 @@ export const load = (async ({ locals }) => {
 	if (artists.totalItems === 0) {
 		artist = await pb.collection('artists').create({
 			org_id: locals.auth.orgId,
-			stage_name: '',
-			legal_name: '',
-			email: '',
 		});
 	} else {
 		artist = artists.items[0];
