@@ -7,7 +7,6 @@
     { label: 'Profile', href: '/my/settings/profile' },
     { label: 'Artist', href: '/my/settings/artist' },
     { label: 'Account', href: '/my/settings/account' },
-    { label: 'Security', href: '/my/settings/security' },
   ];
 </script>
 
