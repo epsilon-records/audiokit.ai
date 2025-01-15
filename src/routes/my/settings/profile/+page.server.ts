@@ -11,7 +11,6 @@ export const load = (async ({ locals }) => {
     }
 	const artists = await pb.collection('artists').getList(1, 1, {
 		filter: `org_id = "${locals.auth.orgId}" || test_org_id = "${locals.auth.orgId}"`,
-		sort: `-org_id = "${locals.auth.orgId}"`
 	});
 	if (artists.totalItems === 0) {
 		throw error(404, 'Profile not found');
