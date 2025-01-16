@@ -40,6 +40,7 @@
   "dependencies": {
     "@biomejs/biome": "^1.9.4",
     "@clerk/themes": "^2.2.5",
+    "@stripe/stripe-js": "^5.5.0",
     "@sveltejs/adapter-auto": "^3.3.1",
     "@tanstack/svelte-query": "^5.64.0",
     "@tiptap/core": "^2.11.2",
