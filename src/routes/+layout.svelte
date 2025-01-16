@@ -10,7 +10,7 @@
   import { onMount } from 'svelte';
 
   let { children } = $props<{ children: Snippet }>();
-  
+
   // Configure router functions for Clerk
   const routerPush = (to: string) => goto(to);
   const routerReplace = (to: string) => goto(to, { replaceState: true });
@@ -22,7 +22,7 @@
       title: 'The Vamp',
       artist: 'Acid Boy',
       coverArt: 'https://f002.backblazeb2.com/file/epsilon-catalog/Acid+Boy/303:+Part+One/logo.gif',
-      audioUrl: '/audio/Acid_Boy_The_Vamp.mp3'
+      audioUrl: '/audio/Acid_Boy_The_Vamp.mp3',
     });
   });
 </script>
@@ -37,5 +37,5 @@
     {@render children()}
   </main>
   <Footer />
-  <AudioPlayer />
+  <!-- <AudioPlayer /> -->
 </ClerkProvider>
