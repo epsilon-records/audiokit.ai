@@ -26,7 +26,7 @@
   class="relative min-h-[100svh] flex items-center justify-center overflow-hidden bg-white"
   in:fade={{ duration: 1000, delay: 200 }}
 >
-  {#if mounted}
+  <!-- {#if mounted}
     <FlickeringGrid
       class="z-0 absolute inset-0 size-full"
       {width}
@@ -37,7 +37,7 @@
       maxOpacity={0.35}
       flickerChance={0.1}
     />
-  {/if}
+  {/if} -->
 
   <div class="relative z-10 w-full">
     <HeroSection />
