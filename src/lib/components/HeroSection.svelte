@@ -1,5 +1,19 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
+  import {
+    siSpotify,
+    siApplemusic,
+    siYoutubemusic,
+    siSoundcloud,
+    siBandcamp,
+    siTidal,
+    siAmazonmusic,
+    siPandora,
+    siTiktok,
+    siInstagram,
+    siX,
+    siTwitch,
+  } from 'simple-icons';
 
   let stats = $state({
     artists: '40+',
@@ -26,12 +40,12 @@
         artists reach millions of listeners worldwide.
       </p>
 
-      <!-- CTA buttons -->
-      <div class="flex flex-col sm:flex-row gap-4 mt-8">
-        <Button size="lg" class="text-lg px-8" href="/sign-up">Start Distribution</Button>
-        <Button size="lg" variant="outline" class="text-lg px-8" href="/services"
-          >Explore Services</Button
-        >
+      <!-- CTA Buttons -->
+      <div class="flex flex-col sm:flex-row gap-4">
+        <Button size="lg" class="text-lg px-8" href="/sign-up">Get Started</Button>
+        <Button size="lg" variant="outline" class="text-lg px-8" href="/services">
+          Learn More
+        </Button>
       </div>
 
       <!-- Stats section -->
@@ -50,6 +64,98 @@
             </span>
           </div>
         {/each}
+      </div>
+
+      <!-- DSP Logos -->
+      <div class="border-t border-border/40 mt-16 pt-8 w-full max-w-3xl">
+        <p class="text-sm text-muted-foreground mb-6">Available on all major platforms</p>
+        <div class="grid grid-cols-3 md:grid-cols-4 gap-8 items-center justify-items-center">
+          <!-- Music Platforms -->
+          <svg
+            class="w-8 h-8 text-[#1DB954] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siSpotify.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#FA243C] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siApplemusic.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#FF0000] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siYoutubemusic.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#000000] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siTidal.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#FF9900] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siAmazonmusic.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#FF6B00] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siSoundcloud.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#629AA9] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siBandcamp.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#00A4DC] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siPandora.path} />
+          </svg>
+
+          <!-- Social Platforms -->
+          <svg
+            class="w-8 h-8 text-[#000000] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siTiktok.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#E4405F] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siInstagram.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#000000] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siX.path} />
+          </svg>
+
+          <svg
+            class="w-8 h-8 text-[#9146FF] hover:scale-110 transition-transform"
+            viewBox="0 0 24 24"
+          >
+            <path fill="currentColor" d={siTwitch.path} />
+          </svg>
+        </div>
       </div>
     </div>
   </div>

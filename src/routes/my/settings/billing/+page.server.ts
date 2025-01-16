@@ -1,17 +1,19 @@
-import { error, redirect } from '@sveltejs/kit';
+import { error, fail, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import {loadStripe} from '@stripe/stripe-js';
-import { STRIPE_PUBLIC_KEY, STRIPE_PRICE_IDS } from '$env/static/private';
+import Stripe from 'stripe';
+import { STRIPE_SECRET_KEY, STRIPE_PRICE_IDS } from '$env/static/private';
 
-const stripe = await loadStripe(STRIPE_PUBLIC_KEY);
-const PRICE_IDS = JSON.parse(STRIPE_PRICE_IDS);
+const stripe = new Stripe(STRIPE_SECRET_KEY);
 
 export const load = (async ({ locals, url }) => {
-  if (!locals.auth?.userId) {
-    return redirect(307, '/sign-in');
-  } else if (!locals.auth?.orgId) {
-    return redirect(302, '/my/settings/create');
-  }
+    const PRICE_IDS = JSON.parse(STRIPE_PRICE_IDS);
+    if (!locals.auth?.userId) {
+        throw redirect(307, '/sign-in');
+    } else if (!locals.auth?.orgId) {
+        throw redirect(302, '/my/settings/create');
+    } else if (!stripe) {
+        throw error(500, 'Internal server error');
+    }
 
   try {
     // Get current subscription if any
@@ -34,8 +36,8 @@ export const load = (async ({ locals, url }) => {
     });
 
     // Format pricing data
-    const plans = products.data.map(product => {
-      const price = prices.data.find(p => p.product === product.id);
+    const plans = products.data.map((product: any) => {
+      const price = prices.data.find((p: any) => p.product === product.id);
       return {
         id: price?.id || '',
         productId: product.id,
@@ -55,12 +57,14 @@ export const load = (async ({ locals, url }) => {
     };
   } catch (err) {
     console.error('Error loading billing data:', err);
-    throw error(500, 'Failed to load billing information');
+    throw error(500, 'Internal server error');
   }
 }) satisfies PageServerLoad;
 
 export const actions = {
   subscribe: async ({ request, locals, url }) => {
+    const PRICE_IDS = JSON.parse(STRIPE_PRICE_IDS);
+    
     if (!locals.auth?.userId || !locals.auth?.orgId) {
       throw error(401, 'Unauthorized');
     }
@@ -90,7 +94,7 @@ export const actions = {
       return { url: session.url };
     } catch (err) {
       console.error('Stripe session creation failed:', err);
-      throw error(500, 'Failed to create checkout session');
+      throw error(500, 'Internal server error');
     }
   },
 
@@ -108,7 +112,7 @@ export const actions = {
       return { url: session.url };
     } catch (err) {
       console.error('Billing portal session creation failed:', err);
-      throw error(500, 'Failed to create billing portal session');
+      throw error(500, 'Internal server error');
     }
   }
 }; 
