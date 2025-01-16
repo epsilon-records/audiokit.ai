@@ -19,8 +19,8 @@
     if (typeof window !== 'undefined') {
       audioStore.playTrack({
         id: 'demo-1',
-        title: 'Welcome to Epsilon',
-        artist: 'Epsilon Records',
+        title: 'The Vamp',
+        artist: 'Acid Boy',
         coverArt: '/demo-cover.jpg',
         audioUrl: '/demo-track.mp3'
       });
