@@ -39,9 +39,9 @@
       <div>
         <h3 class="font-bold mb-4">Follow Us</h3>
         <div class="flex space-x-4">
-          <a href="https://instagram.com" class="hover:text-primary">Instagram</a>
-          <a href="https://soundcloud.com" class="hover:text-primary">SoundCloud</a>
-          <a href="https://bandcamp.com" class="hover:text-primary">Bandcamp</a>
+          <a href="https://instagram.com/epsilonrecords" class="hover:text-primary">Instagram</a>
+          <a href="https://soundcloud.com/epsilonrecords" class="hover:text-primary">SoundCloud</a>
+          <a href="http://epsilonrecords.bandcamp.com" class="hover:text-primary">Bandcamp</a>
         </div>
       </div>
     </div>

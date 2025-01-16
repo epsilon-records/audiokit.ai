@@ -5,7 +5,7 @@
   import ContactInfo from '$lib/components/ContactInfo.svelte';
 </script>
 
-<PageContainer title="Contact" bgColor="bg-black" textColor="text-[#00ff00]">
+<PageContainer title="Contact" bgColor="bg-lime-100" textColor="text-cyan-600">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
     <ContactForm />
     <ContactInfo />
