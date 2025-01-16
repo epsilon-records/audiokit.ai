@@ -21,7 +21,7 @@
         'Fan engagement',
       ],
       icon: '🚀',
-      price: 'Custom pricing',
+      price: 'From $199/release',
       color: 'cyan',
     },
     {
@@ -29,7 +29,7 @@
       description: 'Professional guidance to elevate your music career',
       features: ['1-on-1 mentoring', 'Brand development', 'Release strategy', 'Network access'],
       icon: '⭐',
-      price: 'From $199/release',
+      price: 'Custom pricing',
       color: 'green',
     },
     {
@@ -71,7 +71,7 @@
           service.color === 'yellow' && 'bg-yellow-100/50 hover:bg-yellow-100/80',
           service.color === 'cyan' && 'bg-cyan-100/50 hover:bg-cyan-100/80',
           service.color === 'green' && 'bg-green-100/50 hover:bg-green-100/80',
-          service.color === 'pink' && 'bg-pink-100/50 hover:bg-pink-100/80',
+          service.color === 'pink' && 'bg-pink-100/50 hover:bg-pink-100/80'
         )}
       >
         <div class="mb-4 text-4xl">{service.icon}</div>
