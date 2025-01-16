@@ -3,10 +3,12 @@
     title,
     bgColor = 'bg-black',
     textColor = 'text-[#00ff00]',
+    children
   } = $props<{
     title?: string;
     bgColor?: string;
     textColor?: string;
+    children: () => any;
   }>();
 </script>
 

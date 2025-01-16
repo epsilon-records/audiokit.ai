@@ -1,6 +1,10 @@
 <script lang="ts">
-  let { title } = $props<{
+  let { 
+    title,
+    children 
+  } = $props<{
     title: string;
+    children: () => any;
   }>();
 </script>
 

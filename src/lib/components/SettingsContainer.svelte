@@ -1,6 +1,12 @@
 <script lang="ts">
-  let { title } = $props<{
+  let { 
+    title,
+    children,
+    description 
+  } = $props<{
     title: string;
+    children: () => any;
+    description?: () => any;
   }>();
 </script>
 
@@ -8,7 +14,9 @@
   <div class="mb-8">
     <h3 class="text-2xl font-medium">{title}</h3>
     <div class="text-md text-muted-foreground">
-      {@render description()}
+      {#if description}
+        {@render description()}
+      {/if}
     </div>
   </div>
   {@render children()}
