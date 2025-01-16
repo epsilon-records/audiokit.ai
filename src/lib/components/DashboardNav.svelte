@@ -10,6 +10,7 @@
     { label: 'Profile', href: '/my/settings/profile/' },
     { label: 'Releases', href: '/my/settings/releases/' },
     { label: 'Team', href: '/my/settings/team/' },
+    { label: 'Billing', href: '/my/settings/billing/' },
     { label: 'Account', href: '/my/settings/account/' },
   ];
 </script>
