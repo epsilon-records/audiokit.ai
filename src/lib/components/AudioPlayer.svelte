@@ -11,6 +11,7 @@
   let duration = $state(0);
   let isLoading = $state(true);
   let audio = $state<HTMLAudioElement | null>(null);
+  let isTransitioning = $state(false);
 
   // Get current track from store using $derived
   let currentTrack = $derived(audioStore.currentTrack);
@@ -36,14 +37,28 @@
   });
 
   function togglePlay() {
-    if (!audio || isLoading) return;
+    if (!audio || isLoading || isTransitioning) return;
+    
+    isTransitioning = true;
     
     if (isPlaying) {
-      audio.pause();
+      audio.pause()
+        .finally(() => {
+          isPlaying = false;
+          isTransitioning = false;
+        });
     } else {
-      audio.play();
+      audio.play()
+        .then(() => {
+          isPlaying = true;
+        })
+        .catch((error) => {
+          console.error('Error playing audio:', error);
+        })
+        .finally(() => {
+          isTransitioning = false;
+        });
     }
-    isPlaying = !isPlaying;
   }
 
   function handleTimeUpdate() {
