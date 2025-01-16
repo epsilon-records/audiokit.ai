@@ -18,7 +18,7 @@
   let stats = $state({
     artists: '40+',
     streams: '500K+',
-    countries: '15+',
+    tracks: '120+',
   });
 </script>
 
