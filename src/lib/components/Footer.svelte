@@ -59,7 +59,7 @@
       <!-- Social -->
       <div>
         <h3 class="font-bold mb-4">Follow Us</h3>
-        <div class="grid grid-cols-5 gap-4">
+        <div class="grid grid-cols-4 gap-4">
           <a
             href="https://beatport.com/label/epsilon-records/112442"
             class="hover:opacity-80 transition-opacity"
