@@ -4,28 +4,39 @@
   import { Button } from '$lib/components/ui/button';
   import { Slider } from '$lib/components/ui/slider';
   import { PlayIcon, PauseIcon } from 'lucide-svelte';
+  import { onMount } from 'svelte';
 
   let isPlaying = $state(false);
   let currentTime = $state(0);
   let duration = $state(0);
+  let isLoading = $state(true);
   let audio = $state<HTMLAudioElement | null>(null);
 
   // Get current track from store using $derived
   let currentTrack = $derived(audioStore.currentTrack);
 
-  // Only run audio-related effects on the client side
+  // Handle audio loading and metadata
+  function handleLoadedMetadata() {
+    if (!audio) return;
+    duration = audio.duration;
+    isLoading = false;
+  }
+
+  // Update audio source when track changes
   $effect(() => {
-    if (typeof window === 'undefined') return;
+    if (!audio || !currentTrack) return;
     
-    if (currentTrack && audio) {
+    // Only reload if the track URL has changed
+    if (audio.src !== currentTrack.audioUrl) {
+      isLoading = true;
+      isPlaying = false;
       audio.src = currentTrack.audioUrl;
       audio.load();
-      duration = audio.duration;
     }
   });
 
   function togglePlay() {
-    if (!audio) return;
+    if (!audio || isLoading) return;
     
     if (isPlaying) {
       audio.pause();
@@ -38,13 +49,23 @@
   function handleTimeUpdate() {
     if (!audio) return;
     currentTime = audio.currentTime;
-    duration = audio.duration;
   }
 
   function handleSliderChange(value: number[]) {
     if (!audio) return;
     audio.currentTime = value[0];
   }
+
+  // Cleanup on unmount
+  onMount(() => {
+    return () => {
+      if (audio) {
+        audio.pause();
+        audio.src = '';
+        audio.load();
+      }
+    };
+  });
 </script>
 
 {#if currentTrack}
@@ -52,6 +73,7 @@
     <audio
       bind:this={audio}
       ontimeupdate={handleTimeUpdate}
+      onloadedmetadata={handleLoadedMetadata}
       onended={() => (isPlaying = false)}
     ></audio>
     
@@ -68,7 +90,12 @@
       </div>
 
       <div class="flex items-center gap-4">
-        <Button variant="ghost" size="icon" on:click={togglePlay}>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          on:click={togglePlay}
+          disabled={isLoading}
+        >
           {#if isPlaying}
             <PauseIcon class="h-6 w-6" />
           {:else}
@@ -83,6 +110,7 @@
             max={duration || 100}
             step={1}
             onValueChange={handleSliderChange}
+            disabled={isLoading}
           />
         </div>
       </div>

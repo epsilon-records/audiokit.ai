@@ -7,24 +7,23 @@
   import { audioStore } from '$lib/stores/audioStore.svelte';
   import type { Snippet } from 'svelte';
   import { goto } from '$app/navigation';
+  import { onMount } from 'svelte';
 
   let { children } = $props<{ children: Snippet }>();
-
+  
   // Configure router functions for Clerk
   const routerPush = (to: string) => goto(to);
   const routerReplace = (to: string) => goto(to, { replaceState: true });
 
-  // Set initial demo track on client-side only
-  $effect(() => {
-    if (typeof window !== 'undefined') {
-      audioStore.playTrack({
-        id: 'demo-1',
-        title: 'The Vamp',
-        artist: 'Acid Boy',
-        coverArt: '/demo-cover.jpg',
-        audioUrl: '/demo-track.mp3'
-      });
-    }
+  // Set initial demo track only once on mount
+  onMount(() => {
+    audioStore.playTrack({
+      id: 'demo-1',
+      title: 'The Vamp',
+      artist: 'Acid Boy',
+      coverArt: 'https://f002.backblazeb2.com/file/epsilon-catalog/Acid+Boy/303:+Part+One/logo.gif',
+      audioUrl: 'https://f002.backblazeb2.com/file/epsilon-catalog/Acid+Boy/303:+Part+One/Acid+Boy+The+Vamp.mp3'
+    });
   });
 </script>
 
