@@ -28,7 +28,6 @@
           <li><a href="/artists" class="hover:underline">Artists</a></li>
           <li><a href="/releases" class="hover:underline">Releases</a></li>
           <li><a href="/events" class="hover:underline">Events</a></li>
-          <li><a href="/shop" class="hover:underline">Shop</a></li>
           <li><a href="/faq" class="hover:underline">FAQ</a></li>
         </ul>
       </div>
