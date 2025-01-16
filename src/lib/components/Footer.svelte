@@ -1,5 +1,13 @@
 <script lang="ts">
-  import { siInstagram, siSoundcloud, siBandcamp } from 'simple-icons';
+  import {
+    siInstagram,
+    siSoundcloud,
+    siBandcamp,
+    siYoutube,
+    siTwitch,
+    siTiktok,
+    siMixcloud,
+  } from 'simple-icons';
   const currentYear = $derived(new Date().getFullYear());
 
   // Define brand colors from Simple Icons
@@ -7,6 +15,10 @@
     instagram: '#E4405F',
     soundcloud: '#FF3300',
     bandcamp: '#408294',
+    youtube: '#FF0000',
+    twitch: '#9146FF',
+    tiktok: '#000000',
+    mixcloud: '#5000FF',
   } as const;
 </script>
 
@@ -45,7 +57,7 @@
       <!-- Social -->
       <div>
         <h3 class="font-bold mb-4">Follow Us</h3>
-        <div class="flex space-x-4">
+        <div class="flex flex-wrap gap-4">
           <a
             href="https://instagram.com/epsilonrecords"
             class="hover:opacity-80 transition-opacity"
@@ -53,6 +65,42 @@
           >
             <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.instagram}>
               <path d={siInstagram.path} />
+            </svg>
+          </a>
+          <a
+            href="https://youtube.com/epsilonrecords"
+            class="hover:opacity-80 transition-opacity"
+            aria-label="Follow us on YouTube"
+          >
+            <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.youtube}>
+              <path d={siYoutube.path} />
+            </svg>
+          </a>
+          <a
+            href="https://twitch.tv/epsilonrecords"
+            class="hover:opacity-80 transition-opacity"
+            aria-label="Follow us on Twitch"
+          >
+            <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.twitch}>
+              <path d={siTwitch.path} />
+            </svg>
+          </a>
+          <a
+            href="https://tiktok.com/@epsilonrecords"
+            class="hover:opacity-80 transition-opacity"
+            aria-label="Follow us on TikTok"
+          >
+            <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.tiktok}>
+              <path d={siTiktok.path} />
+            </svg>
+          </a>
+          <a
+            href="https://mixcloud.com/epsilonrecords"
+            class="hover:opacity-80 transition-opacity"
+            aria-label="Follow us on Mixcloud"
+          >
+            <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.mixcloud}>
+              <path d={siMixcloud.path} />
             </svg>
           </a>
           <a
