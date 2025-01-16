@@ -6,9 +6,9 @@ import { releaseSchema } from '$lib/schemas/release';
 
 export const load = (async ({ locals }) => {
 	if (!locals.auth?.userId) {
-		throw error(401, 'Unauthorized');
+		return redirect(307, '/sign-in');
 	} else if (!locals.auth?.orgId) {
-		redirect(302, '/my/settings/create');
+		return redirect(302, '/my/settings/create');
 	}
 	const form = await superValidate(zod(releaseSchema));
 	return { form };
