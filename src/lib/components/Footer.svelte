@@ -1,5 +1,13 @@
 <script lang="ts">
+  import { Instagram, SoundCloud, Bandcamp } from 'simple-icons';
   const currentYear = $derived(new Date().getFullYear());
+
+  // Define brand colors from Simple Icons
+  const BRAND_COLORS = {
+    instagram: '#E4405F',
+    soundcloud: '#FF3300',
+    bandcamp: '#408294',
+  } as const;
 </script>
 
 <footer class="border-t">
@@ -39,9 +47,33 @@
       <div>
         <h3 class="font-bold mb-4">Follow Us</h3>
         <div class="flex space-x-4">
-          <a href="https://instagram.com/epsilonrecords" class="hover:text-primary">Instagram</a>
-          <a href="https://soundcloud.com/epsilonrecords" class="hover:text-primary">SoundCloud</a>
-          <a href="http://epsilonrecords.bandcamp.com" class="hover:text-primary">Bandcamp</a>
+          <a
+            href="https://instagram.com/epsilonrecords"
+            class="hover:opacity-80 transition-opacity"
+            aria-label="Follow us on Instagram"
+          >
+            <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.instagram}>
+              <path d={Instagram.path} />
+            </svg>
+          </a>
+          <a
+            href="https://soundcloud.com/epsilonrecords"
+            class="hover:opacity-80 transition-opacity"
+            aria-label="Follow us on SoundCloud"
+          >
+            <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.soundcloud}>
+              <path d={SoundCloud.path} />
+            </svg>
+          </a>
+          <a
+            href="http://epsilonrecords.bandcamp.com"
+            class="hover:opacity-80 transition-opacity"
+            aria-label="Follow us on Bandcamp"
+          >
+            <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.bandcamp}>
+              <path d={Bandcamp.path} />
+            </svg>
+          </a>
         </div>
       </div>
     </div>
