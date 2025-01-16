@@ -22,7 +22,7 @@
       title: 'The Vamp',
       artist: 'Acid Boy',
       coverArt: 'https://f002.backblazeb2.com/file/epsilon-catalog/Acid+Boy/303:+Part+One/logo.gif',
-      audioUrl: 'https://f002.backblazeb2.com/file/epsilon-catalog/Acid+Boy/303:+Part+One/Acid+Boy+The+Vamp.mp3'
+      audioUrl: '/audio/Acid_Boy_The_Vamp.mp3'
     });
   });
 </script>
