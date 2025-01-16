@@ -2,118 +2,129 @@
   import SettingsContainer from '$lib/components/SettingsContainer.svelte';
   import { Button } from '$lib/components/ui/button';
   import { Card } from '$lib/components/ui/card';
-  import { enhance } from '$app/forms';
+  import { Badge } from '$lib/components/ui/badge';
+  import { Check, Sparkles, Star } from 'lucide-svelte';
 
-  let { data } = $props();
-  let loading = $state(false);
+  interface PricingPlan {
+    id: string;
+    name: string;
+    price: number;
+    interval: 'month' | 'year';
+    features: string[];
+    ctaText: string;
+    emoji: string;
+    popular?: boolean;
+  }
 
-  const features = {
-    basic: ['Basic Distribution', '2 Releases/Year', 'Standard Support'],
-    pro: ['Unlimited Distribution', 'Priority Support', 'Marketing Tools', 'Analytics Dashboard'],
-    enterprise: [
-      'Custom Distribution',
-      'Dedicated Account Manager',
-      'Advanced Analytics',
-      'Priority Release Schedule',
-      'Custom Marketing Campaigns',
-    ],
-  };
+  const plans: PricingPlan[] = [
+    {
+      id: 'monthly',
+      name: 'Monthly Plan',
+      price: 19,
+      interval: 'month',
+      emoji: '🚀',
+      features: [
+        'Full access to Epsilon Distribution',
+        'Priority support',
+        'Advanced analytics',
+        'Custom integrations',
+        'Team collaboration tools',
+        '30-day free trial',
+      ],
+      ctaText: 'Start Monthly Plan',
+    },
+    {
+      id: 'yearly',
+      name: 'Annual Plan',
+      price: 99,
+      interval: 'year',
+      emoji: '⭐',
+      popular: true,
+      features: [
+        'Everything in Monthly Plan',
+        '~$8.25/month (Save 57%)',
+        'Extended API limits',
+        'Premium support',
+        'Advanced reporting',
+        '30-day free trial',
+      ],
+      ctaText: 'Start Annual Plan',
+    },
+  ];
 
-  async function handleAction(action: 'subscribe' | 'manage', priceId?: string) {
-    loading = true;
-    try {
-      const formData = new FormData();
-      if (priceId) formData.append('priceId', priceId);
-
-      const response = await fetch(`?/${action}`, {
-        method: 'POST',
-        body: formData,
-      });
-
-      const { url } = await response.json();
-      if (url) window.location.href = url;
-    } catch (error) {
-      console.error(`${action} error:`, error);
-    } finally {
-      loading = false;
-    }
+  function handleSubscribe(plan: PricingPlan) {
+    // TODO: Implement subscription logic
+    console.log(`Subscribing to ${plan.name}`);
   }
 </script>
 
 <SettingsContainer title="Billing & Subscription">
-  <svelte:fragment slot="description">Manage your subscription and billing details.</svelte:fragment
-  >
+  <svelte:fragment slot="description">
+    Choose the plan that best fits your needs. All plans include a 30-day free trial.
+  </svelte:fragment>
 
-  {#if data.currentPlan}
-    <div class="mb-8 p-6 bg-green-100 rounded-lg border-2 border-green-200">
-      <h2 class="text-2xl font-bold mb-4">Current Subscription</h2>
-      <div class="flex justify-between items-center">
-        <div>
-          <p class="text-lg font-semibold">{data.currentPlan.plan.product.name}</p>
-          <p class="text-sm text-muted-foreground">
-            Next billing date: {new Date(
-              data.currentPlan.current_period_end * 1000,
-            ).toLocaleDateString()}
-          </p>
-        </div>
-        <Button variant="outline" on:click={() => handleAction('manage')} disabled={loading}>
-          Manage Subscription
-        </Button>
-      </div>
-    </div>
-  {/if}
-
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-    {#each data.plans as plan}
-      <Card class="relative p-6 {plan.isPopular ? 'border-primary' : ''}">
-        {#if plan.isPopular}
-          <div
-            class="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-sm rounded-bl-lg rounded-tr-lg"
-          >
-            Popular
-          </div>
-        {/if}
-
-        <h3 class="text-2xl font-bold">{plan.name}</h3>
-        <p class="text-3xl font-bold mt-4">
-          ${plan.price}<span class="text-sm font-normal">/{plan.interval}</span>
-        </p>
-        <p class="mt-2 text-sm text-muted-foreground">{plan.description}</p>
-
-        <ul class="mt-6 space-y-2">
-          {#each plan.features as feature}
-            <li class="flex items-center gap-2">
-              <svg
-                class="w-5 h-5 text-green-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              {feature}
-            </li>
-          {/each}
-        </ul>
-
-        <Button
-          class="w-full mt-6"
-          variant={plan.isPopular ? 'default' : 'outline'}
-          disabled={loading || data.currentPlan?.plan.product.id === plan.productId}
-          on:click={() => handleAction('subscribe', plan.id)}
+  <div class="space-y-6">
+    <div class="grid md:grid-cols-2 gap-6">
+      {#each plans as plan}
+        <Card
+          class="relative p-6 flex flex-col border-2 {plan.popular
+            ? 'border-primary'
+            : 'border-border'} shadow-lg hover:shadow-xl transition-all duration-300"
         >
-          {#if data.currentPlan?.plan.product.id === plan.productId}
-            Current Plan
-          {:else}
-            {loading ? 'Processing...' : `Subscribe to ${plan.name}`}
+          {#if plan.popular}
+            <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+              <Badge
+                variant="default"
+                class="bg-primary text-primary-foreground flex items-center gap-1"
+              >
+                <Sparkles class="h-3 w-3" />
+                <span>Most Popular</span>
+              </Badge>
+            </div>
           {/if}
-        </Button>
-      </Card>
-    {/each}
+
+          <div class="mb-4">
+            <div class="flex items-center gap-2">
+              <span class="text-2xl">{plan.emoji}</span>
+              <h3 class="text-lg font-semibold">{plan.name}</h3>
+            </div>
+            <div class="mt-4">
+              <span class="text-4xl font-bold text-primary">${plan.price}</span>
+              <span class="text-muted-foreground">/{plan.interval}</span>
+            </div>
+          </div>
+
+          <ul class="space-y-3 my-6 flex-grow">
+            {#each plan.features as feature}
+              <li class="flex items-center gap-2">
+                <div class="rounded-full bg-primary/10 p-1">
+                  <Check class="h-4 w-4 text-primary" />
+                </div>
+                <span class="text-sm">{feature}</span>
+              </li>
+            {/each}
+          </ul>
+
+          <Button
+            class="w-full {plan.popular ? 'bg-primary hover:bg-primary/90' : ''}"
+            variant={plan.popular ? 'default' : 'outline'}
+            size="lg"
+            href={plan.id === 'monthly'
+              ? 'https://buy.stripe.com/14k9CLflu2k3eVGcMO'
+              : 'https://buy.stripe.com/aEU9CLa1abUDcNy145'}
+          >
+            {plan.ctaText}
+          </Button>
+        </Card>
+      {/each}
+    </div>
+
+    <div class="mt-12 text-center space-y-4">
+      <div class="flex items-center justify-center gap-2 text-primary">
+        <Star class="h-5 w-5" />
+        <p class="font-medium">30-Day Free Trial</p>
+      </div>
+      <p class="text-sm text-muted-foreground">Try any plan risk-free. Cancel anytime.</p>
+    </div>
   </div>
 </SettingsContainer>
