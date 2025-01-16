@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Instagram, SoundCloud, Bandcamp } from 'simple-icons';
+  import { siInstagram, siSoundcloud, siBandcamp } from 'simple-icons';
   const currentYear = $derived(new Date().getFullYear());
 
   // Define brand colors from Simple Icons
@@ -62,7 +62,7 @@
             aria-label="Follow us on SoundCloud"
           >
             <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.soundcloud}>
-              <path d={SoundCloud.path} />
+              <path d={siSoundcloud.path} />
             </svg>
           </a>
           <a
@@ -71,7 +71,7 @@
             aria-label="Follow us on Bandcamp"
           >
             <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.bandcamp}>
-              <path d={Bandcamp.path} />
+              <path d={siBandcamp.path} />
             </svg>
           </a>
         </div>
