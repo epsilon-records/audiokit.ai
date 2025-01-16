@@ -213,58 +213,19 @@ Documentation
 
 Refer to Svelte, SvelteKit, and Paraglide.js documentation for detailed information on components, internationalization, and best practices.
 
-Project Description
-Create a modern website for Epsilon Records, an underground acid techno label, using Svelte 5 and SvelteKit 2. Include TypeScript and implement responsive design.
-
-Homepage
-Hero section with latest releases
-Events calendar
-Newsletter signup
-Artist spotlight
-
-Artists page
-Grid overview with alternating layout
-Individual artist profiles
-Social links and discography
-Filtering and search
-
-Releases page
-Full catalog with audio previews
-Purchase links for vinyl/digital
-Detailed release pages
-Filter by artist/year/format
-
-Events page
-Upcoming label nights/tours
-Photo galleries
-Ticket integration
-Past events archive
-
-Shop page
-Vinyl and digital releases
-Merch items
-Shopping cart/checkout
-Inventory management
-
-Additional pages
-About/label info
-Demo submission
-Blog/news
-Contact/booking
-
 Technical requirements
-TypeScript throughout
-Responsive layouts (mobile-first)
-SEO optimization
-Loading states and error handling
-Image lazy loading
-API integration for dynamic content
-Secure authentication for admin
-Cache implementation
+- TypeScript throughout
+- Responsive layouts (mobile-first)
+- SEO optimization
+- Loading states and error handling
+- Image lazy loading
+- API integration for dynamic content
+- Secure authentication for admin
+- Cache implementation
 
 Design direction
-Underground techno aesthetic
-High contrast, minimal
-Subtle animations
-Consistent dark theme
-Emphasis on typography and imagery"
+- Underground techno aesthetic
+- High contrast, minimal
+- Subtle animations
+- Consistent dark theme
+- Emphasis on typography and imagery
