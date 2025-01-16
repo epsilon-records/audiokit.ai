@@ -53,7 +53,7 @@
             aria-label="Follow us on Instagram"
           >
             <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.instagram}>
-              <path d={Instagram.path} />
+              <path d={siInstagram.path} />
             </svg>
           </a>
           <a
