@@ -30,14 +30,14 @@
       <h1
         class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500"
       >
-        Turn Your Music Into
-        <span class="block mt-2">Your Empire</span>
+        Music Distribution
+        <span class="block mt-2">For The API Era</span>
       </h1>
 
-      <!-- Compelling subheading -->
+      <!-- Updated subheading to reinforce the tech-first message -->
       <p class="text-lg md:text-xl text-muted-foreground max-w-2xl leading-relaxed">
-        Professional music distribution, marketing, and industry services to help independent
-        artists reach millions of listeners worldwide.
+        Professional music distribution, marketing, and industry services. Built for developers, 
+        loved by artists, engineered for scale.
       </p>
 
       <!-- CTA Buttons -->
