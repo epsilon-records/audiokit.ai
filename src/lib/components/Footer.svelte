@@ -9,7 +9,7 @@
       <div>
         <h3 class="font-bold mb-4">Epsilon Records</h3>
         <p class="text-muted-foreground text-sm">
-          Underground acid techno label pushing boundaries since 2024.
+          Underground acid techno label pushing boundaries since 2023.
         </p>
       </div>
 
@@ -21,6 +21,7 @@
           <li><a href="/releases" class="hover:underline">Releases</a></li>
           <li><a href="/events" class="hover:underline">Events</a></li>
           <li><a href="/shop" class="hover:underline">Shop</a></li>
+          <li><a href="/faq" class="hover:underline">FAQ</a></li>
         </ul>
       </div>
 
