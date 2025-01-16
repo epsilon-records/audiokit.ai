@@ -7,11 +7,15 @@
     siTwitch,
     siTiktok,
     siMixcloud,
+    siSpotify,
+    siBeatport,
   } from 'simple-icons';
   const currentYear = $derived(new Date().getFullYear());
 
   // Define brand colors from Simple Icons
   const BRAND_COLORS = {
+    spotify: '#1DB954',
+    beatport: '#01FF95',
     instagram: '#E4405F',
     soundcloud: '#FF3300',
     bandcamp: '#408294',
@@ -58,6 +62,24 @@
       <div>
         <h3 class="font-bold mb-4">Follow Us</h3>
         <div class="flex flex-wrap gap-4">
+          <a
+            href="https://open.spotify.com/playlist/43DhfPn9asqiIZeOByH09e"
+            class="hover:opacity-80 transition-opacity"
+            aria-label="Follow us on Spotify"
+          >
+            <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.spotify}>
+              <path d={siSpotify.path} />
+            </svg>
+          </a>
+          <a
+            href="https://beatport.com/label/epsilon-records/112442"
+            class="hover:opacity-80 transition-opacity"
+            aria-label="Follow us on Beatport"
+          >
+            <svg role="img" viewBox="0 0 24 24" class="w-6 h-6" fill={BRAND_COLORS.beatport}>
+              <path d={siBeatport.path} />
+            </svg>
+          </a>
           <a
             href="https://instagram.com/epsilonrecords"
             class="hover:opacity-80 transition-opacity"
