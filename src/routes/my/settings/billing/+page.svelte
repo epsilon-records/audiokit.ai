@@ -51,11 +51,6 @@
       ctaText: 'Start Annual Plan',
     },
   ];
-
-  function handleSubscribe(plan: PricingPlan) {
-    // TODO: Implement subscription logic
-    console.log(`Subscribing to ${plan.name}`);
-  }
 </script>
 
 <SettingsContainer title="Billing & Subscription">
