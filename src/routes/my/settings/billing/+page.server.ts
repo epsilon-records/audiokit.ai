@@ -1,125 +1,69 @@
-// import { redirect } from '@sveltejs/kit';
-// import type { PageServerLoad } from './$types';
+import { error, redirect } from '@sveltejs/kit';
+import type { PageServerLoad } from './$types';
+import Stripe from 'stripe';
+import { STRIPE_SECRET_KEY } from '$env/static/private';
 
-// export const load: PageServerLoad = async () => {
-//     throw redirect(302, 'https://buy.stripe.com/aEU9CLa1abUDcNy145');
-// };
+const stripe = new Stripe(STRIPE_SECRET_KEY);
 
-// import { error, fail, redirect } from '@sveltejs/kit';
-// import type { PageServerLoad } from './$types';
-// import Stripe from 'stripe';
-// import { STRIPE_SECRET_KEY, STRIPE_PRICE_IDS } from '$env/static/private';
+interface StripePlan {
+    id: string;
+    interval: 'month' | 'year';
+    amount: number;
+}
 
-// const stripe = new Stripe(STRIPE_SECRET_KEY);
+interface SubscriptionData {
+    id: string;
+    status: Stripe.Subscription.Status;
+    current_period_end: number;
+    cancel_at_period_end: boolean;
+    plan: StripePlan;
+}
 
-// export const load = (async ({ locals, url }) => {
-//     const PRICE_IDS = JSON.parse(STRIPE_PRICE_IDS);
-//     if (!locals.auth?.userId) {
-//         throw redirect(307, '/sign-in');
-//     } else if (!locals.auth?.orgId) {
-//         throw redirect(302, '/my/settings/create');
-//     } else if (!stripe) {
-//         throw error(500, 'Internal server error');
-//     }
-
-//   try {
-//     // Get current subscription if any
-//     const subscriptions = await stripe.subscriptions.list({
-//       customer: locals.auth.orgId,
-//       status: 'active',
-//       expand: ['data.plan.product']
-//     });
-
-//     // Get all products and prices
-//     const products = await stripe.products.list({
-//       active: true,
-//       expand: ['data.default_price']
-//     });
-
-//     const prices = await stripe.prices.list({
-//       active: true,
-//       type: 'recurring',
-//       expand: ['data.product']
-//     });
-
-//     // Format pricing data
-//     const plans = products.data.map((product: any) => {
-//       const price = prices.data.find((p: any) => p.product === product.id);
-//       return {
-//         id: price?.id || '',
-//         productId: product.id,
-//         name: product.name,
-//         description: product.description,
-//         price: price ? (price.unit_amount || 0) / 100 : 0,
-//         interval: price?.recurring?.interval || 'month',
-//         features: product.metadata.features ? JSON.parse(product.metadata.features) : [],
-//         isPopular: product.metadata.isPopular === 'true'
-//       };
-//     });
-
-//     return {
-//       currentPlan: subscriptions.data[0] || null,
-//       plans,
-//       customerId: locals.auth.orgId
-//     };
-//   } catch (err) {
-//     console.error('Error loading billing data:', err);
-//     throw error(500, 'Internal server error');
-//   }
-// }) satisfies PageServerLoad;
-
-// export const actions = {
-//   subscribe: async ({ request, locals, url }) => {
-//     const PRICE_IDS = JSON.parse(STRIPE_PRICE_IDS);
+export const load = (async ({ locals }) => {
+    const { auth } = locals;
     
-//     if (!locals.auth?.userId || !locals.auth?.orgId) {
-//       throw error(401, 'Unauthorized');
-//     }
+    if (!auth?.userId) {
+        throw redirect(307, '/sign-in');
+    }
 
-//     const data = await request.formData();
-//     const priceId = data.get('priceId')?.toString();
+    try {
+        const [customer] = (await stripe.customers.list({
+            email: auth.email,
+            limit: 1
+        })).data;
 
-//     if (!priceId || !PRICE_IDS.includes(priceId)) {
-//       throw error(400, 'Invalid price ID');
-//     }
+        if (!customer) {
+            return { subscription: null };
+        }
 
-//     try {
-//       const session = await stripe.checkout.sessions.create({
-//         customer: locals.auth.orgId,
-//         line_items: [{ price: priceId, quantity: 1 }],
-//         mode: 'subscription',
-//         success_url: `${url.origin}/my/settings/billing?success=true`,
-//         cancel_url: `${url.origin}/my/settings/billing?canceled=true`,
-//         allow_promotion_codes: true,
-//         billing_address_collection: 'required',
-//         customer_update: {
-//           address: 'auto',
-//           name: 'auto'
-//         }
-//       });
+        const [subscription] = (await stripe.subscriptions.list({
+            customer: customer.id,
+            limit: 1,
+            status: 'active',
+            expand: ['data.plan']
+        })).data;
 
-//       return { url: session.url };
-//     } catch (err) {
-//       console.error('Stripe session creation failed:', err);
-//       throw error(500, 'Internal server error');
-//     }
-//   },
+        if (!subscription) {
+            return { subscription: null };
+        }
 
-//   manageSubscription: async ({ locals, url }) => {
-//     if (!locals.auth?.orgId) {
-//       throw error(401, 'Unauthorized');
-//     }
+        const plan = subscription.items.data[0]?.plan;
 
-//     try {
-//       const session = await stripe.billingPortal.sessions.create({
-//         customer: locals.auth.orgId,
-//         return_url: `${url.origin}/my/settings/billing`
-//       });
+        const subscriptionData: SubscriptionData = {
+            id: subscription.id,
+            status: subscription.status,
+            current_period_end: subscription.current_period_end,
+            cancel_at_period_end: subscription.cancel_at_period_end,
+            plan: {
+                id: plan?.id ?? '',
+                interval: plan?.interval as 'month' | 'year',
+                amount: (plan?.amount ?? 0) / 100
+            }
+        };
 
-//       return { url: session.url };
-//     } catch (err) {
-//       console.error('Billing portal session creation failed:', err);
-//       throw error(500, 'Internal server error');
-//     }
-//   }
-// }; 
+        return { subscription: subscriptionData };
+    } catch (err) {
+        console.error('Error fetching subscription:', err);
+        throw error(500, 'Failed to fetch subscription details');
+    }
+}) satisfies PageServerLoad; 

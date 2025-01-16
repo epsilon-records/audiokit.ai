@@ -20,19 +20,23 @@
 	},
 	"[html]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"editor.formatOnSave": true
+		"editor.formatOnSave": true,
+		"editor.formatOnType": true
 	},
 	"[javascript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"editor.formatOnSave": true
+		"editor.formatOnSave": true,
+		"editor.formatOnType": true
 	},
 	"[typescript]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"editor.formatOnSave": true
+		"editor.formatOnSave": true,
+		"editor.formatOnType": true
 	},
 	"[json]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"editor.formatOnSave": true
+		"editor.formatOnSave": true,
+		"editor.formatOnType": true
 	},
 	"[markdown]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
@@ -42,13 +46,15 @@
 			"strings": "on",
 			"other": "on"
 		},
-		"editor.wordBasedSuggestions": "off"
+		"editor.wordBasedSuggestions": "off",
+		"editor.formatOnType": true
 	},
 	"files.associations": {
 		"*.css": "tailwindcss"
 	},
 	"[tailwindcss]": {
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"editor.formatOnSave": true
+		"editor.formatOnSave": true,
+		"editor.formatOnType": true
 	}
 }
