@@ -67,10 +67,10 @@
       </div>
 
       <!-- DSP Logos -->
-      <div class="border-t border-border/40 mt-16 pt-8 w-full max-w-3xl">
+      <div class="border-t border-border/40 mt-16 pt-8 max-w-3xl">
         <p class="text-sm text-muted-foreground mb-6">Available on all major platforms</p>
         <div
-          class="grid grid-cols-3 md:grid-cols-3 gap-4 md:gap-6 items-center justify-items-center"
+          class="grid grid-cols-4 md:grid-cols-6 gap-4 md:gap-6 items-center justify-items-center"
         >
           <!-- Music Platforms -->
           <svg
