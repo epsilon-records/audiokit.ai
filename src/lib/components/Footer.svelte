@@ -61,7 +61,7 @@
       <!-- Social -->
       <div>
         <h3 class="font-bold mb-4">Follow Us</h3>
-        <div class="flex flex-wrap gap-4">
+        <div class="grid grid-cols-5 gap-4">
           <a
             href="https://open.spotify.com/playlist/43DhfPn9asqiIZeOByH09e"
             class="hover:opacity-80 transition-opacity"
