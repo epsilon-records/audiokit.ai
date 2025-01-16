@@ -24,6 +24,10 @@
   }
 </script>
 
-<form bind:this={formElement} on:submit={handleSubmit} class="space-y-6 {className}">
-  <slot {formData} {errors} />
+<form 
+  bind:this={formElement} 
+  onsubmit={handleSubmit} 
+  class="space-y-6 {className}"
+>
+  {@render children({ formData, errors })}
 </form>

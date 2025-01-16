@@ -50,7 +50,7 @@
                 </span>
                 <button
                   class="text-sm text-primary hover:underline"
-                  on:click={() => goto(`/my/settings/releases/${release.id}`)}
+                  onclick={() => goto(`/my/settings/releases/${release.id}`)}
                 >
                   Edit
                 </button>

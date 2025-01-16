@@ -1,6 +1,6 @@
 <!-- AudioPlayer.svelte -->
 <script lang="ts">
-  import { audioStore } from '$lib/stores/audioStore';
+  import { audioStore } from '$lib/stores/audioStore.svelte';
   import { Button } from '$lib/components/ui/button';
   import { Slider } from '$lib/components/ui/slider';
   import { PlayIcon, PauseIcon } from 'lucide-svelte';
@@ -51,9 +51,9 @@
   <div class="fixed bottom-0 left-0 right-0 bg-background border-t p-4">
     <audio
       bind:this={audio}
-      on:timeupdate={handleTimeUpdate}
-      on:ended={() => (isPlaying = false)}
-    />
+      ontimeupdate={handleTimeUpdate}
+      onended={() => (isPlaying = false)}
+    ></audio>
     
     <div class="container mx-auto flex items-center gap-4">
       <img

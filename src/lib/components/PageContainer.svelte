@@ -10,11 +10,11 @@
   }>();
 </script>
 
-<div class="min-h-screen {bgColor}">
-  <div class="container mx-auto px-4 pt-32 pb-12">
+<div class="min-h-screen py-24">
+  <div class="container mx-auto px-4">
     {#if title}
       <h1 class="text-4xl font-bold {textColor} mb-12">{title}</h1>
     {/if}
-    <slot />
+    {@render children()}
   </div>
 </div>

@@ -150,7 +150,7 @@
                   {...props}
                   class="textarea textarea-bordered bg-white text-gray-900 h-32"
                   bind:value={$formData.description}
-                />
+                ></textarea>
               {/snippet}
             </Control>
             <Description class="text-sm">Describe your release in detail.</Description>

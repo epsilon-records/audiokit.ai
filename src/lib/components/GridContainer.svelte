@@ -5,5 +5,5 @@
 </script>
 
 <div class="grid {cols} gap-8">
-  <slot />
+  {@render children()}
 </div>
