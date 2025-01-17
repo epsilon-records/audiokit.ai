@@ -33,9 +33,10 @@
         'Music distribution to major platforms',
         'Royalty tracking & reporting',
         'Contract templates & e-signing',
-        'Email support within 24 hours',
-        'Standard API access',
-        'Basic integrations',
+        '24/7 Slack channel support',
+        'Priority API access',
+        'Advanced integrations',
+        'Custom workflows',
       ],
     },
     {
