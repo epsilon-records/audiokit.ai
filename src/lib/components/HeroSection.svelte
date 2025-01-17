@@ -14,8 +14,8 @@
     <div class="flex flex-col items-center text-center space-y-4 md:space-y-8">
       <MainHeading {ANIMATION_BASE_DELAY} />
       <CtaButtons {ANIMATION_BASE_DELAY} />
-      <PlatformLogos {ANIMATION_BASE_DELAY} />
       <TechStack {ANIMATION_BASE_DELAY} />
+      <PlatformLogos {ANIMATION_BASE_DELAY} />
       <!-- <Stats {ANIMATION_BASE_DELAY} /> -->
     </div>
   </div>

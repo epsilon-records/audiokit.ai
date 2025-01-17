@@ -5,13 +5,13 @@
   import { fade } from 'svelte/transition';
 
   let width = $state(1920); // Default fallback
-  // let height = $state(1080);
+  let height = $state(1080);
   let mounted = $state(false);
 
   onMount(() => {
     const updateDimensions = () => {
       width = window.innerWidth;
-      // height = window.innerHeight;
+      height = window.innerHeight;
     };
 
     updateDimensions();
@@ -30,7 +30,7 @@
     <FlickeringGrid
       class="z-0 absolute inset-0 size-full"
       {width}
-      height={470}
+      {height}
       squareSize={width < 768 ? 10 : 14}
       gridGap={width < 768 ? 12 : 16}
       color="#CFFF04"

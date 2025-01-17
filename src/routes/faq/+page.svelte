@@ -13,10 +13,10 @@
         questions: category.questions.filter(
           (q) =>
             q.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            q.answer.toLowerCase().includes(searchQuery.toLowerCase()),
+            q.answer.toLowerCase().includes(searchQuery.toLowerCase())
         ),
       }))
-      .filter((category) => category.questions.length > 0),
+      .filter((category) => category.questions.length > 0)
   );
 
   function toggleQuestion(categoryIndex: number, questionIndex: number) {
@@ -31,7 +31,7 @@
 </script>
 
 <svelte:head>
-  <title>FAQ - Epsilon Distribution</title>
+  <title>FAQ - AudioKit Distribution</title>
   <meta
     name="description"
     content="Frequently asked questions about Epsilon music distribution service. Learn about our pricing, platforms, technical requirements, and more."
@@ -66,7 +66,7 @@
               <svg
                 class={cn(
                   'w-5 h-5 transition-transform',
-                  expandedQuestions.has(`${categoryIndex}-${questionIndex}`) ? 'rotate-180' : '',
+                  expandedQuestions.has(`${categoryIndex}-${questionIndex}`) ? 'rotate-180' : ''
                 )}
                 fill="none"
                 viewBox="0 0 24 24"

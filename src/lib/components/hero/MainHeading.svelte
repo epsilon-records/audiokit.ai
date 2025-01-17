@@ -1,22 +1,33 @@
 <script lang="ts">
-  import { fly } from 'svelte/transition';
+  import Typewriter from 'typewriter-effect/dist/core';
+  import { onMount } from 'svelte';
 
-  interface Props {
-    ANIMATION_BASE_DELAY: number;
-  }
-  let { ANIMATION_BASE_DELAY } = $props<Props>();
+  let elementRef: HTMLHeadingElement;
+
+  onMount(() => {
+    const typewriter = new Typewriter(elementRef, {
+      delay: 50,
+      cursor: '|',
+    });
+
+    typewriter
+      .typeString('Music Distribution')
+      .pauseFor(500)
+      .typeString('<br>For The API Era')
+      .pauseFor(1000)
+      .deleteChars(7)
+      .typeString('AI Era')
+      .start();
+  });
 </script>
 
-<div in:fly={{ y: 30, duration: 800, delay: ANIMATION_BASE_DELAY }} class="space-y-4">
-  <h1
-    class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500"
-  >
-    Music Distribution
-    <span class="block mt-2">For The API Era</span>
-  </h1>
+<h1
+  bind:this={elementRef}
+  class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500"
+/>
 
-  <p class="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-    Professional music distribution, marketing, and industry services. Built for developers, loved
-    by artists, engineered for scale.
-  </p>
-</div>
+<style>
+  :global(.Typewriter__cursor) {
+    @apply text-primary;
+  }
+</style>

@@ -1,5 +1,6 @@
 <script lang="ts">
   let isAnnual = $state(false);
+  let loadingTier = $state<string | null>(null);
 
   interface PricingTier {
     name: string;
@@ -12,31 +13,41 @@
 
   const pricingTiers: PricingTier[] = [
     {
-      name: 'Basic',
-      description: 'Perfect for individuals and small teams getting started',
-      monthlyPrice: 29,
-      annualPrice: 290, // 2 months free
+      name: 'Basic Label',
+      description: 'Perfect for individual artists and small labels getting started',
+      monthlyPrice: 19,
+      annualPrice: 99, // 2 months free
       features: [
-        'Up to 5 team members',
-        '10GB storage',
-        'Basic analytics',
-        'API access',
-        'Email support',
+        'Manage up to 5 artists',
+        '5 team members per artist',
+        '5GB media storage per artist',
+        'Advanced analytics dashboard',
+        'Release planning & scheduling',
+        'Music distribution to major platforms',
+        'Royalty tracking & reporting',
+        'Contract templates & e-signing',
+        'Email support within 24 hours',
+        'Standard API access',
         'Basic integrations',
       ],
     },
     {
-      name: 'Pro',
-      description: 'Advanced features for growing businesses',
+      name: 'Pro Label',
+      description: 'Advanced features for growing professional labels',
       monthlyPrice: 79,
-      annualPrice: 790, // 2 months free
+      annualPrice: 599, // 2 months free
       highlighted: true,
       features: [
+        'Unlimited artists',
         'Unlimited team members',
         'Unlimited storage',
-        'Advanced analytics',
+        'Advanced analytics dashboard',
+        'Release planning & scheduling',
+        'Music distribution to major platforms',
+        'Royalty tracking & reporting',
+        'Contract templates & e-signing',
+        '24/7 Slack channel support',
         'Priority API access',
-        '24/7 phone & email support',
         'Advanced integrations',
         'Custom workflows',
       ],
@@ -47,6 +58,32 @@
     basic: Math.round((pricingTiers[0].monthlyPrice * 12 - pricingTiers[0].annualPrice) / 12),
     pro: Math.round((pricingTiers[1].monthlyPrice * 12 - pricingTiers[1].annualPrice) / 12),
   });
+
+  async function handleCheckout(tier: PricingTier) {
+    loadingTier = tier.name;
+    try {
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tier: tier.name,
+          isAnnual,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const { url } = await response.json();
+      window.location.href = url;
+    } catch (err) {
+      console.error('Error creating checkout session:', err);
+      // You might want to show an error toast here
+    } finally {
+      loadingTier = null;
+    }
+  }
 </script>
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
@@ -64,7 +101,7 @@
       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 bg-primary"
       role="switch"
       aria-checked={isAnnual}
-      on:click={() => (isAnnual = !isAnnual)}
+      onclick={() => (isAnnual = !isAnnual)}
     >
       <span
         class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
@@ -111,7 +148,7 @@
           </p>
           {#if isAnnual}
             <p class="mt-1 text-sm text-green-600">
-              Save ${isAnnual ? (tier.monthlyPrice * 12 - tier.annualPrice) / 12 : 0}/mo with annual
+              Save ${(tier.monthlyPrice * 12 - tier.annualPrice).toFixed(2)}/year with annual
               billing
             </p>
           {/if}
@@ -138,14 +175,42 @@
           {/each}
         </ul>
 
-        <a
-          href="/signup"
+        <button
+          type="button"
+          onclick={() => handleCheckout(tier)}
+          disabled={loadingTier === tier.name}
           class="block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors {tier.highlighted
             ? 'bg-primary text-white hover:bg-primary/90'
             : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
         >
-          Start {tier.name} trial
-        </a>
+          {#if loadingTier === tier.name}
+            <span class="inline-flex items-center">
+              <svg
+                class="animate-spin -ml-1 mr-3 h-5 w-5"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  class="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  stroke-width="4"
+                ></circle>
+                <path
+                  class="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+              Processing...
+            </span>
+          {:else}
+            Start {tier.name} trial
+          {/if}
+        </button>
       </div>
     {/each}
   </div>
