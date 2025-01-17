@@ -1,0 +1,37 @@
+<script lang="ts">
+  import { Icon } from 'svelte-hero-icons';
+  import type { WidgetProps } from '$lib/types/dashboard';
+  import { cn } from '$lib/utils';
+
+  let { title, value, change, icon } = $props<WidgetProps>();
+
+  const formattedValue = $derived(
+    new Intl.NumberFormat('en-US', { notation: 'compact' }).format(value)
+  );
+
+  const changeColor = $derived(
+    cn('font-medium', {
+      'text-green-500': change && change > 0,
+      'text-red-500': change && change < 0,
+    })
+  );
+</script>
+
+<div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+  <div class="flex items-center justify-between">
+    <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium">{title}</h3>
+    {#if icon}
+      <Icon src={icon} class="w-6 h-6 text-purple-500" />
+    {/if}
+  </div>
+  <div class="mt-2">
+    <p class="text-3xl font-bold text-gray-900 dark:text-white">
+      {formattedValue}
+    </p>
+    {#if change !== undefined}
+      <p class={changeColor}>
+        {change > 0 ? '+' : ''}{change}%
+      </p>
+    {/if}
+  </div>
+</div>

@@ -28,7 +28,7 @@ const PRICE_IDS = {
 
 export async function POST({ request, url }) {
   try {
-    const { tier, isAnnual } = await request.json();
+    const { tier, isAnnual, email } = await request.json();
     if (!PRICE_IDS[tier as keyof typeof PRICE_IDS]) {
       throw error(400, 'Invalid pricing tier');
     }
@@ -36,6 +36,7 @@ export async function POST({ request, url }) {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
       payment_method_types: ['card'],
+      customer_email: email,
       line_items: [
         {
           price: priceId,
@@ -43,7 +44,7 @@ export async function POST({ request, url }) {
         },
       ],
       success_url: `${url.origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${url.origin}/pricing`,
+      cancel_url: `${url.origin}/dashboard?error=payment-cancelled`,
       automatic_tax: { enabled: false },
     });
     return json({ url: session.url });

@@ -2,12 +2,18 @@
   import { UserButton, SignedIn, SignedOut } from 'svelte-clerk';
   import { Icon, Bars3, XMark } from 'svelte-hero-icons';
   import { fade, slide } from 'svelte/transition';
+  import { page } from '$app/stores';
+  import { cn } from '$lib/utils';
 
   let isOpen = $state(false);
 
   const toggleMenu = () => {
     isOpen = !isOpen;
   };
+
+  function isActive(path: string) {
+    return $page.url.pathname.startsWith(path);
+  }
 
   // Close menu when clicking outside
   const handleClickOutside = (event: MouseEvent) => {
@@ -30,14 +36,25 @@
   });
 </script>
 
-<nav class="absolute top-0 w-full z-20">
+<nav
+  class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-200 dark:border-gray-700 dark:bg-gray-800/95 h-16"
+>
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center py-6">
-      <a href="/" class="text-orange-500 font-mono font-bold text-xl">AudioKit</a>
+      <div class="flex items-center gap-4">
+        <a href="/" class="flex items-center gap-2">
+          <img src="/logo.png" alt="AudioKit Logo" class="h-8 w-8 logo-image" />
+          <span
+            class="text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xl hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
+          >
+            AudioKit
+          </span>
+        </a>
+      </div>
 
       <!-- Mobile menu button -->
       <button
-        class="menu-button lg:hidden text-purple-500 hover:text-red-400 transition-colors"
+        class="menu-button lg:hidden text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
         onclick={toggleMenu}
       >
         {#if isOpen}
@@ -50,47 +67,73 @@
       <!-- Desktop menu -->
       <ul class="hidden lg:flex gap-8 text-lg">
         <li>
-          <a href="/services" class="hover:text-red-400 text-purple-500 transition-colors"
-            >Services</a
+          <a
+            href="/docs"
+            class={cn(
+              'transition-colors',
+              isActive('/docs')
+                ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+            )}
           >
-        </li>
-        <li>
-          <a href="/docs" class="hover:text-red-400 text-purple-500 transition-colors">Docs</a>
-        </li>
-        <li>
-          <a href="/pricing" class="hover:text-red-400 text-purple-500 transition-colors">Pricing</a
-          >
-        </li>
-        <li>
-          <a href="/releases" class="hover:text-red-400 text-purple-500 transition-colors"
-            >Releases</a
-          >
-        </li>
-        <li>
-          <a href="/artists" class="hover:text-red-400 text-purple-500 transition-colors">Artists</a
-          >
+            Docs
+          </a>
         </li>
         <SignedOut>
           <li>
             <a
+              href="/services"
+              class={cn(
+                'transition-colors',
+                isActive('/services')
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+              )}
+            >
+              Services
+            </a>
+          </li>
+          <li>
+            <a
+              href="/pricing"
+              class={cn(
+                'transition-colors',
+                isActive('/pricing')
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+              )}
+            >
+              Pricing
+            </a>
+          </li>
+          <li>
+            <a
               href="/sign-in"
-              class="btn btn-sm btn-primary text-lg hover:text-red-400 text-white transition-colors"
+              class="btn btn-sm btn-primary text-lg text-white hover:text-indigo-100 transition-colors"
               >Login</a
             >
           </li>
           <li>
             <a
               href="/sign-up"
-              class="btn btn-sm btn-secondary text-lg hover:text-green-300 text-white transition-colors"
+              class="btn btn-sm btn-secondary text-lg text-white hover:text-indigo-100 transition-colors"
               >Register</a
             >
           </li>
         </SignedOut>
         <SignedIn>
           <li>
-            <a href="/dashboard" class="hover:text-red-400 text-purple-500 transition-colors"
-              >Dashboard</a
+            <a
+              href="/dashboard"
+              class={cn(
+                'transition-colors',
+                isActive('/dashboard')
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+              )}
             >
+              Dashboard
+            </a>
           </li>
           <li>
             <UserButton afterSignOutUrl="/" />
@@ -102,57 +145,43 @@
     <!-- Mobile menu -->
     {#if isOpen}
       <div
-        class="mobile-menu lg:hidden absolute top-20 left-0 right-0 bg-black/95 border-t border-purple-500"
+        class="mobile-menu lg:hidden absolute top-20 left-0 right-0 bg-white/95 dark:bg-gray-800/95 border-t border-gray-200 dark:border-gray-700"
         transition:slide={{ duration: 200 }}
       >
         <ul class="container mx-auto px-4 py-4 flex flex-col gap-4">
           <li>
             <a
-              href="/services"
-              class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-              onclick={() => (isOpen = false)}>Services</a
-            >
-          </li>
-          <li>
-            <a
               href="/docs"
-              class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
+              class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
               onclick={() => (isOpen = false)}>Docs</a
-            >
-          </li>
-          <li>
-            <a
-              href="/pricing"
-              class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-              onclick={() => (isOpen = false)}>Pricing</a
-            >
-          </li>
-          <li>
-            <a
-              href="/releases"
-              class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-              onclick={() => (isOpen = false)}>Releases</a
-            >
-          </li>
-          <li>
-            <a
-              href="/artists"
-              class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-              onclick={() => (isOpen = false)}>Artists</a
             >
           </li>
           <SignedOut>
             <li>
               <a
+                href="/services"
+                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                onclick={() => (isOpen = false)}>Services</a
+              >
+            </li>
+            <li>
+              <a
+                href="/pricing"
+                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                onclick={() => (isOpen = false)}>Pricing</a
+              >
+            </li>
+            <li>
+              <a
                 href="/sign-in"
-                class="block py-2 btn btn-sm btn-primary text-lg hover:text-red-400 text-white transition-colors"
+                class="block py-2 btn btn-sm btn-primary text-lg text-white hover:text-indigo-100 transition-colors"
                 onclick={() => (isOpen = false)}>Login</a
               >
             </li>
             <li>
               <a
                 href="/sign-up"
-                class="block py-2 btn btn-sm btn-secondary text-lg hover:text-green-300 text-white transition-colors"
+                class="block py-2 btn btn-sm btn-secondary text-lg text-white hover:text-indigo-100 transition-colors"
                 onclick={() => (isOpen = false)}>Register</a
               >
             </li>
@@ -161,7 +190,7 @@
             <li>
               <a
                 href="/dashboard"
-                class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
+                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
                 onclick={() => (isOpen = false)}>Dashboard</a
               >
             </li>
@@ -174,3 +203,23 @@
     {/if}
   </div>
 </nav>
+
+<style>
+  @keyframes sway {
+    0%,
+    100% {
+      transform: rotate(-5deg);
+    }
+    50% {
+      transform: rotate(5deg);
+    }
+  }
+
+  .logo-image {
+    transition: transform 0.3s ease;
+  }
+
+  .logo-image:hover {
+    animation: sway 1s ease-in-out infinite;
+  }
+</style>

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { fade } from 'svelte/transition';
   import {
     siSpotify,
     siApplemusic,
@@ -18,12 +17,12 @@
   interface Props {
     ANIMATION_BASE_DELAY: number;
   }
-  const { ANIMATION_BASE_DELAY } = $props<Props>();
+  let { ANIMATION_BASE_DELAY } = $props<Props>();
 </script>
 
 <div
   in:fade={{ duration: 1000, delay: ANIMATION_BASE_DELAY + 600 }}
-  class="w-full max-w-3xl space-y-6 pt-8 border-t border-border/40"
+  class="w-full max-w-xl space-y-6 pt-8 border-t border-border/40"
 >
   <p class="text-sm text-muted-foreground">Available on all major platforms</p>
   <div

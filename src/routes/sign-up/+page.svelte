@@ -5,9 +5,20 @@
   import AuthContainer from '$lib/components/AuthContainer.svelte';
 </script>
 
-<AuthContainer title="Sign Up">
+<svelte:head>
+  <title>Sign Up | AudioKit</title>
+  <meta name="description" content="Create your AudioKit account" />
+</svelte:head>
+
+<AuthContainer title="Create Account">
   <SignUp
-    appearance={{ baseTheme: $mode === 'dark' ? dark : neobrutalism }}
+    appearance={{
+      baseTheme: $mode === 'dark' ? dark : neobrutalism,
+      variables: {
+        spacingUnit: '16px',
+        borderRadius: '8px',
+      },
+    }}
     redirectUrl="/my/settings/profile"
   />
 </AuthContainer>

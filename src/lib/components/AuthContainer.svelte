@@ -1,16 +1,9 @@
 <script lang="ts">
-  let { 
-    title,
-    children 
-  } = $props<{
-    title: string;
-    children: () => any;
-  }>();
+  // No props needed anymore
 </script>
 
-<div class="min-h-screen flex items-center justify-center">
-  <div class="m-4">
-    <h1 class="text-2xl font-bold mb-4 text-center">{title}</h1>
-    {@render children()}
+<div class="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-8">
+  <div class="w-full max-w-md bg-card rounded-lg p-6">
+    <slot />
   </div>
 </div>

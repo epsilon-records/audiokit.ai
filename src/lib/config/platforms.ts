@@ -1,9 +1,9 @@
- export const musicPlatforms = [
+export const musicPlatforms = [
   { id: 'spotify', label: 'Spotify', placeholder: 'Spotify Artist URL' },
   { id: 'apple_music', label: 'Apple Music', placeholder: 'Apple Music URL' },
   { id: 'soundcloud', label: 'SoundCloud', placeholder: 'SoundCloud URL' },
   { id: 'bandcamp', label: 'Bandcamp', placeholder: 'Bandcamp URL' },
-  { id: 'mixcloud', label: 'Mixcloud', placeholder: 'Mixcloud URL' }
+  { id: 'mixcloud', label: 'Mixcloud', placeholder: 'Mixcloud URL' },
 ];
 
 export const socialPlatforms = [
@@ -15,12 +15,12 @@ export const socialPlatforms = [
   { id: 'youtube', label: 'YouTube', placeholder: 'YouTube Channel URL' },
   { id: 'twitch', label: 'Twitch', placeholder: 'Twitch Channel URL' },
   { id: 'snapchat', label: 'Snapchat', placeholder: 'Snapchat URL' },
-  { id: 'linkedin', label: 'LinkedIn', placeholder: 'LinkedIn URL' }
+  { id: 'linkedin', label: 'LinkedIn', placeholder: 'LinkedIn URL' },
 ];
 
 export const eventPlatforms = [
   { id: 'songkick', label: 'Songkick', placeholder: 'Songkick URL' },
-  { id: 'bandsintown', label: 'Bandsintown', placeholder: 'Bandsintown URL' }
+  { id: 'bandsintown', label: 'Bandsintown', placeholder: 'Bandsintown URL' },
 ];
 
 export const hiddenArtistFields = [
@@ -33,5 +33,5 @@ export const hiddenArtistFields = [
   'city',
   'country',
   'artist_photos',
-  'anr'
+  'anr',
 ];

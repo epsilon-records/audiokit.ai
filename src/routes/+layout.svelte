@@ -3,8 +3,7 @@
   import { ClerkProvider } from 'svelte-clerk';
   import Nav from '$lib/components/Nav.svelte';
   import Footer from '$lib/components/Footer.svelte';
-  import AudioPlayer from '$lib/components/AudioPlayer.svelte';
-  import { audioStore } from '$lib/stores/audioStore.svelte';
+  import { Toaster } from 'svelte-sonner';
   import type { Snippet } from 'svelte';
   import { goto } from '$app/navigation';
   import { PUBLIC_CLERK_PUBLISHABLE_KEY } from '$env/static/public';
@@ -16,10 +15,12 @@
 </script>
 
 <ClerkProvider {routerPush} {routerReplace} publishableKey={PUBLIC_CLERK_PUBLISHABLE_KEY}>
-  <Nav />
-  <main class="min-h-[calc(100vh-64px)]">
-    {@render children()}
-  </main>
-  <Footer />
-  <!-- <AudioPlayer /> -->
+  <div class="min-h-screen flex flex-col">
+    <Nav />
+    <main class="flex-1 pt-16">
+      {@render children()}
+    </main>
+    <Footer />
+  </div>
+  <Toaster richColors />
 </ClerkProvider>

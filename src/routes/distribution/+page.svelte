@@ -1,6 +1,14 @@
-<div class="min-h-screen bg-amber-100">
-  <div class="container mx-auto px-4 pt-32 pb-12">
-    <h1 class="text-4xl font-bold text-amber-400 mb-4">Distribution</h1>
+<script lang="ts">
+  import PageContainer from '$lib/components/PageContainer.svelte';
+</script>
+
+<svelte:head>
+  <title>Distribution | AudioKit</title>
+  <meta name="description" content="Music distribution services" />
+</svelte:head>
+
+<PageContainer title="Distribution" bgColor="bg-amber-100" textColor="text-amber-400">
+  <div class="flex items-center justify-center py-12">
     <p class="text-2xl text-lime-800 animate-pulse">Coming soon...</p>
   </div>
-</div>
+</PageContainer>

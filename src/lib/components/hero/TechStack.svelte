@@ -5,30 +5,30 @@
   interface Props {
     ANIMATION_BASE_DELAY: number;
   }
-  const { ANIMATION_BASE_DELAY } = $props<Props>();
+  let { ANIMATION_BASE_DELAY } = $props<Props>();
 </script>
 
 <div
   in:fade={{ duration: 1000, delay: ANIMATION_BASE_DELAY + 800 }}
-  class="w-full max-w-3xl space-y-6 pt-8 border-t border-border/40"
+  class="w-full max-w-lg space-y-6 pt-8 border-t border-border/40"
 >
   <p class="text-sm text-muted-foreground">Integrate With Your Stack</p>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
     <div class="flex flex-col items-center space-y-2 p-4 rounded-lg border border-border/40">
-      <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24">
+      <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24">
         <path fill="currentColor" d={siOpenapiinitiative.path} />
       </svg>
       <span class="text-sm font-medium">REST API</span>
     </div>
     <div class="flex flex-col items-center space-y-2 p-4 rounded-lg border border-border/40">
-      <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24">
+      <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24">
         <path fill="currentColor" d={siGraphql.path} />
       </svg>
       <span class="text-sm font-medium">GraphQL</span>
     </div>
     <div class="flex flex-col items-center space-y-2 p-4 rounded-lg border border-border/40">
       <svg
-        class="w-8 h-8 text-primary"
+        class="w-6 h-6 text-primary"
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
@@ -43,7 +43,7 @@
       <span class="text-sm font-medium">Webhooks</span>
     </div>
     <div class="flex flex-col items-center space-y-2 p-4 rounded-lg border border-border/40">
-      <svg class="w-8 h-8 text-primary" viewBox="0 0 24 24">
+      <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24">
         <path fill="currentColor" d={siNpm.path} />
       </svg>
       <span class="text-sm font-medium">SDKs</span>

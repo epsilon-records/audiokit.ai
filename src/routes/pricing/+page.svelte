@@ -1,6 +1,12 @@
 <script lang="ts">
+  import { goto } from '$app/navigation';
   import { SignedIn, SignedOut } from 'svelte-clerk';
-  let isAnnual = $state(false);
+  import { toast } from 'svelte-sonner';
+  import { page } from '$app/state';
+
+  let { data } = $props();
+  let email = $derived(data.email);
+  let isAnnual = $state(true);
   let loadingTier = $state<string | null>(null);
 
   interface PricingTier {
@@ -62,27 +68,33 @@
 
   async function handleCheckout(tier: PricingTier) {
     loadingTier = tier.name;
-    try {
-      const response = await fetch('/api/create-checkout-session', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+    if (email) {
+      try {
+        const payload = {
           tier: tier.name,
           isAnnual,
-        }),
-      });
+          email: email,
+        };
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+        const response = await fetch('/api/create-checkout-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create checkout session');
+        }
+
+        const { url } = await response.json();
+        window.location.href = url;
+      } catch (err) {
+        toast.error('Failed to start checkout process. Please try again.');
+      } finally {
+        loadingTier = null;
       }
-
-      const { url } = await response.json();
-      window.location.href = url;
-    } catch (err) {
-      console.error('Error creating checkout session:', err);
-      // You might want to show an error toast here
-    } finally {
-      loadingTier = null;
+    } else {
+      await goto('/sign-up');
     }
   }
 </script>
@@ -92,7 +104,6 @@
     <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
       Simple, transparent pricing
     </h1>
-    <p class="mt-4 text-xl text-gray-600">Start free for 14 days. No credit card required.</p>
   </div>
 
   <div class="mt-12 flex justify-center items-center gap-3">
@@ -143,14 +154,15 @@
         <div class="mb-6">
           <p class="flex items-baseline">
             <span class="text-5xl font-bold tracking-tight text-gray-900">
-              ${isAnnual ? Math.round(tier.annualPrice / 12) : tier.monthlyPrice}
+              ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
             </span>
-            <span class="ml-1 text-xl font-semibold text-gray-600">/month</span>
+            <span class="ml-1 text-xl font-semibold text-gray-600">
+              {isAnnual ? '/year' : '/month'}
+            </span>
           </p>
           {#if isAnnual}
             <p class="mt-1 text-sm text-green-600">
-              Save ${(tier.monthlyPrice * 12 - tier.annualPrice).toFixed(2)}/year with annual
-              billing
+              Save ${(tier.monthlyPrice * 12 - tier.annualPrice).toFixed(2)} with annual billing
             </p>
           {/if}
         </div>
@@ -228,9 +240,4 @@
       </div>
     {/each}
   </div>
-
-  <p class="mt-12 text-center text-sm text-gray-600">
-    All plans include a 14-day free trial. No credit card required.
-    <a href="/terms" class="font-medium text-primary hover:underline">Terms apply</a>
-  </p>
 </div>

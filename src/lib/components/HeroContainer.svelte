@@ -23,7 +23,7 @@
 </script>
 
 <section
-  class="relative min-h-[100svh] flex items-center justify-center overflow-hidden bg-neutral-100"
+  class="relative min-h-[80vh] flex items-center justify-center overflow-hidden bg-neutral-100"
   in:fade={{ duration: 1000, delay: 200 }}
 >
   {#if mounted}
