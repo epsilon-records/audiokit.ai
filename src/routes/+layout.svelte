@@ -7,6 +7,7 @@
   import { audioStore } from '$lib/stores/audioStore.svelte';
   import type { Snippet } from 'svelte';
   import { goto } from '$app/navigation';
+  import { PUBLIC_CLERK_PUBLISHABLE_KEY } from '$env/static/public';
 
   let { children } = $props<{ children: Snippet }>();
 
@@ -14,11 +15,7 @@
   const routerReplace = (to: string) => goto(to, { replaceState: true });
 </script>
 
-<ClerkProvider
-  {routerPush}
-  {routerReplace}
-  publishableKey={import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY}
->
+<ClerkProvider {routerPush} {routerReplace} publishableKey={PUBLIC_CLERK_PUBLISHABLE_KEY}>
   <Nav />
   <main class="min-h-[calc(100vh-64px)]">
     {@render children()}
