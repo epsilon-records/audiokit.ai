@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { SignedIn, SignedOut } from 'svelte-clerk';
   let isAnnual = $state(false);
   let loadingTier = $state<string | null>(null);
 
@@ -16,7 +17,7 @@
       name: 'Basic Label',
       description: 'Perfect for individual artists and small labels getting started',
       monthlyPrice: 19,
-      annualPrice: 99, // 2 months free
+      annualPrice: 99,
       features: [
         'Manage up to 5 artists',
         '5 team members per artist',
@@ -35,7 +36,7 @@
       name: 'Pro Label',
       description: 'Advanced features for growing professional labels',
       monthlyPrice: 79,
-      annualPrice: 599, // 2 months free
+      annualPrice: 599,
       highlighted: true,
       features: [
         'Unlimited artists',
@@ -175,42 +176,55 @@
           {/each}
         </ul>
 
-        <button
-          type="button"
-          onclick={() => handleCheckout(tier)}
-          disabled={loadingTier === tier.name}
-          class="block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors {tier.highlighted
-            ? 'bg-primary text-white hover:bg-primary/90'
-            : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
-        >
-          {#if loadingTier === tier.name}
-            <span class="inline-flex items-center">
-              <svg
-                class="animate-spin -ml-1 mr-3 h-5 w-5"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  class="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  stroke-width="4"
-                ></circle>
-                <path
-                  class="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-              Processing...
-            </span>
-          {:else}
+        <SignedIn>
+          <button
+            type="button"
+            onclick={() => handleCheckout(tier)}
+            disabled={loadingTier === tier.name}
+            class="block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors {tier.highlighted
+              ? 'bg-primary text-white hover:bg-primary/90'
+              : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
+          >
+            {#if loadingTier === tier.name}
+              <span class="inline-flex items-center">
+                <svg
+                  class="animate-spin -ml-1 mr-3 h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    class="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    stroke-width="4"
+                  ></circle>
+                  <path
+                    class="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Processing...
+              </span>
+            {:else}
+              Start {tier.name} trial
+            {/if}
+          </button>
+        </SignedIn>
+
+        <SignedOut>
+          <a
+            href="/sign-up"
+            class="block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors {tier.highlighted
+              ? 'bg-primary text-white hover:bg-primary/90'
+              : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
+          >
             Start {tier.name} trial
-          {/if}
-        </button>
+          </a>
+        </SignedOut>
       </div>
     {/each}
   </div>
