@@ -99,14 +99,14 @@
   }
 </script>
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
   <div class="text-center">
-    <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
+    <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-8">
       Simple, transparent pricing
     </h1>
   </div>
 
-  <div class="mt-12 flex justify-center items-center gap-3">
+  <div class="flex justify-center items-center gap-3 mb-8">
     <span class:text-gray-900={!isAnnual} class:text-gray-500={isAnnual}>Monthly</span>
     <button
       type="button"
@@ -129,15 +129,15 @@
     </span>
   </div>
 
-  <div class="mt-12 grid md:grid-cols-2 gap-8 lg:gap-12">
+  <div class="grid md:grid-cols-2 gap-6">
     {#each pricingTiers as tier}
       <div
-        class="relative flex flex-col rounded-2xl border p-8 shadow-sm"
+        class="relative flex flex-col rounded-xl border p-6 shadow-sm"
         class:ring-2={tier.highlighted}
         class:ring-primary={tier.highlighted}
       >
         {#if tier.highlighted}
-          <div class="absolute -top-4 right-8">
+          <div class="absolute -top-3 right-6">
             <span
               class="inline-flex items-center rounded-full bg-primary px-3 py-0.5 text-sm font-medium text-white"
             >
@@ -146,17 +146,17 @@
           </div>
         {/if}
 
-        <div class="mb-6">
-          <h3 class="text-2xl font-bold text-gray-900">{tier.name}</h3>
-          <p class="mt-2 text-gray-600">{tier.description}</p>
+        <div class="mb-4">
+          <h3 class="text-xl font-bold text-gray-900">{tier.name}</h3>
+          <p class="mt-2 text-sm text-gray-600">{tier.description}</p>
         </div>
 
-        <div class="mb-6">
+        <div class="mb-4">
           <p class="flex items-baseline">
-            <span class="text-5xl font-bold tracking-tight text-gray-900">
+            <span class="text-4xl font-bold tracking-tight text-gray-900">
               ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
             </span>
-            <span class="ml-1 text-xl font-semibold text-gray-600">
+            <span class="ml-1 text-lg font-semibold text-gray-600">
               {isAnnual ? '/year' : '/month'}
             </span>
           </p>
@@ -167,11 +167,11 @@
           {/if}
         </div>
 
-        <ul role="list" class="mb-8 space-y-4 flex-1">
+        <ul role="list" class="mb-6 space-y-3 flex-1">
           {#each tier.features as feature}
-            <li class="flex gap-3">
+            <li class="flex gap-2">
               <svg
-                class="h-6 w-6 flex-none text-primary"
+                class="h-5 w-5 flex-none text-primary"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke-width="1.5"
@@ -183,7 +183,7 @@
                   d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span class="text-gray-600">{feature}</span>
+              <span class="text-sm text-gray-600">{feature}</span>
             </li>
           {/each}
         </ul>
@@ -193,7 +193,7 @@
             type="button"
             onclick={() => handleCheckout(tier)}
             disabled={loadingTier === tier.name}
-            class="block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors {tier.highlighted
+            class="block w-full rounded-lg px-4 py-2 text-center text-sm font-semibold transition-colors {tier.highlighted
               ? 'bg-primary text-white hover:bg-primary/90'
               : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
           >
@@ -212,12 +212,12 @@
                     r="10"
                     stroke="currentColor"
                     stroke-width="4"
-                  ></circle>
+                  />
                   <path
                     class="opacity-75"
                     fill="currentColor"
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+                  />
                 </svg>
                 Processing...
               </span>
@@ -230,7 +230,7 @@
         <SignedOut>
           <a
             href="/sign-up"
-            class="block w-full rounded-lg px-4 py-2.5 text-center text-sm font-semibold transition-colors {tier.highlighted
+            class="block w-full rounded-lg px-4 py-2 text-center text-sm font-semibold transition-colors {tier.highlighted
               ? 'bg-primary text-white hover:bg-primary/90'
               : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
           >
