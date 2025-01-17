@@ -66,6 +66,21 @@
 
       <!-- Desktop menu -->
       <ul class="hidden lg:flex gap-8 text-lg">
+        <SignedIn>
+          <li>
+            <a
+              href="/dashboard"
+              class={cn(
+                'transition-colors',
+                isActive('/dashboard')
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+              )}
+            >
+              Dashboard
+            </a>
+          </li>
+        </SignedIn>
         <li>
           <a
             href="/docs"
@@ -123,19 +138,6 @@
         </SignedOut>
         <SignedIn>
           <li>
-            <a
-              href="/dashboard"
-              class={cn(
-                'transition-colors',
-                isActive('/dashboard')
-                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
-              )}
-            >
-              Dashboard
-            </a>
-          </li>
-          <li>
             <UserButton afterSignOutUrl="/" />
           </li>
         </SignedIn>
@@ -149,6 +151,15 @@
         transition:slide={{ duration: 200 }}
       >
         <ul class="container mx-auto px-4 py-4 flex flex-col gap-4">
+          <SignedIn>
+            <li>
+              <a
+                href="/dashboard"
+                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                onclick={() => (isOpen = false)}>Dashboard</a
+              >
+            </li>
+          </SignedIn>
           <li>
             <a
               href="/docs"
@@ -188,13 +199,6 @@
           </SignedOut>
           <SignedIn>
             <li>
-              <a
-                href="/dashboard"
-                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                onclick={() => (isOpen = false)}>Dashboard</a
-              >
-            </li>
-            <li class="py-2">
               <UserButton afterSignOutUrl="/" />
             </li>
           </SignedIn>
