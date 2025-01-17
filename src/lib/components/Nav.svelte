@@ -50,6 +50,9 @@
       <!-- Desktop menu -->
       <ul class="hidden lg:flex gap-8 text-lg">
         <li>
+          <a href="/docs" class="hover:text-red-400 text-purple-500 transition-colors">Docs</a>
+        </li>
+        <li>
           <a href="/services" class="hover:text-red-400 text-purple-500 transition-colors"
             >Services</a
           >
@@ -99,6 +102,13 @@
         transition:slide={{ duration: 200 }}
       >
         <ul class="container mx-auto px-4 py-4 flex flex-col gap-4">
+          <li>
+            <a
+              href="/docs"
+              class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
+              onclick={() => (isOpen = false)}>Docs</a
+            >
+          </li>
           <li>
             <a
               href="/services"
