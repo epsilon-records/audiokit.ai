@@ -222,7 +222,7 @@
                 Processing...
               </span>
             {:else}
-              Start {tier.name} trial
+              Subscribe to {tier.name}
             {/if}
           </button>
         </SignedIn>
@@ -234,7 +234,7 @@
               ? 'bg-primary text-white hover:bg-primary/90'
               : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
           >
-            Start {tier.name} trial
+            Subscribe to {tier.name}
           </a>
         </SignedOut>
       </div>
