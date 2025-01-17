@@ -13,7 +13,7 @@
       <div class="text-center py-6 text-muted-foreground">
         <p>
           No releases found. <a
-            href="/my/settings/releases/create"
+            href="/dashboard/releases/create"
             class="text-green-400 font-bold hover:text-green-600 transition-colors hover:underline"
             >Create your first release</a
           > to get started.
@@ -43,14 +43,14 @@
                     'px-2 py-1 text-xs rounded-full',
                     release.status === 'published'
                       ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800',
+                      : 'bg-yellow-100 text-yellow-800'
                   )}
                 >
                   {release.status}
                 </span>
                 <button
                   class="text-sm text-primary hover:underline"
-                  onclick={() => goto(`/my/settings/releases/${release.id}`)}
+                  onclick={() => goto(`/dashboard/releases/${release.id}`)}
                 >
                   Edit
                 </button>

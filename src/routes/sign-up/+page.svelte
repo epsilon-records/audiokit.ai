@@ -19,6 +19,6 @@
         borderRadius: '8px',
       },
     }}
-    redirectUrl="/my/settings/profile"
+    redirectUrl="/dashboard"
   />
 </AuthContainer>
