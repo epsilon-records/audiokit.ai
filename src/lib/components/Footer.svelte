@@ -29,9 +29,10 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
       <!-- About -->
       <div>
-        <h3 class="font-bold mb-4">Epsilon Records</h3>
+        <h3 class="font-bold mb-4">AudioKit</h3>
         <p class="text-muted-foreground text-sm">
-          Underground acid techno label pushing boundaries since 2023.
+          Specialized music distribution platform providing API access and AI-powered tools for
+          artists and developers.
         </p>
       </div>
 
@@ -137,7 +138,7 @@
     </div>
 
     <div class="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-      <p>© {currentYear} Epsilon Records. All rights reserved.</p>
+      <p>© {currentYear} AudioKit. All rights reserved.</p>
     </div>
   </div>
 </footer>

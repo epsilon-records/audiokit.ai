@@ -33,7 +33,7 @@
 <nav class="absolute top-0 w-full z-20">
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center py-6">
-      <a href="/" class="text-orange-500 font-mono font-bold text-xl">EPSILON</a>
+      <a href="/" class="text-orange-500 font-mono font-bold text-xl">AudioKit</a>
 
       <!-- Mobile menu button -->
       <button
@@ -50,11 +50,15 @@
       <!-- Desktop menu -->
       <ul class="hidden lg:flex gap-8 text-lg">
         <li>
+          <a href="/services" class="hover:text-red-400 text-purple-500 transition-colors"
+            >Services</a
+          >
+        </li>
+        <li>
           <a href="/docs" class="hover:text-red-400 text-purple-500 transition-colors">Docs</a>
         </li>
         <li>
-          <a href="/services" class="hover:text-red-400 text-purple-500 transition-colors"
-            >Services</a
+          <a href="/pricing" class="hover:text-red-400 text-purple-500 transition-colors">Pricing</a
           >
         </li>
         <li>
@@ -104,6 +108,13 @@
         <ul class="container mx-auto px-4 py-4 flex flex-col gap-4">
           <li>
             <a
+              href="/services"
+              class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
+              onclick={() => (isOpen = false)}>Services</a
+            >
+          </li>
+          <li>
+            <a
               href="/docs"
               class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
               onclick={() => (isOpen = false)}>Docs</a
@@ -111,9 +122,9 @@
           </li>
           <li>
             <a
-              href="/services"
+              href="/pricing"
               class="block py-2 hover:text-red-400 text-purple-500 transition-colors"
-              onclick={() => (isOpen = false)}>Services</a
+              onclick={() => (isOpen = false)}>Pricing</a
             >
           </li>
           <li>

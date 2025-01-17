@@ -24,7 +24,7 @@
       interval: 'month',
       emoji: '🚀',
       features: [
-        'Full access to Epsilon Distribution',
+        'Full access to AudioKit Distribution',
         'Priority support',
         'Advanced analytics',
         'Custom integrations',

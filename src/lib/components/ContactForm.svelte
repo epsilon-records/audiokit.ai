@@ -4,7 +4,7 @@
 
 <div class="flex flex-col gap-6">
   <p class="text-lg text-cyan-900">
-    Get in touch with Epsilon Records for demos, bookings, or general inquiries.
+    Get in touch with AudioKit for demos, bookings, or general inquiries.
   </p>
 
   <form class="flex flex-col gap-6">
