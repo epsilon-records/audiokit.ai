@@ -89,6 +89,7 @@ export const load: PageServerLoad = async ({ locals }) => {
           timestamp: stats.streaming.timestamp,
           platform: stats.streaming.platform,
         },
+        metadata: stats.metadata,
       },
       hasActiveSubscription,
     };

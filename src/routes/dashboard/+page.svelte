@@ -25,6 +25,24 @@
       timestamp: number;
       platform: string;
     };
+    metadata?: {
+      uuid: string;
+      slug: string;
+      name: string;
+      appUrl: string;
+      imageUrl: string;
+      countryCode: string;
+      genres: Array<{
+        root: string;
+        sub: string[];
+      }>;
+      biography: string;
+      isni: string;
+      ipi: string;
+      gender: 'male' | 'female' | 'other';
+      type: 'person' | 'group';
+      birthDate: string;
+    };
   }
 
   let { data } = $props<{ data: { stats?: Stats; hasActiveSubscription: boolean } }>();
@@ -50,6 +68,31 @@
         timestamp: Date.now(),
         platform: 'No Platform Connected',
       },
+      metadata: {
+        uuid: 'demo-id',
+        slug: 'demo-artist',
+        name: 'Demo Artist',
+        appUrl: '#',
+        imageUrl: '',
+        countryCode: 'US',
+        genres: [
+          {
+            root: 'Electronic',
+            sub: ['House', 'Techno'],
+          },
+          {
+            root: 'Pop',
+            sub: ['Indie Pop'],
+          },
+        ],
+        biography:
+          'This is a demo artist profile. Connect your platforms to see your real statistics.',
+        isni: '0000000000000000',
+        ipi: '00000000000',
+        gender: 'other',
+        type: 'person',
+        birthDate: '2024-01-01',
+      },
     }
   );
 
@@ -62,9 +105,9 @@
 
 <div class="container mx-auto px-4 py-8">
   <div class="mb-8">
-    <h1 class="text-4xl font-bold tracking-tight">Artist Profile</h1>
+    <h1 class="text-4xl font-bold tracking-tight">Dashboard Overview</h1>
     <p class="mt-2 text-lg text-muted-foreground">
-      Manage your artist information, biography, and social media presence.
+      Get insights into your performance metrics and manage your artist profile.
     </p>
 
     {#if !data.stats}
@@ -81,8 +124,88 @@
   </div>
 
   <div class="space-y-8">
-    <!-- Social Media Stats -->
+    <!-- Artist Information -->
     <div in:fly={{ y: 20, duration: 400, delay: 300 }} class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2
+          class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-emerald-500"
+        >
+          Artist Information
+        </h2>
+      </div>
+      {#if stats.metadata}
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+            <CardHeader
+              class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 pb-6"
+            >
+              <CardTitle>Artist Details</CardTitle>
+            </CardHeader>
+            <CardContent class="pt-6 space-y-4">
+              <div>
+                <p class="text-sm text-muted-foreground">Name</p>
+                <p class="text-lg font-semibold">{stats.metadata.name}</p>
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground">Type</p>
+                <p class="text-lg font-semibold capitalize">{stats.metadata.type}</p>
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground">Country</p>
+                <p class="text-lg font-semibold">{stats.metadata.countryCode}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+            <CardHeader
+              class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 pb-6"
+            >
+              <CardTitle>Genres</CardTitle>
+            </CardHeader>
+            <CardContent class="pt-6">
+              {#each stats.metadata.genres as genre}
+                <div class="mb-4">
+                  <p class="text-lg font-semibold capitalize">{genre.root}</p>
+                  {#if genre.sub.length > 0}
+                    <div class="flex flex-wrap gap-2 mt-2">
+                      {#each genre.sub as subGenre}
+                        <Badge variant="secondary" class="capitalize">{subGenre}</Badge>
+                      {/each}
+                    </div>
+                  {/if}
+                </div>
+              {/each}
+            </CardContent>
+          </Card>
+
+          <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+            <CardHeader
+              class="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950 dark:to-teal-900 pb-6"
+            >
+              <CardTitle>Professional Info</CardTitle>
+            </CardHeader>
+            <CardContent class="pt-6 space-y-4">
+              {#if stats.metadata.isni}
+                <div>
+                  <p class="text-sm text-muted-foreground">ISNI</p>
+                  <p class="text-lg font-mono">{stats.metadata.isni}</p>
+                </div>
+              {/if}
+              {#if stats.metadata.ipi}
+                <div>
+                  <p class="text-sm text-muted-foreground">IPI</p>
+                  <p class="text-lg font-mono">{stats.metadata.ipi}</p>
+                </div>
+              {/if}
+            </CardContent>
+          </Card>
+        </div>
+      {/if}
+    </div>
+
+    <!-- Social Media Stats -->
+    <div in:fly={{ y: 20, duration: 400, delay: 400 }} class="space-y-4">
       <div class="flex items-center justify-between">
         <h2
           class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500"
@@ -152,7 +275,7 @@
     </div>
 
     <!-- Streaming Stats -->
-    <div in:fly={{ y: 20, duration: 400, delay: 400 }} class="space-y-4">
+    <div in:fly={{ y: 20, duration: 400, delay: 500 }} class="space-y-4">
       <div class="flex items-center justify-between">
         <h2
           class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-500"
