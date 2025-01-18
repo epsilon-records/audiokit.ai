@@ -25,6 +25,7 @@ export class SoundchartsAPI {
 
   private async fetch<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
     const url = new URL(`${SOUNDCHARTS_BASE_URL}${endpoint}`);
+    console.log(url);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value);
