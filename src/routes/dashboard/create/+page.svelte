@@ -18,7 +18,7 @@
             href="/dashboard/create-artist"
             class="inline-flex w-full h-12 items-center justify-center btn btn-primary text-pink-100"
           >
-            Create Artist Profile
+            Manage New Artist
           </a>
         </div>
       </div>
