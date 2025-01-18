@@ -2,7 +2,6 @@
   import { goto } from '$app/navigation';
   import { SignedIn, SignedOut } from 'svelte-clerk';
   import { toast } from 'svelte-sonner';
-  import { page } from '$app/state';
 
   let { data } = $props();
   let email = $derived(data.email);
@@ -109,19 +108,13 @@
 
   <div class="flex justify-center items-center gap-3 mb-8">
     <span class:text-gray-900={!isAnnual} class:text-gray-500={isAnnual}>Monthly</span>
-    <button
-      type="button"
-      class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 bg-primary"
-      role="switch"
-      aria-checked={isAnnual}
-      onclick={() => (isAnnual = !isAnnual)}
-    >
-      <span
-        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-        class:translate-x-5={isAnnual}
-        class:translate-x-0={!isAnnual}
-      />
-    </button>
+    <input
+      type="checkbox"
+      class="toggle toggle-primary"
+      checked={isAnnual}
+      onchange={() => (isAnnual = !isAnnual)}
+      aria-label="Toggle billing period"
+    />
     <span class:text-gray-500={!isAnnual} class:text-gray-900={isAnnual}>
       Annual
       <span class="text-green-600 font-medium">
@@ -245,4 +238,4 @@
 
 <div
   class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
-/>
+></div>

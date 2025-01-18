@@ -4,6 +4,9 @@
   import { fade, slide } from 'svelte/transition';
   import { page } from '$app/stores';
   import { cn } from '$lib/utils';
+  import { mode } from 'mode-watcher';
+  import { neobrutalism, dark } from '@clerk/themes';
+  import ThemeSwitcher from '$lib/components/ThemeSwitcher.svelte';
 
   let isOpen = $state(false);
 
@@ -138,7 +141,19 @@
         </SignedOut>
         <SignedIn>
           <li>
-            <UserButton afterSignOutUrl="/" />
+            <ThemeSwitcher />
+          </li>
+          <li>
+            <UserButton
+              afterSignOutUrl="/"
+              appearance={{
+                baseTheme: $mode === 'dark' ? dark : neobrutalism,
+                variables: {
+                  spacingUnit: '16px',
+                  borderRadius: '8px',
+                },
+              }}
+            />
           </li>
         </SignedIn>
       </ul>
@@ -199,7 +214,19 @@
           </SignedOut>
           <SignedIn>
             <li>
-              <UserButton afterSignOutUrl="/" />
+              <ThemeSwitcher />
+            </li>
+            <li>
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  baseTheme: $mode === 'dark' ? dark : neobrutalism,
+                  variables: {
+                    spacingUnit: '16px',
+                    borderRadius: '8px',
+                  },
+                }}
+              />
             </li>
           </SignedIn>
         </ul>

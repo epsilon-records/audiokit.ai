@@ -4,6 +4,8 @@
   import { cn } from '$lib/utils';
   import { toast } from 'svelte-sonner';
   import { OrganizationSwitcher } from 'svelte-clerk';
+  import { neobrutalism, dark } from '@clerk/themes';
+  import { mode } from 'mode-watcher';
 
   async function handleManageSubscription() {
     try {
@@ -42,6 +44,11 @@
           afterSelectOrganizationUrl="/dashboard"
           afterLeaveOrganizationUrl="/dashboard"
           appearance={{
+            baseTheme: $mode === 'dark' ? dark : neobrutalism,
+            variables: {
+              spacingUnit: '16px',
+              borderRadius: '8px',
+            },
             elements: {
               rootBox: 'flex',
               organizationSwitcherTrigger:
@@ -61,6 +68,28 @@
           Profile
         </a>
         <a
+          href="/dashboard/team"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/team')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Team
+        </a>
+        <a
+          href="/dashboard/account"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/account')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Account
+        </a>
+        <a
           href="/dashboard/releases"
           class={cn(
             'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
@@ -73,7 +102,7 @@
         </a>
       </div>
       <div class="flex items-center gap-4">
-        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
+        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
         <span class="text-sm text-gray-600 dark:text-gray-400">
           Status:
           {#if page.data.hasActiveSubscription}
@@ -91,7 +120,7 @@
           {/if}
         </span>
         <button
-          on:click={handleManageSubscription}
+          onclick={handleManageSubscription}
           class="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
         >
           Manage Subscription
