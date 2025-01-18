@@ -199,7 +199,7 @@
   <form method="POST" class="space-y-6" enctype="multipart/form-data" use:enhance>
     <!-- Basic Information Card -->
     <Card>
-      <CardHeader>
+      <CardHeader class="bg-gradient-to-r from-blue-50 to-blue-100 pb-4">
         <CardTitle>👤 Artist Details</CardTitle>
       </CardHeader>
       <CardContent>
@@ -291,7 +291,7 @@
 
     <!-- Legal Details Card -->
     <Card>
-      <CardHeader>
+      <CardHeader class="bg-gradient-to-r from-purple-50 to-purple-100 pb-4">
         <CardTitle>📋 Legal Details</CardTitle>
       </CardHeader>
       <CardContent>
@@ -383,7 +383,7 @@
 
     <!-- Location Card -->
     <Card>
-      <CardHeader>
+      <CardHeader class="bg-gradient-to-r from-green-50 to-green-100 pb-4">
         <CardTitle>📍 Current Location</CardTitle>
       </CardHeader>
       <CardContent>
@@ -434,7 +434,7 @@
 
     <!-- Biography Card -->
     <Card>
-      <CardHeader>
+      <CardHeader class="bg-gradient-to-r from-yellow-50 to-yellow-100 pb-4">
         <CardTitle>📝 Artist Biography</CardTitle>
       </CardHeader>
       <CardContent>
@@ -555,7 +555,7 @@
 
     <!-- Music Platforms Card -->
     <Card>
-      <CardHeader>
+      <CardHeader class="bg-gradient-to-r from-red-50 to-red-100 pb-4">
         <CardTitle>🎵 Music Platforms</CardTitle>
       </CardHeader>
       <CardContent>
@@ -686,7 +686,7 @@
 
     <!-- Social Networks Card -->
     <Card>
-      <CardHeader>
+      <CardHeader class="bg-gradient-to-r from-indigo-50 to-indigo-100 pb-4">
         <CardTitle>🌐 Social Networks</CardTitle>
       </CardHeader>
       <CardContent>
@@ -817,7 +817,7 @@
 
     <!-- Event Platforms Card -->
     <Card>
-      <CardHeader>
+      <CardHeader class="bg-gradient-to-r from-pink-50 to-pink-100 pb-4">
         <CardTitle>🎫 Event Platforms</CardTitle>
       </CardHeader>
       <CardContent>
@@ -872,19 +872,19 @@
     <!-- Submit button card with transparent background -->
     <Card class="bg-transparent border-none shadow-none">
       <CardContent class="flex justify-end p-0">
-        <button class="btn btn-primary" type="submit">Save Changes</button>
+        <button class="btn" type="submit">Save Changes</button>
       </CardContent>
     </Card>
 
     <!-- Debug card remains the same -->
-    <Card>
-      <CardHeader>
+    <!-- <Card>
+      <CardHeader class="bg-gradient-to-r from-gray-50 to-gray-100 pb-4">
         <CardTitle>Debug Data</CardTitle>
       </CardHeader>
       <CardContent>
         <SuperDebug data={$formData} />
       </CardContent>
-    </Card>
+    </Card> -->
   </form>
 </div>
 

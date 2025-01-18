@@ -181,8 +181,8 @@
     {#if isOpen}
       <div
         bind:this={menuRef}
-        class="mobile-menu lg:hidden absolute top-20 left-0 right-0 bg-white/95 dark:bg-gray-800/95 border-t border-gray-200 dark:border-gray-700"
-        transition:slide={{ duration: 200 }}
+        class="mobile-menu lg:hidden fixed top-16 right-0 w-64 h-[calc(100vh-4rem)] bg-white/95 dark:bg-gray-800/95 border-l border-gray-200 dark:border-gray-700 overflow-y-auto"
+        transition:slide={{ duration: 200, axis: 'x' }}
       >
         <ul class="container mx-auto px-4 py-4 flex flex-col gap-4">
           <SignedIn>
@@ -247,7 +247,7 @@
             <li>
               <ThemeSwitcher />
             </li>
-            <li>
+            <li class="px-2">
               <UserButton
                 afterSignOutUrl="/"
                 appearance={{
