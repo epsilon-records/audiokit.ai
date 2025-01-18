@@ -1,6 +1,10 @@
 <script lang="ts">
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { formatNumber } from '$lib/utils/format';
+  import { fade, fly } from 'svelte/transition';
+  import { AlertCircle } from 'lucide-svelte';
+  import { Alert, AlertDescription } from '$lib/components/ui/alert';
+  import { Badge } from '$lib/components/ui/badge';
 
   interface Stats {
     followers: {
@@ -25,75 +29,119 @@
 
   let { data } = $props<{ data: { stats?: Stats; hasActiveSubscription: boolean } }>();
 
-  // Derived calculations for total engagement
-  let totalSocialEngagement = $derived(
-    data.stats
-      ? data.stats.followers.comments + data.stats.followers.likes + data.stats.followers.shares
-      : 0
+  // Add fake stats when no real stats are available
+  let stats = $derived(
+    data.stats ?? {
+      followers: {
+        comments: 0,
+        engagement: 0,
+        followers: 0,
+        likes: 0,
+        shares: 0,
+        views: 0,
+        platform: 'No Platform Connected',
+      },
+      streaming: {
+        streams: 0,
+        listeners: 0,
+        playlists: 0,
+        shares: 0,
+        views: 0,
+        timestamp: Date.now(),
+        platform: 'No Platform Connected',
+      },
+    }
   );
 
-  let totalStreamingEngagement = $derived(
-    data.stats ? data.stats.streaming.streams + data.stats.streaming.listeners : 0
+  let totalSocialEngagement = $derived(
+    stats.followers.comments + stats.followers.likes + stats.followers.shares
   );
+
+  let totalStreamingEngagement = $derived(stats.streaming.streams + stats.streaming.listeners);
 </script>
 
-{#if !data.stats}
-  <div class="flex flex-col items-center justify-center min-h-[50vh] gap-4">
-    <h2 class="text-2xl font-semibold">No Stats Available</h2>
-    <p class="text-muted-foreground">
-      We couldn't find any statistics for your artist profile. Please ensure your artist name is
-      correctly set up.
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold tracking-tight">Artist Profile</h1>
+    <p class="mt-2 text-lg text-muted-foreground">
+      Manage your artist information, biography, and social media presence.
     </p>
+
+    {#if !data.stats}
+      <div class="mt-4" in:fly={{ y: 20, duration: 400, delay: 200 }}>
+        <Badge
+          variant="outline"
+          class="bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800"
+        >
+          <AlertCircle class="h-4 w-4 mr-2" />
+          No statistics are available yet. Connect your platforms to start tracking your performance.
+        </Badge>
+      </div>
+    {/if}
   </div>
-{:else}
+
   <div class="space-y-8">
     <!-- Social Media Stats -->
-    <div class="space-y-4">
-      <h2 class="text-2xl font-semibold">Social Media Performance</h2>
+    <div in:fly={{ y: 20, duration: 400, delay: 300 }} class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2
+          class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500"
+        >
+          Social Media Performance
+        </h2>
+      </div>
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader>
+        <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <CardHeader
+            class="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950 dark:to-indigo-900 pb-6"
+          >
             <CardTitle>Followers</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent class="pt-6">
             <div class="text-2xl font-bold">
-              {formatNumber(data.stats.followers.followers)}
+              {formatNumber(stats.followers.followers)}
             </div>
             <p class="text-xs text-muted-foreground">
-              Platform: {data.stats.followers.platform}
+              Platform: {stats.followers.platform}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <CardHeader
+            class="bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-950 dark:to-violet-900 pb-6"
+          >
             <CardTitle>Engagement</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent class="pt-6">
             <div class="text-2xl font-bold">
-              {formatNumber(data.stats.followers.engagement)}
+              {formatNumber(stats.followers.engagement)}
             </div>
             <p class="text-xs text-muted-foreground">Total interactions</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <CardHeader
+            class="bg-gradient-to-br from-fuchsia-50 to-fuchsia-100 dark:from-fuchsia-950 dark:to-fuchsia-900 pb-6"
+          >
             <CardTitle>Total Views</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent class="pt-6">
             <div class="text-2xl font-bold">
-              {formatNumber(data.stats.followers.views)}
+              {formatNumber(stats.followers.views)}
             </div>
             <p class="text-xs text-muted-foreground">Across all content</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <CardHeader
+            class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 pb-6"
+          >
             <CardTitle>Social Activity</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent class="pt-6">
             <div class="text-2xl font-bold">
               {formatNumber(totalSocialEngagement)}
             </div>
@@ -104,52 +152,66 @@
     </div>
 
     <!-- Streaming Stats -->
-    <div class="space-y-4">
-      <h2 class="text-2xl font-semibold">Streaming Analytics</h2>
+    <div in:fly={{ y: 20, duration: 400, delay: 400 }} class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2
+          class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-cyan-500"
+        >
+          Streaming Analytics
+        </h2>
+      </div>
       <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader>
+        <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <CardHeader
+            class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 pb-6"
+          >
             <CardTitle>Total Streams</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent class="pt-6">
             <div class="text-2xl font-bold">
-              {formatNumber(data.stats.streaming.streams)}
+              {formatNumber(stats.streaming.streams)}
             </div>
             <p class="text-xs text-muted-foreground">
-              Platform: {data.stats.streaming.platform}
+              Platform: {stats.streaming.platform}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <CardHeader
+            class="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-950 dark:to-cyan-900 pb-6"
+          >
             <CardTitle>Monthly Listeners</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent class="pt-6">
             <div class="text-2xl font-bold">
-              {formatNumber(data.stats.streaming.listeners)}
+              {formatNumber(stats.streaming.listeners)}
             </div>
             <p class="text-xs text-muted-foreground">Unique listeners</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <CardHeader
+            class="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950 dark:to-teal-900 pb-6"
+          >
             <CardTitle>Playlist Inclusions</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent class="pt-6">
             <div class="text-2xl font-bold">
-              {formatNumber(data.stats.streaming.playlists)}
+              {formatNumber(stats.streaming.playlists)}
             </div>
             <p class="text-xs text-muted-foreground">Total playlists</p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <CardHeader
+            class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 pb-6"
+          >
             <CardTitle>Total Engagement</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent class="pt-6">
             <div class="text-2xl font-bold">
               {formatNumber(totalStreamingEngagement)}
             </div>
@@ -159,4 +221,4 @@
       </div>
     </div>
   </div>
-{/if}
+</div>

@@ -185,11 +185,10 @@
   }
 </script>
 
-<div class="container py-8 space-y-6">
-  <!-- Header without card -->
-  <div class="space-y-0.5">
-    <h1 class="text-2xl font-bold tracking-tight">Artist Profile</h1>
-    <p class="text-muted-foreground">
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold tracking-tight">Artist Profile</h1>
+    <p class="mt-2 text-lg text-muted-foreground">
       Manage your artist information, biography, and social media presence.
     </p>
     <div class="mt-4">
