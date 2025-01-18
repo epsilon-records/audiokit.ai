@@ -16,13 +16,17 @@
   });
 </script>
 
-<div class="space-y-4 p-4">
-  <div class="flex justify-between items-center">
-    <h1 class="text-2xl font-bold">Analytics Dashboard</h1>
+<div class="container mx-auto px-4 py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1
+      class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500"
+    >
+      Analytics Dashboard
+    </h1>
     <DateRangePicker date={dateRange} onSelect={(range: any) => (dateRange = range)} />
   </div>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     <Card>
       <CardHeader>
         <CardTitle>Streaming Analytics</CardTitle>
