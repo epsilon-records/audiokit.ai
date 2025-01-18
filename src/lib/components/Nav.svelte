@@ -116,7 +116,7 @@
           </a>
         </li>
         <SignedOut>
-          <li>
+          <li class="pt-1">
             <a
               href="/services"
               class={cn(
@@ -129,7 +129,7 @@
               Services
             </a>
           </li>
-          <li>
+          <li class="pt-1">
             <a
               href="/pricing"
               class={cn(
