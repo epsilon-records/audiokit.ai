@@ -4,18 +4,57 @@
   import { superForm } from 'sveltekit-superforms';
   import { Field, Control, Label, Description, FieldErrors } from 'formsnap';
   import { artistSchema } from '$lib/schemas/artist';
-  import { fade } from 'svelte/transition';
   import SuperDebug from 'sveltekit-superforms';
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+  import { toast } from 'svelte-sonner';
+  import confetti from 'canvas-confetti';
 
   let { data } = $props();
+
+  let showConfetti = $state(false);
 
   const form = superForm(data.form, {
     resetForm: false,
     validators: zodClient(artistSchema),
     dataType: 'json',
+    onResult: ({ result }) => {
+      if (result.type === 'success') {
+        toast.success('Profile updated successfully');
+
+        // Create fireworks effect
+        const duration = 5 * 1000;
+        const animationEnd = Date.now() + duration;
+        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+        function randomInRange(min: number, max: number) {
+          return Math.random() * (max - min) + min;
+        }
+
+        const interval: any = setInterval(function () {
+          const timeLeft = animationEnd - Date.now();
+
+          if (timeLeft <= 0) {
+            return clearInterval(interval);
+          }
+
+          const particleCount = 50 * (timeLeft / duration);
+
+          // Since particles fall down, start a bit higher than random
+          confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
+          });
+          confetti({
+            ...defaults,
+            particleCount,
+            origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
+          });
+        }, 250);
+      }
+    },
   });
-  const { form: formData, message, enhance } = form;
+  const { form: formData, enhance } = form;
 
   // Handle file upload preview
   let avatarPreview = $state('');
@@ -33,19 +72,13 @@
 </script>
 
 <div class="container mx-auto px-4 py-8">
-  {#if !data.hasActiveSubscription}
-    <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-8 rounded" in:fade>
-      <p class="text-yellow-700">
-        <span class="font-bold">Limited Access:</span>
-        Upgrade to Pro to unlock all profile features.
-      </p>
-    </div>
-  {/if}
-
   <form method="POST" class="space-y-6" enctype="multipart/form-data" use:enhance>
-    <!-- Hidden Fields Card -->
+    <!-- Basic Information Card -->
     <Card>
-      <CardContent class="pt-6">
+      <CardHeader>
+        <CardTitle>Artist Profile</CardTitle>
+      </CardHeader>
+      <CardContent>
         <div>
           <Field {form} name="id">
             <Control>
@@ -69,15 +102,6 @@
             </Control>
           </Field>
         </div>
-      </CardContent>
-    </Card>
-
-    <!-- Basic Information Card -->
-    <Card>
-      <CardHeader>
-        <CardTitle>Artist Profile</CardTitle>
-      </CardHeader>
-      <CardContent>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="stage_name">
