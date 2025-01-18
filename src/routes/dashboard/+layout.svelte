@@ -41,24 +41,6 @@
   <div class="container mx-auto px-4">
     <div class="flex h-16 items-center justify-between">
       <div class="flex items-center gap-4">
-        <OrganizationSwitcher
-          hidePersonal={true}
-          afterCreateOrganizationUrl="/dashboard/team"
-          afterSelectOrganizationUrl="/dashboard"
-          afterLeaveOrganizationUrl="/dashboard"
-          appearance={{
-            baseTheme: $mode === 'dark' ? dark : neobrutalism,
-            variables: {
-              spacingUnit: '16px',
-              borderRadius: '8px',
-            },
-            elements: {
-              rootBox: 'flex',
-              organizationSwitcherTrigger:
-                'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
-            },
-          }}
-        />
         <a
           href="/dashboard"
           class={cn(
@@ -69,17 +51,6 @@
           )}
         >
           Overview
-        </a>
-        <a
-          href="/dashboard/create"
-          class={cn(
-            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/create')
-              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-              : 'text-gray-500 dark:text-gray-400'
-          )}
-        >
-          Create
         </a>
         <a
           href="/dashboard/profile"
@@ -113,6 +84,17 @@
           )}
         >
           Analytics
+        </a>
+        <a
+          href="/dashboard/create"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/create')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Create
         </a>
       </div>
       <div class="flex items-center gap-4">

@@ -180,11 +180,26 @@
 </script>
 
 <div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold tracking-tight">Artist Profile</h1>
+    <p class="mt-2 text-lg text-muted-foreground">
+      Manage your artist information, biography, and social media presence.
+    </p>
+    <div class="mt-4">
+      <span
+        class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
+      >
+        <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-green-600"></span>
+        Profile is public and visible to fans
+      </span>
+    </div>
+  </div>
+
   <form method="POST" class="space-y-6" enctype="multipart/form-data" use:enhance>
     <!-- Basic Information Card -->
     <Card>
       <CardHeader>
-        <CardTitle>Artist Profile</CardTitle>
+        <CardTitle>👤 Artist Details</CardTitle>
       </CardHeader>
       <CardContent>
         <div>
@@ -276,7 +291,7 @@
     <!-- Legal Details Card -->
     <Card>
       <CardHeader>
-        <CardTitle>Legal Details</CardTitle>
+        <CardTitle>📋 Legal Details</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -368,7 +383,7 @@
     <!-- Location Card -->
     <Card>
       <CardHeader>
-        <CardTitle>Current Location</CardTitle>
+        <CardTitle>📍 Current Location</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -419,7 +434,7 @@
     <!-- Biography Card -->
     <Card>
       <CardHeader>
-        <CardTitle>Artist Biography</CardTitle>
+        <CardTitle>📝 Artist Biography</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="space-y-4">
@@ -540,7 +555,7 @@
     <!-- Music Platforms Card -->
     <Card>
       <CardHeader>
-        <CardTitle>Music Platforms</CardTitle>
+        <CardTitle>🎵 Music Platforms</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -671,7 +686,7 @@
     <!-- Social Networks Card -->
     <Card>
       <CardHeader>
-        <CardTitle>Social Networks</CardTitle>
+        <CardTitle>🌐 Social Networks</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -802,7 +817,7 @@
     <!-- Event Platforms Card -->
     <Card>
       <CardHeader>
-        <CardTitle>Event Platforms</CardTitle>
+        <CardTitle>🎫 Event Platforms</CardTitle>
       </CardHeader>
       <CardContent>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

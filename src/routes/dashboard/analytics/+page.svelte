@@ -17,13 +17,14 @@
 </script>
 
 <div class="container mx-auto px-4 py-8">
-  <div class="flex justify-between items-center mb-8">
-    <h1
-      class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500"
-    >
-      Analytics Dashboard
-    </h1>
-    <DateRangePicker date={dateRange} onSelect={(range: any) => (dateRange = range)} />
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold tracking-tight">Analytics Dashboard</h1>
+    <p class="mt-2 text-lg text-muted-foreground">
+      Track your performance metrics, streaming data, and audience engagement across platforms.
+    </p>
+    <div class="mt-4 flex justify-end">
+      <DateRangePicker date={dateRange} onSelect={(range: any) => (dateRange = range)} />
+    </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { UserButton, SignedIn, SignedOut } from 'svelte-clerk';
+  import { UserButton, SignedIn, SignedOut, OrganizationSwitcher } from 'svelte-clerk';
   import { Icon, Bars3, XMark } from 'svelte-hero-icons';
   import { fade, slide } from 'svelte/transition';
   import { page } from '$app/stores';
@@ -53,6 +53,25 @@
             AudioKit
           </span>
         </a>
+        <SignedIn>
+          <OrganizationSwitcher
+            hidePersonal={true}
+            afterCreateOrganizationUrl="/dashboard/team"
+            afterSelectOrganizationUrl="/dashboard"
+            afterLeaveOrganizationUrl="/dashboard"
+            appearance={{
+              baseTheme: $mode === 'dark' ? dark : neobrutalism,
+              variables: {
+                spacingUnit: '16px',
+                borderRadius: '8px',
+              },
+              elements: {
+                organizationSwitcherTrigger:
+                  'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
+              },
+            }}
+          />
+        </SignedIn>
       </div>
 
       <!-- Mobile menu button -->
@@ -76,8 +95,8 @@
               class={cn(
                 'transition-colors',
                 isActive('/dashboard')
-                  ? 'text-primary font-medium'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary'
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
               )}
             >
               Dashboard
