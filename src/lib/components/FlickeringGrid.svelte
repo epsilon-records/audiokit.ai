@@ -43,30 +43,39 @@
   }
 
   function setupCanvas() {
-    const canvasWidth = width || canvas.clientWidth;
-    const canvasHeight = height || canvas.clientHeight;
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
+    const canvasWidth = width || canvas.offsetWidth;
+    const canvasHeight = height || canvas.offsetHeight;
+
     canvas.width = canvasWidth * dpr;
     canvas.height = canvasHeight * dpr;
     canvas.style.width = `${canvasWidth}px`;
     canvas.style.height = `${canvasHeight}px`;
+
     const cols = Math.floor(canvasWidth / (squareSize + gridGap));
     const rows = Math.floor(canvasHeight / (squareSize + gridGap));
 
-    const squares = new Float32Array(cols * rows);
-    for (let i = 0; i < squares.length; i++) {
-      squares[i] = Math.random() * maxOpacity;
-    }
+    const squares = Array.from({ length: cols * rows }, () => ({
+      opacity: Math.random() * maxOpacity,
+      targetOpacity: Math.random() * maxOpacity,
+      transitionSpeed: 2 + Math.random() * 3,
+    }));
 
     return { canvasWidth, canvasHeight, cols, rows, squares, dpr };
   }
 
-  function updateSquares(squares: Float32Array, deltaTime: number) {
-    for (let i = 0; i < squares.length; i++) {
+  function updateSquares(
+    squares: Array<{ opacity: number; targetOpacity: number; transitionSpeed: number }>,
+    deltaTime: number
+  ) {
+    squares.forEach((square) => {
       if (Math.random() < flickerChance * deltaTime) {
-        squares[i] = Math.random() * maxOpacity;
+        square.targetOpacity = Math.random() * maxOpacity;
       }
-    }
+
+      const diff = square.targetOpacity - square.opacity;
+      square.opacity += diff * square.transitionSpeed * deltaTime;
+    });
   }
 
   function drawGrid(
@@ -75,29 +84,31 @@
     height: number,
     cols: number,
     rows: number,
-    squares: Float32Array,
-    dpr: number,
+    squares: Array<{ opacity: number }>,
+    dpr: number
   ) {
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = 'transparent';
-    ctx.fillRect(0, 0, width, height);
 
     for (let i = 0; i < cols; i++) {
       for (let j = 0; j < rows; j++) {
-        const opacity = squares[i * rows + j];
-        ctx.fillStyle = `${memoizedColor}${opacity})`;
-        ctx.fillRect(
-          i * (squareSize + gridGap) * dpr,
-          j * (squareSize + gridGap) * dpr,
-          squareSize * dpr,
-          squareSize * dpr,
-        );
+        const square = squares[i + j * cols];
+        if (!square) continue;
+
+        const x = i * (squareSize + gridGap) * dpr;
+        const y = j * (squareSize + gridGap) * dpr;
+        const size = squareSize * dpr;
+
+        ctx.fillStyle = `${memoizedColor}${square.opacity})`;
+        ctx.fillRect(x, y, size, size);
       }
     }
   }
 
   $effect(() => {
     if (!canvas) return;
+
+    // Reset isInView when component mounts
+    isInView = false;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -123,10 +134,14 @@
       ([entry]) => {
         isInView = entry.isIntersecting;
         if (isInView) {
+          // Cancel any existing animation frame before starting a new one
+          if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+          }
           animationFrameId = requestAnimationFrame(animate);
         }
       },
-      { threshold: 0 },
+      { threshold: 0 }
     );
 
     observer.observe(canvas);
@@ -134,14 +149,12 @@
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      cancelAnimationFrame(animationFrameId);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
       observer.disconnect();
     };
   });
 </script>
 
-<canvas
-  bind:this={canvas}
-  class="size-full pointer-events-none {className}"
-  style="width: {width || '100%'}; height: {height || '100%'};"
-></canvas>
+<canvas bind:this={canvas} class={className} />
