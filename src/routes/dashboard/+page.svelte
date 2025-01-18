@@ -1,194 +1,162 @@
 <script lang="ts">
-  import { ChartBarSquare, Users, Heart, CurrencyDollar } from 'svelte-hero-icons';
-  import StatWidget from '$lib/components/dashboard/StatWidget.svelte';
-  import { fade } from 'svelte/transition';
-  import { toast } from 'svelte-sonner';
+  import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
+  import { formatNumber } from '$lib/utils/format';
 
-  let { data } = $props();
+  interface Stats {
+    followers: {
+      comments: number;
+      engagement: number;
+      followers: number;
+      likes: number;
+      shares: number;
+      views: number;
+      platform: string;
+    };
+    streaming: {
+      streams: number;
+      listeners: number;
+      playlists: number;
+      shares: number;
+      views: number;
+      timestamp: number;
+      platform: string;
+    };
+  }
 
-  $effect(() => {
-    if (data.hasActiveSubscription) {
-      toast.success('Subscription Active', {
-        description: 'Welcome! You now have access to enhanced analytics features.',
-      });
-    }
-  });
+  let { data } = $props<{ data: { stats?: Stats; hasActiveSubscription: boolean } }>();
 
-  const platformStats = $derived({
-    spotify: {
-      monthly_listeners: 45892,
-      top_tracks: 12,
-      playlist_adds: 892,
-      change: 12.4,
-    },
-    appleMusic: {
-      plays: 12453,
-      playlist_adds: 234,
-      change: 8.2,
-    },
-    soundcloud: {
-      plays: 23412,
-      followers: 1234,
-      change: -2.1,
-    },
-  });
+  // Derived calculations for total engagement
+  let totalSocialEngagement = $derived(
+    data.stats
+      ? data.stats.followers.comments + data.stats.followers.likes + data.stats.followers.shares
+      : 0
+  );
 
-  const socialStats = $derived({
-    instagram: data?.stats?.instagramFollowers || 0,
-    tiktok: 25600,
-    youtube: 12300,
-    twitter: 8900,
-  });
-
-  const engagementRate = $derived(data?.stats?.engagementRate || 0);
-  const weeklyGrowth = $derived(data?.stats?.weeklyGrowth || 0);
+  let totalStreamingEngagement = $derived(
+    data.stats ? data.stats.streaming.streams + data.stats.streaming.listeners : 0
+  );
 </script>
 
-<div class="container mx-auto px-4 py-8">
-  {#if !data.hasActiveSubscription}
-    <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-8 rounded" in:fade>
-      <p class="text-yellow-700">
-        <span class="font-bold">Limited Access:</span>
-        Upgrade your subscription to unlock full analytics and insights.
-      </p>
-    </div>
-  {/if}
-
-  <div class="mb-8">
-    <h1 class="text-4xl font-bold tracking-tight">Dashboard Overview</h1>
-    <p class="mt-2 text-lg text-muted-foreground">
-      Monitor your performance metrics, manage your artist profile, and track your growth across
-      platforms.
+{#if !data.stats}
+  <div class="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+    <h2 class="text-2xl font-semibold">No Stats Available</h2>
+    <p class="text-muted-foreground">
+      We couldn't find any statistics for your artist profile. Please ensure your artist name is
+      correctly set up.
     </p>
-    <div class="mt-4">
-      <span
-        class="inline-flex items-center rounded-full {data.hasActiveSubscription
-          ? 'bg-green-50 text-green-700 ring-green-600/20'
-          : 'bg-yellow-50 text-yellow-700 ring-yellow-600/20'} 
-          px-2 py-1 text-xs font-medium ring-1 ring-inset"
-      >
-        <span
-          class="mr-1.5 h-1.5 w-1.5 rounded-full {data.hasActiveSubscription
-            ? 'bg-green-600'
-            : 'bg-yellow-600'}"
-        />
-        {data.hasActiveSubscription ? 'Full Access Enabled' : 'Limited Access Mode'}
-      </span>
+  </div>
+{:else}
+  <div class="space-y-8">
+    <!-- Social Media Stats -->
+    <div class="space-y-4">
+      <h2 class="text-2xl font-semibold">Social Media Performance</h2>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Followers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">
+              {formatNumber(data.stats.followers.followers)}
+            </div>
+            <p class="text-xs text-muted-foreground">
+              Platform: {data.stats.followers.platform}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Engagement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">
+              {formatNumber(data.stats.followers.engagement)}
+            </div>
+            <p class="text-xs text-muted-foreground">Total interactions</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Views</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">
+              {formatNumber(data.stats.followers.views)}
+            </div>
+            <p class="text-xs text-muted-foreground">Across all content</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Social Activity</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">
+              {formatNumber(totalSocialEngagement)}
+            </div>
+            <p class="text-xs text-muted-foreground">Comments, likes & shares</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+
+    <!-- Streaming Stats -->
+    <div class="space-y-4">
+      <h2 class="text-2xl font-semibold">Streaming Analytics</h2>
+      <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Streams</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">
+              {formatNumber(data.stats.streaming.streams)}
+            </div>
+            <p class="text-xs text-muted-foreground">
+              Platform: {data.stats.streaming.platform}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Monthly Listeners</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">
+              {formatNumber(data.stats.streaming.listeners)}
+            </div>
+            <p class="text-xs text-muted-foreground">Unique listeners</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Playlist Inclusions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">
+              {formatNumber(data.stats.streaming.playlists)}
+            </div>
+            <p class="text-xs text-muted-foreground">Total playlists</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Total Engagement</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div class="text-2xl font-bold">
+              {formatNumber(totalStreamingEngagement)}
+            </div>
+            <p class="text-xs text-muted-foreground">Streams & listeners combined</p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   </div>
-
-  <!-- Overview Stats -->
-  <section class="mb-12">
-    <h2
-      class="text-2xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500"
-    >
-      Performance Overview
-    </h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatWidget
-        title="Total Followers"
-        value={Object.values(socialStats).reduce((a, b) => a + b, 0)}
-        change={weeklyGrowth}
-        icon={Users}
-      />
-      <StatWidget title="Engagement Rate" value={engagementRate} change={1.2} icon={Heart} />
-      <StatWidget
-        title="Monthly Listeners"
-        value={platformStats.spotify.monthly_listeners}
-        change={platformStats.spotify.change}
-        icon={ChartBarSquare}
-      />
-      <StatWidget title="Revenue Growth" value={12500} change={15.7} icon={CurrencyDollar} />
-    </div>
-  </section>
-
-  <!-- Platform Performance -->
-  <section class="mb-12">
-    <h2 class="text-2xl font-bold mb-6">Platform Performance</h2>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Spotify -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-lg">Spotify</h3>
-          <span class={platformStats.spotify.change > 0 ? 'text-green-500' : 'text-red-500'}>
-            {platformStats.spotify.change > 0 ? '+' : ''}{platformStats.spotify.change}%
-          </span>
-        </div>
-        <div class="space-y-4">
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Monthly Listeners</span>
-            <span class="font-medium"
-              >{platformStats.spotify.monthly_listeners.toLocaleString()}</span
-            >
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Top Tracks</span>
-            <span class="font-medium">{platformStats.spotify.top_tracks}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Playlist Adds</span>
-            <span class="font-medium">{platformStats.spotify.playlist_adds}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Apple Music -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-lg">Apple Music</h3>
-          <span class={platformStats.appleMusic.change > 0 ? 'text-green-500' : 'text-red-500'}>
-            {platformStats.appleMusic.change > 0 ? '+' : ''}{platformStats.appleMusic.change}%
-          </span>
-        </div>
-        <div class="space-y-4">
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Total Plays</span>
-            <span class="font-medium">{platformStats.appleMusic.plays.toLocaleString()}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Playlist Adds</span>
-            <span class="font-medium">{platformStats.appleMusic.playlist_adds}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- SoundCloud -->
-      <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-        <div class="flex items-center justify-between mb-4">
-          <h3 class="font-semibold text-lg">SoundCloud</h3>
-          <span class={platformStats.soundcloud.change > 0 ? 'text-green-500' : 'text-red-500'}>
-            {platformStats.soundcloud.change > 0 ? '+' : ''}{platformStats.soundcloud.change}%
-          </span>
-        </div>
-        <div class="space-y-4">
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Total Plays</span>
-            <span class="font-medium">{platformStats.soundcloud.plays.toLocaleString()}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-gray-600 dark:text-gray-400">Followers</span>
-            <span class="font-medium">{platformStats.soundcloud.followers.toLocaleString()}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Social Media Performance -->
-  <section>
-    <h2 class="text-2xl font-bold mb-6">Social Media Reach</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {#each Object.entries(socialStats) as [platform, followers]}
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <h3 class="font-semibold text-lg capitalize mb-2">{platform}</h3>
-          <div class="flex items-end gap-2">
-            <span class="text-2xl font-bold">
-              {followers.toLocaleString()}
-            </span>
-            <span class="text-gray-600 dark:text-gray-400 text-sm">followers</span>
-          </div>
-        </div>
-      {/each}
-    </div>
-  </section>
-</div>
+{/if}

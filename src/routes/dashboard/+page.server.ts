@@ -1,8 +1,12 @@
-import { error, redirect, type Redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '$env/static/private';
 import { clerkClient } from 'svelte-clerk/server';
+import { soundcharts } from '$lib/services/soundcharts';
+import { db } from '$lib/db';
+import { artists } from '$lib/db/schema';
+import { eq } from 'drizzle-orm';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY);
 
@@ -12,20 +16,16 @@ export const load: PageServerLoad = async ({ locals }) => {
   }
 
   const user = await clerkClient.users.getUser(locals.auth.userId);
-  let email = user.primaryEmailAddress?.emailAddress ?? null;
+  const email = user.primaryEmailAddress?.emailAddress;
 
   if (!email) {
     throw redirect(307, '/sign-in');
   }
 
-  const [customer] = (
-    await stripe.customers.list({
-      email: email,
-      limit: 1,
-    })
-  ).data;
-
+  // Check subscription status
+  const [customer] = (await stripe.customers.list({ email, limit: 1 })).data;
   let hasActiveSubscription = false;
+
   if (customer) {
     const [subscription] = (
       await stripe.subscriptions.list({
@@ -37,16 +37,19 @@ export const load: PageServerLoad = async ({ locals }) => {
     hasActiveSubscription = !!subscription;
   }
 
-  const stats = hasActiveSubscription
-    ? {
-        instagramFollowers: 12500,
-        weeklyGrowth: 2.5,
-        engagementRate: 4.7,
-      }
-    : null;
+  // Get artist data
+  const artistData = await db
+    .select()
+    .from(artists)
+    .where(eq(artists.orgId, locals.auth.orgId))
+    .limit(1);
 
-  return {
-    stats,
-    hasActiveSubscription,
-  };
+  console.log(artistData);
+
+  if (!artistData) {
+    return {
+      stats: null,
+      hasActiveSubscription,
+    };
+  }
 };
