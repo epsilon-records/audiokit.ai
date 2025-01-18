@@ -1,4 +1,5 @@
 import { SOUNDCHARTS_API_KEY } from '$env/static/private';
+import type { StreamingMetrics, SocialMetrics } from '$lib/types/stats';
 
 const SOUNDCHARTS_BASE_URL = 'https://api.soundcharts.com/api/v2';
 
@@ -54,19 +55,6 @@ export class SoundchartsAPI {
       streaming: spotifyStats.data,
       social: socialStats.data,
     };
-  }
-
-  async getArtistRevenue(artistId: string, startDate: string, endDate: string) {
-    return this.fetch<SoundchartsResponse<RevenueMetrics[]>>(`/artist/${artistId}/revenue`, {
-      start_date: startDate,
-      end_date: endDate,
-    });
-  }
-
-  async searchArtist(query: string) {
-    return this.fetch<SoundchartsResponse<Array<{ id: string; name: string }>>>('/search/artists', {
-      q: query,
-    });
   }
 }
 
