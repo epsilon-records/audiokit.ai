@@ -1,4 +1,4 @@
-import { SOUNDCHARTS_API_KEY } from '$env/static/private';
+import { SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
 import type { StreamingMetrics, SocialMetrics } from '$lib/types/stats';
 
 const SOUNDCHARTS_BASE_URL = 'https://customer.api.soundcharts.com';
@@ -18,9 +18,11 @@ interface SoundchartsResponse<T> {
 
 export class SoundchartsAPI {
   private apiKey: string;
+  private appId: string;
 
   constructor() {
     this.apiKey = SOUNDCHARTS_API_KEY;
+    this.appId = SOUNDCHARTS_APP_ID;
   }
 
   private async fetch<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
@@ -35,12 +37,14 @@ export class SoundchartsAPI {
     const response = await fetch(url.toString(), {
       headers: {
         Accept: 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
+        'x-app-id': this.appId,
+        'x-api-key': this.apiKey,
       },
     });
 
     if (!response.ok) {
-      throw new Error(`Soundcharts API error: ${response.statusText}`);
+      const errorText = await response.text();
+      throw new Error(`Soundcharts API error: ${response.status} - ${errorText}`);
     }
 
     return response.json();
