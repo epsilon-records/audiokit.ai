@@ -1,7 +1,7 @@
 <script lang="ts">
   import { UserButton, SignedIn, SignedOut, OrganizationSwitcher } from 'svelte-clerk';
   import { Icon, Bars3, XMark } from 'svelte-hero-icons';
-  import { fade, slide } from 'svelte/transition';
+  import { slide } from 'svelte/transition';
   import { page } from '$app/stores';
   import { cn } from '$lib/utils';
   import { mode } from 'mode-watcher';
@@ -9,41 +9,49 @@
   import ThemeSwitcher from '$lib/components/ThemeSwitcher.svelte';
 
   let isOpen = $state(false);
+  let menuRef = $state<HTMLDivElement | null>(null);
+  let buttonRef = $state<HTMLButtonElement | null>(null);
 
-  const toggleMenu = () => {
+  // Close menu when clicking outside
+  function handleClickOutside(event: MouseEvent) {
+    const target = event.target as HTMLElement;
+    if (
+      isOpen &&
+      menuRef &&
+      buttonRef &&
+      !menuRef.contains(target) &&
+      !buttonRef.contains(target)
+    ) {
+      isOpen = false;
+    }
+  }
+
+  // Add click outside listener
+  $effect(() => {
+    if (isOpen) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  });
+
+  function toggleMenu() {
     isOpen = !isOpen;
-  };
+  }
+
+  function closeMenu() {
+    isOpen = false;
+  }
 
   function isActive(path: string) {
     return $page.url.pathname.startsWith(path);
   }
-
-  // Close menu when clicking outside
-  const handleClickOutside = (event: MouseEvent) => {
-    const target = event.target as HTMLElement;
-    if (!target.closest('.mobile-menu') && !target.closest('.menu-button')) {
-      isOpen = false;
-    }
-  };
-
-  $effect(() => {
-    if (isOpen) {
-      document.addEventListener('click', handleClickOutside);
-    } else {
-      document.removeEventListener('click', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside);
-    };
-  });
 </script>
 
 <nav
   class="fixed top-0 w-full z-50 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 border-b border-gray-200 dark:border-gray-700 dark:bg-gray-800/95 h-16"
 >
   <div class="container mx-auto px-4">
-    <div class="flex justify-between items-center py-6">
+    <div class="flex justify-between items-center py-4">
       <div class="flex items-center gap-4">
         <a href="/" class="flex items-center gap-2">
           <img src="/logo.png" alt="AudioKit Logo" class="h-8 w-8 logo-image" />
@@ -75,16 +83,17 @@
       </div>
 
       <!-- Mobile menu button -->
-      <button
-        class="menu-button lg:hidden text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
-        onclick={toggleMenu}
-      >
-        {#if isOpen}
-          <Icon src={XMark} class="w-6 h-6" />
-        {:else}
-          <Icon src={Bars3} class="w-6 h-6" />
-        {/if}
-      </button>
+      <div class="pb-4 lg:hidden">
+        <button
+          bind:this={buttonRef}
+          class="menu-button text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
+          onclick={toggleMenu}
+          aria-expanded={isOpen}
+          aria-label="Toggle menu"
+        >
+          <Icon src={isOpen ? XMark : Bars3} class="w-6 h-6" />
+        </button>
+      </div>
 
       <!-- Desktop menu -->
       <ul class="hidden lg:flex gap-8 text-lg">
@@ -171,6 +180,7 @@
     <!-- Mobile menu -->
     {#if isOpen}
       <div
+        bind:this={menuRef}
         class="mobile-menu lg:hidden absolute top-20 left-0 right-0 bg-white/95 dark:bg-gray-800/95 border-t border-gray-200 dark:border-gray-700"
         transition:slide={{ duration: 200 }}
       >
@@ -180,45 +190,57 @@
               <a
                 href="/dashboard"
                 class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                onclick={() => (isOpen = false)}>Dashboard</a
+                onclick={closeMenu}
               >
+                Dashboard
+              </a>
             </li>
           </SignedIn>
           <li>
             <a
               href="/docs"
               class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-              onclick={() => (isOpen = false)}>Docs</a
+              onclick={closeMenu}
             >
+              Docs
+            </a>
           </li>
           <SignedOut>
             <li>
               <a
                 href="/services"
                 class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                onclick={() => (isOpen = false)}>Services</a
+                onclick={closeMenu}
               >
+                Services
+              </a>
             </li>
             <li>
               <a
                 href="/pricing"
                 class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                onclick={() => (isOpen = false)}>Pricing</a
+                onclick={closeMenu}
               >
+                Pricing
+              </a>
             </li>
             <li>
               <a
                 href="/sign-in"
                 class="block py-2 btn btn-sm btn-primary text-lg text-white hover:text-indigo-100 transition-colors"
-                onclick={() => (isOpen = false)}>Login</a
+                onclick={closeMenu}
               >
+                Login
+              </a>
             </li>
             <li>
               <a
                 href="/sign-up"
                 class="block py-2 btn btn-sm btn-secondary text-lg text-white hover:text-indigo-100 transition-colors"
-                onclick={() => (isOpen = false)}>Register</a
+                onclick={closeMenu}
               >
+                Register
+              </a>
             </li>
           </SignedOut>
           <SignedIn>
