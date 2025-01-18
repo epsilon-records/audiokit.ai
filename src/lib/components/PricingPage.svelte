@@ -101,14 +101,16 @@
 </script>
 
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <div class="text-center">
-    <h1 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-8">
-      {#if isSubscribePage}
-        Unlock premium features
-      {:else}
-        Simple, transparent pricing
-      {/if}
+  <div class="text-center mb-12">
+    <h1
+      class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
+    >
+      Simple, Transparent Pricing
     </h1>
+    <p class="text-muted-foreground max-w-2xl mx-auto text-lg">
+      Choose the perfect plan for your music distribution needs with our straightforward pricing
+      options.
+    </p>
   </div>
 
   <div class="flex justify-center items-center gap-3 mb-8">

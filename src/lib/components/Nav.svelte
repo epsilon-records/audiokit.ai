@@ -53,7 +53,7 @@
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center py-4">
       <div class="flex items-center gap-4">
-        <a href="/" class="flex items-center gap-2">
+        <a href="/" class="flex items-center gap-2 lg:pb-0 pb-2">
           <img src="/logo.png" alt="AudioKit Logo" class="h-8 w-8 logo-image" />
           <span
             class="text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xl hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
@@ -107,14 +107,6 @@
             </a>
           </li>
         </SignedIn>
-        <li class="pt-1">
-          <a
-            href="/docs"
-            class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-          >
-            Docs
-          </a>
-        </li>
         <SignedOut>
           <li class="pt-1">
             <a
@@ -140,6 +132,27 @@
               )}
             >
               Pricing
+            </a>
+          </li>
+          <li class="pt-1">
+            <a
+              href="/docs"
+              class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+            >
+              Docs
+            </a>
+          </li>
+          <li class="pt-1">
+            <a
+              href="/contact"
+              class={cn(
+                'transition-colors',
+                isActive('/contact')
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+              )}
+            >
+              Contact
             </a>
           </li>
           <li>
@@ -181,7 +194,7 @@
     {#if isOpen}
       <div
         bind:this={menuRef}
-        class="mobile-menu lg:hidden fixed top-16 right-0 w-64 h-[calc(100vh-4rem)] bg-white/95 dark:bg-gray-800/95 border-l border-gray-200 dark:border-gray-700 overflow-y-auto"
+        class="mobile-menu lg:hidden fixed top-16 right-0 w-32 h-[calc(100vh-4rem)] bg-white/95 dark:bg-gray-800/95 border-l border-gray-200 dark:border-gray-700 overflow-y-auto"
         transition:slide={{ duration: 200, axis: 'x' }}
       >
         <ul class="container mx-auto px-4 py-4 flex flex-col gap-4">
@@ -196,15 +209,6 @@
               </a>
             </li>
           </SignedIn>
-          <li>
-            <a
-              href="/docs"
-              class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-              onclick={closeMenu}
-            >
-              Docs
-            </a>
-          </li>
           <SignedOut>
             <li>
               <a
@@ -226,8 +230,26 @@
             </li>
             <li>
               <a
+                href="/docs"
+                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                onclick={closeMenu}
+              >
+                Docs
+              </a>
+            </li>
+            <li>
+              <a
+                href="/contact"
+                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                onclick={closeMenu}
+              >
+                Contact
+              </a>
+            </li>
+            <li>
+              <a
                 href="/sign-in"
-                class="block py-2 btn btn-sm btn-primary text-lg text-white hover:text-indigo-100 transition-colors"
+                class="btn btn-sm btn-primary text-lg text-white hover:text-indigo-100 transition-colors"
                 onclick={closeMenu}
               >
                 Login
@@ -236,7 +258,7 @@
             <li>
               <a
                 href="/sign-up"
-                class="block py-2 btn btn-sm btn-secondary text-lg text-white hover:text-indigo-100 transition-colors"
+                class="btn btn-sm btn-secondary text-lg text-white hover:text-indigo-100 transition-colors"
                 onclick={closeMenu}
               >
                 Register
