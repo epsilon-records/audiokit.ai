@@ -1,12 +1,23 @@
 <script lang="ts">
-  import { onMount, onDestroy } from 'svelte';
   import { Chart, type ChartConfiguration } from 'chart.js/auto';
 
-  let { data, xAxis, yAxis, className = '' } = $props();
-  let canvas: HTMLCanvasElement;
-  let chart: Chart;
+  // Use runes for props
+  let data = $state([
+    { x: 'Jan', y: 10 },
+    { x: 'Feb', y: 20 },
+    { x: 'Mar', y: 30 },
+  ]);
+  let xAxis = $state('x');
+  let yAxis = $state('y');
+  let className = $state('');
 
+  // State management
+  let canvas = $state<HTMLCanvasElement | null>(null);
+  let chart = $state<Chart | null>(null);
+
+  // Create chart function
   function createChart() {
+    if (!canvas || !data) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -42,25 +53,13 @@
     chart = new Chart(ctx, config);
   }
 
+  // Side effect to create and destroy chart
   $effect(() => {
-    if (chart) {
-      chart.data.labels = data.map((d) => d[xAxis]);
-      chart.data.datasets[0].data = data.map((d) => d[yAxis]);
-      chart.update();
-    }
-  });
-
-  onMount(() => {
     createChart();
-  });
-
-  onDestroy(() => {
-    if (chart) {
-      chart.destroy();
-    }
+    return () => {
+      chart?.destroy();
+    };
   });
 </script>
 
-<div class="w-full h-[300px] {className}">
-  <canvas bind:this={canvas}></canvas>
-</div>
+<canvas bind:this={canvas} class={className}></canvas>
