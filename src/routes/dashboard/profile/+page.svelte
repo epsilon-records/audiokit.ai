@@ -8,6 +8,7 @@
     List,
     ListOrdered,
     Quote as QuoteIcon,
+    Save,
   } from 'lucide-svelte';
   import { zodClient } from 'sveltekit-superforms/adapters';
   import { superForm } from 'sveltekit-superforms';
@@ -26,12 +27,15 @@
 
   let { data } = $props();
 
-  let showConfetti = $state(false);
+  let isSubmitting = $state(false);
 
   const form = superForm(data.form, {
     resetForm: false,
     validators: zodClient(artistSchema),
     dataType: 'json',
+    onSubmit: () => {
+      isSubmitting = true;
+    },
     onResult: ({ result }) => {
       if (result.type === 'success') {
         toast.success('Artist profile saved successfully', {
@@ -69,6 +73,8 @@
           });
         }, 250);
       }
+      // Re-enable the button after the submission is complete
+      isSubmitting = false;
     },
   });
   const { form: formData, enhance } = form;
@@ -872,7 +878,18 @@
     <!-- Submit button card with transparent background -->
     <Card class="bg-transparent border-none shadow-none">
       <CardContent class="flex justify-end p-0">
-        <button class="btn" type="submit">Save Changes</button>
+        <button
+          class="btn btn-accent hover:bg-accent hover:text-accent-foreground transition-colors"
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {#if isSubmitting}
+            <span class="loading loading-spinner loading-sm"></span>
+          {:else}
+            <Save class="w-4 h-4" />
+          {/if}
+          {isSubmitting ? 'Saving...' : 'Save Changes'}
+        </button>
       </CardContent>
     </Card>
 
