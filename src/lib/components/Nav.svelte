@@ -76,8 +76,8 @@
               class={cn(
                 'transition-colors',
                 isActive('/dashboard')
-                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+                  ? 'text-primary font-medium'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-primary'
               )}
             >
               Dashboard

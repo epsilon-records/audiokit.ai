@@ -1,4 +1,5 @@
 <script lang="ts">
+  import '$lib/styles/tiptap.css';
   import {
     Pencil,
     Bold,

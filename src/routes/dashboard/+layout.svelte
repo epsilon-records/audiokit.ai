@@ -57,16 +57,40 @@
           }}
         />
         <a
-          href="/dashboard/profile"
+          href="/dashboard/create"
           class={cn(
             'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/profile')
+            isActive('/dashboard/create')
               ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Create
+        </a>
+        <a
+          href="/dashboard/profile"
+          class={cn(
+            'text-sm hover:text-primary dark:hover:text-primary transition-colors',
+            isActive('/dashboard/profile')
+              ? 'text-primary font-medium'
               : 'text-gray-500 dark:text-gray-400'
           )}
         >
           Profile
         </a>
+        <a
+          href="/dashboard/releases"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/releases')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Releases
+        </a>
+      </div>
+      <div class="flex items-center gap-4">
         <a
           href="/dashboard/team"
           class={cn(
@@ -89,20 +113,18 @@
         >
           Account
         </a>
-        <a
-          href="/dashboard/releases"
+        <button
+          onclick={handleManageSubscription}
           class={cn(
             'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/releases')
+            isActive('/dashboard/billing')
               ? 'text-indigo-600 dark:text-indigo-400 font-medium'
               : 'text-gray-500 dark:text-gray-400'
           )}
         >
-          Releases
-        </a>
-      </div>
-      <div class="flex items-center gap-4">
-        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
+          Billing
+        </button>
+        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
         <span class="text-sm text-gray-600 dark:text-gray-400">
           Status:
           {#if page.data.hasActiveSubscription}
@@ -117,28 +139,14 @@
             >
               Inactive
             </span>
+            <a
+              href="/subscribe"
+              class="ml-2 inline-flex items-center rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
+            >
+              Enable Services
+            </a>
           {/if}
         </span>
-        <button
-          onclick={handleManageSubscription}
-          class="inline-flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-        >
-          Manage Subscription
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
-            />
-          </svg>
-        </button>
       </div>
     </div>
   </div>

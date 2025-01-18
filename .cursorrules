@@ -1,6 +1,7 @@
 You are an expert in Svelte 5, SvelteKit 2, TypeScript, and modern web development.
 
 FUNDAMENTAL PRINCIPLES
+
 - ALWAYS use Svelte 5 runes mode - NEVER use the older reactive syntax
 - ALWAYS use SvelteKit 2 (not SvelteKit 1.x) features and conventions
 - ALWAYS provide complete code examples - NEVER use ellipsis or "rest of code remains same"
@@ -10,6 +11,7 @@ FUNDAMENTAL PRINCIPLES
 - Follow SvelteKit 2's file-based routing and conventions
 
 SvelteKit 2 Key Features
+
 - Use new route groups (+), server hooks, and middleware
 - Leverage new data loading patterns with Universal Load
 - Implement enhanced form actions
@@ -18,37 +20,41 @@ SvelteKit 2 Key Features
 - Use the new streaming features for enhanced performance
 
 Runes Usage (Required)
+
 - NEVER use the old `$:` reactive syntax
 - ALWAYS use these runes:
+
   ```typescript
   // State management
   let count = $state(0);
-  
+
   // Derived values
   let doubled = $derived(count * 2);
-  
+
   // Side effects
   $effect(() => {
     console.log(`Count is now ${count}`);
   });
-  
+
   // Props with TypeScript
   interface Props {
     required: string;
     optional?: number;
   }
   let { required, optional = 42 } = $props<Props>();
-  
+
   // Two-way binding
   let value = $bindable(initialValue);
-  
+
   // Development debugging
   $inspect(count);
   ```
 
 TypeScript Integration
+
 - Use TypeScript for all files
 - Define interfaces for props and state:
+
   ```typescript
   interface TodoProps {
     id: string;
@@ -59,7 +65,7 @@ TypeScript Integration
   function TodoItem() {
     let { id, title, completed = false } = $props<TodoProps>();
     let isEditing = $state(false);
-    
+
     // Always implement complete functions
     function toggleEdit() {
       isEditing = !isEditing;
@@ -68,41 +74,45 @@ TypeScript Integration
   ```
 
 SvelteKit 2 Routing and Data Loading
+
 - Use Universal Load for consistent data loading:
+
   ```typescript
   // +page.ts
   export async function load({ fetch, params }) {
     // Universal load works on both server and client
     const response = await fetch(`/api/todos/${params.id}`);
-    
+
     if (!response.ok) {
       throw error(response.status, 'Failed to load todo');
     }
-    
+
     return {
-      todo: await response.json()
+      todo: await response.json(),
     };
   }
   ```
 
 - Use SvelteKit 2's form actions:
+
   ```typescript
   // +page.server.ts
   export const actions = {
     default: async ({ request }) => {
       const data = await request.formData();
       const title = data.get('title');
-      
+
       // Complete implementation
       await db.todos.create({ title });
-      
+
       // Use declarative redirects
       throw redirect(303, '/todos');
-    }
+    },
   };
   ```
 
 File Structure and Naming
+
 - Use lowercase with hyphens for files: `todo-list.svelte`
 - Use PascalCase for component names in code: `import TodoList from './todo-list.svelte'`
 - Use camelCase for variables and functions: `handleSubmit`
@@ -133,7 +143,9 @@ File Structure and Naming
   ```
 
 State Management
+
 - Use classes for complex state:
+
   ```typescript
   // todo-store.svelte.ts
   interface TodoItem {
@@ -145,25 +157,28 @@ State Management
   class TodoStore {
     items = $state<TodoItem[]>([]);
     filter = $state<'all' | 'active' | 'completed'>('all');
-    
+
     filteredItems = $derived(
-      this.items.filter(item => {
+      this.items.filter((item) => {
         if (this.filter === 'active') return !item.completed;
         if (this.filter === 'completed') return item.completed;
         return true;
       })
     );
-    
+
     addItem(title: string) {
-      this.items = [...this.items, {
-        id: crypto.randomUUID(),
-        title,
-        completed: false
-      }];
+      this.items = [
+        ...this.items,
+        {
+          id: crypto.randomUUID(),
+          title,
+          completed: false,
+        },
+      ];
     }
-    
+
     toggleItem(id: string) {
-      this.items = this.items.map(item =>
+      this.items = this.items.map((item) =>
         item.id === id ? { ...item, completed: !item.completed } : item
       );
     }
@@ -173,6 +188,7 @@ State Management
   ```
 
 UI and Styling
+
 - Use Tailwind CSS for styling
 - Import Shadcn components from `$lib/components/ui`
 - Use the `cn()` utility for class merging
@@ -183,6 +199,7 @@ UI and Styling
   ```
 
 Internationalization
+
 - Use Paraglide.js for translations
 - Import translations properly:
   ```typescript
@@ -190,6 +207,7 @@ Internationalization
   ```
 
 Performance and SEO
+
 - Use SvelteKit 2's streaming features for improved performance
 - Implement proper meta tags
 - Use image lazy loading
@@ -198,11 +216,13 @@ Performance and SEO
 - Monitor Core Web Vitals
 
 Documentation References
+
 - Svelte 5 Runes: https://svelte-5-preview.vercel.app/docs/runes
 - SvelteKit 2: https://kit.svelte.dev/docs
 - Paraglide.js: https://inlang.com/m/gerre34r/library-inlang-paraglideJs
 
 Technical Requirements
+
 - TypeScript throughout
 - Responsive layouts
 - SSR/SSG optimization
@@ -212,6 +232,7 @@ Technical Requirements
 - Performance monitoring
 
 Remember:
+
 1. ALWAYS use Svelte 5 runes mode
 2. ALWAYS use SvelteKit 2 features
 3. NEVER omit code in examples
@@ -219,3 +240,116 @@ Remember:
 5. ALWAYS implement complete functions
 6. NEVER mix old and new syntax
 7. ALWAYS follow SvelteKit 2 conventions
+
+PLANNED FEATURES
+
+1. Distribution Service
+
+- Multi-step release submission process
+- Automated distribution to major platforms
+- Release status tracking and analytics
+- Automated ISRC generation
+- Content validation and quality checks
+- Royalty tracking and payment processing
+
+2. Enhanced Analytics Dashboard
+
+- Real-time streaming metrics
+- Revenue tracking and projections
+- Audience demographics
+- Social media performance
+- Custom date range analysis
+- Export functionality
+
+3. Events Management System
+
+- Event creation and management
+- Venue booking system
+- Ticket sales integration
+- Promotional tools
+- Attendance tracking
+- Post-event analytics
+
+4. Artist Profile Enhancements
+
+- Enhanced profile editor
+- EPK generation
+- Integrated music player
+- Social media aggregation
+- Press kit management
+- Portfolio showcase
+
+5. Team Collaboration Features
+
+- Role-based access control
+- Task management system
+- Team chat/messaging
+- Activity tracking
+- Resource sharing
+- Calendar integration
+
+6. Content Management System
+
+- Blog/news management
+- Media library
+- SEO optimization
+- Content scheduling
+- Analytics integration
+- Version control
+
+Key Data Structures:
+
+interface Release {
+id: string;
+title: string;
+artist: string;
+type: 'Single' | 'EP' | 'Album';
+releaseDate: Date;
+artwork: string;
+tracks: Track[];
+status: 'draft' | 'pending' | 'processing' | 'live' | 'rejected';
+platforms: DistributionPlatform[];
+}
+
+interface Event {
+id: string;
+title: string;
+type: 'concert' | 'festival' | 'meetup' | 'release_party';
+date: Date;
+venue: Venue;
+ticketing: TicketingInfo;
+capacity: number;
+soldTickets: number;
+status: 'draft' | 'published' | 'cancelled' | 'completed';
+promotion: PromotionDetails;
+}
+
+interface TeamMember {
+id: string;
+role: TeamRole;
+permissions: Permission[];
+assignments: Task[];
+activity: ActivityLog[];
+}
+
+interface Content {
+id: string;
+type: 'blog' | 'news' | 'release' | 'press';
+title: string;
+body: string;
+author: string;
+status: 'draft' | 'published' | 'archived';
+publishDate: Date;
+media: MediaAsset[];
+seo: SEOMetadata;
+analytics: ContentAnalytics;
+}
+
+Implementation Priority:
+
+1. Distribution Service (core business feature)
+2. Enhanced Analytics (provides immediate value)
+3. Events Management (complements distribution)
+4. Artist Profile Enhancements (improves user experience)
+5. Team Collaboration (supports scaling)
+6. CMS (supports marketing/content)
