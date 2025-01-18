@@ -1,9 +1,8 @@
 <script lang="ts">
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { formatNumber } from '$lib/utils/format';
-  import { fade, fly } from 'svelte/transition';
+  import { fly } from 'svelte/transition';
   import { AlertCircle } from 'lucide-svelte';
-  import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import { Badge } from '$lib/components/ui/badge';
 
   interface Stats {

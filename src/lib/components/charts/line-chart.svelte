@@ -1,14 +1,20 @@
 <script lang="ts">
   import { Chart, type ChartConfiguration } from 'chart.js/auto';
 
+  // Define the type for data points
+  interface DataPoint {
+    x: string;
+    y: number;
+  }
+
   // Use runes for props
-  let data = $state([
+  let data = $state<DataPoint[]>([
     { x: 'Jan', y: 10 },
     { x: 'Feb', y: 20 },
     { x: 'Mar', y: 30 },
   ]);
-  let xAxis = $state('x');
-  let yAxis = $state('y');
+  let xAxis = $state<'x' | 'y'>('x');
+  let yAxis = $state<'x' | 'y'>('y');
   let className = $state('');
 
   // State management
@@ -28,7 +34,7 @@
         datasets: [
           {
             label: yAxis.charAt(0).toUpperCase() + yAxis.slice(1),
-            data: data.map((d) => d[yAxis]),
+            data: data.map((d) => d[yAxis] as number),
             borderColor: 'rgb(75, 192, 192)',
             tension: 0.1,
           },

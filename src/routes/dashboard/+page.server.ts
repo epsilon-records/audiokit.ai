@@ -70,27 +70,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     const stats = await soundcharts.getArtistStats(spotifyId);
 
     return {
-      stats: {
-        followers: {
-          comments: stats.social.comments || 0,
-          engagement: stats.social.engagement || 0,
-          followers: stats.social.followers || 0,
-          likes: stats.social.likes || 0,
-          shares: stats.social.shares || 0,
-          views: stats.social.views || 0,
-          platform: stats.social.platform,
-        },
-        streaming: {
-          streams: stats.streaming.streams || 0,
-          listeners: stats.streaming.listeners || 0,
-          playlists: stats.streaming.playlists || 0,
-          shares: stats.streaming.saves || 0,
-          views: 0,
-          timestamp: stats.streaming.timestamp,
-          platform: stats.streaming.platform,
-        },
-        metadata: stats.metadata,
-      },
+      stats: stats,
       hasActiveSubscription,
     };
   } catch (err) {
