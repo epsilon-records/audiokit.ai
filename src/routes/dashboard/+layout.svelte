@@ -24,7 +24,10 @@
       window.location.href = url;
     } catch (err) {
       console.error(err);
-      toast.error('Failed to open billing portal. Please try again.');
+      toast.error('Failed to open billing portal', {
+        description:
+          'There was an issue accessing your billing settings. Please try again or contact support.',
+      });
     }
   }
 
@@ -57,6 +60,17 @@
           }}
         />
         <a
+          href="/dashboard"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Overview
+        </a>
+        <a
           href="/dashboard/create"
           class={cn(
             'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
@@ -88,6 +102,17 @@
           )}
         >
           Releases
+        </a>
+        <a
+          href="/dashboard/analytics"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/analytics')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Analytics
         </a>
       </div>
       <div class="flex items-center gap-4">

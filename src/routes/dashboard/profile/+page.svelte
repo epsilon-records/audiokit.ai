@@ -34,7 +34,9 @@
     dataType: 'json',
     onResult: ({ result }) => {
       if (result.type === 'success') {
-        toast.success('Artist profile saved successfully');
+        toast.success('Artist profile saved successfully', {
+          description: 'Your profile changes have been updated and are now live.',
+        });
 
         // Create fireworks effect
         const duration = 5 * 1000;

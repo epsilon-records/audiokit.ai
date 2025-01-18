@@ -2,8 +2,17 @@
   import { ChartBarSquare, Users, Heart, CurrencyDollar } from 'svelte-hero-icons';
   import StatWidget from '$lib/components/dashboard/StatWidget.svelte';
   import { fade } from 'svelte/transition';
+  import { toast } from 'svelte-sonner';
 
   let { data } = $props();
+
+  $effect(() => {
+    if (data.hasActiveSubscription) {
+      toast.success('Subscription Active', {
+        description: 'Welcome! You now have access to enhanced analytics features.',
+      });
+    }
+  });
 
   const platformStats = $derived({
     spotify: {
@@ -40,7 +49,7 @@
     <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-8 rounded" in:fade>
       <p class="text-yellow-700">
         <span class="font-bold">Limited Access:</span>
-        Upgrade to Pro to unlock full analytics and insights.
+        Upgrade your subscription to unlock full analytics and insights.
       </p>
     </div>
   {/if}
