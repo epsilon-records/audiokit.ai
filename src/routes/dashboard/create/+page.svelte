@@ -14,12 +14,9 @@
           </p>
         </div>
         <div class="mt-auto">
-          <a
-            href="/dashboard/create-artist"
-            class="inline-flex w-full h-12 items-center justify-center btn btn-primary text-pink-100"
-          >
+          <Button href="/dashboard/create-artist" class="w-full h-12" size="lg">
             Manage New Artist
-          </a>
+          </Button>
         </div>
       </div>
       <div class="flex flex-col h-full bg-card rounded-lg p-6 shadow-lg">
@@ -31,12 +28,9 @@
           </p>
         </div>
         <div class="mt-auto">
-          <a
-            href="/dashboard/releases/new"
-            class="inline-flex w-full h-12 items-center justify-center btn btn-primary text-pink-100"
-          >
+          <Button href="/dashboard/releases/new" class="w-full h-12" size="lg">
             Create New Release
-          </a>
+          </Button>
         </div>
       </div>
     </div>

@@ -179,17 +179,18 @@
   }
 </script>
 
-<div class="container mx-auto px-4 py-8">
-  <div class="mb-8">
-    <h1 class="text-4xl font-bold tracking-tight">Artist Profile</h1>
-    <p class="mt-2 text-lg text-muted-foreground">
+<div class="container py-8 space-y-6">
+  <!-- Header without card -->
+  <div class="space-y-0.5">
+    <h1 class="text-2xl font-bold tracking-tight">Artist Profile</h1>
+    <p class="text-muted-foreground">
       Manage your artist information, biography, and social media presence.
     </p>
     <div class="mt-4">
       <span
-        class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
+        class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
       >
-        <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-green-600"></span>
+        <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-green-600" />
         Profile is public and visible to fans
       </span>
     </div>
@@ -264,7 +265,7 @@
                     </label>
                     <div class="w-32">
                       <img
-                        src={avatarPreview || $formData.artist_photos?.[0] || '/default-avatar.jpg'}
+                        src={avatarPreview || $formData.artist_photos?.[0] || '/logo.gif'}
                         alt="Artist photo"
                         class="rounded-full object-cover w-full h-full"
                       />
@@ -868,13 +869,22 @@
       </CardContent>
     </Card>
 
-    <!-- Submit Button -->
-    <div class="flex justify-end">
-      <button class="btn btn-primary text-pink-100" type="submit">Update Profile</button>
-    </div>
+    <!-- Submit button card with transparent background -->
+    <Card class="bg-transparent border-none shadow-none">
+      <CardContent class="flex justify-end p-0">
+        <button class="btn btn-primary" type="submit">Save Changes</button>
+      </CardContent>
+    </Card>
 
-    <!-- Debug Data -->
-    <SuperDebug data={$formData} />
+    <!-- Debug card remains the same -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Debug Data</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <SuperDebug data={$formData} />
+      </CardContent>
+    </Card>
   </form>
 </div>
 
