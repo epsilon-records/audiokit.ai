@@ -1,5 +1,5 @@
 import { SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
-import type { StreamingMetrics, SocialMetrics } from '$lib/types/stats';
+import type { ArtistMetadata, StreamingMetrics, SocialMetrics } from '$lib/types/stats';
 
 const SOUNDCHARTS_BASE_URL = 'https://customer.api.soundcharts.com';
 
@@ -51,18 +51,33 @@ export class SoundchartsAPI {
   }
 
   async getArtistStats(artistId: string) {
-    const [spotifyStats, socialStats] = await Promise.all([
-      this.fetch<SoundchartsResponse<StreamingMetrics>>(
-        `/api/v2/artist/${artistId}/streaming/spotify/listening`
-      ),
+    const [artistMetadata, socialStats] = await Promise.all([
+      this.fetch<SoundchartsResponse<ArtistMetadata>>(`/api/v2/artist/${artistId}`),
       this.fetch<SoundchartsResponse<SocialMetrics>>(
         `/api/v2.37/artist/${artistId}/social/instagram/followers`
       ),
     ]);
 
     return {
-      streaming: spotifyStats.data,
-      social: socialStats.data,
+      metadata: artistMetadata.data,
+      streaming: {
+        streams: 0, // Placeholder since Soundcharts doesn't provide this directly
+        listeners: 0,
+        playlists: 0,
+        shares: 0,
+        views: 0,
+        timestamp: Date.now(),
+        platform: artistMetadata.data.object.name,
+      },
+      followers: {
+        comments: socialStats.data.comments || 0,
+        engagement: socialStats.data.engagement || 0,
+        followers: socialStats.data.followers || 0,
+        likes: socialStats.data.likes || 0,
+        shares: socialStats.data.shares || 0,
+        views: socialStats.data.views || 0,
+        platform: socialStats.data.platform || 'instagram',
+      },
     };
   }
 }

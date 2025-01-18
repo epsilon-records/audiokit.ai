@@ -1,3 +1,22 @@
+export interface ArtistMetadata {
+  uuid: string;
+  slug: string;
+  name: string;
+  appUrl: string;
+  imageUrl: string;
+  countryCode: string;
+  genres: Array<{
+    root: string;
+    sub: string[];
+  }>;
+  biography: string;
+  isni: string;
+  ipi: string;
+  gender: 'male' | 'female' | 'other';
+  type: 'person' | 'group';
+  birthDate: string;
+}
+
 export interface StreamingMetrics {
   platform: 'spotify' | 'apple_music' | 'youtube_music' | 'soundcloud';
   streams: number;
