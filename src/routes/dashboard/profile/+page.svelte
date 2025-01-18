@@ -4,29 +4,48 @@
   import { superForm } from 'sveltekit-superforms';
   import { Field, Control, Label, Description, FieldErrors } from 'formsnap';
   import { artistSchema } from '$lib/schemas/artist';
+  import { fade } from 'svelte/transition';
   import SuperDebug from 'sveltekit-superforms';
+  import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
 
   let { data } = $props();
-  let activeTab = $state('basic');
 
   const form = superForm(data.form, {
     resetForm: false,
     validators: zodClient(artistSchema),
     dataType: 'json',
   });
-  const { form: formData, enhance } = form;
+  const { form: formData, message, enhance } = form;
+
+  // Handle file upload preview
+  let avatarPreview = $state('');
+
+  function handleAvatarChange(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        avatarPreview = e.target?.result as string;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
 </script>
 
-<div class="flex min-h-full flex-col justify-center py-12 sm:px-6 lg:px-8">
-  <div class="mt-8 sm:mx-auto sm:w-full">
-    <div class="space-y-4 rounded-lg border-2 px-8 pb-8 max-w-screen-lg mx-auto">
-      <form
-        method="POST"
-        class="flex flex-col space-y-6 max-w-screen-lg"
-        enctype="multipart/form-data"
-        use:enhance
-      >
-        <!-- Hidden Fields -->
+<div class="container mx-auto px-4 py-8">
+  {#if !data.hasActiveSubscription}
+    <div class="bg-yellow-100 border-l-4 border-yellow-500 p-4 mb-8 rounded" in:fade>
+      <p class="text-yellow-700">
+        <span class="font-bold">Limited Access:</span>
+        Upgrade to Pro to unlock all profile features.
+      </p>
+    </div>
+  {/if}
+
+  <form method="POST" class="space-y-6" enctype="multipart/form-data" use:enhance>
+    <!-- Hidden Fields Card -->
+    <Card>
+      <CardContent class="pt-6">
         <div>
           <Field {form} name="id">
             <Control>
@@ -50,15 +69,24 @@
             </Control>
           </Field>
         </div>
+      </CardContent>
+    </Card>
 
-        <!-- Basic Information Section -->
-        <div class="divider divider-accent text-2xl">Artist Profile</div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+    <!-- Basic Information Card -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Artist Profile</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="stage_name">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Artist Name</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Artist Name</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -67,7 +95,6 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">This is your public artist stage name.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <!-- Artist Photos -->
@@ -83,26 +110,35 @@
               </label>
               <div class="w-32">
                 <!-- <img
-                    src={data.user?.avatar
-                      ? getImageURL(data.user?.collectionId, data.user?.id, data.user?.avatar)
-                      : `https://ui-avatars.com/api/?name=${data.user?.name}`}
-                    alt="user avatar"
-                    id="avatar-preview"
-                  /> -->
+                  src={data.user?.avatar
+                    ? getImageURL(data.user?.collectionId, data.user?.id, data.user?.avatar)
+                    : `https://ui-avatars.com/api/?name=${data.user?.name}`}
+                  alt="user avatar"
+                  id="avatar-preview"
+                /> -->
               </div>
             </label>
             <input type="file" name="avatar" id="avatar" value="" accept="image/*" hidden />
           </div>
         </div>
+      </CardContent>
+    </Card>
 
-        <!-- Essential Fields -->
-        <div class="divider divider-accent text-2xl">Legal Details</div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+    <!-- Legal Details Card -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Legal Details</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="legal_name">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Legal Name</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Legal Name</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -111,14 +147,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Be sure to use your real name.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="phone">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Phone</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Phone</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -129,14 +167,16 @@
               </Control>
               <Description class="text-sm">Used for urgent booking communications only.</Description
               >
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="email">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Email</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Email</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -149,14 +189,16 @@
               <Description class="text-sm"
                 >It's preferred that you use your company email.</Description
               >
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="birthdate">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Birthdate</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Birthdate</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -168,19 +210,27 @@
               <Description class="text-sm"
                 >Required for age-restricted venues and events.</Description
               >
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
         </div>
+      </CardContent>
+    </Card>
 
-        <!-- Location Section -->
-        <div class="divider divider-accent text-2xl">Current Location</div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+    <!-- Location Card -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Current Location</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="city">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">City</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">City</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -190,7 +240,6 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">The city you're primarily based in.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full">
@@ -205,15 +254,24 @@
             >
           </div>
         </div>
+      </CardContent>
+    </Card>
 
-        <!-- Biography Section -->
-        <div class="divider divider-accent text-2xl">Artist Biography</div>
-        <div class="space-y-4 px-2">
+    <!-- Biography Card -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Artist Biography</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="space-y-4">
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="website">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Artist Website</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Artist Website</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -223,19 +281,27 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official artist website or portfolio.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
         </div>
+      </CardContent>
+    </Card>
 
-        <!-- Music Platforms -->
-        <div class="divider divider-accent text-2xl">Music Platforms</div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+    <!-- Music Platforms Card -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Music Platforms</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="apple_music">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Apple Music</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Apple Music</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -246,14 +312,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official Apple Music artist profile.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="spotify">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Spotify</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Spotify</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -264,14 +332,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official Spotify artist profile.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="soundcloud">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">SoundCloud</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">SoundCloud</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -282,14 +352,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official SoundCloud artist profile.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="bandcamp">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Bandcamp</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Bandcamp</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -300,14 +372,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official Bandcamp artist profile.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="youtube">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">YouTube</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">YouTube</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -318,14 +392,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official YouTube artist channel.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="mixcloud">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Mixcloud</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Mixcloud</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -336,19 +412,27 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official Mixcloud artist profile.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
         </div>
+      </CardContent>
+    </Card>
 
-        <!-- Social Networks -->
-        <div class="divider divider-accent text-2xl">Social Networks</div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+    <!-- Social Networks Card -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Social Networks</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="instagram">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Instagram</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Instagram</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -359,14 +443,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official Instagram profile.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="facebook">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Facebook</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Facebook</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -377,14 +463,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official Facebook artist page.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="x">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">X (Twitter)</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">X (Twitter)</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -395,14 +483,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official X (Twitter) artist profile.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="tiktok">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">TikTok</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">TikTok</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -413,14 +503,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official TikTok artist profile.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="twitch">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Twitch</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Twitch</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -431,14 +523,16 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official Twitch artist channel.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="linkedin">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">LinkedIn</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">LinkedIn</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -449,19 +543,27 @@
                 {/snippet}
               </Control>
               <Description class="text-sm">Your official LinkedIn artist profile.</Description>
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
         </div>
+      </CardContent>
+    </Card>
 
-        <!-- Event Platforms -->
-        <div class="divider divider-accent text-2xl">Event Platforms</div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 px-2">
+    <!-- Event Platforms Card -->
+    <Card>
+      <CardHeader>
+        <CardTitle>Event Platforms</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="songkick">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Songkick</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Songkick</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -473,14 +575,16 @@
               </Control>
               <Description class="text-sm">Your Songkick artist profile for tour dates.</Description
               >
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
           <div class="form-control w-full max-w-lg mb-2">
             <Field {form} name="bandsintown">
               <Control>
                 {#snippet children({ props })}
-                  <Label class="text-xl">Bandsintown</Label>
+                  <div class="flex justify-between items-center">
+                    <Label class="text-base font-bold">Bandsintown</Label>
+                    <FieldErrors class="font-bold text-destructive text-sm" />
+                  </div>
                   <input
                     {...props}
                     class="input input-bordered bg-white text-gray-900"
@@ -493,19 +597,18 @@
               <Description class="text-sm"
                 >Your Bandsintown artist profile for tour dates.</Description
               >
-              <FieldErrors class="font-bold text-destructive mt-1" />
             </Field>
           </div>
         </div>
+      </CardContent>
+    </Card>
 
-        <!-- Submit Button -->
-        <div class="w-full pt-8 px-2">
-          <button class="btn btn-primary text-pink-100" type="submit"> Update Profile </button>
-        </div>
-
-        <!-- Debug Data -->
-        <SuperDebug data={$formData} />
-      </form>
+    <!-- Submit Button -->
+    <div class="flex justify-end">
+      <button class="btn btn-primary text-pink-100" type="submit">Update Profile</button>
     </div>
-  </div>
+
+    <!-- Debug Data -->
+    <SuperDebug data={$formData} />
+  </form>
 </div>
