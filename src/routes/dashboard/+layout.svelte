@@ -55,9 +55,9 @@
         <a
           href="/dashboard/profile"
           class={cn(
-            'text-sm hover:text-primary dark:hover:text-primary transition-colors',
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
             isActive('/dashboard/profile')
-              ? 'text-primary font-medium'
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
               : 'text-gray-500 dark:text-gray-400'
           )}
         >

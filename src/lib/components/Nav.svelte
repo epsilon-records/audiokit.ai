@@ -92,12 +92,7 @@
           <li>
             <a
               href="/dashboard"
-              class={cn(
-                'transition-colors',
-                isActive('/dashboard')
-                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
-              )}
+              class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
             >
               Dashboard
             </a>
@@ -106,12 +101,7 @@
         <li>
           <a
             href="/docs"
-            class={cn(
-              'transition-colors',
-              isActive('/docs')
-                ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-                : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
-            )}
+            class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
           >
             Docs
           </a>

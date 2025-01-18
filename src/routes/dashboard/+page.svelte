@@ -54,6 +54,29 @@
     </div>
   {/if}
 
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold tracking-tight">Dashboard Overview</h1>
+    <p class="mt-2 text-lg text-muted-foreground">
+      Monitor your performance metrics, manage your artist profile, and track your growth across
+      platforms.
+    </p>
+    <div class="mt-4">
+      <span
+        class="inline-flex items-center rounded-full {data.hasActiveSubscription
+          ? 'bg-green-50 text-green-700 ring-green-600/20'
+          : 'bg-yellow-50 text-yellow-700 ring-yellow-600/20'} 
+          px-2 py-1 text-xs font-medium ring-1 ring-inset"
+      >
+        <span
+          class="mr-1.5 h-1.5 w-1.5 rounded-full {data.hasActiveSubscription
+            ? 'bg-green-600'
+            : 'bg-yellow-600'}"
+        />
+        {data.hasActiveSubscription ? 'Full Access Enabled' : 'Limited Access Mode'}
+      </span>
+    </div>
+  </div>
+
   <!-- Overview Stats -->
   <section class="mb-12">
     <h2
