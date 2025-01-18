@@ -98,7 +98,7 @@
       <!-- Desktop menu -->
       <ul class="hidden lg:flex gap-8 text-lg">
         <SignedIn>
-          <li>
+          <li class="pt-1">
             <a
               href="/dashboard"
               class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
@@ -107,7 +107,7 @@
             </a>
           </li>
         </SignedIn>
-        <li>
+        <li class="pt-1">
           <a
             href="/docs"
             class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
@@ -158,7 +158,7 @@
           </li>
         </SignedOut>
         <SignedIn>
-          <li>
+          <li class="pt-1">
             <ThemeSwitcher />
           </li>
           <li>
