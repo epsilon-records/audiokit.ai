@@ -1,7 +1,7 @@
 import { SOUNDCHARTS_API_KEY } from '$env/static/private';
 import type { StreamingMetrics, SocialMetrics } from '$lib/types/stats';
 
-const SOUNDCHARTS_BASE_URL = 'https://api.soundcharts.com/api/v2';
+const SOUNDCHARTS_BASE_URL = 'https://customer.api.soundcharts.com/api/v2';
 
 interface SoundchartsResponse<T> {
   data: T;
