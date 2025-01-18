@@ -9,11 +9,6 @@
     start: data.dateRange.start,
     end: data.dateRange.end,
   });
-
-  $effect(() => {
-    // Refresh data when date range changes
-    console.log('Date range updated:', dateRange);
-  });
 </script>
 
 <div class="container mx-auto px-4 py-8">

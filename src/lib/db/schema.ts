@@ -120,28 +120,3 @@ export const tracks = pgTable('tracks', {
   performerArtists: json('performer_artists').default([]),
   engineerArtists: json('engineer_artists').default([]),
 });
-
-export const streamingAnalytics = pgTable('streaming_analytics', {
-  id: text('id').primaryKey(),
-  orgId: text('org_id').notNull(),
-  platform: text('platform').notNull(),
-  streams: integer('streams').notNull(),
-  timestamp: timestamp('timestamp').notNull().defaultNow(),
-});
-
-export const socialAnalytics = pgTable('social_analytics', {
-  id: text('id').primaryKey(),
-  orgId: text('org_id').notNull(),
-  platform: text('platform').notNull(),
-  followers: integer('followers').notNull(),
-  engagement: integer('engagement').notNull(),
-  timestamp: timestamp('timestamp').notNull().defaultNow(),
-});
-
-export const revenueAnalytics = pgTable('revenue_analytics', {
-  id: text('id').primaryKey(),
-  orgId: text('org_id').notNull(),
-  source: text('source').notNull(),
-  amount: integer('amount').notNull(),
-  timestamp: timestamp('timestamp').notNull().defaultNow(),
-});
