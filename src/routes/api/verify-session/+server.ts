@@ -23,7 +23,6 @@ export async function POST({ request }) {
 
     return json({ success: true });
   } catch (err) {
-    console.error('Session verification error:', err);
     throw error(500, 'Could not verify checkout session');
   }
 }

@@ -31,7 +31,6 @@ export const POST: RequestHandler = async ({ locals, url }) => {
     });
     return json({ url: session.url });
   } catch (err) {
-    console.error('Portal session error:', err);
     throw error(500, 'Could not create portal session');
   }
 };

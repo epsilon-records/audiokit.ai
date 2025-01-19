@@ -16,6 +16,68 @@ interface SoundchartsResponse<T> {
   };
 }
 
+const defaultMetadata = {
+  type: 'artist' as const,
+  object: {
+    uuid: '',
+    slug: '',
+    name: 'Artist Name',
+    appUrl: '',
+    imageUrl: '',
+    countryCode: '',
+    genres: [
+      {
+        root: '',
+        sub: [],
+      },
+    ],
+    biography: '',
+    isni: '',
+    ipi: '',
+    gender: 'other' as const,
+    type: 'person' as const,
+    birthDate: '',
+  },
+  errors: [],
+};
+
+const defaultStreaming = {
+  type: 'streaming' as const,
+  object: {
+    spotify: {
+      monthlyListeners: 0,
+      followers: 0,
+      popularity: 0,
+      playlists: 0,
+    },
+    appleMusic: {
+      playlists: 0,
+    },
+    deezer: {
+      fans: 0,
+      playlists: 0,
+    },
+  },
+  errors: [],
+};
+
+const defaultFollowers = {
+  type: 'followers' as const,
+  object: {
+    total: 0,
+    platforms: {
+      spotify: 0,
+      instagram: 0,
+      youtube: 0,
+      tiktok: 0,
+      facebook: 0,
+      twitter: 0,
+    },
+    history: [] as { date: string; count: number }[],
+  },
+  errors: [],
+};
+
 export class SoundchartsAPI {
   private apiKey: string;
   private appId: string;
@@ -27,7 +89,6 @@ export class SoundchartsAPI {
 
   private async fetch<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
     const url = new URL(`${SOUNDCHARTS_BASE_URL}${endpoint}`);
-    console.log(url);
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value);
@@ -53,32 +114,12 @@ export class SoundchartsAPI {
   async getArtistStats(artistId: string) {
     const [artistMetadata] = await Promise.all([
       this.fetch<SoundchartsResponse<ArtistMetadata>>(`/api/v2.9/artist/${artistId}`),
-      //   this.fetch<SoundchartsResponse<StreamingMetrics>>(`/api/v2/artist/${artistId}`),
-      //   this.fetch<SoundchartsResponse<SocialMetrics>>(
-      // `/api/v2.37/artist/${artistId}/social/instagram/followers`
-      //   ),
     ]);
 
     return {
       metadata: artistMetadata,
-      //   streaming: {
-      //     streams: 0, // Placeholder since Soundcharts doesn't provide this directly
-      //     listeners: 0,
-      //     playlists: 0,
-      //     shares: 0,
-      //     views: 0,
-      //     timestamp: Date.now(),
-      //     platform: artistMetadata.data.object.name,
-      //   },
-      //   followers: {
-      //     comments: socialStats.data.comments || 0,
-      //     engagement: socialStats.data.engagement || 0,
-      //     followers: socialStats.data.followers || 0,
-      //     likes: socialStats.data.likes || 0,
-      //     shares: socialStats.data.shares || 0,
-      //     views: socialStats.data.views || 0,
-      //     platform: socialStats.data.platform || 'instagram',
-      //   },
+      streaming: defaultStreaming,
+      followers: defaultFollowers,
     };
   }
 }

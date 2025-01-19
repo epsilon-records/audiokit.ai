@@ -10,13 +10,13 @@
     name: string;
     stats?: {
       metadata: typeof defaultMetadata;
-      streaming?: null;
-      followers?: null;
+      streaming?: typeof defaultStreaming;
+      followers?: typeof defaultFollowers;
     };
   }
 
   let { data } = $props<{ data: PageData }>();
-  let { stats, name, hasActiveSubscription } = $derived(data);
+  let { stats, hasActiveSubscription } = $derived(data);
 
   let defaultMetadata = $state({
     type: 'artist',
@@ -40,6 +40,23 @@
       type: 'entity',
       birthDate: '1980-01-01T00:00:00+00:00',
     },
+    errors: [],
+  });
+
+  let defaultStreaming = $state({
+    platform: 'Spotify',
+    streams: 1000000,
+    listeners: 250000,
+    playlists: 1500,
+    engagement: 750000,
+    errors: [],
+  });
+
+  let defaultFollowers = $state({
+    platform: 'Instagram',
+    followers: 50000,
+    engagement: 25000,
+    views: 1000000,
     errors: [],
   });
 </script>
@@ -163,10 +180,10 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.followers.followers)}
+                {formatNumber(stats.followers.object.followers)}
               </div>
               <p class="text-xs text-muted-foreground">
-                Platform: {stats.followers.platform}
+                Platform: {stats.followers.object.platform}
               </p>
             </CardContent>
           </Card>
@@ -179,7 +196,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.followers.engagement)}
+                {formatNumber(stats.followers.object.engagement)}
               </div>
               <p class="text-xs text-muted-foreground">Total interactions</p>
             </CardContent>
@@ -193,7 +210,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.followers.views)}
+                {formatNumber(stats.followers.object.views)}
               </div>
               <p class="text-xs text-muted-foreground">Across all content</p>
             </CardContent>
@@ -207,7 +224,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.followers.engagement)}
+                {formatNumber(stats.followers.object.engagement)}
               </div>
               <p class="text-xs text-muted-foreground">Comments, likes & shares</p>
             </CardContent>
@@ -235,10 +252,10 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.streaming.streams)}
+                {formatNumber(stats.streaming.object.streams)}
               </div>
               <p class="text-xs text-muted-foreground">
-                Platform: {stats.streaming.platform}
+                Platform: {stats.streaming.object.platform}
               </p>
             </CardContent>
           </Card>
@@ -251,7 +268,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.streaming.listeners)}
+                {formatNumber(stats.streaming.object.listeners)}
               </div>
               <p class="text-xs text-muted-foreground">Unique listeners</p>
             </CardContent>
@@ -265,7 +282,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.streaming.playlists)}
+                {formatNumber(stats.streaming.object.playlists)}
               </div>
               <p class="text-xs text-muted-foreground">Total playlists</p>
             </CardContent>
@@ -279,7 +296,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.streaming.engagement)}
+                {formatNumber(stats.streaming.object.engagement)}
               </div>
               <p class="text-xs text-muted-foreground">Streams & listeners combined</p>
             </CardContent>
