@@ -191,28 +191,8 @@
 
       <!-- Mobile Navigation -->
       <div class="md:hidden flex items-center justify-between w-full">
+        <!-- Mobile Hamburger Button and Organization Switcher -->
         <div class="flex items-center gap-2">
-          <OrganizationSwitcher
-            hidePersonal={true}
-            afterCreateOrganizationUrl="/dashboard/team"
-            afterSelectOrganizationUrl="/dashboard"
-            afterLeaveOrganizationUrl="/dashboard"
-            appearance={{
-              baseTheme: $mode === 'dark' ? dark : neobrutalism,
-              variables: {
-                spacingUnit: '16px',
-                borderRadius: '8px',
-              },
-              elements: {
-                organizationSwitcherTrigger:
-                  'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
-              },
-            }}
-          />
-
-          <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
-
-          <!-- Mobile Hamburger Button -->
           <button class="p-1" onclick={toggleMenu} aria-label="Toggle menu">
             <svg
               class="w-6 h-6 text-black dark:text-white"
@@ -236,6 +216,27 @@
               {/if}
             </svg>
           </button>
+
+          <!-- Divider -->
+          <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
+
+          <OrganizationSwitcher
+            hidePersonal={true}
+            afterCreateOrganizationUrl="/dashboard/team"
+            afterSelectOrganizationUrl="/dashboard"
+            afterLeaveOrganizationUrl="/dashboard"
+            appearance={{
+              baseTheme: $mode === 'dark' ? dark : neobrutalism,
+              variables: {
+                spacingUnit: '16px',
+                borderRadius: '8px',
+              },
+              elements: {
+                organizationSwitcherTrigger:
+                  'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
+              },
+            }}
+          />
         </div>
 
         <!-- Status Indicator (visible on all screens) -->
