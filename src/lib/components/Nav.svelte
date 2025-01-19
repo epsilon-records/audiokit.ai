@@ -1,6 +1,6 @@
 <script lang="ts">
   import { UserButton, SignedIn, SignedOut, OrganizationSwitcher } from 'svelte-clerk';
-  import { Icon, Bars3, XMark } from 'svelte-hero-icons';
+  import { Icon, Bars4, XMark } from 'svelte-hero-icons';
   import { slide } from 'svelte/transition';
   import { page } from '$app/stores';
   import { cn } from '$lib/utils';
@@ -72,7 +72,7 @@
           aria-expanded={isOpen}
           aria-label="Toggle menu"
         >
-          <Icon src={isOpen ? XMark : Bars3} class="w-6 h-6" />
+          <Icon src={isOpen ? XMark : Bars4} class="w-6 h-6" />
         </button>
       </div>
 
