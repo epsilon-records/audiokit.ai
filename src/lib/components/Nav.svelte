@@ -1,11 +1,9 @@
 <script lang="ts">
-  import { UserButton, SignedIn, SignedOut, OrganizationSwitcher } from 'svelte-clerk';
+  import { UserButton, SignedIn, SignedOut } from 'svelte-clerk';
   import { Icon, Bars4, XMark } from 'svelte-hero-icons';
   import { slide } from 'svelte/transition';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import { cn } from '$lib/utils';
-  import { mode } from 'mode-watcher';
-  import { neobrutalism, dark } from '@clerk/themes';
   import ThemeSwitcher from '$lib/components/ThemeSwitcher.svelte';
 
   let isOpen = $state(false);
@@ -43,7 +41,7 @@
   }
 
   function isActive(path: string) {
-    return $page.url.pathname.startsWith(path);
+    return page.url.pathname.startsWith(path);
   }
 </script>
 
@@ -163,16 +161,7 @@
             <ThemeSwitcher />
           </li>
           <li>
-            <UserButton
-              afterSignOutUrl="/"
-              appearance={{
-                baseTheme: $mode === 'dark' ? dark : neobrutalism,
-                variables: {
-                  spacingUnit: '16px',
-                  borderRadius: '8px',
-                },
-              }}
-            />
+            <UserButton afterSignOutUrl="/" />
           </li>
         </SignedIn>
       </ul>
@@ -272,16 +261,7 @@
             <div class="px-4 py-2 space-y-1">
               <ThemeSwitcher />
               <div class="mt-2 px-2">
-                <UserButton
-                  afterSignOutUrl="/"
-                  appearance={{
-                    baseTheme: $mode === 'dark' ? dark : neobrutalism,
-                    variables: {
-                      spacingUnit: '16px',
-                      borderRadius: '8px',
-                    },
-                  }}
-                />
+                <UserButton afterSignOutUrl="/" />
               </div>
             </div>
           </SignedIn>

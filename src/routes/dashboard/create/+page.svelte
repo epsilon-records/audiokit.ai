@@ -2,9 +2,15 @@
   import { Button } from '$lib/components/ui/button';
 </script>
 
-<div class="container mx-auto px-4 py-16">
+<div class="container mx-auto px-4 py-8">
+  <div class="mb-8">
+    <h1 class="text-4xl font-bold tracking-tight">Create New</h1>
+    <p class="mt-2 text-lg text-muted-foreground">
+      Start creating new artists or releases for your catalog.
+    </p>
+  </div>
+
   <div class="max-w-2xl mx-auto text-center">
-    <h1 class="text-4xl font-bold mb-8">What would you like to create?</h1>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div class="flex flex-col h-full bg-card rounded-lg p-6 shadow-lg">
         <div class="flex-1">

@@ -7,4 +7,5 @@ export const load = async () => {
     invalidateAll();
     throw redirect(307, '/dashboard');
   }
+  throw redirect(307, '/sign-in');
 };

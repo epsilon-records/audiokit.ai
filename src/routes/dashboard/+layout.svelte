@@ -4,11 +4,12 @@
   import { cn } from '$lib/utils';
   import { toast } from 'svelte-sonner';
   import { OrganizationSwitcher } from 'svelte-clerk';
-  import { neobrutalism, dark } from '@clerk/themes';
   import { mode } from 'mode-watcher';
   import { slide } from 'svelte/transition';
+  import { createClerkNavAppearance } from '$lib/config/clerk';
 
   let isMenuOpen = $state(false);
+  let navAppearance = $state(createClerkNavAppearance($mode === 'dark' ? 'dark' : 'light'));
 
   async function handleManageSubscription() {
     try {
@@ -48,6 +49,11 @@
       isMenuOpen = false;
     }
   });
+
+  // Update appearance when mode changes
+  $effect(() => {
+    navAppearance = createClerkNavAppearance($mode === 'dark' ? 'dark' : 'light');
+  });
 </script>
 
 <!-- Secondary Navigation -->
@@ -57,21 +63,11 @@
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-3">
         <OrganizationSwitcher
+          appearance={navAppearance}
           hidePersonal={true}
           afterCreateOrganizationUrl="/redirect"
           afterSelectOrganizationUrl="/redirect"
           afterLeaveOrganizationUrl="/redirect"
-          appearance={{
-            baseTheme: $mode === 'dark' ? dark : neobrutalism,
-            variables: {
-              spacingUnit: '16px',
-              borderRadius: '8px',
-            },
-            elements: {
-              organizationSwitcherTrigger:
-                'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
-            },
-          }}
         />
         <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
         <a
@@ -216,26 +212,12 @@
               {/if}
             </svg>
           </button>
-
-          <!-- Divider -->
-          <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
-
           <OrganizationSwitcher
+            appearance={navAppearance}
             hidePersonal={true}
-            afterCreateOrganizationUrl="/"
-            afterSelectOrganizationUrl="/"
-            afterLeaveOrganizationUrl="/"
-            appearance={{
-              baseTheme: $mode === 'dark' ? dark : neobrutalism,
-              variables: {
-                spacingUnit: '16px',
-                borderRadius: '8px',
-              },
-              elements: {
-                organizationSwitcherTrigger:
-                  'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
-              },
-            }}
+            afterCreateOrganizationUrl="/redirect"
+            afterSelectOrganizationUrl="/redirect"
+            afterLeaveOrganizationUrl="/redirect"
           />
         </div>
 
@@ -265,12 +247,9 @@
       </div>
     </div>
 
-    <!-- Mobile Menu -->
+    <!-- Mobile Menu Panel -->
     {#if isMenuOpen}
-      <div
-        class="md:hidden fixed top-28 left-4 right-4 z-50 py-2 space-y-1 bg-background border-2 border-black dark:border-gray-700 rounded-lg shadow-lg max-w-[1400px] mx-auto"
-        transition:slide
-      >
+      <div class="md:hidden py-2 space-y-1" transition:slide={{ duration: 200 }}>
         <a
           href="/dashboard"
           class={cn(
