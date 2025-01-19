@@ -192,6 +192,26 @@
       <!-- Mobile Navigation -->
       <div class="md:hidden flex items-center justify-between w-full">
         <div class="flex items-center gap-2">
+          <OrganizationSwitcher
+            hidePersonal={true}
+            afterCreateOrganizationUrl="/dashboard/team"
+            afterSelectOrganizationUrl="/dashboard"
+            afterLeaveOrganizationUrl="/dashboard"
+            appearance={{
+              baseTheme: $mode === 'dark' ? dark : neobrutalism,
+              variables: {
+                spacingUnit: '16px',
+                borderRadius: '8px',
+              },
+              elements: {
+                organizationSwitcherTrigger:
+                  'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
+              },
+            }}
+          />
+
+          <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
+
           <!-- Mobile Hamburger Button -->
           <button class="p-1" onclick={toggleMenu} aria-label="Toggle menu">
             <svg
@@ -217,32 +237,38 @@
               {/if}
             </svg>
           </button>
-
-          <OrganizationSwitcher
-            hidePersonal={true}
-            afterCreateOrganizationUrl="/dashboard/team"
-            afterSelectOrganizationUrl="/dashboard"
-            afterLeaveOrganizationUrl="/dashboard"
-            appearance={{
-              baseTheme: $mode === 'dark' ? dark : neobrutalism,
-              variables: {
-                spacingUnit: '16px',
-                borderRadius: '8px',
-              },
-              elements: {
-                organizationSwitcherTrigger:
-                  'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
-              },
-            }}
-          />
         </div>
+
+        <!-- Status Indicator (visible on all screens) -->
+        <span class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
+          Status:
+          {#if page.data.hasActiveSubscription}
+            <span
+              class="ml-1 inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400"
+            >
+              Active
+            </span>
+          {:else}
+            <span
+              class="ml-1 inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            >
+              Inactive
+            </span>
+            <a
+              href="/subscribe"
+              class="ml-2 inline-flex items-center rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
+            >
+              Enable
+            </a>
+          {/if}
+        </span>
       </div>
     </div>
 
     <!-- Mobile Menu -->
     {#if isMenuOpen}
       <div
-        class="md:hidden py-2 space-y-1 bg-background border-2 border-black dark:border-gray-700 rounded-lg shadow-lg"
+        class="md:hidden fixed top-28 left-4 right-4 z-50 py-2 space-y-1 bg-background border-2 border-black dark:border-gray-700 rounded-lg shadow-lg max-w-[1400px] mx-auto"
         transition:slide
       >
         <a
