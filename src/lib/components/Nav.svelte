@@ -201,7 +201,7 @@
     {#if isOpen}
       <div
         bind:this={menuRef}
-        class="mobile-menu lg:hidden fixed top-16 right-0 w-full bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
+        class="mobile-menu lg:hidden fixed top-16 right-0 w-full bg-background border-2 border-black rounded-lg"
       >
         <div class="container mx-auto px-4">
           <div class="py-2 space-y-1">

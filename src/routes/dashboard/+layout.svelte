@@ -210,7 +210,7 @@
 
     <!-- Mobile Menu -->
     {#if isMenuOpen}
-      <div class="md:hidden py-2 space-y-1">
+      <div class="md:hidden py-2 space-y-1 bg-background border-2 border-black rounded-lg">
         <a
           href="/dashboard"
           class={cn(
