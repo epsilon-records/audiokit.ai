@@ -19,6 +19,6 @@
         borderRadius: '8px',
       },
     }}
-    fallbackRedirectUrl="/redirect"
+    fallbackRedirectUrl="/dashboard"
   />
 </AuthContainer>
