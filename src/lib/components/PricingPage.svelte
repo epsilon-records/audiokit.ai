@@ -14,50 +14,48 @@
     description: string;
     monthlyPrice: number;
     annualPrice: number;
-    features: string[];
+    features: { text: string; icon: string }[];
     highlighted?: boolean;
   }
 
   const pricingTiers: PricingTier[] = [
     {
-      name: 'Basic Label',
+      name: '🎵 Basic Label',
       description: 'Perfect for individual artists and small labels getting started',
       monthlyPrice: 19,
       annualPrice: 99,
       features: [
-        'Manage up to 5 artists',
-        '5 team members per artist',
-        '5GB media storage per artist',
-        'Advanced analytics dashboard',
-        'Release planning & scheduling',
-        'Music distribution to major platforms',
-        'Royalty tracking & reporting',
-        'Contract templates & e-signing',
-        '24/7 Slack channel support',
-        'Priority API access',
-        'Advanced integrations',
-        'Custom workflows',
+        { text: 'Music distribution to all major platforms', icon: '🎧' },
+        { text: 'Manage up to 5 artists', icon: '👥' },
+        { text: '5 team members per artist', icon: '🤝' },
+        { text: '5GB media storage per artist', icon: '💾' },
+        { text: 'Advanced analytics dashboard', icon: '📊' },
+        { text: 'Release planning & scheduling', icon: '📅' },
+        { text: 'Royalty tracking & reporting', icon: '💰' },
+        { text: 'Contract templates & e-signing', icon: '📝' },
+        { text: '24/7 Slack channel support', icon: '💬' },
+        { text: 'Priority API access', icon: '🔑' },
       ],
     },
     {
-      name: 'Pro Label',
+      name: '⭐ Pro Label',
       description: 'Advanced features for growing professional labels',
       monthlyPrice: 79,
       annualPrice: 599,
       highlighted: true,
       features: [
-        'Unlimited artists',
-        'Unlimited team members',
-        'Unlimited storage',
-        'Advanced analytics dashboard',
-        'Release planning & scheduling',
-        'Music distribution to major platforms',
-        'Royalty tracking & reporting',
-        'Contract templates & e-signing',
-        '24/7 Slack channel support',
-        'Priority API access',
-        'Advanced integrations',
-        'Custom workflows',
+        { text: 'Music distribution to all major platforms', icon: '🎧' },
+        { text: 'Unlimited artists', icon: '👥' },
+        { text: 'Unlimited team members', icon: '🤝' },
+        { text: 'Unlimited storage', icon: '💾' },
+        { text: 'Advanced analytics dashboard', icon: '📊' },
+        { text: 'Release planning & scheduling', icon: '📅' },
+        { text: 'Royalty tracking & reporting', icon: '💰' },
+        { text: 'Contract templates & e-signing', icon: '📝' },
+        { text: '24/7 Slack channel support', icon: '💬' },
+        { text: 'Priority API access', icon: '🔑' },
+        { text: 'Advanced integrations', icon: '🔌' },
+        { text: 'Custom workflows', icon: '⚡' },
       ],
     },
   ];
@@ -154,7 +152,9 @@
 
         <div class="mb-4">
           <p class="flex items-baseline">
-            <span class="text-4xl font-bold tracking-tight text-gray-900">
+            <span
+              class="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-emerald-400"
+            >
               ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
             </span>
             <span class="ml-1 text-lg font-semibold text-gray-600">
@@ -162,7 +162,15 @@
             </span>
           </p>
           {#if isAnnual}
-            <p class="mt-1 text-sm text-green-600">
+            <p class="mt-1 text-sm text-emerald-600 flex items-center gap-1">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M5 13l4 4L19 7"
+                />
+              </svg>
               Save ${(tier.monthlyPrice * 12 - tier.annualPrice).toFixed(2)} with annual billing
             </p>
           {/if}
@@ -170,12 +178,12 @@
 
         <ul role="list" class="mb-6 space-y-3 flex-1">
           {#each tier.features as feature}
-            <li class="flex gap-2">
+            <li class="flex gap-3 items-center">
               <svg
-                class="h-5 w-5 flex-none text-primary"
+                class="h-5 w-5 flex-none text-emerald-500"
                 fill="none"
                 viewBox="0 0 24 24"
-                stroke-width="1.5"
+                stroke-width="2"
                 stroke="currentColor"
               >
                 <path
@@ -184,7 +192,10 @@
                   d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <span class="text-sm text-gray-600">{feature}</span>
+              <span class="text-sm text-gray-600">
+                <span class="mr-2">{feature.icon}</span>
+                {feature.text}
+              </span>
             </li>
           {/each}
         </ul>
