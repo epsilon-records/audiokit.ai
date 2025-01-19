@@ -53,7 +53,7 @@
   <div class="container mx-auto px-4">
     <div class="flex justify-between items-center py-4">
       <div class="flex items-center gap-4">
-        <a href="/" class="flex items-center gap-2 lg:pb-0 pb-2">
+        <a href="/" class="flex items-center gap-2">
           <img src="/logo.png" alt="AudioKit Logo" class="h-8 w-8 logo-image" />
           <span
             class="text-indigo-600 dark:text-indigo-400 font-mono font-bold text-xl hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
@@ -83,7 +83,7 @@
       </div>
 
       <!-- Mobile menu button -->
-      <div class="pb-4 lg:hidden">
+      <div class="lg:hidden">
         <button
           bind:this={buttonRef}
           class="menu-button text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 dark:hover:text-indigo-300 transition-colors"
@@ -201,97 +201,111 @@
     {#if isOpen}
       <div
         bind:this={menuRef}
-        class="mobile-menu lg:hidden fixed top-16 right-0 w-32 h-[calc(100vh-4rem)] bg-white/95 dark:bg-gray-800/95 border-l border-gray-200 dark:border-gray-700 overflow-y-auto"
-        transition:slide={{ duration: 200, axis: 'x' }}
+        class="mobile-menu lg:hidden fixed top-16 right-0 w-full bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700"
       >
-        <ul class="container mx-auto px-4 py-4 flex flex-col gap-4">
-          <SignedIn>
-            <li>
+        <div class="container mx-auto px-4">
+          <div class="py-2 space-y-1">
+            <SignedIn>
               <a
                 href="/dashboard"
-                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                class={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+                  isActive('/dashboard')
+                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                )}
                 onclick={closeMenu}
               >
                 Dashboard
               </a>
-            </li>
-          </SignedIn>
-          <SignedOut>
-            <li>
+            </SignedIn>
+            <SignedOut>
               <a
                 href="/services"
-                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                class={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+                  isActive('/services')
+                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                )}
                 onclick={closeMenu}
               >
                 Services
               </a>
-            </li>
-            <li>
               <a
                 href="/pricing"
-                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                class={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+                  isActive('/pricing')
+                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                )}
                 onclick={closeMenu}
               >
                 Pricing
               </a>
-            </li>
-          </SignedOut>
-          <li>
+            </SignedOut>
             <a
               href="/docs"
-              class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              class={cn(
+                'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+                isActive('/docs')
+                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                  : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+              )}
               onclick={closeMenu}
             >
               Docs
             </a>
-          </li>
-          <SignedOut>
-            <li>
+            <SignedOut>
               <a
                 href="/contact"
-                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+                class={cn(
+                  'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+                  isActive('/contact')
+                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                )}
                 onclick={closeMenu}
               >
                 Contact
               </a>
-            </li>
-            <li>
-              <a
-                href="/sign-in"
-                class="btn btn-sm btn-primary text-lg text-white hover:text-indigo-100 transition-colors"
-                onclick={closeMenu}
-              >
-                Login
-              </a>
-            </li>
-            <li>
-              <a
-                href="/sign-up"
-                class="btn btn-sm btn-secondary text-lg text-white hover:text-indigo-100 transition-colors"
-                onclick={closeMenu}
-              >
-                Register
-              </a>
-            </li>
-          </SignedOut>
-          <SignedIn>
-            <li>
-              <ThemeSwitcher />
-            </li>
-            <li class="px-2">
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  baseTheme: $mode === 'dark' ? dark : neobrutalism,
-                  variables: {
-                    spacingUnit: '16px',
-                    borderRadius: '8px',
-                  },
-                }}
-              />
-            </li>
-          </SignedIn>
-        </ul>
+              <div class="px-3 py-2 space-y-1">
+                <a
+                  href="/sign-in"
+                  class="w-full inline-flex justify-center items-center px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors text-base font-medium"
+                  onclick={closeMenu}
+                >
+                  Login
+                </a>
+                <a
+                  href="/sign-up"
+                  class="w-full inline-flex justify-center items-center px-3 py-2 rounded-md bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 transition-colors text-base font-medium"
+                  onclick={closeMenu}
+                >
+                  Register
+                </a>
+              </div>
+            </SignedOut>
+            <SignedIn>
+              <div class="px-3 py-2 space-y-1">
+                <ThemeSwitcher />
+                <div class="mt-2 px-2">
+                  <UserButton
+                    afterSignOutUrl="/"
+                    appearance={{
+                      baseTheme: $mode === 'dark' ? dark : neobrutalism,
+                      variables: {
+                        spacingUnit: '16px',
+                        borderRadius: '8px',
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+            </SignedIn>
+          </div>
+        </div>
       </div>
     {/if}
   </div>
