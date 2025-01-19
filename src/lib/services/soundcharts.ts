@@ -1,5 +1,5 @@
 import { SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
-import type { ArtistMetadata, StreamingMetrics, SocialMetrics } from '$lib/types/stats';
+import type { ArtistMetadata } from '$lib/types/stats';
 
 const SOUNDCHARTS_BASE_URL = 'https://customer.api.soundcharts.com';
 
@@ -52,7 +52,7 @@ export class SoundchartsAPI {
 
   async getArtistStats(artistId: string) {
     const [artistMetadata] = await Promise.all([
-      this.fetch<SoundchartsResponse<ArtistMetadata>>(`/api/v2/artist/${artistId}`),
+      this.fetch<SoundchartsResponse<ArtistMetadata>>(`/api/v2.9/artist/${artistId}`),
       //   this.fetch<SoundchartsResponse<StreamingMetrics>>(`/api/v2/artist/${artistId}`),
       //   this.fetch<SoundchartsResponse<SocialMetrics>>(
       // `/api/v2.37/artist/${artistId}/social/instagram/followers`

@@ -1,20 +1,24 @@
 export interface ArtistMetadata {
-  uuid: string;
-  slug: string;
-  name: string;
-  appUrl: string;
-  imageUrl: string;
-  countryCode: string;
-  genres: Array<{
-    root: string;
-    sub: string[];
-  }>;
-  biography: string;
-  isni: string;
-  ipi: string;
-  gender: 'male' | 'female' | 'other';
-  type: 'person' | 'group';
-  birthDate: string;
+  type: 'artist';
+  object: {
+    uuid: string;
+    slug: string;
+    name: string;
+    appUrl: string;
+    imageUrl: string;
+    countryCode: string;
+    genres: Array<{
+      root: string;
+      sub: string[];
+    }>;
+    biography: string;
+    isni: string;
+    ipi: string;
+    gender: 'male' | 'female' | 'other';
+    type: 'person' | 'group';
+    birthDate: string;
+  };
+  errors: string[];
 }
 
 export interface StreamingMetrics {

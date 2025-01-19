@@ -1,14 +1,11 @@
-import { error, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY } from '$env/static/private';
 import { clerkClient } from 'svelte-clerk/server';
-import { soundcharts } from '$lib/services/soundcharts';
+import { stripe } from '$lib/server/stripe';
 import { db } from '$lib/db';
-import { artists } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
-
-const stripe = new Stripe(STRIPE_SECRET_KEY);
+import { artists } from '$lib/db/schema';
+import { soundcharts } from '$lib/services/soundcharts';
 
 export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.auth?.userId) {
@@ -22,7 +19,6 @@ export const load: PageServerLoad = async ({ locals }) => {
     throw redirect(307, '/sign-in');
   }
 
-  // Check subscription status
   const [customer] = (await stripe.customers.list({ email, limit: 1 })).data;
   let hasActiveSubscription = false;
 
@@ -37,7 +33,6 @@ export const load: PageServerLoad = async ({ locals }) => {
     hasActiveSubscription = !!subscription;
   }
 
-  // Get artist data
   const artistData = await db
     .select()
     .from(artists)
@@ -51,16 +46,11 @@ export const load: PageServerLoad = async ({ locals }) => {
     };
   }
 
-  // Fetch stats from Soundcharts if we have an artist
   try {
     const artist = artistData[0];
-    console.log(artist);
-
-    // Extract Spotify ID from URL
     const spotifyId = artist.spotify ? artist.spotify.split('/').pop() : null;
-    console.log(spotifyId);
+
     if (!spotifyId) {
-      console.error('Spotify ID not found for artist');
       return {
         stats: null,
         hasActiveSubscription,
@@ -68,9 +58,11 @@ export const load: PageServerLoad = async ({ locals }) => {
     }
 
     const stats = await soundcharts.getArtistStats(spotifyId);
-
+    console.error('Successfully fetched stats:', stats);
     return {
-      stats: stats,
+      stats: {
+        metadata: stats.metadata,
+      },
       hasActiveSubscription,
     };
   } catch (err) {

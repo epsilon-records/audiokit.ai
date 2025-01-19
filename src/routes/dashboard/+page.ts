@@ -8,17 +8,12 @@ export async function load({ url, fetch }: PageLoadEvent) {
       method: 'POST',
       body: JSON.stringify({ sessionId }),
     }).catch(() => {
-      throw redirect(303, '/pricing?error=payment-verification-failed');
+      throw redirect(303, '/subscribe?error=payment-verification-failed');
     });
 
     if (!response.ok) {
-      throw redirect(303, '/pricing?error=payment-verification-failed');
+      throw redirect(303, '/subscribe?error=payment-verification-failed');
     }
     throw redirect(303, '/dashboard');
   }
-
-  // Normal dashboard load logic here
-  return {
-    // ... other dashboard data
-  };
 }
