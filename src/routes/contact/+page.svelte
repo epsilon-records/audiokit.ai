@@ -1,6 +1,6 @@
 <script lang="ts">
   import { fade, fly, scale } from 'svelte/transition';
-  import { Mail, MessageSquare, Clock, ExternalLink } from 'lucide-svelte';
+  import { MessageSquare, Clock, ExternalLink } from 'lucide-svelte';
 </script>
 
 <svelte:head>
