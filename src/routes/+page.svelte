@@ -34,8 +34,8 @@
 </script>
 
 <svelte:head>
-  <title>AudioKit | Music Distribution & Artist Services</title>
-  <meta name="description" content="Professional music distribution and artist services platform" />
+  <title>AudioKit | Music Distribution & Label Services</title>
+  <meta name="description" content="Professional music distribution and label services platform" />
 </svelte:head>
 
 <HeroContainer />
