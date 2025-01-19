@@ -1,8 +1,13 @@
-import { db } from '$lib/db';
+import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { desc, eq } from 'drizzle-orm';
 
 export const load: PageServerLoad = async ({ locals }) => {
+  if (!locals.auth?.userId) {
+    throw redirect(307, '/sign-in');
+  } else if (!locals.auth.orgId) {
+    throw redirect(307, '/dashboard/create-artist');
+  }
+
   try {
     return {
       streaming: null,

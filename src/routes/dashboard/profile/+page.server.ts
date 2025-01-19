@@ -8,8 +8,8 @@ import { artistSchema } from '$lib/schemas/artist';
 export const load = (async ({ locals }) => {
   if (!locals.auth?.userId) {
     throw redirect(307, '/sign-in');
-  } else if (!locals.auth?.orgId) {
-    throw redirect(302, '/dashboard/create');
+  } else if (!locals.auth.orgId) {
+    throw redirect(307, '/dashboard/create-artist');
   }
   const artists = await pb.collection('artists').getList(1, 1, {
     filter: `org_id = "${locals.auth.orgId}"`,

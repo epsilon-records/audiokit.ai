@@ -3,6 +3,7 @@ import type { LayoutServerLoad } from './$types';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '$env/static/private';
 import { clerkClient } from 'svelte-clerk/server';
+import { page } from '$app/state';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY);
 

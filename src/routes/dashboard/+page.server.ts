@@ -72,6 +72,8 @@ const defaultFollowers = {
 export const load: PageServerLoad = async ({ locals }) => {
   if (!locals.auth?.userId) {
     throw redirect(307, '/sign-in');
+  } else if (!locals.auth.orgId) {
+    throw redirect(307, '/dashboard/create-artist');
   }
 
   const user = await clerkClient.users.getUser(locals.auth.userId);
