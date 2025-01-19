@@ -195,7 +195,7 @@
           <!-- Mobile Hamburger Button -->
           <button class="p-1" onclick={toggleMenu} aria-label="Toggle menu">
             <svg
-              class="w-6 h-6 text-gray-500 dark:text-gray-400"
+              class="w-6 h-6 text-black dark:text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -205,14 +205,14 @@
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="1.5"
-                  d="M6 6l12 12m0-12L6 18"
+                  d="M9 9l6 6m0-6l-6 6m12-3a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               {:else}
                 <path
                   stroke-linecap="round"
                   stroke-linejoin="round"
                   stroke-width="1.5"
-                  d="M3.75 9h16.5m-16.5 6h16.5"
+                  d="M7 7h.01M12 7h.01M17 7h.01M7 12h.01M12 12h.01M17 12h.01M7 17h.01M12 17h.01M17 17h.01"
                 />
               {/if}
             </svg>
