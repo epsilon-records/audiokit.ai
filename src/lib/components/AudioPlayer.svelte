@@ -14,10 +14,10 @@
   let wavesurfer: WaveSurfer;
 
   const testTrack = {
-    title: "The Vamp",
-    artist: "Acid Boy",
-    coverUrl: "https://f002.backblazeb2.com/file/epsilon-catalog/Acid+Boy/303:+Part+One/logo.gif",
-    audioUrl: "/audio/Acid_Boy_The_Vamp.mp3"
+    title: 'The Vamp',
+    artist: 'Acid Boy',
+    coverUrl: 'https://f002.backblazeb2.com/file/epsilon-catalog/Acid+Boy/303:+Part+One/logo.gif',
+    audioUrl: '/audio/Acid_Boy_The_Vamp.mp3',
   };
 
   onMount(() => {
@@ -64,7 +64,7 @@
         isPlaying = true;
       }
     } catch (error) {
-      console.error('Playback error:', error);
+      // console.error('Playback error:', error);
       isPlaying = false;
     }
   }
@@ -91,8 +91,8 @@
   <div class="container mx-auto flex flex-col gap-2">
     <div class="flex items-center justify-between gap-4">
       <div class="flex items-center gap-4">
-        <img 
-          src={testTrack.coverUrl} 
+        <img
+          src={testTrack.coverUrl}
           alt={`${testTrack.title} cover`}
           class="h-16 w-16 rounded-md object-cover"
         />
@@ -107,7 +107,7 @@
           <span class="text-xs w-12 text-muted-foreground">
             {formatTime(currentTime)}
           </span>
-          
+
           <div class="flex-1 relative h-10 flex items-center group cursor-pointer">
             <div bind:this={waveformRef} class="absolute inset-0" />
             <Slider
@@ -118,7 +118,7 @@
               class="opacity-75 group-hover:opacity-100 transition-opacity"
             />
           </div>
-          
+
           <span class="text-xs w-12 text-muted-foreground">
             {formatTime(duration)}
           </span>
@@ -126,17 +126,13 @@
       </div>
 
       <div class="flex items-center gap-2">
-        <Button 
-          variant="ghost" 
-          size="icon"
-          class="hover:bg-accent hover:text-accent-foreground"
-        >
+        <Button variant="ghost" size="icon" class="hover:bg-accent hover:text-accent-foreground">
           <SkipBack class="h-5 w-5" />
         </Button>
 
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           onclick={togglePlay}
           class="hover:bg-accent hover:text-accent-foreground"
         >
@@ -147,14 +143,10 @@
           {/if}
         </Button>
 
-        <Button 
-          variant="ghost" 
-          size="icon"
-          class="hover:bg-accent hover:text-accent-foreground"
-        >
+        <Button variant="ghost" size="icon" class="hover:bg-accent hover:text-accent-foreground">
           <SkipForward class="h-5 w-5" />
         </Button>
       </div>
     </div>
   </div>
-</div> 
+</div>

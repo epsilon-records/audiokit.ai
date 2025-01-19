@@ -58,9 +58,9 @@
       <div class="hidden md:flex items-center gap-3">
         <OrganizationSwitcher
           hidePersonal={true}
-          afterCreateOrganizationUrl="/dashboard/team"
-          afterSelectOrganizationUrl="/dashboard"
-          afterLeaveOrganizationUrl="/dashboard"
+          afterCreateOrganizationUrl="/redirect"
+          afterSelectOrganizationUrl="/redirect"
+          afterLeaveOrganizationUrl="/redirect"
           appearance={{
             baseTheme: $mode === 'dark' ? dark : neobrutalism,
             variables: {
@@ -222,9 +222,9 @@
 
           <OrganizationSwitcher
             hidePersonal={true}
-            afterCreateOrganizationUrl="/dashboard/team"
-            afterSelectOrganizationUrl="/dashboard"
-            afterLeaveOrganizationUrl="/dashboard"
+            afterCreateOrganizationUrl="/"
+            afterSelectOrganizationUrl="/"
+            afterLeaveOrganizationUrl="/"
             appearance={{
               baseTheme: $mode === 'dark' ? dark : neobrutalism,
               variables: {

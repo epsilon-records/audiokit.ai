@@ -112,16 +112,16 @@ export class SoundchartsAPI {
   }
 
   async getArtistStats(artistId: string) {
-    const [artistMetadata] = await Promise.all([
+    const [metadata] = await Promise.all([
       this.fetch<SoundchartsResponse<ArtistMetadata>>(
         `/api/v2.9/artist/ca22091a-3c00-11e9-974f-549f35141000`
       ),
     ]);
 
     return {
-      metadata: artistMetadata,
-      streaming: defaultStreaming,
-      followers: defaultFollowers,
+      metadata: { ...defaultMetadata, ...metadata.data },
+      streaming: { ...defaultStreaming },
+      followers: { ...defaultFollowers },
     };
   }
 }

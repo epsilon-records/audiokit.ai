@@ -101,28 +101,43 @@ export const load: PageServerLoad = async ({ locals }) => {
     .where(eq(artists.orgId, locals.auth.orgId))
     .limit(1);
 
-  // Fetch organization details
   const org = await clerkClient.organizations.getOrganization({
     organizationId: locals.auth.orgId,
   });
 
+  const baseResponse = {
+    hasActiveSubscription,
+    user: {
+      id: user.id,
+      imageUrl: user.imageUrl,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.primaryEmailAddress?.emailAddress,
+      phone: user.primaryPhoneNumber?.phoneNumber,
+      legalAcceptedAt: user.legalAcceptedAt,
+      lastSignedInAt: user.lastSignInAt,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    },
+    org: {
+      id: org.id,
+      name: org.name,
+      imageUrl: org.imageUrl,
+      slug: org.slug,
+      membersCount: org.membersCount,
+      maxAllowedMemberships: org.maxAllowedMemberships,
+      createdAt: org.createdAt,
+      updatedAt: org.updatedAt,
+    },
+  };
+
   if (!artistData.length) {
     return {
-      stats: {
-        metadata: defaultMetadata,
-        streaming: defaultStreaming,
-        followers: defaultFollowers,
-      },
-      hasActiveSubscription,
-      user: {
-        id: user.id,
-        imageUrl: user.imageUrl,
-      },
-      org: {
-        id: org.id,
-        name: org.name,
-        imageUrl: org.imageUrl,
-      },
+      ...baseResponse,
+      metadata: defaultMetadata,
+      streaming: defaultStreaming,
+      followers: defaultFollowers,
     };
   }
 
@@ -132,61 +147,28 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     if (!spotifyId) {
       return {
-        stats: {
-          metadata: defaultMetadata,
-          streaming: defaultStreaming,
-          followers: defaultFollowers,
-        },
-        hasActiveSubscription,
-        user: {
-          id: user.id,
-          imageUrl: user.imageUrl,
-        },
-        org: {
-          id: org.id,
-          name: org.name,
-          imageUrl: org.imageUrl,
-        },
+        ...baseResponse,
+        metadata: defaultMetadata,
+        streaming: defaultStreaming,
+        followers: defaultFollowers,
       };
     }
 
-    const stats = await soundcharts.getArtistStats(spotifyId);
-    console.error('Successfully fetched stats:', stats);
+    const { metadata, streaming, followers } = await soundcharts.getArtistStats(spotifyId);
+    console.log('Successfully fetched stats:', { metadata, streaming, followers });
     return {
-      stats: {
-        metadata: stats.metadata,
-        streaming: defaultStreaming,
-        followers: defaultFollowers,
-      },
-      hasActiveSubscription,
-      user: {
-        id: user.id,
-        imageUrl: user.imageUrl,
-      },
-      org: {
-        id: org.id,
-        name: org.name,
-        imageUrl: org.imageUrl,
-      },
+      ...baseResponse,
+      metadata: metadata,
+      streaming: streaming,
+      followers: followers,
     };
   } catch (err) {
     console.error('Error fetching stats:', err);
     return {
-      stats: {
-        metadata: defaultMetadata,
-        streaming: defaultStreaming,
-        followers: defaultFollowers,
-      },
-      hasActiveSubscription,
-      user: {
-        id: user.id,
-        imageUrl: user.imageUrl,
-      },
-      org: {
-        id: org.id,
-        name: org.name,
-        imageUrl: org.imageUrl,
-      },
+      ...baseResponse,
+      metadata: defaultMetadata,
+      streaming: defaultStreaming,
+      followers: defaultFollowers,
     };
   }
 };

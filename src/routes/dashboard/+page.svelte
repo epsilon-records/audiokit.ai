@@ -6,65 +6,48 @@
   import { formatNumber } from '$lib/utils/format';
 
   interface PageData {
-    stats?: {
-      metadata: typeof defaultMetadata;
-      streaming?: typeof defaultStreaming;
-      followers?: typeof defaultFollowers;
+    metadata: {
+      genres: Array<{ root: string; sub: string[] }>;
+      isni?: string;
+      ipi?: string;
     };
-    hasActiveSubscription: boolean;
+    streaming?: {
+      streams: number;
+      platform: string;
+      listeners: number;
+      playlists: number;
+      engagement: number;
+    };
+    followers?: {
+      followers: number;
+      platform: string;
+      engagement: number;
+      views: number;
+    };
     user: {
-      id: string;
+      firstName: string;
+      lastName: string;
+      username: string;
+      email: string;
+      phone?: string;
+      lastSignedInAt: string;
       imageUrl: string;
+    };
+    org: {
+      name: string;
+      membersCount: number;
+      maxAllowedMemberships: number;
+      slug: string;
+      imageUrl: string;
+      updatedAt: string;
+      createdAt: string;
     };
   }
 
   let { data } = $props<{ data: PageData }>();
-  let { stats, hasActiveSubscription, user, org } = data;
 
-  let artistName = $state(org.name);
-  let artistPhoto = $state(org.imageUrl);
-
-  let defaultMetadata = {
-    type: 'artist',
-    object: {
-      uuid: 'real-uuid-1234',
-      slug: 'real-artist',
-      name: 'Real Artist',
-      appUrl: 'https://example.com/real-artist',
-      imageUrl: 'https://example.com/real-artist.jpg',
-      countryCode: 'US',
-      genres: [
-        {
-          root: 'Real Genre',
-          sub: ['Subgenre A', 'Subgenre B'],
-        },
-      ],
-      biography: 'This is a real artist biography.',
-      isni: '1234567890123456',
-      ipi: '12345678901',
-      gender: 'male',
-      type: 'entity',
-      birthDate: '1980-01-01T00:00:00+00:00',
-    },
-    errors: [],
-  };
-
-  let defaultStreaming = {
-    platform: 'Spotify',
-    streams: 1000000,
-    listeners: 250000,
-    playlists: 1500,
-    engagement: 750000,
-    errors: [],
-  };
-
-  let defaultFollowers = {
-    platform: 'Instagram',
-    followers: 50000,
-    engagement: 25000,
-    views: 1000000,
-    errors: [],
-  };
+  // Using $derived to maintain reactivity
+  let { metadata, streaming, followers, user, org } = $derived(data);
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -73,7 +56,7 @@
     <p class="mt-2 text-lg text-muted-foreground">
       Get insights into your performance metrics and manage your artist profile.
     </p>
-    {#if !stats}
+    {#if !metadata}
       <div class="mt-4" in:fly={{ y: 20, duration: 400, delay: 200 }}>
         <Badge
           variant="outline"
@@ -96,7 +79,7 @@
           Artist Information
         </h2>
       </div>
-      {#if stats?.metadata}
+      {#if metadata}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -107,23 +90,23 @@
             <CardContent class="pt-6 space-y-4 flex justify-between">
               <div class="flex-1 space-y-4">
                 <div>
-                  <p class="text-sm text-muted-foreground">Name</p>
-                  <p class="text-lg font-semibold">{artistName}</p>
+                  <p class="text-sm text-muted-foreground">Organization</p>
+                  <p class="text-lg font-semibold">{org.name}</p>
                 </div>
                 <div>
-                  <p class="text-sm text-muted-foreground">Type</p>
-                  <p class="text-lg font-semibold capitalize">{stats.metadata.object.type}</p>
+                  <p class="text-sm text-muted-foreground">Members</p>
+                  <p class="text-base">{org.membersCount} / {org.maxAllowedMemberships}</p>
                 </div>
                 <div>
-                  <p class="text-sm text-muted-foreground">Country</p>
-                  <p class="text-lg font-semibold">{stats.metadata.object.countryCode}</p>
+                  <p class="text-sm text-muted-foreground">Slug</p>
+                  <p class="text-base">@{org.slug}</p>
                 </div>
               </div>
               <div class="flex justify-center items-center pr-8">
                 <div class="w-48 h-48 m-4 flex-shrink-0">
                   <img
-                    src={artistPhoto}
-                    alt="Artist"
+                    src={org.imageUrl}
+                    alt="Organization"
                     class="w-full border-black border-2 h-full rounded-full object-cover"
                   />
                 </div>
@@ -138,7 +121,7 @@
               <CardTitle>🎵 Genres</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
-              {#each stats.metadata.object.genres as genre}
+              {#each metadata.genres as genre}
                 <div class="mb-4">
                   <p class="text-lg font-semibold capitalize">{genre.root}</p>
                   {#if genre.sub.length > 0}
@@ -160,18 +143,80 @@
               <CardTitle>📋 Professional Info</CardTitle>
             </CardHeader>
             <CardContent class="pt-6 space-y-4">
-              {#if stats.metadata.object.isni}
+              {#if metadata.isni}
                 <div>
                   <p class="text-sm text-muted-foreground">ISNI</p>
-                  <p class="text-lg font-mono">{stats.metadata.object.isni}</p>
+                  <p class="text-lg font-mono">{metadata.isni}</p>
                 </div>
               {/if}
-              {#if stats.metadata.object.ipi}
+              {#if metadata.ipi}
                 <div>
                   <p class="text-sm text-muted-foreground">IPI</p>
-                  <p class="text-lg font-mono">{stats.metadata.object.ipi}</p>
+                  <p class="text-lg font-mono">{metadata.ipi}</p>
                 </div>
               {/if}
+              <div>
+                <p class="text-sm text-muted-foreground">Updated At</p>
+                <p class="text-lg font-semibold">
+                  {new Date(org.updatedAt).toLocaleDateString()}
+                </p>
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground">Member Since</p>
+                <p class="text-lg font-semibold">
+                  {new Date(org.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      {/if}
+    </div>
+
+    <!-- Artist & Repertoire -->
+    <div in:fly={{ y: 20, duration: 400, delay: 350 }} class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2
+          class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-500"
+        >
+          Artist & Repertoire
+        </h2>
+      </div>
+      {#if metadata}
+        <div class="grid gap-4">
+          <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+            <CardHeader
+              class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 pb-6"
+            >
+              <CardTitle>👔 A&R Details</CardTitle>
+            </CardHeader>
+            <CardContent class="pt-6 space-y-4">
+              <div>
+                <p class="text-sm text-muted-foreground">Name</p>
+                <p class="text-lg font-semibold">{user.firstName} {user.lastName}</p>
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground">Username</p>
+                <p class="text-lg font-semibold">@{user.username}</p>
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground">Contact</p>
+                <p class="text-base">{user.email}</p>
+                {#if user.phone}
+                  <p class="text-base">{user.phone}</p>
+                {/if}
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground">Last Sign In</p>
+                <p class="text-base">{new Date(user.lastSignedInAt).toLocaleDateString()}</p>
+              </div>
+              <div class="flex justify-center">
+                <img
+                  src={user.imageUrl}
+                  alt="A&R Representative"
+                  class="w-24 h-24 rounded-full object-cover border-2 border-black"
+                />
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -187,7 +232,7 @@
           Social Media Performance
         </h2>
       </div>
-      {#if stats?.followers}
+      {#if followers}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -197,10 +242,10 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.followers.object.followers)}
+                {formatNumber(followers.followers)}
               </div>
               <p class="text-xs text-muted-foreground">
-                Platform: {stats.followers.object.platform}
+                Platform: {followers.platform}
               </p>
             </CardContent>
           </Card>
@@ -213,7 +258,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.followers.object.engagement)}
+                {formatNumber(followers.engagement)}
               </div>
               <p class="text-xs text-muted-foreground">Total interactions</p>
             </CardContent>
@@ -227,7 +272,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.followers.object.views)}
+                {formatNumber(followers.views)}
               </div>
               <p class="text-xs text-muted-foreground">Across all content</p>
             </CardContent>
@@ -241,7 +286,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.followers.object.engagement)}
+                {formatNumber(followers.engagement)}
               </div>
               <p class="text-xs text-muted-foreground">Comments, likes & shares</p>
             </CardContent>
@@ -259,7 +304,7 @@
           Streaming Analytics
         </h2>
       </div>
-      {#if stats?.streaming}
+      {#if streaming}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -269,10 +314,10 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.streaming.object.streams)}
+                {formatNumber(streaming.streams)}
               </div>
               <p class="text-xs text-muted-foreground">
-                Platform: {stats.streaming.object.platform}
+                Platform: {streaming.platform}
               </p>
             </CardContent>
           </Card>
@@ -285,7 +330,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.streaming.object.listeners)}
+                {formatNumber(streaming.listeners)}
               </div>
               <p class="text-xs text-muted-foreground">Unique listeners</p>
             </CardContent>
@@ -299,7 +344,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.streaming.object.playlists)}
+                {formatNumber(streaming.playlists)}
               </div>
               <p class="text-xs text-muted-foreground">Total playlists</p>
             </CardContent>
@@ -313,7 +358,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats.streaming.object.engagement)}
+                {formatNumber(streaming.engagement)}
               </div>
               <p class="text-xs text-muted-foreground">Streams & listeners combined</p>
             </CardContent>
