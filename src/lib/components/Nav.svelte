@@ -134,14 +134,21 @@
               Pricing
             </a>
           </li>
-          <li class="pt-1">
-            <a
-              href="/docs"
-              class="text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-            >
-              Docs
-            </a>
-          </li>
+        </SignedOut>
+        <li class="pt-1">
+          <a
+            href="/docs"
+            class={cn(
+              'transition-colors',
+              isActive('/docs')
+                ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+            )}
+          >
+            Docs
+          </a>
+        </li>
+        <SignedOut>
           <li class="pt-1">
             <a
               href="/contact"
@@ -228,15 +235,17 @@
                 Pricing
               </a>
             </li>
-            <li>
-              <a
-                href="/docs"
-                class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
-                onclick={closeMenu}
-              >
-                Docs
-              </a>
-            </li>
+          </SignedOut>
+          <li>
+            <a
+              href="/docs"
+              class="block py-2 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors"
+              onclick={closeMenu}
+            >
+              Docs
+            </a>
+          </li>
+          <SignedOut>
             <li>
               <a
                 href="/contact"
