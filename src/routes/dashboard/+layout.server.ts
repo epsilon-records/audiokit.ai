@@ -37,7 +37,15 @@ export const load: LayoutServerLoad = async ({ locals }) => {
     hasActiveSubscription = !!subscription;
   }
 
+  // Extract only the necessary properties from the user object
+  const userData = {
+    id: user.id,
+    email: user.primaryEmailAddress?.emailAddress,
+    imageUrl: user.imageUrl,
+  };
+
   return {
     hasActiveSubscription,
+    user: userData, // Return the plain object
   };
 };

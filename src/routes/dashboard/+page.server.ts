@@ -101,6 +101,11 @@ export const load: PageServerLoad = async ({ locals }) => {
     .where(eq(artists.orgId, locals.auth.orgId))
     .limit(1);
 
+  // Fetch organization details
+  const org = await clerkClient.organizations.getOrganization({
+    organizationId: locals.auth.orgId,
+  });
+
   if (!artistData.length) {
     return {
       stats: {
@@ -109,6 +114,14 @@ export const load: PageServerLoad = async ({ locals }) => {
         followers: defaultFollowers,
       },
       hasActiveSubscription,
+      user: {
+        id: user.id,
+        imageUrl: user.imageUrl,
+      },
+      org: {
+        id: org.id,
+        imageUrl: org.imageUrl,
+      },
     };
   }
 
@@ -124,6 +137,14 @@ export const load: PageServerLoad = async ({ locals }) => {
           followers: defaultFollowers,
         },
         hasActiveSubscription,
+        user: {
+          id: user.id,
+          imageUrl: user.imageUrl,
+        },
+        org: {
+          id: org.id,
+          imageUrl: org.imageUrl,
+        },
       };
     }
 
@@ -136,6 +157,14 @@ export const load: PageServerLoad = async ({ locals }) => {
         followers: defaultFollowers,
       },
       hasActiveSubscription,
+      user: {
+        id: user.id,
+        imageUrl: user.imageUrl,
+      },
+      org: {
+        id: org.id,
+        imageUrl: org.imageUrl,
+      },
     };
   } catch (err) {
     console.error('Error fetching stats:', err);
@@ -146,6 +175,14 @@ export const load: PageServerLoad = async ({ locals }) => {
         followers: defaultFollowers,
       },
       hasActiveSubscription,
+      user: {
+        id: user.id,
+        imageUrl: user.imageUrl,
+      },
+      org: {
+        id: org.id,
+        imageUrl: org.imageUrl,
+      },
     };
   }
 };

@@ -6,19 +6,24 @@
   import { formatNumber } from '$lib/utils/format';
 
   interface PageData {
-    hasActiveSubscription: boolean;
-    name: string;
     stats?: {
       metadata: typeof defaultMetadata;
       streaming?: typeof defaultStreaming;
       followers?: typeof defaultFollowers;
     };
+    hasActiveSubscription: boolean;
+    user: {
+      id: string;
+      imageUrl: string;
+    };
   }
 
   let { data } = $props<{ data: PageData }>();
-  let { stats, hasActiveSubscription } = $derived(data);
+  let { stats, hasActiveSubscription, user, org } = data;
 
-  let defaultMetadata = $state({
+  let artistPhoto = $state(org.imageUrl);
+
+  let defaultMetadata = {
     type: 'artist',
     object: {
       uuid: 'real-uuid-1234',
@@ -41,24 +46,24 @@
       birthDate: '1980-01-01T00:00:00+00:00',
     },
     errors: [],
-  });
+  };
 
-  let defaultStreaming = $state({
+  let defaultStreaming = {
     platform: 'Spotify',
     streams: 1000000,
     listeners: 250000,
     playlists: 1500,
     engagement: 750000,
     errors: [],
-  });
+  };
 
-  let defaultFollowers = $state({
+  let defaultFollowers = {
     platform: 'Instagram',
     followers: 50000,
     engagement: 25000,
     views: 1000000,
     errors: [],
-  });
+  };
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -98,18 +103,29 @@
             >
               <CardTitle>👤 Artist Details</CardTitle>
             </CardHeader>
-            <CardContent class="pt-6 space-y-4">
-              <div>
-                <p class="text-sm text-muted-foreground">Name</p>
-                <p class="text-lg font-semibold">{stats.metadata.object.name}</p>
+            <CardContent class="pt-6 space-y-4 flex justify-between">
+              <div class="flex-1 space-y-4">
+                <div>
+                  <p class="text-sm text-muted-foreground">Name</p>
+                  <p class="text-lg font-semibold">{stats.metadata.object.name}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-muted-foreground">Type</p>
+                  <p class="text-lg font-semibold capitalize">{stats.metadata.object.type}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-muted-foreground">Country</p>
+                  <p class="text-lg font-semibold">{stats.metadata.object.countryCode}</p>
+                </div>
               </div>
-              <div>
-                <p class="text-sm text-muted-foreground">Type</p>
-                <p class="text-lg font-semibold capitalize">{stats.metadata.object.type}</p>
-              </div>
-              <div>
-                <p class="text-sm text-muted-foreground">Country</p>
-                <p class="text-lg font-semibold">{stats.metadata.object.countryCode}</p>
+              <div class="flex justify-center items-center pr-8">
+                <div class="w-48 h-48 m-4 flex-shrink-0">
+                  <img
+                    src={artistPhoto}
+                    alt="Artist"
+                    class="w-full h-full rounded-full object-cover"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
