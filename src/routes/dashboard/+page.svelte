@@ -21,6 +21,7 @@
   let { data } = $props<{ data: PageData }>();
   let { stats, hasActiveSubscription, user, org } = data;
 
+  let artistName = $state(org.name);
   let artistPhoto = $state(org.imageUrl);
 
   let defaultMetadata = {
@@ -107,7 +108,7 @@
               <div class="flex-1 space-y-4">
                 <div>
                   <p class="text-sm text-muted-foreground">Name</p>
-                  <p class="text-lg font-semibold">{stats.metadata.object.name}</p>
+                  <p class="text-lg font-semibold">{artistName}</p>
                 </div>
                 <div>
                   <p class="text-sm text-muted-foreground">Type</p>
@@ -123,7 +124,7 @@
                   <img
                     src={artistPhoto}
                     alt="Artist"
-                    class="w-full h-full rounded-full object-cover"
+                    class="w-full border-black border-2 h-full rounded-full object-cover"
                   />
                 </div>
               </div>

@@ -120,6 +120,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       },
       org: {
         id: org.id,
+        name: org.name,
         imageUrl: org.imageUrl,
       },
     };
@@ -143,6 +144,7 @@ export const load: PageServerLoad = async ({ locals }) => {
         },
         org: {
           id: org.id,
+          name: org.name,
           imageUrl: org.imageUrl,
         },
       };
@@ -163,6 +165,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       },
       org: {
         id: org.id,
+        name: org.name,
         imageUrl: org.imageUrl,
       },
     };
@@ -181,6 +184,7 @@ export const load: PageServerLoad = async ({ locals }) => {
       },
       org: {
         id: org.id,
+        name: org.name,
         imageUrl: org.imageUrl,
       },
     };
