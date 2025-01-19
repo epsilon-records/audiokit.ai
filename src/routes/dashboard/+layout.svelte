@@ -56,6 +56,24 @@
     <div class="flex h-8 items-center justify-between">
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-3">
+        <OrganizationSwitcher
+          hidePersonal={true}
+          afterCreateOrganizationUrl="/dashboard/team"
+          afterSelectOrganizationUrl="/dashboard"
+          afterLeaveOrganizationUrl="/dashboard"
+          appearance={{
+            baseTheme: $mode === 'dark' ? dark : neobrutalism,
+            variables: {
+              spacingUnit: '16px',
+              borderRadius: '8px',
+            },
+            elements: {
+              organizationSwitcherTrigger:
+                'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
+            },
+          }}
+        />
+        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
         <a
           href="/dashboard"
           class={cn(
@@ -101,30 +119,6 @@
           Analytics
         </a>
         <a
-          href="/dashboard/create"
-          class={cn(
-            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/create')
-              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-              : 'text-gray-500 dark:text-gray-400'
-          )}
-        >
-          Create
-        </a>
-        <a
-          href="/dashboard/tools"
-          class={cn(
-            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/tools')
-              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-              : 'text-gray-500 dark:text-gray-400'
-          )}
-        >
-          Tools
-        </a>
-      </div>
-      <div class="hidden md:flex items-center gap-3">
-        <a
           href="/dashboard/team"
           class={cn(
             'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
@@ -136,15 +130,15 @@
           Team
         </a>
         <a
-          href="/dashboard/account"
+          href="/dashboard/create"
           class={cn(
             'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/account')
+            isActive('/dashboard/create')
               ? 'text-indigo-600 dark:text-indigo-400 font-medium'
               : 'text-gray-500 dark:text-gray-400'
           )}
         >
-          Account
+          Create
         </a>
         <button
           onclick={handleManageSubscription}
@@ -157,6 +151,19 @@
         >
           Billing
         </button>
+        <a
+          href="/dashboard/account"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/account')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Account
+        </a>
+      </div>
+      <div class="hidden md:flex items-center gap-3">
         <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
         <span class="text-sm text-gray-600 dark:text-gray-400">
           Status:
@@ -182,31 +189,54 @@
         </span>
       </div>
 
-      <!-- Mobile Hamburger Button -->
-      <button class="md:hidden p-1" onclick={toggleMenu} aria-label="Toggle menu">
-        <svg
-          class="w-6 h-6 text-gray-500 dark:text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          {#if isMenuOpen}
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M6 6l12 12m0-12L6 18"
-            />
-          {:else}
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="1.5"
-              d="M3.75 9h16.5m-16.5 6h16.5"
-            />
-          {/if}
-        </svg>
-      </button>
+      <!-- Mobile Navigation -->
+      <div class="md:hidden flex items-center justify-between w-full">
+        <div class="flex items-center gap-2">
+          <!-- Mobile Hamburger Button -->
+          <button class="p-1" onclick={toggleMenu} aria-label="Toggle menu">
+            <svg
+              class="w-6 h-6 text-gray-500 dark:text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              {#if isMenuOpen}
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M6 6l12 12m0-12L6 18"
+                />
+              {:else}
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                  d="M3.75 9h16.5m-16.5 6h16.5"
+                />
+              {/if}
+            </svg>
+          </button>
+
+          <OrganizationSwitcher
+            hidePersonal={true}
+            afterCreateOrganizationUrl="/dashboard/team"
+            afterSelectOrganizationUrl="/dashboard"
+            afterLeaveOrganizationUrl="/dashboard"
+            appearance={{
+              baseTheme: $mode === 'dark' ? dark : neobrutalism,
+              variables: {
+                spacingUnit: '16px',
+                borderRadius: '8px',
+              },
+              elements: {
+                organizationSwitcherTrigger:
+                  'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
+              },
+            }}
+          />
+        </div>
+      </div>
     </div>
 
     <!-- Mobile Menu -->
@@ -260,6 +290,17 @@
           Analytics
         </a>
         <a
+          href="/dashboard/team"
+          class={cn(
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
+            isActive('/dashboard/team')
+              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+              : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+          )}
+        >
+          Team
+        </a>
+        <a
           href="/dashboard/create"
           class={cn(
             'block px-3 py-2 text-base font-medium rounded-md transition-colors',
@@ -270,41 +311,28 @@
         >
           Create
         </a>
-        <a
-          href="/dashboard/tools"
+        <button
+          onclick={handleManageSubscription}
           class={cn(
-            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
-            isActive('/dashboard/tools')
+            'block w-full text-left px-3 py-2 text-base font-medium rounded-md transition-colors',
+            isActive('/dashboard/billing')
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
               : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
           )}
         >
-          Tools
+          Billing
+        </button>
+        <a
+          href="/dashboard/account"
+          class={cn(
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
+            isActive('/dashboard/account')
+              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+              : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+          )}
+        >
+          Account
         </a>
-        <div class="px-3 py-2">
-          <span class="text-sm text-gray-600 dark:text-gray-400">
-            Status:
-            {#if page.data.hasActiveSubscription}
-              <span
-                class="ml-1 inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400"
-              >
-                Active
-              </span>
-            {:else}
-              <span
-                class="ml-1 inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400"
-              >
-                Inactive
-              </span>
-              <a
-                href="/subscribe"
-                class="ml-2 inline-flex items-center rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
-              >
-                Enable Services
-              </a>
-            {/if}
-          </span>
-        </div>
       </div>
     {/if}
   </div>

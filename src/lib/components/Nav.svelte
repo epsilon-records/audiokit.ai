@@ -61,25 +61,6 @@
             AudioKit
           </span>
         </a>
-        <SignedIn>
-          <OrganizationSwitcher
-            hidePersonal={true}
-            afterCreateOrganizationUrl="/dashboard/team"
-            afterSelectOrganizationUrl="/dashboard"
-            afterLeaveOrganizationUrl="/dashboard"
-            appearance={{
-              baseTheme: $mode === 'dark' ? dark : neobrutalism,
-              variables: {
-                spacingUnit: '16px',
-                borderRadius: '8px',
-              },
-              elements: {
-                organizationSwitcherTrigger:
-                  'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-gray-500 dark:text-gray-400',
-              },
-            }}
-          />
-        </SignedIn>
       </div>
 
       <!-- Mobile menu button -->
