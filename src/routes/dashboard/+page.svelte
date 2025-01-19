@@ -63,7 +63,7 @@
 
 <div class="container mx-auto px-4 py-8">
   <div class="mb-8">
-    <h1 class="text-4xl font-bold tracking-tight">Dashboard Overview</h1>
+    <h1 class="text-4xl font-bold tracking-tight">Artist Overview</h1>
     <p class="mt-2 text-lg text-muted-foreground">
       Get insights into your performance metrics and manage your artist profile.
     </p>
@@ -96,7 +96,7 @@
             <CardHeader
               class="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900 pb-6"
             >
-              <CardTitle>Artist Details</CardTitle>
+              <CardTitle>👤 Artist Details</CardTitle>
             </CardHeader>
             <CardContent class="pt-6 space-y-4">
               <div>
@@ -118,7 +118,7 @@
             <CardHeader
               class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 pb-6"
             >
-              <CardTitle>Genres</CardTitle>
+              <CardTitle>🎵 Genres</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               {#each stats.metadata.object.genres as genre}
@@ -140,7 +140,7 @@
             <CardHeader
               class="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950 dark:to-teal-900 pb-6"
             >
-              <CardTitle>Professional Info</CardTitle>
+              <CardTitle>📋 Professional Info</CardTitle>
             </CardHeader>
             <CardContent class="pt-6 space-y-4">
               {#if stats.metadata.object.isni}
@@ -176,7 +176,7 @@
             <CardHeader
               class="bg-gradient-to-br from-indigo-50 to-indigo-100 dark:from-indigo-950 dark:to-indigo-900 pb-6"
             >
-              <CardTitle>Followers</CardTitle>
+              <CardTitle>👥 Followers</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
@@ -192,7 +192,7 @@
             <CardHeader
               class="bg-gradient-to-br from-violet-50 to-violet-100 dark:from-violet-950 dark:to-violet-900 pb-6"
             >
-              <CardTitle>Engagement</CardTitle>
+              <CardTitle>❤️ Engagement</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
@@ -206,7 +206,7 @@
             <CardHeader
               class="bg-gradient-to-br from-fuchsia-50 to-fuchsia-100 dark:from-fuchsia-950 dark:to-fuchsia-900 pb-6"
             >
-              <CardTitle>Total Views</CardTitle>
+              <CardTitle>👀 Total Views</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
@@ -220,7 +220,7 @@
             <CardHeader
               class="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900 pb-6"
             >
-              <CardTitle>Social Activity</CardTitle>
+              <CardTitle>🔄 Social Activity</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
@@ -248,7 +248,7 @@
             <CardHeader
               class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 pb-6"
             >
-              <CardTitle>Total Streams</CardTitle>
+              <CardTitle>🌊 Total Streams</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
@@ -264,7 +264,7 @@
             <CardHeader
               class="bg-gradient-to-br from-cyan-50 to-cyan-100 dark:from-cyan-950 dark:to-cyan-900 pb-6"
             >
-              <CardTitle>Monthly Listeners</CardTitle>
+              <CardTitle>👥 Monthly Listeners</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
@@ -278,7 +278,7 @@
             <CardHeader
               class="bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-950 dark:to-teal-900 pb-6"
             >
-              <CardTitle>Playlist Inclusions</CardTitle>
+              <CardTitle>📝 Playlist Inclusions</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
@@ -292,7 +292,7 @@
             <CardHeader
               class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 pb-6"
             >
-              <CardTitle>Total Engagement</CardTitle>
+              <CardTitle>🤝 Total Engagement</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">

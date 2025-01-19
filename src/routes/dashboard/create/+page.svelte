@@ -8,14 +8,14 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div class="flex flex-col h-full bg-card rounded-lg p-6 shadow-lg">
         <div class="flex-1">
-          <h2 class="text-2xl font-bold mb-4">Create Artist Profile</h2>
+          <h2 class="text-2xl font-bold mb-4">Create New Artist</h2>
           <p class="text-muted-foreground mb-4">
             Create and manage your artist organization with team collaboration tools.
           </p>
         </div>
         <div class="mt-auto">
           <Button href="/dashboard/create-artist" class="w-full h-12" size="lg">
-            Manage New Artist
+            Create New Artist
           </Button>
         </div>
       </div>

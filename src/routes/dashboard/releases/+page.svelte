@@ -17,8 +17,8 @@
 
   {#if data.releases.length === 0}
     <Card>
-      <CardHeader>
-        <CardTitle>No releases found</CardTitle>
+      <CardHeader class="bg-gradient-to-r from-yellow-50 to-yellow-100 pb-4">
+        <CardTitle>🎵 No releases found</CardTitle>
       </CardHeader>
       <CardContent>
         <p class="text-muted-foreground">
