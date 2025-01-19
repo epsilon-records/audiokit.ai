@@ -96,6 +96,17 @@
         >
           Create
         </a>
+        <a
+          href="/dashboard/tools"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/tools')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Tools
+        </a>
       </div>
       <div class="flex items-center gap-4">
         <a
