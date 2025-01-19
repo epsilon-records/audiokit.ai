@@ -20,15 +20,16 @@
 
   const pricingTiers: PricingTier[] = [
     {
-      name: '🎵 Basic Label',
-      description: 'Perfect for individual artists and small labels getting started',
+      name: '🎵 Individual Artist',
+      description:
+        'Perfect for solo artists and creators ready to share their music with the world',
       monthlyPrice: 19,
       annualPrice: 99,
       features: [
         { text: 'Music distribution to all major platforms', icon: '🎧' },
-        { text: 'Manage up to 5 artists', icon: '👥' },
-        { text: '5 team members per artist', icon: '🤝' },
-        { text: '5GB media storage per artist', icon: '💾' },
+        { text: 'Manage one individual artist', icon: '👤' },
+        { text: 'Up to 5 team members', icon: '🤝' },
+        { text: '5GB media storage', icon: '💾' },
         { text: 'Advanced analytics dashboard', icon: '📊' },
         { text: 'Release planning & scheduling', icon: '📅' },
         { text: 'Royalty tracking & reporting', icon: '💰' },
@@ -38,14 +39,15 @@
       ],
     },
     {
-      name: '⭐ Pro Label',
-      description: 'Advanced features for growing professional labels',
+      name: '⭐ Record Label',
+      description:
+        'Powerful tools for professional labels managing multiple artists and releases at scale',
       monthlyPrice: 79,
       annualPrice: 599,
       highlighted: true,
       features: [
         { text: 'Music distribution to all major platforms', icon: '🎧' },
-        { text: 'Unlimited artists', icon: '👥' },
+        { text: 'Manage unlimited artists', icon: '👥' },
         { text: 'Unlimited team members', icon: '🤝' },
         { text: 'Unlimited storage', icon: '💾' },
         { text: 'Advanced analytics dashboard', icon: '📊' },
