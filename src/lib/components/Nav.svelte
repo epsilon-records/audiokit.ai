@@ -201,110 +201,109 @@
     {#if isOpen}
       <div
         bind:this={menuRef}
-        class="mobile-menu lg:hidden fixed top-16 right-0 w-full bg-background border-2 border-black rounded-lg"
+        class="mobile-menu lg:hidden fixed top-16 left-4 right-4 bg-background border-2 border-black dark:border-gray-700 rounded-lg shadow-lg max-w-[1400px] mx-auto"
+        transition:slide
       >
-        <div class="container mx-auto px-4">
-          <div class="py-2 space-y-1">
-            <SignedIn>
-              <a
-                href="/dashboard"
-                class={cn(
-                  'block px-3 py-2 rounded-md text-base font-medium transition-colors',
-                  isActive('/dashboard')
-                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
-                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                )}
-                onclick={closeMenu}
-              >
-                Dashboard
-              </a>
-            </SignedIn>
-            <SignedOut>
-              <a
-                href="/services"
-                class={cn(
-                  'block px-3 py-2 rounded-md text-base font-medium transition-colors',
-                  isActive('/services')
-                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
-                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                )}
-                onclick={closeMenu}
-              >
-                Services
-              </a>
-              <a
-                href="/pricing"
-                class={cn(
-                  'block px-3 py-2 rounded-md text-base font-medium transition-colors',
-                  isActive('/pricing')
-                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
-                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                )}
-                onclick={closeMenu}
-              >
-                Pricing
-              </a>
-            </SignedOut>
+        <div class="py-2 space-y-1">
+          <SignedIn>
             <a
-              href="/docs"
+              href="/dashboard"
               class={cn(
-                'block px-3 py-2 rounded-md text-base font-medium transition-colors',
-                isActive('/docs')
+                'block px-6 py-2 text-base font-medium rounded-md transition-colors',
+                isActive('/dashboard')
                   ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
                   : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
               )}
               onclick={closeMenu}
             >
-              Docs
+              Dashboard
             </a>
-            <SignedOut>
+          </SignedIn>
+          <SignedOut>
+            <a
+              href="/services"
+              class={cn(
+                'block px-6 py-2 text-base font-medium rounded-md transition-colors',
+                isActive('/services')
+                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                  : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+              )}
+              onclick={closeMenu}
+            >
+              Services
+            </a>
+            <a
+              href="/pricing"
+              class={cn(
+                'block px-6 py-2 text-base font-medium rounded-md transition-colors',
+                isActive('/pricing')
+                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                  : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+              )}
+              onclick={closeMenu}
+            >
+              Pricing
+            </a>
+          </SignedOut>
+          <a
+            href="/docs"
+            class={cn(
+              'block px-6 py-2 text-base font-medium rounded-md transition-colors',
+              isActive('/docs')
+                ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+            )}
+            onclick={closeMenu}
+          >
+            Docs
+          </a>
+          <SignedOut>
+            <a
+              href="/contact"
+              class={cn(
+                'block px-6 py-2 text-base font-medium rounded-md transition-colors',
+                isActive('/contact')
+                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                  : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+              )}
+              onclick={closeMenu}
+            >
+              Contact
+            </a>
+            <div class="px-4 py-2 space-y-1">
               <a
-                href="/contact"
-                class={cn(
-                  'block px-3 py-2 rounded-md text-base font-medium transition-colors',
-                  isActive('/contact')
-                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
-                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-                )}
+                href="/sign-in"
+                class="w-full inline-flex justify-center items-center px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors text-base font-medium"
                 onclick={closeMenu}
               >
-                Contact
+                Login
               </a>
-              <div class="px-3 py-2 space-y-1">
-                <a
-                  href="/sign-in"
-                  class="w-full inline-flex justify-center items-center px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors text-base font-medium"
-                  onclick={closeMenu}
-                >
-                  Login
-                </a>
-                <a
-                  href="/sign-up"
-                  class="w-full inline-flex justify-center items-center px-3 py-2 rounded-md bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 transition-colors text-base font-medium"
-                  onclick={closeMenu}
-                >
-                  Register
-                </a>
+              <a
+                href="/sign-up"
+                class="w-full inline-flex justify-center items-center px-3 py-2 rounded-md bg-gray-200 text-gray-900 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 transition-colors text-base font-medium"
+                onclick={closeMenu}
+              >
+                Register
+              </a>
+            </div>
+          </SignedOut>
+          <SignedIn>
+            <div class="px-4 py-2 space-y-1">
+              <ThemeSwitcher />
+              <div class="mt-2 px-2">
+                <UserButton
+                  afterSignOutUrl="/"
+                  appearance={{
+                    baseTheme: $mode === 'dark' ? dark : neobrutalism,
+                    variables: {
+                      spacingUnit: '16px',
+                      borderRadius: '8px',
+                    },
+                  }}
+                />
               </div>
-            </SignedOut>
-            <SignedIn>
-              <div class="px-3 py-2 space-y-1">
-                <ThemeSwitcher />
-                <div class="mt-2 px-2">
-                  <UserButton
-                    afterSignOutUrl="/"
-                    appearance={{
-                      baseTheme: $mode === 'dark' ? dark : neobrutalism,
-                      variables: {
-                        spacingUnit: '16px',
-                        borderRadius: '8px',
-                      },
-                    }}
-                  />
-                </div>
-              </div>
-            </SignedIn>
-          </div>
+            </div>
+          </SignedIn>
         </div>
       </div>
     {/if}

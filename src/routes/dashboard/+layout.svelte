@@ -6,6 +6,7 @@
   import { OrganizationSwitcher } from 'svelte-clerk';
   import { neobrutalism, dark } from '@clerk/themes';
   import { mode } from 'mode-watcher';
+  import { slide } from 'svelte/transition';
 
   let isMenuOpen = $state(false);
 
@@ -193,15 +194,15 @@
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
+              stroke-width="1.5"
+              d="M6 6l12 12m0-12L6 18"
             />
           {:else}
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 6h16M4 12h16M4 18h16"
+              stroke-width="1.5"
+              d="M3.75 9h16.5m-16.5 6h16.5"
             />
           {/if}
         </svg>
@@ -210,11 +211,14 @@
 
     <!-- Mobile Menu -->
     {#if isMenuOpen}
-      <div class="md:hidden py-2 space-y-1 bg-background border-2 border-black rounded-lg">
+      <div
+        class="md:hidden py-2 space-y-1 bg-background border-2 border-black dark:border-gray-700 rounded-lg shadow-lg"
+        transition:slide
+      >
         <a
           href="/dashboard"
           class={cn(
-            'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
             isActive('/dashboard')
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
               : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
@@ -225,7 +229,7 @@
         <a
           href="/dashboard/profile"
           class={cn(
-            'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
             isActive('/dashboard/profile')
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
               : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
@@ -236,7 +240,7 @@
         <a
           href="/dashboard/releases"
           class={cn(
-            'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
             isActive('/dashboard/releases')
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
               : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
@@ -247,7 +251,7 @@
         <a
           href="/dashboard/analytics"
           class={cn(
-            'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
             isActive('/dashboard/analytics')
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
               : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
@@ -258,7 +262,7 @@
         <a
           href="/dashboard/create"
           class={cn(
-            'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
             isActive('/dashboard/create')
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
               : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
@@ -269,7 +273,7 @@
         <a
           href="/dashboard/tools"
           class={cn(
-            'block px-3 py-2 rounded-md text-base font-medium transition-colors',
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
             isActive('/dashboard/tools')
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
               : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
