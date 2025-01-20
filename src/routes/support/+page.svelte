@@ -104,7 +104,7 @@
           </a>
           <a href="/docs" class="btn btn-secondary gap-4">
             <ExternalLink class="w-5 h-5" />
-            View Documentation →
+            View Docs →
           </a>
         </div>
       </div>
