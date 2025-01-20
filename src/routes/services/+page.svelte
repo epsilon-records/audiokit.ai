@@ -69,12 +69,14 @@
   ></div>
   <div class="container max-w-6xl mx-auto px-4 py-16 relative z-10">
     <div class="text-center mb-12" in:fade={{ duration: 800 }}>
-      <h1
-        class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
-      >
-        Services That Scale With You
-      </h1>
-      <p class="text-muted-foreground max-w-2xl mx-auto text-lg">
+      <div class="bg-white inline-block">
+        <h1
+          class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
+        >
+          Services That Scale With You
+        </h1>
+      </div>
+      <p class="bg-white text-muted-foreground max-w-2xl mx-auto text-lg">
         Leverage AI-powered tools and expert guidance to build a successful music career in the
         digital age.
       </p>
