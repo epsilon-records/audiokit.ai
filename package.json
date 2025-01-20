@@ -13,8 +13,8 @@
     "build-storybook": "storybook build"
   },
   "engines": {
-    "npm": ">=10.0.0",
-    "node": ">=20.0.0"
+    "npm": "^10",
+    "node": "^20"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.3",
