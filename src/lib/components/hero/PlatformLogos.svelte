@@ -22,9 +22,11 @@
   in:fade={{ duration: 1000, delay: ANIMATION_BASE_DELAY + 600 }}
   class="w-full max-w-xl space-y-6 pt-8 border-t border-border/40"
 >
-  <p class="text-lg text-muted-foreground bg-white">Available on all major platforms</p>
+  <div class="inline-block">
+    <p class="text-lg text-muted-foreground bg-white">Available on all major platforms</p>
+  </div>
   <div
-    class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 md:gap-6 items-center justify-items-center bg-white border-2 border-black rounded-lg p-4"
+    class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4 md:gap-6 items-center justify-items-center bg-white border-2 border-black rounded-lg p-4 transition-transform duration-300 hover:scale-[1.02]"
   >
     {#each [{ icon: siSpotify, color: '#1DB954' }, { icon: siApplemusic, color: '#FA243C' }, { icon: siYoutubemusic, color: '#FF0000' }, { icon: siTidal, color: '#000000' }, { icon: siAmazonmusic, color: '#FF9900' }, { icon: siSoundcloud, color: '#FF6B00' }, { icon: siBandcamp, color: '#629AA9' }, { icon: siPandora, color: '#00A4DC' }, { icon: siTiktok, color: '#000000' }, { icon: siInstagram, color: '#E4405F' }, { icon: siX, color: '#000000' }, { icon: siTwitch, color: '#9146FF' }] as item}
       <svg
