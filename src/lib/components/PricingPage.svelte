@@ -110,7 +110,7 @@
     class="absolute inset-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
   ></div>
   <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="text-center mb-12 rounded-xl p-8 shadow-sm">
+    <div class="text-center mb-8 rounded-xl shadow-sm">
       <div class="bg-white inline-block">
         <h1
           class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
@@ -123,21 +123,25 @@
       </p>
     </div>
 
-    <div class="flex justify-center items-center gap-3 mb-8">
-      <span class:text-gray-900={!isAnnual} class:text-gray-500={isAnnual}>Monthly</span>
-      <input
-        type="checkbox"
-        class="toggle toggle-primary"
-        checked={isAnnual}
-        onchange={() => (isAnnual = !isAnnual)}
-        aria-label="Toggle billing period"
-      />
-      <span class:text-gray-500={!isAnnual} class:text-gray-900={isAnnual}>
-        Annual
-        <span class="text-green-600 font-medium">
-          (Save up to ${Math.max(savings.basic, savings.pro)}/mo)
-        </span>
-      </span>
+    <div class="flex flex-col items-center gap-2 mb-6">
+      <div class="bg-white px-4 py-2 rounded-lg">
+        <div class="flex items-center gap-3">
+          <span class:text-gray-900={!isAnnual} class:text-gray-500={isAnnual}>Monthly</span>
+          <input
+            type="checkbox"
+            class="toggle toggle-primary"
+            checked={isAnnual}
+            onchange={() => (isAnnual = !isAnnual)}
+            aria-label="Toggle billing period"
+          />
+          <span class:text-gray-500={!isAnnual} class:text-gray-900={isAnnual}>Annual</span>
+        </div>
+        {#if isAnnual}
+          <span class="text-green-600 font-medium text-center mt-1">
+            Save up to ${Math.max(savings.basic, savings.pro)}/month
+          </span>
+        {/if}
+      </div>
     </div>
 
     <div class="grid md:grid-cols-2 gap-6">
