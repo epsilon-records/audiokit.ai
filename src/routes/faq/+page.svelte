@@ -131,10 +131,10 @@
           <p class="text-muted-foreground">Our support team is here to help you succeed.</p>
         </div>
         <div class="flex items-center justify-center gap-4">
-          <Button href="/join" variant="default" class="secondary hover:opacity-90">
+          <Button href="/join" variant="default" class="text-lg secondary hover:opacity-90">
             Get Started Now
           </Button>
-          <Button href="mailto:support@audiokit.ai" variant="outline" class="gap-2">
+          <Button href="mailto:support@audiokit.ai" variant="outline" class="text-lg gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               class="w-5 h-5"

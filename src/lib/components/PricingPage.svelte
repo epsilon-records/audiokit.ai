@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { page } from '$app/state';
   import { goto } from '$app/navigation';
   import { SignedIn, SignedOut } from 'svelte-clerk';
   import { toast } from 'svelte-sonner';
   import { siDiscord } from 'simple-icons';
+  import { Button } from './ui/button';
 
   let { email, title, description } = $props();
 
@@ -109,7 +109,7 @@
   <div
     class="absolute inset-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
   ></div>
-  <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
     <div class="text-center mb-8 rounded-xl shadow-sm">
       <div class="bg-white inline-block">
         <h1
@@ -279,6 +279,40 @@
           </SignedOut>
         </div>
       {/each}
+    </div>
+  </div>
+  <div class="text-center py-12 rounded-lg" in:fade={{ duration: 800, delay: 200 }}>
+    <div class="flex flex-col items-center gap-4 relative z-20">
+      <h2 class="bg-white px-6 py-2 rounded-lg text-4xl font-semibold text-primary">
+        Need help choosing a plan?
+      </h2>
+      <div class="bg-white px-6 py-2 rounded-lg">
+        <p class="text-muted-foreground">
+          Talk to our music industry experts about finding the right fit for your goals.
+        </p>
+      </div>
+      <div class="flex items-center justify-center gap-4">
+        <Button href="/faq" variant="default" class="text-lg secondary hover:opacity-90">
+          Read the FAQ
+        </Button>
+        <Button href="mailto:support@audiokit.ai" variant="outline" class="text-lg gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+            />
+          </svg>
+          Contact Support
+        </Button>
+      </div>
     </div>
   </div>
 </div>
