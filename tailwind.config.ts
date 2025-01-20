@@ -5,11 +5,7 @@ import { withUt } from 'uploadthing/tw';
 
 const config: Config = {
   darkMode: ['class'],
-  content: [
-    './src/**/*.{html,js,svelte,ts}',
-    './node_modules/uploadthing/themes/**/*.{js,ts}',
-    './node_modules/clerk/**/*.{js,ts}',
-  ],
+  content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/uploadthing/themes/**/*.{js,ts}'],
   daisyui: {
     themes: ['light'],
   },
@@ -67,7 +63,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [typography, require('daisyui')],
+  plugins: [require('@tailwindcss/typography'), require('daisyui')],
 };
 
 export default withUt(config);
