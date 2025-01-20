@@ -192,7 +192,7 @@
             <ThemeSwitcher />
           </li>
           <li>
-            <UserButton afterSignOutUrl="/" />
+            <UserButton afterSignOutUrl="/sign-in" />
           </li>
         </SignedIn>
       </ul>
@@ -306,7 +306,7 @@
             <div class="px-4 py-2 space-y-1">
               <ThemeSwitcher />
               <div class="mt-2 px-2">
-                <UserButton afterSignOutUrl="/" />
+                <UserButton afterSignOutUrl="/sign-in" />
               </div>
             </div>
           </SignedIn>
