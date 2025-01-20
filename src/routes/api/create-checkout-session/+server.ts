@@ -16,11 +16,11 @@ const stripe = new Stripe(STRIPE_SECRET_KEY);
 // } as const;
 
 const PRICE_IDS = {
-  'Individual Artist': {
+  '🎵 Individual Artist': {
     monthly: 'price_1QiHU7GR0puR9CIOWqQh3Pxq',
     annual: 'price_1Qho2uGR0puR9CIODFZLVvkI',
   },
-  'Record Label': {
+  '⭐ Record Label': {
     monthly: 'price_1QiHVlGR0puR9CIOKOHpA0GS',
     annual: 'price_1QiHUyGR0puR9CIOOCVYhZ3y',
   },
