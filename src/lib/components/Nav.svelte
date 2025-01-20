@@ -124,7 +124,7 @@
                 : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
             )}
           >
-            Documentation
+            Docs
           </a>
         </li>
         <SignedIn>
@@ -240,7 +240,7 @@
             )}
             onclick={closeMenu}
           >
-            Documentation
+            Docs
           </a>
           <SignedIn>
             <a
