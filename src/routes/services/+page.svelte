@@ -15,6 +15,7 @@
       ],
       icon: '🎵',
       price: 'Included Free',
+      priceEmoji: '🎁',
       color: 'yellow',
       gradient: 'from-yellow-500/20 to-amber-500/20',
     },
@@ -29,6 +30,7 @@
       ],
       icon: '👥',
       price: 'Included Free',
+      priceEmoji: '🎁',
       color: 'purple',
       gradient: 'from-purple-500/20 to-violet-500/20',
     },
@@ -38,6 +40,7 @@
       features: ['Press kit generation', 'Media library', 'Content scheduling', 'SEO optimization'],
       icon: '📱',
       price: 'Included Free',
+      priceEmoji: '🎁',
       color: 'rose',
       gradient: 'from-rose-500/20 to-pink-500/20',
     },
@@ -52,6 +55,7 @@
       ],
       icon: '📊',
       price: 'Included Free',
+      priceEmoji: '🎁',
       color: 'pink',
       gradient: 'from-pink-500/20 to-rose-500/20',
     },
@@ -66,6 +70,7 @@
       ],
       icon: '🎚️',
       price: '$49/track',
+      priceEmoji: '💎',
       color: 'orange',
       gradient: 'from-orange-500/20 to-red-500/20',
     },
@@ -80,6 +85,7 @@
       ],
       icon: '🚀',
       price: '$199/release',
+      priceEmoji: '🚀',
       color: 'cyan',
       gradient: 'from-cyan-500/20 to-blue-500/20',
     },
@@ -94,6 +100,7 @@
       ],
       icon: '🎫',
       price: 'Coming Soon',
+      priceEmoji: '⏳',
       color: 'indigo',
       gradient: 'from-indigo-500/20 to-blue-500/20',
     },
@@ -108,6 +115,7 @@
       ],
       icon: '⭐',
       price: 'Custom Pricing',
+      priceEmoji: '👑',
       color: 'green',
       gradient: 'from-green-500/20 to-emerald-500/20',
     },
@@ -171,7 +179,10 @@
           </div>
 
           <div class="flex items-center justify-between mt-auto pt-4">
-            <span class="text-xl font-semibold">{service.price}</span>
+            <span class="text-xl font-semibold flex items-center gap-2">
+              <span>{service.price}</span>
+              <span class="text-2xl">{service.priceEmoji}</span>
+            </span>
             <Button variant="outline" href="/pricing" class="hover:bg-background/80"
               >Learn More</Button
             >
@@ -180,17 +191,16 @@
       {/each}
     </div>
 
-    <div
-      in:fade={{ duration: 800, delay: 400 }}
-      class="text-center p-12 rounded-xl border-2 border-black bg-gradient-to-br from-primary/5 to-blue-500/5"
-    >
-      <h2 class="text-3xl font-bold mb-4">Ready to Transform Your Music Career?</h2>
-      <p class="text-muted-foreground mb-8 max-w-2xl mx-auto text-lg">
-        Join thousands of artists using our AI-powered platform to reach new heights in their music
+    <div in:fade={{ duration: 800, delay: 400 }} class="text-center p-12 rounded-xl">
+      <div class="bg-white inline-block">
+        <h2 class="text-3xl font-bold mb-4">Ready to Transform Your Music Career?</h2>
+      </div>
+      <div class="bg-white text-muted-foreground mb-8 max-w-2xl mx-auto text-lg">
+        Join dozens of artists using our AI-powered platform to reach new heights in their music
         careers.
-      </p>
+      </div>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <Button size="lg" class="text-lg px-8">Get Started</Button>
+        <Button size="lg" href="/faq" class="text-lg px-8">FAQ</Button>
         <Button
           size="lg"
           variant="outline"
