@@ -9,6 +9,8 @@ export const GET: RequestHandler = async () => {
     origin: PUBLIC_ORIGIN,
     excludeRoutePatterns: [
       '^/dashboard.*', // i.e. routes starting with `/dashboard`
+      '^/artists.*',
+      '^/releases.*',
     ],
     defaultChangefreq: 'daily',
     defaultPriority: 0.7,
