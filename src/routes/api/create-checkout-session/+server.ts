@@ -1,6 +1,6 @@
 import { error, json } from '@sveltejs/kit';
-import { STRIPE_SECRET_KEY } from '$env/static/private';
 import {
+  STRIPE_SECRET_KEY,
   STRIPE_LIVE_ARTIST_MONTHLY,
   STRIPE_LIVE_ARTIST_ANNUAL,
   STRIPE_LIVE_LABEL_MONTHLY,
