@@ -38,7 +38,7 @@
   });
 </script>
 
-<div class="space-y-4 relative inset-0 bg-background -z-10">
+<div class="space-y-4 relative inset-0 -z-10">
   <h1
     bind:this={elementRef}
     in:fade={{ duration: 1000, delay: 200 }}
@@ -49,9 +49,8 @@
 
   <p
     in:fade={{ duration: 1000, delay: 400 }}
-    class="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto relative z-10"
+    class="bg-background text-xl md:text-2xl text-foreground max-w-3xl mx-auto relative z-10"
   >
-    <span class="absolute inset-0 bg-background -z-10" />
     Streamline your music distribution with powerful APIs and AI-driven tools
   </p>
 </div>

@@ -2,17 +2,14 @@
   import { fade } from 'svelte/transition';
   import { siOpenapiinitiative, siGraphql, siNpm } from 'simple-icons';
 
-  interface Props {
-    ANIMATION_BASE_DELAY: number;
-  }
-  let { ANIMATION_BASE_DELAY } = $props<Props>();
+  let { ANIMATION_BASE_DELAY } = $props();
 </script>
 
 <div
   in:fade={{ duration: 1000, delay: ANIMATION_BASE_DELAY + 800 }}
   class="w-full max-w-lg space-y-6 pt-8 border-t border-border/40"
 >
-  <p class="text-md text-muted-foreground bg-white">Integrate With Your Stack</p>
+  <p class="text-lg text-muted-foreground bg-white">Integrate With Your Stack</p>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
     <div
       class="flex flex-col items-center space-y-2 p-4 rounded-lg border border-border/40 bg-white"
