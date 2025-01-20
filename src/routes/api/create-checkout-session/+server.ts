@@ -59,7 +59,7 @@ export async function POST({ request, url }) {
         },
       ],
       success_url: `${url.origin}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${url.origin}/dashboard?error=payment-cancelled`,
+      cancel_url: `${url.origin}/dashboard`,
       automatic_tax: { enabled: false },
     });
     return json({ url: session.url });
