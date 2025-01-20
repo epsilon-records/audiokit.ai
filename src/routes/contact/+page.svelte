@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { fade, fly, scale } from 'svelte/transition';
+  import { fly } from 'svelte/transition';
   import { MessageSquare, Clock, ExternalLink } from 'lucide-svelte';
 </script>
 
@@ -28,7 +28,7 @@
 
     <div
       in:fly={{ y: 20, duration: 600, delay: 400 }}
-      class="relative overflow-hidden rounded-xl border border-border/40 bg-gradient-to-br from-violet-50 via-slate-50 to-indigo-50 dark:from-violet-950/50 dark:via-slate-950/50 dark:to-indigo-950/50 p-12 text-center hover:shadow-lg transition-all duration-300"
+      class="relative overflow-hidden rounded-xl border-2 border-black bg-gradient-to-br from-violet-50 via-slate-50 to-indigo-50 dark:from-violet-950/50 dark:via-slate-950/50 dark:to-indigo-950/50 p-12 text-center transition-all duration-300 hover:scale-[1.02]"
     >
       <h2 class="text-2xl font-bold mb-4">Email Us ✉️</h2>
       <div class="flex items-center justify-center gap-2 mb-6 text-muted-foreground">
@@ -46,7 +46,7 @@
     </div>
 
     <div
-      class="mt-8 relative overflow-hidden rounded-xl border border-border/40 bg-gradient-to-br from-emerald-50 via-slate-50 to-teal-50 dark:from-emerald-950/50 dark:via-slate-950/50 dark:to-teal-950/50 p-12 text-center hover:shadow-lg transition-all duration-300"
+      class="mt-8 relative overflow-hidden rounded-xl border-2 border-black bg-gradient-to-br from-emerald-50 via-slate-50 to-teal-50 dark:from-emerald-950/50 dark:via-slate-950/50 dark:to-teal-950/50 p-12 text-center transition-all duration-300 hover:scale-[1.02]"
       in:fade={{ duration: 800, delay: 400 }}
     >
       <div class="text-3xl mb-2" in:scale={{ duration: 600, delay: 600 }}>🤔</div>

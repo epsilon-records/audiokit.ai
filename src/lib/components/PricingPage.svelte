@@ -4,6 +4,7 @@
   import { toast } from 'svelte-sonner';
   import { siDiscord } from 'simple-icons';
   import { Button } from './ui/button';
+  import { fly } from 'svelte/transition';
 
   let { email, title, description } = $props();
 
@@ -282,7 +283,7 @@
       {/each}
     </div>
   </div>
-  <div class="text-center py-12 rounded-lg" in:fade={{ duration: 800, delay: 200 }}>
+  <div class="text-center py-12 rounded-lg">
     <div class="flex flex-col items-center gap-4 relative z-20">
       <h2 class="bg-white px-6 py-2 rounded-lg text-4xl font-semibold text-primary">
         Need help choosing a plan?

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Button } from '$lib/components/ui/button';
   import { cn } from '$lib/utils';
-  import { fade, fly } from 'svelte/transition';
+  import { fly } from 'svelte/transition';
 
   let services = $state([
     {
@@ -17,7 +17,7 @@
       price: 'Included Free',
       priceEmoji: '🎁',
       color: 'yellow',
-      gradient: 'from-yellow-500/20 to-amber-500/20',
+      gradient: 'from-[#ffff00]/20 to-yellow-400/20',
     },
     {
       title: 'Team Collaboration',
@@ -31,8 +31,8 @@
       icon: '👥',
       price: 'Included Free',
       priceEmoji: '🎁',
-      color: 'purple',
-      gradient: 'from-purple-500/20 to-violet-500/20',
+      color: 'cyan',
+      gradient: 'from-cyan-500/20 to-blue-500/20',
     },
     {
       title: 'Content Management',
@@ -41,8 +41,8 @@
       icon: '📱',
       price: 'Included Free',
       priceEmoji: '🎁',
-      color: 'rose',
-      gradient: 'from-rose-500/20 to-pink-500/20',
+      color: 'purple',
+      gradient: 'from-purple-500/20 to-violet-500/20',
     },
     {
       title: 'Analytics & Insights',
@@ -56,8 +56,8 @@
       icon: '📊',
       price: 'Included Free',
       priceEmoji: '🎁',
-      color: 'pink',
-      gradient: 'from-pink-500/20 to-rose-500/20',
+      color: 'green',
+      gradient: 'from-green-500/20 to-emerald-500/20',
     },
     {
       title: 'AI Mastering',
@@ -71,8 +71,8 @@
       icon: '🎚️',
       price: '$49/track',
       priceEmoji: '💎',
-      color: 'orange',
-      gradient: 'from-orange-500/20 to-red-500/20',
+      color: 'rose',
+      gradient: 'from-rose-500/20 to-pink-500/20',
     },
     {
       title: 'Marketing & Promotion',
@@ -86,8 +86,8 @@
       icon: '🚀',
       price: '$199/release',
       priceEmoji: '🚀',
-      color: 'cyan',
-      gradient: 'from-cyan-500/20 to-blue-500/20',
+      color: 'indigo',
+      gradient: 'from-indigo-500/20 to-blue-500/20',
     },
     {
       title: 'Event Management',
@@ -101,8 +101,8 @@
       icon: '🎫',
       price: 'Coming Soon',
       priceEmoji: '⏳',
-      color: 'indigo',
-      gradient: 'from-indigo-500/20 to-blue-500/20',
+      color: 'amber',
+      gradient: 'from-amber-500/20 to-yellow-500/20',
     },
     {
       title: 'Artist Development',
@@ -116,13 +116,13 @@
       icon: '⭐',
       price: 'Custom Pricing',
       priceEmoji: '👑',
-      color: 'green',
-      gradient: 'from-green-500/20 to-emerald-500/20',
+      color: 'teal',
+      gradient: 'from-teal-500/20 to-emerald-500/20',
     },
   ]);
 </script>
 
-<div class="relative" in:fade={{ duration: 800 }}>
+<div class="relative">
   <div
     class="absolute inset-0 z-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
   ></div>

@@ -5,7 +5,6 @@
   import Footer from '$lib/components/Footer.svelte';
   import { Toaster } from 'svelte-sonner';
   import type { Snippet } from 'svelte';
-  import { goto } from '$app/navigation';
   import { PUBLIC_CLERK_PUBLISHABLE_KEY } from '$env/static/public';
   import { ModeWatcher } from 'mode-watcher';
 
