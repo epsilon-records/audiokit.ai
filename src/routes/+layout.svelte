@@ -10,9 +10,6 @@
   import { ModeWatcher } from 'mode-watcher';
 
   let { children } = $props<{ children: Snippet }>();
-
-  const routerPush = (to: string) => goto(to);
-  const routerReplace = (to: string) => goto(to, { replaceState: true });
 </script>
 
 <svelte:head>
@@ -25,7 +22,7 @@
   {/if}
 </svelte:head>
 
-<ClerkProvider {routerPush} {routerReplace} publishableKey={PUBLIC_CLERK_PUBLISHABLE_KEY}>
+<ClerkProvider publishableKey={PUBLIC_CLERK_PUBLISHABLE_KEY}>
   <ModeWatcher />
   <div class="min-h-screen flex flex-col">
     <Nav />
