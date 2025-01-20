@@ -124,9 +124,24 @@
                 : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
             )}
           >
-            Docs
+            Documentation
           </a>
         </li>
+        <SignedIn>
+          <li class="pt-1">
+            <a
+              href="/support"
+              class={cn(
+                'transition-colors',
+                isActive('/support')
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+              )}
+            >
+              Support
+            </a>
+          </li>
+        </SignedIn>
         <SignedOut>
           <li class="pt-1">
             <a
@@ -225,8 +240,22 @@
             )}
             onclick={closeMenu}
           >
-            Docs
+            Documentation
           </a>
+          <SignedIn>
+            <a
+              href="/support"
+              class={cn(
+                'block px-6 py-2 text-base font-medium rounded-md transition-colors',
+                isActive('/support')
+                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                  : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+              )}
+              onclick={closeMenu}
+            >
+              Support
+            </a>
+          </SignedIn>
           <SignedOut>
             <a
               href="/contact"
