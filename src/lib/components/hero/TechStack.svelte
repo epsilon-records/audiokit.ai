@@ -10,7 +10,7 @@
   class="w-full max-w-lg space-y-6 pt-8 border-t border-border/40"
 >
   <div class="inline-block">
-    <p class="text-lg text-muted-foreground bg-white">Integrate With Your Stack</p>
+    <p class="text-lg text-muted-foreground bg-white">Integrate with your tech stack</p>
   </div>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
     <div
