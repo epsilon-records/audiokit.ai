@@ -122,12 +122,12 @@
   ]);
 </script>
 
-<div class="relative">
+<div class="relative" in:fade={{ duration: 800 }}>
   <div
     class="absolute inset-0 z-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
   ></div>
   <div class="container max-w-6xl mx-auto px-4 py-16 relative z-10">
-    <div class="text-center mb-12" in:fade={{ duration: 800 }}>
+    <div class="text-center mb-12">
       <div class="bg-white inline-block">
         <h1
           class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
@@ -200,7 +200,7 @@
         careers.
       </div>
       <div class="flex flex-col sm:flex-row gap-4 justify-center">
-        <Button size="lg" href="/faq" class="text-lg px-8">FAQ</Button>
+        <Button size="lg" href="/faq" class="text-lg px-8">Read the FAQ</Button>
         <Button
           size="lg"
           variant="outline"

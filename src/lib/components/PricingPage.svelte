@@ -110,7 +110,7 @@
     class="absolute inset-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
   ></div>
   <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
-    <div class="text-center mb-8 rounded-xl shadow-sm">
+    <div class="text-center mb-8 rounded-xl shadow-sm" in:fade={{ duration: 800 }}>
       <div class="bg-white inline-block">
         <h1
           class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
@@ -145,8 +145,9 @@
     </div>
 
     <div class="grid md:grid-cols-2 gap-6">
-      {#each pricingTiers as tier}
+      {#each pricingTiers as tier, i}
         <div
+          in:fly={{ y: 20, duration: 600, delay: i * 200 }}
           class="relative flex flex-col rounded-xl border p-6 shadow-sm bg-white"
           class:ring-2={tier.highlighted}
           class:ring-primary={tier.highlighted}

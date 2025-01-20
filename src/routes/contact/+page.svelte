@@ -14,7 +14,6 @@
   ></div>
   <div class="container max-w-4xl mx-auto px-4 py-16 relative z-10">
     <div class="text-center mb-12" in:fade={{ duration: 800 }}>
-      <div class="text-4xl mb-4" in:scale={{ duration: 600, delay: 200 }}>👋</div>
       <h1
         class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
       >
@@ -69,10 +68,12 @@
     </div>
   </div>
 
-  <div
-    class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
-  />
-  <div
-    class="absolute inset-0 -z-20 h-full w-full bg-gradient-to-br from-primary/5 via-blue-500/5 to-violet-500/5 opacity-50"
-  />
+  <div class="relative">
+    <div
+      class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
+    />
+    <div
+      class="absolute inset-0 -z-20 h-full w-full bg-gradient-to-br from-primary/5 via-blue-500/5 to-violet-500/5 opacity-50"
+    />
+  </div>
 </div>
