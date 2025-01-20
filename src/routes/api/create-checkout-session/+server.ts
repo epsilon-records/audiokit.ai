@@ -43,7 +43,6 @@ export async function POST({ request, url }) {
     // Select price IDs based on environment
     const PRICE_IDS = import.meta.env.PROD ? LIVE_PRICE_IDS : TEST_PRICE_IDS;
 
-    console.log(tier, isAnnual, email);
     if (!PRICE_IDS[tier as keyof typeof PRICE_IDS]) {
       throw error(400, 'Invalid pricing tier');
     }

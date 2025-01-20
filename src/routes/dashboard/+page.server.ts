@@ -157,7 +157,7 @@ export const load: PageServerLoad = async ({ locals }) => {
     }
 
     const { metadata, streaming, followers } = await soundcharts.getArtistStats(spotifyId);
-    console.log('Successfully fetched stats:', { metadata, streaming, followers });
+
     return {
       ...baseResponse,
       metadata: metadata,

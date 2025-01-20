@@ -80,7 +80,6 @@
           isAnnual,
           email: email,
         };
-        console.log(payload);
 
         const response = await fetch('/api/create-checkout-session', {
           method: 'POST',
