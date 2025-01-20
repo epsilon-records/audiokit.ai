@@ -95,7 +95,9 @@
         window.location.href = url;
       } catch (err) {
         console.error(err);
-        toast.error('Failed to start checkout process. Please try again.');
+        toast.error('An error occurred', {
+          description: 'Please try again or contact support',
+        });
       } finally {
         loadingTier = null;
       }

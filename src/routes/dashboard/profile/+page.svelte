@@ -38,8 +38,8 @@
     },
     onResult: ({ result }) => {
       if (result.type === 'success') {
-        toast.success('Artist profile saved successfully', {
-          description: 'Your profile changes have been updated and are now live.',
+        toast.success('Artist profile updated', {
+          description: 'Your changes are now live',
         });
 
         // Create fireworks effect
@@ -82,7 +82,7 @@
   // Handle file upload preview
   let avatarPreview = $state('');
 
-  const uploadThing = createUploadThing<OurFileRouter>();
+  // const uploadThing = createUploadThing<OurFileRouter>();
 
   async function handleAvatarChange(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -90,11 +90,11 @@
 
     try {
       const [file] = input.files;
-      const res = await uploadThing['imageUploader'].upload([file]);
+      // const res = await uploadThing['imageUploader'].upload([file]);
 
-      if (res?.[0]?.url) {
-        avatarPreview = res[0].url;
-        $formData.artist_photos = [res[0].url];
+      if (false) {
+        // avatarPreview = res[0].url;
+        // $formData.artist_photos = [res[0].url];
 
         toast.success('Photo uploaded successfully');
       }
@@ -269,11 +269,11 @@
                       </span>
                     </label>
                     <div class="w-32">
-                      <img
+                      <!-- <img
                         src={avatarPreview || $formData.artist_photos?.[0] || '/logo.gif'}
                         alt="Artist photo"
                         class="rounded-full object-cover w-full h-full"
-                      />
+                      /> -->
                     </div>
                   </label>
                   <input

@@ -28,9 +28,8 @@
       window.location.href = url;
     } catch (err) {
       console.error(err);
-      toast.error('Failed to open billing portal', {
-        description:
-          'There was an issue accessing your billing settings. Please try again or contact support.',
+      toast.error('An error occurred', {
+        description: 'Please try again or contact support',
       });
     }
   }
