@@ -17,6 +17,28 @@
       data-is-production-environment="false"
       src="https://snippet.meticulous.ai/v1/meticulous.js"
     ></script>
+    <script>
+      (function () {
+        var dbpr = 100;
+        if (Math.random() * 100 > 100 - dbpr) {
+          var d = 'dbbRum',
+            w = window,
+            o = document,
+            a = addEventListener,
+            scr = o.createElement('script');
+          scr.async = !0;
+          w[d] = w[d] || [];
+          w[d].push(['presampling', dbpr]);
+          ['error', 'unhandledrejection'].forEach(function (t) {
+            a(t, function (e) {
+              w[d].push([t, e]);
+            });
+          });
+          scr.src = 'https://cdn.debugbear.com/5GOULW9zQSMv.js';
+          o.head.appendChild(scr);
+        }
+      })();
+    </script>
   {/if}
 </svelte:head>
 
