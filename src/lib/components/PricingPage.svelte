@@ -111,7 +111,7 @@
     class="absolute inset-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
   ></div>
   <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
-    <div class="text-center mb-8 rounded-xl shadow-sm" in:fade={{ duration: 800 }}>
+    <div class="text-center mb-8 rounded-xl shadow-sm">
       <div class="bg-white inline-block">
         <h1
           class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"

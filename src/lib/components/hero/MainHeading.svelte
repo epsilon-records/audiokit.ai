@@ -38,19 +38,20 @@
   });
 </script>
 
-<div class="space-y-4">
+<div class="space-y-4 relative inset-0 bg-background -z-10">
   <h1
     bind:this={elementRef}
     in:fade={{ duration: 1000, delay: 200 }}
-    class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500 min-h-[2em] leading-[1.2]"
+    class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500 min-h-[2em] leading-[1.2] relative z-10"
   >
     Label Services<br />For The API Era
   </h1>
 
   <p
     in:fade={{ duration: 1000, delay: 400 }}
-    class="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto"
+    class="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto relative z-10"
   >
+    <span class="absolute inset-0 bg-background -z-10" />
     Streamline your music distribution with powerful APIs and AI-driven tools
   </p>
 </div>

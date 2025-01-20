@@ -191,7 +191,7 @@
       {/each}
     </div>
 
-    <div in:fade={{ duration: 800, delay: 400 }} class="text-center p-12 rounded-xl">
+    <div class="text-center p-12 rounded-xl">
       <div class="bg-white inline-block">
         <h2 class="text-3xl font-bold mb-4">Ready to Transform Your Music Career?</h2>
       </div>
