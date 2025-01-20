@@ -27,7 +27,6 @@
       const { url } = await response.json();
       window.location.href = url;
     } catch (err) {
-      console.error(err);
       toast.error('An error occurred', {
         description: 'Please try again or contact support',
       });

@@ -165,7 +165,6 @@ export const load: PageServerLoad = async ({ locals }) => {
       followers: followers,
     };
   } catch (err) {
-    console.error('Error fetching stats:', err);
     return {
       ...baseResponse,
       metadata: defaultMetadata,

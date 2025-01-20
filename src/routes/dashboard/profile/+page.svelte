@@ -99,7 +99,6 @@
         toast.success('Photo uploaded successfully');
       }
     } catch (err) {
-      console.error('Upload failed:', err);
       toast.error('Failed to upload photo');
     }
   }

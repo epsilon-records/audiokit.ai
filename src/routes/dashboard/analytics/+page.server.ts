@@ -19,7 +19,6 @@ export const load: PageServerLoad = async ({ locals }) => {
       },
     };
   } catch (err) {
-    console.error('Error loading analytics:', err);
     return {
       streaming: [],
       social: [],

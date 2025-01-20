@@ -8,7 +8,6 @@ export const load: PageServerLoad = async () => {
       releases: releases,
     };
   } catch (err) {
-    console.error('Error fetching releases:', err);
     return {
       releases: [],
     };

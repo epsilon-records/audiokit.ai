@@ -1,5 +1,6 @@
-import { handleErrorWithSentry, replayIntegration } from "@sentry/sveltekit";
+import { handleErrorWithSentry, replayIntegration } from '@sentry/sveltekit';
 import * as Sentry from '@sentry/sveltekit';
+import posthog from 'posthog-js';
 
 Sentry.init({
   dsn: 'https://b89f1762b68462bece4cd38d79eca72f@o337159.ingest.us.sentry.io/4508676068540416',
@@ -16,6 +17,11 @@ Sentry.init({
 
   // If you don't want to use Session Replay, just remove the line below:
   integrations: [replayIntegration()],
+});
+
+posthog.init('phc_j5S8Foca22TArMjuKIWR0DhyRt821XV9IqUY1mrOkQJ', {
+  api_host: 'https://us.i.posthog.com',
+  person_profiles: 'always',
 });
 
 // If you have a custom error handler, pass it to `handleErrorWithSentry`

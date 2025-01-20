@@ -64,7 +64,6 @@
         isPlaying = true;
       }
     } catch (error) {
-      // console.error('Playback error:', error);
       isPlaying = false;
     }
   }
