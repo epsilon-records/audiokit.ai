@@ -13,7 +13,7 @@
     "build-storybook": "storybook build"
   },
   "engines": {
-    "npm": "v10.*"
+    "npm": "^9.0.0"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.3",
