@@ -42,7 +42,7 @@
   <h1
     bind:this={elementRef}
     in:fade={{ duration: 1000, delay: 200 }}
-    class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500"
+    class="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-500 min-h-[2em] leading-[1.2]"
   >
     Label Services<br />For The API Era
   </h1>
