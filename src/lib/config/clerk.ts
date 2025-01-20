@@ -157,6 +157,7 @@ export interface ClerkNavConfig {
     };
     organizationSwitcherTrigger: {
       color: string;
+      textColor: string;
       '&:hover': {
         backgroundColor: string;
       };
@@ -195,6 +196,7 @@ export function createClerkNavAppearance(mode: 'light' | 'dark'): ClerkNavConfig
       },
       organizationSwitcherTrigger: {
         color: mode === 'dark' ? '#F3F4F6' : '#111827',
+        textColor: mode === 'dark' ? '#F3F4F6' : '#111827',
         '&:hover': {
           backgroundColor: 'transparent',
         },
@@ -210,7 +212,7 @@ export function createClerkNavAppearance(mode: 'light' | 'dark'): ClerkNavConfig
         borderColor: mode === 'dark' ? '#374151' : '#E5E7EB',
       },
       organizationSwitcherPopoverCard: {
-        backgroundColor: mode === 'dark' ? '#1F2937' : '#FFFFFF',
+        backgroundColor: mode === 'dark' ? '#FFFFFF' : '#FFFFFF',
         borderColor: mode === 'dark' ? '#374151' : '#E5E7EB',
       },
     },

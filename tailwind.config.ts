@@ -6,7 +6,16 @@ import { withUt } from 'uploadthing/tw';
 const config: Config = {
   darkMode: ['class'],
   content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/uploadthing/themes/**/*.{js,ts}'],
-  safelist: ['dark'],
+  safelist: [
+    'dark',
+    'light',
+    {
+      pattern: /^cl-./,
+    },
+  ],
+  daisyui: {
+    themes: ['light', 'dark'],
+  },
   theme: {
     container: {
       center: true,
