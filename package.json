@@ -12,9 +12,6 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },
-  "engines": {
-    "npm": "^9.0.0"
-  },
   "devDependencies": {
     "@chromatic-com/storybook": "^3.2.3",
     "@internationalized/date": "^3.7.0",
