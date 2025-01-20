@@ -10,9 +10,21 @@ updates:
     directory: '/'
     schedule:
       interval: 'daily'
+    labels:
+      - 'github-actions'
+      - 'dependencies'
 
   # Maintain dependencies for npm
   - package-ecosystem: 'npm'
     directory: '/'
     schedule:
       interval: 'daily'
+    versioning-strategy: 'auto'
+    labels:
+      - 'npm'
+      - 'dependencies'
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+    open-pull-requests-limit: 10
+    target-version: '10.x'
