@@ -1,6 +1,5 @@
 <script lang="ts">
   import ImageHandler from './ImageHandler.svelte';
-  import { pb } from '$lib/pocketbase';
 
   let { artist } = $props<{
     artist: {
@@ -9,11 +8,7 @@
     };
   }>();
 
-  const imageUrl = $derived(
-    artist.artist_photos?.[0]
-      ? pb.files.getURL(artist, artist.artist_photos[0])
-      : '/default-artist.jpg',
-  );
+  const imageUrl = '/default-artist.jpg';
 </script>
 
 <div class="relative">

@@ -1,19 +1,14 @@
 <script lang="ts">
   import type { PageData } from './$types';
-  import { pb } from '$lib/pocketbase';
   import PageContainer from '$lib/components/PageContainer.svelte';
   import { Button } from '$lib/components/ui/button';
 
   let { data } = $props<{ data: PageData }>();
 
-  const coverArtUrl = $derived(
-    data.release.cover_artwork?.[0]
-      ? pb.files.getURL(data.release, data.release.cover_artwork[0])
-      : '/default-release.jpg',
-  );
+  const coverArtUrl = '/default-release.jpg';
 </script>
 
-<PageContainer bgColor="bg-black" textColor="text-[#00ff00]">
+<PageContainer title={data.release.release_title} bgColor="bg-black" textColor="text-[#00ff00]">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
     <div class="aspect-square overflow-hidden border border-[#00ff00]">
       <img src={coverArtUrl} alt={data.release.title} class="w-full h-full object-cover" />

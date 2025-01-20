@@ -1,20 +1,15 @@
 <script lang="ts">
   import ImageHandler from './ImageHandler.svelte';
 
-  let { artist, pb } = $props<{
+  let { artist } = $props<{
     artist: {
       slug: string;
       artist_photos?: string[];
       stage_name: string;
     };
-    pb: any;
   }>();
 
-  const imageUrl = $derived(
-    artist.artist_photos?.[0]
-      ? pb.files.getURL(artist, artist.artist_photos[0])
-      : '/default-artist.jpg',
-  );
+  const imageUrl = '/default-artist.jpg';
 </script>
 
 <a href="/artists/{artist.slug}" class="block group">

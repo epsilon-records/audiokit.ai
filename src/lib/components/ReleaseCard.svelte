@@ -1,7 +1,7 @@
 <script lang="ts">
   import ImageHandler from './ImageHandler.svelte';
 
-  let { release, pb } = $props<{
+  let { release } = $props<{
     release: {
       slug: string;
       cover_artwork?: string[];
@@ -14,23 +14,18 @@
         }[];
       };
     };
-    pb: any;
   }>();
 
-  const imageUrl = $derived(
-    release.cover_artwork?.[0]
-      ? pb.files.getURL(release, release.cover_artwork[0])
-      : '/default-release.jpg',
-  );
+  const imageUrl = '/default-release.jpg';
 
   const artistNames = $derived(
     [
       ...new Set(
         release.expand.tracks.flatMap((track: any) =>
-          track.expand.primary_artists.map((artist: any) => artist.stage_name),
-        ),
+          track.expand.primary_artists.map((artist: any) => artist.stage_name)
+        )
       ),
-    ].join(' • '),
+    ].join(' • ')
   );
 </script>
 

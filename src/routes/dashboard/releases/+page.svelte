@@ -1,18 +1,10 @@
 <script lang="ts">
-  import { Button } from '$lib/components/ui/button';
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { Badge } from '$lib/components/ui/badge';
-  import { pb } from '$lib/pocketbase';
   import { goto } from '$app/navigation';
   import { PlusCircle } from 'lucide-svelte';
 
-  // Update props to include subscription status
-  interface PageData {
-    releases: any[];
-    hasActiveSubscription: boolean;
-  }
-
-  let { data } = $props<PageData>();
+  let { data } = $props();
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -62,9 +54,7 @@
         <Card class="hover:shadow-md transition-shadow">
           <div class="aspect-square">
             <img
-              src={release.cover_artwork?.[0]
-                ? pb.files.getURL(release, release.cover_artwork[0])
-                : '/default-release.jpg'}
+              src={'/default-release.jpg'}
               alt={release.release_title}
               class="object-cover w-full h-full rounded-t-lg"
             />
@@ -78,7 +68,7 @@
               </Badge>
               <button
                 class="btn btn-ghost btn-sm"
-                on:click={() => goto(`/dashboard/releases/${release.id}`)}
+                onclick={() => goto(`/dashboard/releases/${release.id}`)}
               >
                 Edit
               </button>
