@@ -1,3 +1,5 @@
+[![Netlify Status](https://api.netlify.com/api/v1/badges/65f87109-7c6a-4a84-8f91-cb2ea8fc48bf/deploy-status)](https://app.netlify.com/sites/audiokit/deploys)
+
 # sv
 
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
