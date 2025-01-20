@@ -42,6 +42,7 @@
     "vite": "^5.4.11"
   },
   "dependencies": {
+    "@alwaysmeticulous/recorder-loader": "^2.194.1",
     "@biomejs/biome": "^1.9.4",
     "@clerk/themes": "^2.2.5",
     "@stripe/stripe-js": "^5.5.0",

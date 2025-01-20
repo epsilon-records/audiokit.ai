@@ -15,6 +15,16 @@
   const routerReplace = (to: string) => goto(to, { replaceState: true });
 </script>
 
+<svelte:head>
+  {#if !import.meta.env.PROD}
+    <script
+      data-recording-token="YlK6PCQzlht5rZutE1qns77yPUiS5FNPT6QBMXM0"
+      data-is-production-environment="false"
+      src="https://snippet.meticulous.ai/v1/meticulous.js"
+    ></script>
+  {/if}
+</svelte:head>
+
 <ClerkProvider {routerPush} {routerReplace} publishableKey={PUBLIC_CLERK_PUBLISHABLE_KEY}>
   <ModeWatcher />
   <div class="min-h-screen flex flex-col">
