@@ -11,25 +11,19 @@
 >
   <p class="text-lg text-muted-foreground bg-white">Integrate With Your Stack</p>
   <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-    <div
-      class="flex flex-col items-center space-y-2 p-4 rounded-lg border border-border/40 bg-white"
-    >
+    <div class="flex flex-col items-center space-y-2 p-4 rounded-lg border-2 border-black bg-white">
       <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24">
         <path fill="currentColor" d={siOpenapiinitiative.path} />
       </svg>
       <span class="text-sm font-medium">REST API</span>
     </div>
-    <div
-      class="flex flex-col items-center space-y-2 p-4 rounded-lg border border-border/40 bg-white"
-    >
+    <div class="flex flex-col items-center space-y-2 p-4 rounded-lg border-2 border-black bg-white">
       <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24">
         <path fill="currentColor" d={siGraphql.path} />
       </svg>
       <span class="text-sm font-medium">GraphQL</span>
     </div>
-    <div
-      class="flex flex-col items-center space-y-2 p-4 rounded-lg border border-border/40 bg-white"
-    >
+    <div class="flex flex-col items-center space-y-2 p-4 rounded-lg border-2 border-black bg-white">
       <svg
         class="w-6 h-6 text-primary"
         viewBox="0 0 24 24"
@@ -45,9 +39,7 @@
       </svg>
       <span class="text-sm font-medium">Webhooks</span>
     </div>
-    <div
-      class="flex flex-col items-center space-y-2 p-4 rounded-lg border border-border/40 bg-white"
-    >
+    <div class="flex flex-col items-center space-y-2 p-4 rounded-lg border-2 border-black bg-white">
       <svg class="w-6 h-6 text-primary" viewBox="0 0 24 24">
         <path fill="currentColor" d={siNpm.path} />
       </svg>
