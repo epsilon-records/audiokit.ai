@@ -65,9 +65,9 @@
         <OrganizationSwitcher
           appearance={navAppearance}
           hidePersonal={true}
-          afterCreateOrganizationUrl="/redirect"
-          afterSelectOrganizationUrl="/redirect"
-          afterLeaveOrganizationUrl="/redirect"
+          afterCreateOrganizationUrl="/dashboard/redirect"
+          afterSelectOrganizationUrl="/dashboard/redirect"
+          afterLeaveOrganizationUrl="/dashboard/redirect"
         />
         <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
         <a
@@ -215,9 +215,9 @@
           <OrganizationSwitcher
             appearance={navAppearance}
             hidePersonal={true}
-            afterCreateOrganizationUrl="/redirect"
-            afterSelectOrganizationUrl="/redirect"
-            afterLeaveOrganizationUrl="/redirect"
+            afterCreateOrganizationUrl="/dashboard/redirect"
+            afterSelectOrganizationUrl="/dashboard/redirect"
+            afterLeaveOrganizationUrl="/dashboard/redirect"
           />
         </div>
 
