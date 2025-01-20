@@ -3,6 +3,7 @@
   import { goto } from '$app/navigation';
   import { SignedIn, SignedOut } from 'svelte-clerk';
   import { toast } from 'svelte-sonner';
+  import { siDiscord } from 'simple-icons';
 
   let { email } = $props();
   let isAnnual = $state(true);
@@ -26,16 +27,17 @@
       monthlyPrice: 19,
       annualPrice: 99,
       features: [
-        { text: 'Music distribution to all major platforms', icon: '🎧' },
         { text: 'Manage one individual artist', icon: '👤' },
+        { text: 'Music distribution to all major platforms', icon: '🎧' },
+        { text: 'Keep 100% of your music royalties', icon: '💰' },
         { text: 'Up to 5 team members', icon: '🤝' },
         { text: '5GB media storage', icon: '💾' },
-        { text: 'Advanced analytics dashboard', icon: '📊' },
+        { text: 'Basic analytics dashboard', icon: '📊' },
         { text: 'Release planning & scheduling', icon: '📅' },
         { text: 'Royalty tracking & reporting', icon: '💰' },
         { text: 'Contract templates & e-signing', icon: '📝' },
-        { text: '24/7 Slack channel support', icon: '💬' },
-        { text: 'Priority API access', icon: '🔑' },
+        { text: '24/7 Discord channel support', icon: 'discord' },
+        { text: 'Limited API access', icon: '🔑' },
       ],
     },
     {
@@ -46,15 +48,16 @@
       annualPrice: 599,
       highlighted: true,
       features: [
-        { text: 'Music distribution to all major platforms', icon: '🎧' },
         { text: 'Manage unlimited artists', icon: '👥' },
+        { text: 'Music distribution to all major platforms', icon: '🎧' },
+        { text: 'Keep 100% of your music royalties', icon: '💰' },
         { text: 'Unlimited team members', icon: '🤝' },
         { text: 'Unlimited storage', icon: '💾' },
         { text: 'Advanced analytics dashboard', icon: '📊' },
         { text: 'Release planning & scheduling', icon: '📅' },
         { text: 'Royalty tracking & reporting', icon: '💰' },
         { text: 'Contract templates & e-signing', icon: '📝' },
-        { text: '24/7 Slack channel support', icon: '💬' },
+        { text: '24/7 Discord channel support', icon: 'discord' },
         { text: 'Priority API access', icon: '🔑' },
         { text: 'Advanced integrations', icon: '🔌' },
         { text: 'Custom workflows', icon: '⚡' },
@@ -199,7 +202,19 @@
                   />
                 </svg>
                 <span class="text-sm text-gray-600">
-                  <span class="mr-2">{feature.icon}</span>
+                  <span class="mr-2">
+                    {#if feature.icon === 'discord'}
+                      <svg
+                        role="img"
+                        viewBox="0 0 24 24"
+                        class="inline-block w-4 h-4 text-[#5865F2]"
+                      >
+                        <path fill="currentColor" d={siDiscord.path} />
+                      </svg>
+                    {:else}
+                      {feature.icon}
+                    {/if}
+                  </span>
                   {feature.text}
                 </span>
               </li>
