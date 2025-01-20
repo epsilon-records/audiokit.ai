@@ -17,5 +17,5 @@
 </svelte:head>
 
 <AuthContainer title="Create Account">
-  <SignUp {appearance} fallbackRedirectUrl="/dashboard/redirect" />
+  <SignUp {appearance} fallbackRedirectUrl="/" />
 </AuthContainer>

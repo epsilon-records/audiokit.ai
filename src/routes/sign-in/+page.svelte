@@ -17,5 +17,5 @@
 </svelte:head>
 
 <AuthContainer title="Welcome Back">
-  <SignIn {appearance} fallbackRedirectUrl="/dashboard/redirect" />
+  <SignIn {appearance} fallbackRedirectUrl="/" />
 </AuthContainer>

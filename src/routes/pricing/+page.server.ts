@@ -7,12 +7,10 @@ export const load: PageServerLoad = async ({ locals }) => {
     throw redirect(303, '/join');
   }
 
-  const user = await clerkClient.users.getUser(locals.auth.userId);
   return {
-    meta: {
-      title: 'Pricing - AudioKit',
-      description: 'Simple, transparent pricing for all your music distribution needs',
-    },
-    email: user.primaryEmailAddress?.emailAddress ?? null,
+    title: 'Simple, Transparent Pricing',
+    description:
+      'Choose the perfect plan for your music distribution needs with our straightforward pricing options.',
+    email: null,
   };
 };

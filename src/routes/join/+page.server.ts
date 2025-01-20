@@ -9,6 +9,9 @@ export const load: PageServerLoad = async ({ locals }) => {
 
   const user = await clerkClient.users.getUser(locals.auth.userId);
   return {
+    title: 'Get Started with AudioKit',
+    description:
+      'Choose the perfect plan for your music distribution needs with our straightforward pricing options.',
     email: user.primaryEmailAddress?.emailAddress,
   };
 };

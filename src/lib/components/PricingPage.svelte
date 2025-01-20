@@ -5,10 +5,10 @@
   import { toast } from 'svelte-sonner';
   import { siDiscord } from 'simple-icons';
 
-  let { email } = $props();
+  let { email, title, description } = $props();
+
   let isAnnual = $state(true);
   let loadingTier = $state<string | null>(null);
-  let isSubscribePage = $derived(page.url.pathname === '/subscribe');
 
   interface PricingTier {
     name: string;
@@ -113,12 +113,11 @@
         <h1
           class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
         >
-          Simple, Transparent Pricing
+          {title}
         </h1>
       </div>
       <p class="bg-white text-muted-foreground max-w-2xl mx-auto text-lg">
-        Choose the perfect plan for your music distribution needs with our straightforward pricing
-        options.
+        {description}
       </p>
     </div>
 
