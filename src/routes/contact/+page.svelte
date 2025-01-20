@@ -49,16 +49,27 @@
       <div class="text-3xl mb-2" in:scale={{ duration: 600, delay: 600 }}>🤔</div>
       <h3 class="text-xl font-semibold mb-4">Looking for immediate answers?</h3>
       <p class="text-muted-foreground mb-6">
-        Check out our comprehensive FAQ section for quick solutions to common questions.
+        Check out our comprehensive FAQ section and documentation for quick solutions to common
+        questions.
       </p>
-      <a
-        href="/faq"
-        class="group inline-flex items-center justify-center px-8 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:scale-105"
-      >
-        <MessageSquare class="w-5 h-5 mr-2" />
-        Visit FAQ
-        <span class="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-      </a>
+      <div class="flex items-center justify-center gap-4">
+        <a
+          href="/faq"
+          class="group inline-flex items-center justify-center px-8 py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-300 hover:scale-105"
+        >
+          <MessageSquare class="w-5 h-5 mr-2" />
+          Visit FAQ
+          <span class="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+        </a>
+        <a
+          href="/docs"
+          class="group inline-flex items-center justify-center px-8 py-3 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-all duration-300 hover:scale-105"
+        >
+          <ExternalLink class="w-5 h-5 mr-2" />
+          View Docs
+          <span class="ml-2 opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+        </a>
+      </div>
     </div>
   </div>
 

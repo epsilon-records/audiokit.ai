@@ -15,7 +15,7 @@
   ></div>
   <div class="container relative z-10 max-w-6xl mx-auto">
     <div class="flex flex-col items-center text-center space-y-4 md:space-y-8">
-      <MainHeading {ANIMATION_BASE_DELAY} />
+      <MainHeading />
       <CtaButtons {ANIMATION_BASE_DELAY} />
       <TechStack {ANIMATION_BASE_DELAY} />
       <PlatformLogos {ANIMATION_BASE_DELAY} />
