@@ -124,7 +124,7 @@
       content: $formData.biography || '',
       editorProps: {
         attributes: {
-          class: 'prose prose-sm sm:prose-base max-w-none min-h-[200px] p-4 focus:outline-none',
+          class: 'prose-sm sm:prose-base max-w-none min-h-[200px] p-4 focus:outline-none',
         },
       },
       onUpdate: ({ editor }) => {
@@ -905,7 +905,7 @@
 
 <style>
   :global(.tiptap-editor) {
-    @apply prose prose-sm sm:prose-base max-w-none min-h-[200px] p-4;
+    @apply prose-sm sm:prose-base max-w-none min-h-[200px] p-4;
   }
 
   :global(.tiptap-editor p.is-editor-empty:first-child::before) {
