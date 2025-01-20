@@ -4,12 +4,9 @@
   import { cn } from '$lib/utils';
   import { toast } from 'svelte-sonner';
   import { OrganizationSwitcher } from 'svelte-clerk';
-  import { mode } from 'mode-watcher';
   import { slide } from 'svelte/transition';
-  import { createClerkNavAppearance } from '$lib/config/clerk';
 
   let isMenuOpen = $state(false);
-  let navAppearance = $state(createClerkNavAppearance($mode === 'dark' ? 'dark' : 'light'));
 
   async function handleManageSubscription() {
     try {
@@ -47,11 +44,6 @@
       isMenuOpen = false;
     }
   });
-
-  // Update appearance when mode changes
-  $effect(() => {
-    navAppearance = createClerkNavAppearance($mode === 'dark' ? 'dark' : 'light');
-  });
 </script>
 
 <!-- Secondary Navigation -->
@@ -61,7 +53,6 @@
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-3">
         <OrganizationSwitcher
-          appearance={navAppearance}
           hidePersonal={true}
           afterCreateOrganizationUrl="/dashboard/redirect"
           afterSelectOrganizationUrl="/dashboard/redirect"
@@ -222,7 +213,6 @@
             </svg>
           </button>
           <OrganizationSwitcher
-            appearance={navAppearance}
             hidePersonal={true}
             afterCreateOrganizationUrl="/dashboard/redirect"
             afterSelectOrganizationUrl="/dashboard/redirect"

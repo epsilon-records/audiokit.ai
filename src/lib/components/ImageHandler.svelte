@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Icon, ExclamationCircle } from 'svelte-hero-icons';
+  import { ExclamationCircle } from 'svelte-heros-v2';
 
   let {
     src,
@@ -50,7 +50,7 @@
 
   {#if error}
     <div class="absolute inset-0 flex items-center justify-center bg-muted/50">
-      <Icon src={ExclamationCircle} class="w-8 h-8 text-muted-foreground" />
+      <ExclamationCircle class="w-8 h-8 text-muted-foreground" />
     </div>
   {/if}
 </div>
