@@ -79,6 +79,7 @@
           isAnnual,
           email: email,
         };
+        console.log(payload);
 
         const response = await fetch('/api/create-checkout-session', {
           method: 'POST',
@@ -93,6 +94,7 @@
         const { url } = await response.json();
         window.location.href = url;
       } catch (err) {
+        console.error(err);
         toast.error('Failed to start checkout process. Please try again.');
       } finally {
         loadingTier = null;

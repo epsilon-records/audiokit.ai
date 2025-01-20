@@ -16,11 +16,11 @@ const stripe = new Stripe(STRIPE_SECRET_KEY);
 // } as const;
 
 const PRICE_IDS = {
-  'Basic Label': {
+  'Individual Artist': {
     monthly: 'price_1QiHU7GR0puR9CIOWqQh3Pxq',
     annual: 'price_1Qho2uGR0puR9CIODFZLVvkI',
   },
-  'Pro Label': {
+  'Record Label': {
     monthly: 'price_1QiHVlGR0puR9CIOKOHpA0GS',
     annual: 'price_1QiHUyGR0puR9CIOOCVYhZ3y',
   },
@@ -49,6 +49,7 @@ export async function POST({ request, url }) {
     });
     return json({ url: session.url });
   } catch (err) {
+    console.error(err);
     throw error(500, 'Could not create checkout session');
   }
 }
