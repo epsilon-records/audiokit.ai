@@ -4,7 +4,6 @@
   import { slide } from 'svelte/transition';
   import { page } from '$app/state';
   import { cn } from '$lib/utils';
-  import ThemeSwitcher from '$lib/components/ThemeSwitcher.svelte';
 
   let isOpen = $state(false);
   let menuRef = $state<HTMLDivElement | null>(null);
@@ -188,9 +187,6 @@
           </li>
         </SignedOut>
         <SignedIn>
-          <li class="pt-1">
-            <ThemeSwitcher />
-          </li>
           <li>
             <UserButton afterSignOutUrl="/sign-in" />
           </li>
@@ -304,7 +300,6 @@
           </SignedOut>
           <SignedIn>
             <div class="px-4 py-2 space-y-1">
-              <ThemeSwitcher />
               <div class="mt-2 px-2">
                 <UserButton afterSignOutUrl="/sign-in" />
               </div>

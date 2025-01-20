@@ -6,7 +6,6 @@
   import { Toaster } from 'svelte-sonner';
   import type { Snippet } from 'svelte';
   import { PUBLIC_CLERK_PUBLISHABLE_KEY } from '$env/static/public';
-  import { ModeWatcher } from 'mode-watcher';
 
   let { children } = $props<{ children: Snippet }>();
 </script>
@@ -22,7 +21,6 @@
 </svelte:head>
 
 <ClerkProvider publishableKey={PUBLIC_CLERK_PUBLISHABLE_KEY}>
-  <ModeWatcher />
   <div class="min-h-screen flex flex-col">
     <Nav />
     <main class="flex-1 pt-16">

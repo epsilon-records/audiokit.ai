@@ -5,14 +5,13 @@ import { withUt } from 'uploadthing/tw';
 
 const config: Config = {
   darkMode: ['class'],
-  safelist: ['dark', 'light'],
   content: [
     './src/**/*.{html,js,svelte,ts}',
     './node_modules/uploadthing/themes/**/*.{js,ts}',
     './node_modules/clerk/**/*.{js,ts}',
   ],
   daisyui: {
-    themes: ['light', 'dark'],
+    themes: ['light'],
   },
   theme: {
     container: {
