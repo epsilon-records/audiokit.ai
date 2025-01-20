@@ -9,6 +9,9 @@
 </svelte:head>
 
 <div class="relative min-h-[80vh] flex items-center">
+  <div
+    class="absolute inset-0 z-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
+  ></div>
   <div class="container max-w-4xl mx-auto px-4 py-16">
     <div class="text-center mb-12" in:fade={{ duration: 800 }}>
       <div class="text-4xl mb-4" in:scale={{ duration: 600, delay: 200 }}>👋</div>

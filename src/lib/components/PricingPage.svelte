@@ -100,162 +100,163 @@
   }
 </script>
 
-<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-  <div class="text-center mb-12">
-    <h1
-      class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
-    >
-      Simple, Transparent Pricing
-    </h1>
-    <p class="text-muted-foreground max-w-2xl mx-auto text-lg">
-      Choose the perfect plan for your music distribution needs with our straightforward pricing
-      options.
-    </p>
-  </div>
-
-  <div class="flex justify-center items-center gap-3 mb-8">
-    <span class:text-gray-900={!isAnnual} class:text-gray-500={isAnnual}>Monthly</span>
-    <input
-      type="checkbox"
-      class="toggle toggle-primary"
-      checked={isAnnual}
-      onchange={() => (isAnnual = !isAnnual)}
-      aria-label="Toggle billing period"
-    />
-    <span class:text-gray-500={!isAnnual} class:text-gray-900={isAnnual}>
-      Annual
-      <span class="text-green-600 font-medium">
-        (Save up to ${Math.max(savings.basic, savings.pro)}/mo)
-      </span>
-    </span>
-  </div>
-
-  <div class="grid md:grid-cols-2 gap-6">
-    {#each pricingTiers as tier}
-      <div
-        class="relative flex flex-col rounded-xl border p-6 shadow-sm"
-        class:ring-2={tier.highlighted}
-        class:ring-primary={tier.highlighted}
+<div class="relative">
+  <div
+    class="absolute inset-0 z-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
+  ></div>
+  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12">
+      <h1
+        class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
       >
-        {#if tier.highlighted}
-          <div class="absolute -top-3 right-6">
-            <span
-              class="inline-flex items-center rounded-full bg-primary px-3 py-0.5 text-sm font-medium text-white"
-            >
-              Popular
-            </span>
-          </div>
-        {/if}
+        Simple, Transparent Pricing
+      </h1>
+      <p class="text-muted-foreground max-w-2xl mx-auto text-lg">
+        Choose the perfect plan for your music distribution needs with our straightforward pricing
+        options.
+      </p>
+    </div>
 
-        <div class="mb-4">
-          <h3 class="text-xl font-bold text-gray-900">{tier.name}</h3>
-          <p class="mt-2 text-sm text-gray-600">{tier.description}</p>
-        </div>
+    <div class="flex justify-center items-center gap-3 mb-8">
+      <span class:text-gray-900={!isAnnual} class:text-gray-500={isAnnual}>Monthly</span>
+      <input
+        type="checkbox"
+        class="toggle toggle-primary"
+        checked={isAnnual}
+        onchange={() => (isAnnual = !isAnnual)}
+        aria-label="Toggle billing period"
+      />
+      <span class:text-gray-500={!isAnnual} class:text-gray-900={isAnnual}>
+        Annual
+        <span class="text-green-600 font-medium">
+          (Save up to ${Math.max(savings.basic, savings.pro)}/mo)
+        </span>
+      </span>
+    </div>
 
-        <div class="mb-4">
-          <p class="flex items-baseline">
-            <span
-              class="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-emerald-400"
-            >
-              ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
-            </span>
-            <span class="ml-1 text-lg font-semibold text-gray-600">
-              {isAnnual ? '/year' : '/month'}
-            </span>
-          </p>
-          {#if isAnnual}
-            <p class="mt-1 text-sm text-emerald-600 flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
-              Save ${(tier.monthlyPrice * 12 - tier.annualPrice).toFixed(2)} with annual billing
-            </p>
-          {/if}
-        </div>
-
-        <ul role="list" class="mb-6 space-y-3 flex-1">
-          {#each tier.features as feature}
-            <li class="flex gap-3 items-center">
-              <svg
-                class="h-5 w-5 flex-none text-emerald-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke-width="2"
-                stroke="currentColor"
+    <div class="grid md:grid-cols-2 gap-6">
+      {#each pricingTiers as tier}
+        <div
+          class="relative flex flex-col rounded-xl border p-6 shadow-sm bg-white"
+          class:ring-2={tier.highlighted}
+          class:ring-primary={tier.highlighted}
+        >
+          {#if tier.highlighted}
+            <div class="absolute -top-3 right-6">
+              <span
+                class="inline-flex items-center rounded-full bg-primary px-3 py-0.5 text-sm font-medium text-white"
               >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span class="text-sm text-gray-600">
-                <span class="mr-2">{feature.icon}</span>
-                {feature.text}
+                Popular
               </span>
-            </li>
-          {/each}
-        </ul>
+            </div>
+          {/if}
 
-        <SignedIn>
-          <button
-            type="button"
-            onclick={() => handleCheckout(tier)}
-            disabled={loadingTier === tier.name}
-            class="block w-full rounded-lg px-4 py-2 text-center text-sm font-semibold transition-colors {tier.highlighted
-              ? 'bg-primary text-white hover:bg-primary/90'
-              : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
-          >
-            {#if loadingTier === tier.name}
-              <span class="inline-flex items-center">
-                <svg
-                  class="animate-spin -ml-1 mr-3 h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    class="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    stroke-width="4"
-                  />
+          <div class="mb-4">
+            <h3 class="text-xl font-bold text-gray-900">{tier.name}</h3>
+            <p class="mt-2 text-sm text-gray-600">{tier.description}</p>
+          </div>
+
+          <div class="mb-4">
+            <p class="flex items-baseline">
+              <span
+                class="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-emerald-400"
+              >
+                ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
+              </span>
+              <span class="ml-1 text-lg font-semibold text-gray-600">
+                {isAnnual ? '/year' : '/month'}
+              </span>
+            </p>
+            {#if isAnnual}
+              <p class="mt-1 text-sm text-emerald-600 flex items-center gap-1">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
-                    class="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M5 13l4 4L19 7"
                   />
                 </svg>
-                Processing...
-              </span>
-            {:else}
-              Subscribe to {tier.name}
+                Save ${(tier.monthlyPrice * 12 - tier.annualPrice).toFixed(2)} with annual billing
+              </p>
             {/if}
-          </button>
-        </SignedIn>
+          </div>
 
-        <SignedOut>
-          <a
-            href="/sign-up"
-            class="block w-full rounded-lg px-4 py-2 text-center text-sm font-semibold transition-colors {tier.highlighted
-              ? 'bg-primary text-white hover:bg-primary/90'
-              : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
-          >
-            Subscribe to {tier.name}
-          </a>
-        </SignedOut>
-      </div>
-    {/each}
+          <ul role="list" class="mb-6 space-y-3 flex-1">
+            {#each tier.features as feature}
+              <li class="flex gap-3 items-center">
+                <svg
+                  class="h-5 w-5 flex-none text-emerald-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                <span class="text-sm text-gray-600">
+                  <span class="mr-2">{feature.icon}</span>
+                  {feature.text}
+                </span>
+              </li>
+            {/each}
+          </ul>
+
+          <SignedIn>
+            <button
+              type="button"
+              onclick={() => handleCheckout(tier)}
+              disabled={loadingTier === tier.name}
+              class="block w-full rounded-lg px-4 py-2 text-center text-sm font-semibold transition-colors {tier.highlighted
+                ? 'bg-primary text-white hover:bg-primary/90'
+                : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
+            >
+              {#if loadingTier === tier.name}
+                <span class="inline-flex items-center">
+                  <svg
+                    class="animate-spin -ml-1 mr-3 h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Processing...
+                </span>
+              {:else}
+                Subscribe to {tier.name}
+              {/if}
+            </button>
+          </SignedIn>
+
+          <SignedOut>
+            <a
+              href="/sign-up"
+              class="block w-full rounded-lg px-4 py-2 text-center text-sm font-semibold transition-colors {tier.highlighted
+                ? 'bg-primary text-white hover:bg-primary/90'
+                : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
+            >
+              Subscribe to {tier.name}
+            </a>
+          </SignedOut>
+        </div>
+      {/each}
+    </div>
   </div>
 </div>
-
-<div
-  class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
-></div>

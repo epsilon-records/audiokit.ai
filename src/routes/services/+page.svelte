@@ -64,7 +64,10 @@
 </script>
 
 <div class="relative">
-  <div class="container max-w-6xl mx-auto px-4 py-16">
+  <div
+    class="absolute inset-0 z-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
+  ></div>
+  <div class="container max-w-6xl mx-auto px-4 py-16 relative z-10">
     <div class="text-center mb-12" in:fade={{ duration: 800 }}>
       <h1
         class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
@@ -82,8 +85,8 @@
         <div
           in:fly={{ y: 20, duration: 600, delay: i * 100 }}
           class={cn(
-            'group p-8 rounded-xl border border-border/40 transition-all hover:scale-[1.02] hover:shadow-lg',
-            'bg-gradient-to-br',
+            'group p-8 rounded-xl border border-border/40 transition-all hover:scale-[1.02] hover:shadow-lg relative z-20',
+            'bg-gradient-to-br bg-background/80 backdrop-blur-sm',
             service.gradient
           )}
         >
@@ -138,17 +141,9 @@
           target="_blank"
           class="text-lg px-8"
         >
-          Book a Demo
+          Book a Consultation
         </Button>
       </div>
     </div>
   </div>
-
-  <div
-    class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
-  />
-
-  <div
-    class="absolute inset-0 -z-10 h-full w-full bg-gradient-to-br from-primary/5 via-blue-500/5 to-violet-500/5 opacity-50"
-  />
 </div>
