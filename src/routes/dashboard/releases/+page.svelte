@@ -6,7 +6,13 @@
   import { goto } from '$app/navigation';
   import { PlusCircle } from 'lucide-svelte';
 
-  let { data } = $props();
+  // Update props to include subscription status
+  interface PageData {
+    releases: any[];
+    hasActiveSubscription: boolean;
+  }
+
+  let { data } = $props<PageData>();
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -24,11 +30,29 @@
         <p class="text-muted-foreground">
           Get started by creating your first release to begin distribution.
         </p>
-        <div class="mt-4">
-          <Button href="/dashboard/releases/create" variant="default">
-            <PlusCircle class="mr-2 h-4 w-4" />
+        <div class="mt-4 space-y-2">
+          <a
+            href="/dashboard/releases/create"
+            class="btn btn-primary gap-2"
+            class:btn-disabled={!data.hasActiveSubscription}
+          >
+            <PlusCircle class="h-4 w-4" />
             Create Release
-          </Button>
+          </a>
+
+          {#if !data.hasActiveSubscription}
+            <div class="flex items-center gap-2">
+              <Badge variant="destructive">
+                You need an active subscription to create releases.
+                <a
+                  href="/join"
+                  class="ml-2 inline-flex items-center rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
+                >
+                  Enable Services
+                </a>
+              </Badge>
+            </div>
+          {/if}
         </div>
       </CardContent>
     </Card>
@@ -52,13 +76,12 @@
               <Badge variant={release.status === 'published' ? 'success' : 'warning'}>
                 {release.status}
               </Badge>
-              <Button
-                variant="ghost"
-                size="sm"
+              <button
+                class="btn btn-ghost btn-sm"
                 on:click={() => goto(`/dashboard/releases/${release.id}`)}
               >
                 Edit
-              </Button>
+              </button>
             </div>
           </CardContent>
         </Card>

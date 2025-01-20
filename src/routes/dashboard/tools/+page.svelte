@@ -62,7 +62,9 @@
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     {#each tools as tool, i}
       <div in:fly={{ y: 20, duration: 400, delay: i * 100 }}>
-        <Card class="h-full transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+        <Card
+          class="flex flex-col h-full transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+        >
           <CardHeader class="bg-gradient-to-br {tool.gradient} pb-6">
             <div class="flex items-center justify-between">
               <CardTitle class="flex items-center gap-2">
@@ -76,17 +78,19 @@
               {/if}
             </div>
           </CardHeader>
-          <CardContent class="pt-6">
-            <p class="text-muted-foreground mb-6">{tool.description}</p>
-            <Button
-              href={tool.href}
-              class="w-full"
-              disabled={tool.comingSoon}
-              variant={tool.comingSoon ? 'outline' : 'default'}
-            >
-              <Wand2 class="mr-2 h-4 w-4" />
-              {tool.comingSoon ? 'Coming Soon' : 'Launch Tool'}
-            </Button>
+          <CardContent class="flex flex-col flex-1 pt-6">
+            <p class="text-muted-foreground">{tool.description}</p>
+            <div class="flex-1 flex items-end pt-6">
+              <Button
+                href={tool.href}
+                class="w-full"
+                disabled={tool.comingSoon}
+                variant={tool.comingSoon ? 'outline' : 'default'}
+              >
+                <Wand2 class="mr-2 h-4 w-4" />
+                {tool.comingSoon ? 'Coming Soon' : 'Launch Tool'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>
