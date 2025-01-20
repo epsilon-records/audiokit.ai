@@ -81,10 +81,8 @@
             <a
               href="/dashboard"
               class={cn(
-                'transition-colors',
-                isActive('/dashboard')
-                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+                'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+                isActive('/dashboard') && 'text-indigo-600 dark:text-indigo-400'
               )}
             >
               Dashboard
@@ -105,20 +103,20 @@
               Services
             </a>
           </li>
+          <li class="pt-1">
+            <a
+              href="/pricing"
+              class={cn(
+                'transition-colors',
+                isActive('/pricing')
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+              )}
+            >
+              Pricing
+            </a>
+          </li>
         </SignedOut>
-        <li class="pt-1">
-          <a
-            href="/pricing"
-            class={cn(
-              'transition-colors',
-              isActive('/pricing')
-                ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-                : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
-            )}
-          >
-            Pricing
-          </a>
-        </li>
         <li class="pt-1">
           <a
             href="/docs"
@@ -164,28 +162,16 @@
           <li>
             <a
               href="/sign-in"
-              class={cn(
-                'btn btn-sm btn-primary text-lg',
-                isActive('/sign-in')
-                  ? 'text-white bg-indigo-700 dark:bg-indigo-600'
-                  : 'text-white hover:text-indigo-100 transition-colors'
-              )}
+              class="btn btn-sm btn-primary text-lg text-white hover:text-indigo-100 transition-colors"
+              >Login</a
             >
-              Login
-            </a>
           </li>
           <li>
             <a
               href="/sign-up"
-              class={cn(
-                'btn btn-sm btn-secondary text-lg',
-                isActive('/sign-up')
-                  ? 'text-white bg-indigo-700 dark:bg-indigo-600'
-                  : 'text-white hover:text-indigo-100 transition-colors'
-              )}
+              class="btn btn-sm btn-secondary text-lg text-white hover:text-indigo-100 transition-colors"
+              >Register</a
             >
-              Register
-            </a>
           </li>
         </SignedOut>
         <SignedIn>
@@ -234,19 +220,19 @@
             >
               Services
             </a>
+            <a
+              href="/pricing"
+              class={cn(
+                'block px-6 py-2 text-base font-medium rounded-md transition-colors',
+                isActive('/pricing')
+                  ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                  : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+              )}
+              onclick={closeMenu}
+            >
+              Pricing
+            </a>
           </SignedOut>
-          <a
-            href="/pricing"
-            class={cn(
-              'block px-6 py-2 text-base font-medium rounded-md transition-colors',
-              isActive('/pricing')
-                ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
-                : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-            )}
-            onclick={closeMenu}
-          >
-            Pricing
-          </a>
           <a
             href="/docs"
             class={cn(
