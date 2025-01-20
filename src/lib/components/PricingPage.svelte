@@ -105,16 +105,18 @@
 
 <div class="relative">
   <div
-    class="absolute inset-0 z-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
+    class="absolute inset-0 bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
   ></div>
-  <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <div class="text-center mb-12">
-      <h1
-        class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
-      >
-        Simple, Transparent Pricing
-      </h1>
-      <p class="text-muted-foreground max-w-2xl mx-auto text-lg">
+  <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="text-center mb-12 rounded-xl p-8 shadow-sm">
+      <div class="bg-white inline-block">
+        <h1
+          class="text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-violet-500"
+        >
+          Simple, Transparent Pricing
+        </h1>
+      </div>
+      <p class="bg-white text-muted-foreground max-w-2xl mx-auto text-lg">
         Choose the perfect plan for your music distribution needs with our straightforward pricing
         options.
       </p>
