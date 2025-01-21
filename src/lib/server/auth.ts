@@ -1,20 +1,45 @@
 import { stripe } from './stripe';
 import { redirect, error } from '@sveltejs/kit';
 import { clerkClient } from 'svelte-clerk/server';
+import Stripe from 'stripe';
+import { STRIPE_SECRET_KEY } from '$env/static/private';
 
 /**
- * Fetches user details from Clerk authentication service
- * @param userId - The Clerk user ID
- * @returns The Clerk user object
- * @throws {error} 401 if unable to fetch user details
+ * Common error messages as constants to maintain consistency
  */
-async function getClerkUser(userId: string) {
-  try {
-    const user = await clerkClient.users.getUser(userId);
-    return user;
-  } catch (err) {
-    throw error(401, 'Unable to fetch user details');
+const AUTH_ERRORS = {
+  NO_EMAIL: 'No email address found',
+  INVALID_AUTH: 'Invalid authentication state',
+  STRIPE_CUSTOMER_ERROR: 'Unable to create Stripe customer',
+  SUBSCRIPTION_ERROR: 'Unable to verify subscription status',
+} as const;
+
+/**
+ * Interface defining authentication state
+ */
+interface Auth {
+  userId: string;
+  orgId?: string;
+  email?: string;
+  customerId?: string;
+  hasActiveSubscription?: boolean;
+}
+
+/**
+ * Retrieves the primary email address for a given user
+ * @param userId - The Clerk user ID
+ * @returns The user's primary email address
+ * @throws {error} 400 if no email address is found
+ */
+async function getUserEmail(userId: string) {
+  const user = await clerkClient.users.getUser(userId);
+  const email = user.primaryEmailAddress?.emailAddress;
+
+  if (!email) {
+    throw error(400, AUTH_ERRORS.NO_EMAIL);
   }
+
+  return email;
 }
 
 /**
@@ -24,29 +49,24 @@ async function getClerkUser(userId: string) {
  * @throws {error} 401 if no email found or invalid auth state
  */
 async function getStripeCustomerId(userId: string) {
-  const user = await getClerkUser(userId);
+  const email = await getUserEmail(userId);
 
-  // Get primary email address
-  const email = user.emailAddresses[0]?.emailAddress;
-
-  if (!email) {
-    throw error(401, 'Invalid authentication state');
-  }
-
-  // Try to find existing customer
   const [existingCustomer] = (await stripe.customers.list({ email, limit: 1 })).data;
 
   if (existingCustomer) {
     return existingCustomer.id;
   }
 
-  // Create new customer if none exists
   const newCustomer = await stripe.customers.create({
     email,
     metadata: {
       userId, // Link Stripe customer to Clerk user ID
     },
   });
+
+  if (!newCustomer.id) {
+    throw error(400, AUTH_ERRORS.STRIPE_CUSTOMER_ERROR);
+  }
 
   return newCustomer.id;
 }
@@ -57,7 +77,7 @@ async function getStripeCustomerId(userId: string) {
  * @returns Object containing userId
  * @throws {redirect} to /sign-in if user is not authenticated
  */
-function requireUser(locals: App.Locals): { userId: string } {
+function requireUser(locals: App.Locals): Auth {
   if (!locals.auth?.userId) {
     throw redirect(307, '/sign-in');
   }
@@ -70,14 +90,14 @@ function requireUser(locals: App.Locals): { userId: string } {
  * @returns Object containing userId and orgId
  * @throws {redirect} to /dashboard/create-artist if no org selected
  */
-function requireOrg(locals: App.Locals): { userId: string; orgId: string } {
-  const { userId } = requireUser(locals);
+function requireOrg(locals: App.Locals): Auth {
+  const auth = requireUser(locals);
 
   if (!locals.auth?.orgId) {
     throw redirect(307, '/dashboard/create-artist');
   }
 
-  return { userId, orgId: locals.auth.orgId };
+  return { ...auth, orgId: locals.auth.orgId };
 }
 
 /**
@@ -86,16 +106,15 @@ function requireOrg(locals: App.Locals): { userId: string; orgId: string } {
  * @returns Object containing authenticated userId and orgId
  * @throws {error} 401 if authentication state is invalid
  */
-export function requireAuth(locals: App.Locals): { auth: { userId: string; orgId: string } } {
-  const { userId, orgId } = requireOrg(locals);
+export async function requireAuth(locals: App.Locals): Promise<Auth> {
+  const auth = requireOrg(locals);
+  const email = await getUserEmail(auth.userId);
 
-  if (!userId || !orgId) {
-    throw error(401, 'Invalid authentication state');
+  if (!auth.userId || !auth.orgId || !email) {
+    throw error(401, AUTH_ERRORS.INVALID_AUTH);
   }
 
-  return {
-    auth: { userId, orgId },
-  };
+  return { ...auth, email };
 }
 
 /**
@@ -105,18 +124,27 @@ export function requireAuth(locals: App.Locals): { auth: { userId: string; orgId
  * @throws {error} 401 if user is not authenticated
  * @throws {error} 400 if unable to get/create Stripe customer
  */
-export async function requireCustomer(locals: App.Locals): Promise<string> {
-  const { userId } = requireUser(locals);
+export async function requireCustomer(locals: App.Locals): Promise<Auth> {
+  const auth = requireUser(locals);
+  const email = await getUserEmail(auth.userId);
+  const customerId = await getStripeCustomerId(auth.userId);
 
-  if (!userId) {
-    throw error(401, 'Invalid authentication state');
-  }
+  return { ...auth, email, customerId };
+}
 
-  const customerId = await getStripeCustomerId(userId);
+/**
+ * Subscription check
+ */
+export async function requireSubscription(locals: App.Locals): Promise<Auth> {
+  const auth = await requireCustomer(locals);
 
-  if (!customerId) {
-    throw error(400, 'Unable to find or create Stripe customer.');
-  }
+  const [subscription] = (
+    await stripe.subscriptions.list({
+      customer: auth.customerId!,
+      limit: 1,
+      status: 'active',
+    })
+  ).data;
 
-  return customerId;
+  return { ...auth, hasActiveSubscription: !!subscription };
 }

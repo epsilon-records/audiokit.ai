@@ -1,21 +1,19 @@
 import type { PageServerLoad } from './$types';
-import { redirect } from '@sveltejs/kit';
+import { requireAuth } from '$lib/server/auth';
 import { clerkClient } from 'svelte-clerk/server';
 import Stripe from 'stripe';
 import { STRIPE_SECRET_KEY } from '$env/static/private';
+import { error } from '@sveltejs/kit';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY);
 
 export const load: PageServerLoad = async ({ locals }) => {
-  if (!locals.auth?.userId) {
-    throw redirect(307, '/sign-in');
-  }
-
-  const user = await clerkClient.users.getUser(locals.auth.userId);
+  const { auth } = requireAuth(locals);
+  const user = await clerkClient.users.getUser(auth.userId);
   const email = user.primaryEmailAddress?.emailAddress;
 
   if (!email) {
-    throw redirect(307, '/sign-in');
+    throw error(400, 'No email address found');
   }
 
   const [customer] = (

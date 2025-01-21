@@ -54,9 +54,9 @@
       <div class="hidden md:flex items-center gap-3">
         <OrganizationSwitcher
           hidePersonal={true}
-          afterCreateOrganizationUrl="/dashboard/redirect"
-          afterSelectOrganizationUrl="/dashboard/redirect"
-          afterLeaveOrganizationUrl="/dashboard/redirect"
+          afterCreateOrganizationUrl="/dashboard/reload"
+          afterSelectOrganizationUrl="/dashboard/reload"
+          afterLeaveOrganizationUrl="/dashboard/reload"
         />
         <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
         <a
@@ -208,9 +208,9 @@
           </button>
           <OrganizationSwitcher
             hidePersonal={true}
-            afterCreateOrganizationUrl="/dashboard/redirect"
-            afterSelectOrganizationUrl="/dashboard/redirect"
-            afterLeaveOrganizationUrl="/dashboard/redirect"
+            afterCreateOrganizationUrl="/dashboard/reload"
+            afterSelectOrganizationUrl="/dashboard/reload"
+            afterLeaveOrganizationUrl="/dashboard/reload"
           />
         </div>
 
