@@ -226,7 +226,7 @@
     {#if isOpen}
       <div
         bind:this={menuRef}
-        class="mobile-menu lg:hidden fixed top-16 left-4 right-4 bg-background border-2 border-black dark:border-gray-700 rounded-lg shadow-lg max-w-[1400px] mx-auto"
+        class="mobile-menu lg:hidden fixed inset-x-0 top-16 bg-background border-2 border-black dark:border-gray-700 rounded-lg shadow-lg mx-4"
         transition:slide
       >
         {#if !isLoaded}
