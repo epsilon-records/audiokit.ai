@@ -1,8 +1,13 @@
+// Soundcharts API v2 Integration
+// Documentation: https://doc.api.soundcharts.com/api/v2/doc
+
 import { SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
 import type { ArtistMetadata } from '$lib/types/stats';
 
+// Base URL for all Soundcharts API endpoints
 const SOUNDCHARTS_BASE_URL = 'https://customer.api.soundcharts.com';
 
+// Generic response type for Soundcharts API
 interface SoundchartsResponse<T> {
   data: T;
   meta?: {
@@ -14,8 +19,14 @@ interface SoundchartsResponse<T> {
       total_pages: number;
     };
   };
+  errors?: Array<{
+    key: string;
+    code: number;
+    message: string;
+  }>;
 }
 
+// Default artist metadata structure
 const defaultMetadata = {
   type: 'artist' as const,
   object: {
@@ -25,12 +36,7 @@ const defaultMetadata = {
     appUrl: '',
     imageUrl: '',
     countryCode: '',
-    genres: [
-      {
-        root: '',
-        sub: [],
-      },
-    ],
+    genres: [{ root: '', sub: [] }],
     biography: '',
     isni: '',
     ipi: '',
@@ -41,6 +47,7 @@ const defaultMetadata = {
   errors: [],
 };
 
+// Default streaming statistics structure
 const defaultStreaming = {
   type: 'streaming' as const,
   object: {
@@ -61,6 +68,7 @@ const defaultStreaming = {
   errors: [],
 };
 
+// Default social media followers structure
 const defaultFollowers = {
   type: 'followers' as const,
   object: {
@@ -73,7 +81,7 @@ const defaultFollowers = {
       facebook: 0,
       twitter: 0,
     },
-    history: [] as { date: string; count: number }[],
+    history: [] as Array<{ date: string; count: number }>,
   },
   errors: [],
 };
@@ -87,14 +95,23 @@ export class SoundchartsAPI {
     this.appId = SOUNDCHARTS_APP_ID;
   }
 
+  /**
+   * Generic fetch method for Soundcharts API
+   * Handles authentication and error responses
+   * @param endpoint - API endpoint path
+   * @param params - Optional query parameters
+   */
   private async fetch<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
     const url = new URL(`${SOUNDCHARTS_BASE_URL}${endpoint}`);
+
+    // Add query parameters if provided
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value);
       });
     }
 
+    // Make API request with required headers
     const response = await fetch(url.toString(), {
       headers: {
         Accept: 'application/json',
@@ -103,6 +120,7 @@ export class SoundchartsAPI {
       },
     });
 
+    // Handle API errors
     if (!response.ok) {
       const errorText = await response.text();
       throw new Error(`Soundcharts API error: ${response.status} - ${errorText}`);
@@ -111,19 +129,45 @@ export class SoundchartsAPI {
     return response.json();
   }
 
+  /**
+   * Get comprehensive artist statistics
+   * Includes metadata, streaming stats, and social media followers
+   * @param artistId - Soundcharts artist UUID
+   */
   async getArtistStats(artistId: string) {
-    const [metadata] = await Promise.all([
-      this.fetch<SoundchartsResponse<ArtistMetadata>>(
-        `/api/v2.9/artist/ca22091a-3c00-11e9-974f-549f35141000`
-      ),
-    ]);
+    try {
+      // Fetch artist metadata
+      const metadata = await this.fetch<SoundchartsResponse<ArtistMetadata>>(
+        `/api/v2.9/artist/${artistId}`
+      );
 
-    return {
-      metadata: { ...defaultMetadata, ...metadata.data },
-      streaming: { ...defaultStreaming },
-      followers: { ...defaultFollowers },
-    };
+      // TODO: Add additional API calls for streaming and followers data
+      // const streaming = await this.fetch(`/api/v2/artist/${artistId}/streaming`);
+      // const followers = await this.fetch(`/api/v2/artist/${artistId}/followers`);
+
+      return {
+        metadata: { ...defaultMetadata, ...metadata.data },
+        streaming: { ...defaultStreaming },
+        followers: { ...defaultFollowers },
+      };
+    } catch (error) {
+      console.error('Error fetching artist stats:', error);
+      // Return default values if API calls fail
+      return {
+        metadata: { ...defaultMetadata },
+        streaming: { ...defaultStreaming },
+        followers: { ...defaultFollowers },
+      };
+    }
   }
+
+  // TODO: Add additional methods for other API endpoints:
+  // - getArtistSongs(artistId: string)
+  // - getArtistAlbums(artistId: string)
+  // - getArtistAudience(artistId: string)
+  // - getArtistPopularity(artistId: string)
+  // - searchArtist(query: string)
 }
 
+// Export singleton instance
 export const soundcharts = new SoundchartsAPI();
