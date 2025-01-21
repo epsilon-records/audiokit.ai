@@ -2,7 +2,7 @@
   import PricingPage from '$lib/components/PricingPage.svelte';
 
   let { data } = $props();
-  let email = $derived(data.email);
+  let email = null;
   let title = $derived(data.title);
   let description = $derived(data.description);
 </script>

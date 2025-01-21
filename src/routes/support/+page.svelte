@@ -4,7 +4,7 @@
   import { siDiscord } from 'simple-icons';
 
   let { data } = $props();
-  let hasActiveSubscription = $derived(data.hasActiveSubscription);
+  let hasActiveSubscription = $derived(data.auth.hasActiveSubscription);
 </script>
 
 <svelte:head>
@@ -113,8 +113,8 @@
 
   <div
     class="absolute inset-0 -z-10 h-full w-full bg-[radial-gradient(#0f131750_1px,transparent_1px)] [background-size:16px_16px]"
-  />
+  ></div>
   <div
     class="absolute inset-0 -z-10 h-full w-full bg-gradient-to-br from-primary/5 via-blue-500/5 to-violet-500/5 opacity-50"
-  />
+  ></div>
 </div>
