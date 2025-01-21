@@ -18,17 +18,8 @@ const config = {
       // Regions configuration
       regions: ['fra1'], // Optional: specify Vercel regions (default: auto-detected)
 
-      // Split configuration
-      split: true, // Optional: enable/disable code splitting (default: true)
-
-      // Output configuration
-      out: 'build', // Optional: output directory (default: 'build')
-
       // Edge middleware configuration
       edgeMiddleware: true, // Optional: enable edge middleware (default: false)
-
-      // Image optimization configuration
-      imageService: true, // Optional: enable Vercel Image Optimization (default: true)
     }),
   },
 };
