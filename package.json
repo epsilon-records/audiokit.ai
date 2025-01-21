@@ -57,6 +57,7 @@
     "@stripe/stripe-js": "^5.5.0",
     "@sveltejs/adapter-auto": "^3.3.1",
     "@sveltejs/adapter-netlify": "^4.4.0",
+    "@sveltejs/adapter-vercel": "^5.5.3",
     "@tanstack/svelte-query": "^5.64.2",
     "@tiptap/core": "^2.11.2",
     "@tiptap/extension-link": "^2.11.2",
