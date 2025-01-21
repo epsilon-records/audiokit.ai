@@ -9,14 +9,6 @@
 
   // Using $derived to maintain reactivity
   let { auth, metadata, streaming, followers } = $derived(data);
-  let user = $derived.by(async () => {
-    const authData = await auth;
-    return await getUser(authData.userId);
-  });
-  let org = $derived.by(async () => {
-    const authData = await auth;
-    return await getOrg(authData.orgId);
-  });
 </script>
 
 <div class="container mx-auto px-4 py-8">

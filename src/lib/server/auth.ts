@@ -88,7 +88,7 @@ async function getOrCreateStripeCustomer(userId: string) {
  * @returns {Auth} Authentication state with userId and orgId
  * @throws {redirect} 307 to /sign-in if authentication guard fails
  */
-function requireUser(locals: App.Locals): Auth {
+function requireAuth(locals: App.Locals): Auth {
   if (!locals.auth?.userId) {
     throw redirect(307, '/sign-in');
   }
@@ -106,7 +106,7 @@ function requireUser(locals: App.Locals): Auth {
  * @throws {Error} Redirects to /sign-in if auth guard fails or /dashboard/create-artist if org guard fails
  */
 async function requireOrg(locals: App.Locals): Promise<Auth> {
-  const auth = requireUser(locals);
+  const auth = requireAuth(locals);
 
   if (!locals.auth?.orgId) {
     throw redirect(307, '/dashboard/create-artist');
@@ -126,7 +126,7 @@ async function requireOrg(locals: App.Locals): Promise<Auth> {
  * @throws {Error} 401 if auth guard fails, 400 if Stripe guard fails
  */
 async function requireCustomer(locals: App.Locals): Promise<Auth> {
-  const auth = requireUser(locals);
+  const auth = requireAuth(locals);
   const email = await getUserEmail(auth.userId);
   const customerId = await getOrCreateStripeCustomer(auth.userId);
 
@@ -153,7 +153,7 @@ async function requireSubscription(locals: App.Locals): Promise<Auth> {
   ).data;
 
   if (!subscription) {
-    throw redirect(307, '/dashboard/billing');
+    throw redirect(307, '/join');
   }
 
   return { ...auth, hasActiveSubscription: true };
@@ -244,4 +244,4 @@ async function getOrg(orgId: string) {
   }
 }
 
-export { requireCustomer, requireSubscription, getUser, getOrg };
+export { requireAuth, requireOrg, requireCustomer, requireSubscription, getUser, getOrg };

@@ -3,7 +3,7 @@ import { db } from '$lib/db';
 import { eq } from 'drizzle-orm';
 import { artists } from '$lib/db/schema';
 import { soundcharts } from '$lib/server/soundcharts';
-import { requireAuth } from '$lib/server/auth';
+import { requireOrg } from '$lib/server/auth';
 
 const defaultMetadata = {
   type: 'artist' as const,
