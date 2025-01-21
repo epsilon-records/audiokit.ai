@@ -13,7 +13,7 @@
     <p class="mt-2 text-lg text-muted-foreground">Manage your artist releases and distribution.</p>
   </div>
 
-  {#if data.releases.length === 0}
+  {#if true}
     <Card>
       <CardHeader class="bg-gradient-to-r from-yellow-50 to-yellow-100 pb-4">
         <CardTitle>🎵 No releases found</CardTitle>
@@ -48,34 +48,5 @@
         </div>
       </CardContent>
     </Card>
-  {:else}
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {#each data.releases as release}
-        <Card class="hover:shadow-md transition-shadow">
-          <div class="aspect-square">
-            <img
-              src={'/default-release.jpg'}
-              alt={release.release_title}
-              class="object-cover w-full h-full rounded-t-lg"
-            />
-          </div>
-          <CardContent class="p-4 space-y-2">
-            <h3 class="font-semibold truncate">{release.release_title}</h3>
-            <p class="text-sm text-muted-foreground">{release.release_date}</p>
-            <div class="flex justify-between items-center mt-4">
-              <Badge variant={release.status === 'published' ? 'success' : 'warning'}>
-                {release.status}
-              </Badge>
-              <button
-                class="btn btn-ghost btn-sm"
-                onclick={() => goto(`/dashboard/releases/${release.id}`)}
-              >
-                Edit
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-      {/each}
-    </div>
   {/if}
 </div>

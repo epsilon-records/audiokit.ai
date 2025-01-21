@@ -5,7 +5,7 @@ import { stripe } from '$lib/server/stripe';
 import { db } from '$lib/db';
 import { eq } from 'drizzle-orm';
 import { artists } from '$lib/db/schema';
-import { soundcharts } from '$lib/services/soundcharts';
+import { soundcharts } from '$lib/server/soundcharts';
 
 const defaultMetadata = {
   type: 'artist' as const,

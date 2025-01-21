@@ -56,5 +56,8 @@
 		"editor.defaultFormatter": "esbenp.prettier-vscode",
 		"editor.formatOnSave": true,
 		"editor.formatOnType": true
-	}
+	},
+	"tailwindCSS.experimental.classRegex": [
+		"class:\\s*?[\"'`]([^\"'`]*).*?,"
+	]
 }

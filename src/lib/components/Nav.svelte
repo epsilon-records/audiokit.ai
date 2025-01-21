@@ -65,7 +65,7 @@
       <!-- Mobile menu button -->
       <div class="lg:hidden">
         {#if !isLoaded}
-          <div class="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div class="h-6 w-6 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
         {:else}
           <button
             bind:this={buttonRef}
@@ -88,16 +88,16 @@
         {#if !isLoaded}
           <!-- Skeleton loader -->
           <li class="pt-1">
-            <div class="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div class="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           </li>
           <li class="pt-1">
-            <div class="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div class="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           </li>
           <li class="pt-1">
-            <div class="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div class="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           </li>
           <li>
-            <div class="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+            <div class="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse"></div>
           </li>
         {:else}
           <SignedIn>
@@ -229,10 +229,10 @@
       >
         {#if !isLoaded}
           <div class="py-2 space-y-1 px-6">
-            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
-            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
-            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2" />
-            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-2"></div>
+            <div class="h-10 bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           </div>
         {:else}
           <div class="py-2 space-y-1">

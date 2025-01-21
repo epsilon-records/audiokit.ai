@@ -84,7 +84,7 @@
               <Button
                 href={tool.href}
                 class="w-full"
-                disabled={tool.comingSoon}
+                data-disabled={tool.comingSoon}
                 variant={tool.comingSoon ? 'outline' : 'default'}
               >
                 <Wand2 class="mr-2 h-4 w-4" />
