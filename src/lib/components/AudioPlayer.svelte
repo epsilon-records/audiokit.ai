@@ -108,43 +108,42 @@
           </span>
 
           <div class="flex-1 relative h-10 flex items-center group cursor-pointer">
-            <div bind:this={waveformRef} class="absolute inset-0" />
+            <div bind:this={waveformRef} class="absolute inset-0"></div>
             <input
               type="range"
               step={1}
-              onchange={handleSliderChange}
               class="opacity-75 group-hover:opacity-100 transition-opacity"
-            ></div>
+            />
           </div>
-
-          <span class="text-xs w-12 text-muted-foreground">
-            {formatTime(duration)}
-          </span>
         </div>
+
+        <span class="text-xs w-12 text-muted-foreground">
+          {formatTime(duration)}
+        </span>
       </div>
+    </div>
 
-      <div class="flex items-center gap-2">
-        <Button variant="ghost" size="icon" class="hover:bg-accent hover:text-accent-foreground">
-          <SkipBack class="h-5 w-5" />
-        </Button>
+    <div class="flex items-center gap-2">
+      <Button variant="ghost" size="icon" class="hover:bg-accent hover:text-accent-foreground">
+        <SkipBack class="h-5 w-5" />
+      </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onclick={togglePlay}
-          class="hover:bg-accent hover:text-accent-foreground"
-        >
-          {#if isPlaying}
-            <PauseIcon class="h-6 w-6" />
-          {:else}
-            <PlayIcon class="h-6 w-6" />
-          {/if}
-        </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        onclick={togglePlay}
+        class="hover:bg-accent hover:text-accent-foreground"
+      >
+        {#if isPlaying}
+          <PauseIcon class="h-6 w-6" />
+        {:else}
+          <PlayIcon class="h-6 w-6" />
+        {/if}
+      </Button>
 
-        <Button variant="ghost" size="icon" class="hover:bg-accent hover:text-accent-foreground">
-          <SkipForward class="h-5 w-5" />
-        </Button>
-      </div>
+      <Button variant="ghost" size="icon" class="hover:bg-accent hover:text-accent-foreground">
+        <SkipForward class="h-5 w-5" />
+      </Button>
     </div>
   </div>
 </div>

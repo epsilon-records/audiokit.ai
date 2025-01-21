@@ -1,10 +1,7 @@
 <script lang="ts">
   import { fly } from 'svelte/transition';
 
-  interface Props {
-    ANIMATION_BASE_DELAY: number;
-  }
-  const { ANIMATION_BASE_DELAY } = $props<Props>();
+  const { ANIMATION_BASE_DELAY } = $props();
 
   let stats = $state({
     artists: '40+',

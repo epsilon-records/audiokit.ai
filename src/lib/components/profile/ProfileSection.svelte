@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Icon, Pencil } from 'svelte-hero-icons';
   import { Field, Control, Label, Description, FieldErrors } from 'formsnap';
   import ImageHandler from '$lib/components/ImageHandler.svelte';
   import { cn } from '$lib/utils';
@@ -91,7 +90,6 @@
               <span
                 class="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white hover:bg-primary/90 transition-colors"
               >
-                <Icon src={Pencil} class="w-4 h-4" />
               </span>
             </div>
             <input

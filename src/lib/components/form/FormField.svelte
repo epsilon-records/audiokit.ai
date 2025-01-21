@@ -48,7 +48,6 @@
     bind:value
     on:blur={validate}
     class="bg-background"
-    class:border-destructive={touched && error}
     aria-invalid={error ? 'true' : undefined}
     {required}
   />
