@@ -9,7 +9,7 @@ import { artists } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 
 export const load = (async ({ locals }) => {
-  requireAuth(locals);
+  const auth = await requireAuth(locals);
 
   // Get artist data using Drizzle
   const artistData = await db
@@ -36,7 +36,7 @@ export const load = (async ({ locals }) => {
 
   const form = await superValidate(artist, zod(artistSchema));
 
-  return { form };
+  return { auth, form };
 }) satisfies PageServerLoad;
 
 export const actions = {

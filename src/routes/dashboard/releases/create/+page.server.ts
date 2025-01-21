@@ -1,15 +1,15 @@
-import { error, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { releaseSchema } from '$lib/schemas/release';
+import { requireAuth } from '$lib/server/auth';
 
 export const load = (async ({ locals }) => {
-  if (!locals.auth?.userId) {
-    throw redirect(307, '/sign-in');
-  } else if (!locals.auth?.orgId) {
-    throw redirect(302, '/dashboard/create');
-  }
+  const auth = await requireAuth(locals);
   const form = await superValidate(zod(releaseSchema));
-  return { form };
+
+  return {
+    auth,
+    form,
+  };
 }) satisfies PageServerLoad;

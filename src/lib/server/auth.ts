@@ -1,8 +1,6 @@
 import { stripe } from './stripe';
 import { redirect, error } from '@sveltejs/kit';
 import { clerkClient } from 'svelte-clerk/server';
-import Stripe from 'stripe';
-import { STRIPE_SECRET_KEY } from '$env/static/private';
 
 /**
  * Common error messages as constants to maintain consistency
@@ -172,4 +170,24 @@ export async function requireSubscription(locals: App.Locals): Promise<Auth> {
   ).data;
 
   return { ...auth, hasActiveSubscription: !!subscription };
+}
+
+export function redirectAuthenticated(
+  locals: App.Locals,
+  redirectCode: number,
+  redirectUrl: string
+) {
+  if (locals.auth?.userId) {
+    throw redirect(redirectCode, redirectUrl);
+  }
+}
+
+export function redirectUnauthenticated(
+  locals: App.Locals,
+  redirectCode: number,
+  redirectUrl: string
+) {
+  if (!locals.auth?.userId) {
+    throw redirect(redirectCode, redirectUrl);
+  }
 }

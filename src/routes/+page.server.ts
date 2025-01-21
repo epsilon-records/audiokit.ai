@@ -1,10 +1,7 @@
-import { redirect } from '@sveltejs/kit';
+import { redirectAuthenticated } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
-  if (locals.auth?.userId) {
-    throw redirect(307, '/dashboard');
-  }
-
+export const load = (async ({ locals }) => {
+  redirectAuthenticated(locals, 307, '/dashboard');
   return {};
-};
+}) satisfies PageServerLoad;

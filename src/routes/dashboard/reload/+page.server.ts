@@ -1,9 +1,7 @@
-import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
+import { redirectUnauthenticated } from '$lib/server/auth';
 
 export const load = (async ({ locals }) => {
-  if (!locals.auth?.userId) {
-    throw redirect(307, '/sign-in');
-  }
+  redirectUnauthenticated(locals, 307, '/sign-in');
   return {};
 }) satisfies PageServerLoad;

@@ -1,11 +1,9 @@
-import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { clerkClient } from 'svelte-clerk/server';
-import { stripe } from '$lib/server/stripe';
 import { db } from '$lib/db';
 import { eq } from 'drizzle-orm';
 import { artists } from '$lib/db/schema';
 import { soundcharts } from '$lib/server/soundcharts';
+import { requireAuth } from '$lib/server/auth';
 
 const defaultMetadata = {
   type: 'artist' as const,
@@ -69,33 +67,8 @@ const defaultFollowers = {
   errors: [],
 };
 
-export const load: PageServerLoad = async ({ locals }) => {
-  if (!locals.auth?.userId) {
-    throw redirect(307, '/sign-in');
-  } else if (!locals.auth.orgId) {
-    throw redirect(307, '/dashboard/create-artist');
-  }
-
-  const user = await clerkClient.users.getUser(locals.auth.userId);
-  const email = user.primaryEmailAddress?.emailAddress;
-
-  if (!email) {
-    throw redirect(307, '/sign-in');
-  }
-
-  const [customer] = (await stripe.customers.list({ email, limit: 1 })).data;
-  let hasActiveSubscription = false;
-
-  if (customer) {
-    const [subscription] = (
-      await stripe.subscriptions.list({
-        customer: customer.id,
-        limit: 1,
-        status: 'active',
-      })
-    ).data;
-    hasActiveSubscription = !!subscription;
-  }
+export const load = (async ({ locals }) => {
+  const auth = requireAuth(locals);
 
   const artistData = await db
     .select()
@@ -103,40 +76,9 @@ export const load: PageServerLoad = async ({ locals }) => {
     .where(eq(artists.orgId, locals.auth.orgId))
     .limit(1);
 
-  const org = await clerkClient.organizations.getOrganization({
-    organizationId: locals.auth.orgId,
-  });
-
-  const baseResponse = {
-    hasActiveSubscription,
-    user: {
-      id: user.id,
-      imageUrl: user.imageUrl,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      username: user.username,
-      email: user.primaryEmailAddress?.emailAddress,
-      phone: user.primaryPhoneNumber?.phoneNumber,
-      legalAcceptedAt: user.legalAcceptedAt,
-      lastSignedInAt: user.lastSignInAt,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    },
-    org: {
-      id: org.id,
-      name: org.name,
-      imageUrl: org.imageUrl,
-      slug: org.slug,
-      membersCount: org.membersCount,
-      maxAllowedMemberships: org.maxAllowedMemberships,
-      createdAt: org.createdAt,
-      updatedAt: org.updatedAt,
-    },
-  };
-
   if (!artistData.length) {
     return {
-      ...baseResponse,
+      auth,
       metadata: defaultMetadata,
       streaming: defaultStreaming,
       followers: defaultFollowers,
@@ -149,7 +91,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 
     if (!spotifyId) {
       return {
-        ...baseResponse,
+        auth,
         metadata: defaultMetadata,
         streaming: defaultStreaming,
         followers: defaultFollowers,
@@ -159,17 +101,17 @@ export const load: PageServerLoad = async ({ locals }) => {
     const { metadata, streaming, followers } = await soundcharts.getArtistStats(spotifyId);
 
     return {
-      ...baseResponse,
+      auth,
       metadata: metadata,
       streaming: streaming,
       followers: followers,
     };
   } catch (err) {
     return {
-      ...baseResponse,
+      auth,
       metadata: defaultMetadata,
       streaming: defaultStreaming,
       followers: defaultFollowers,
     };
   }
-};
+}) satisfies PageServerLoad;

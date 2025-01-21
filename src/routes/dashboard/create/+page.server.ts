@@ -1,6 +1,7 @@
 import { requireAuth } from '$lib/server/auth';
+import type { PageServerLoad } from './$types';
 
-export function load({ locals }) {
-  const { auth } = requireAuth(locals);
+export const load = (async ({ locals }) => {
+  const auth = await requireAuth(locals);
   return { auth };
-}
+}) satisfies PageServerLoad;
