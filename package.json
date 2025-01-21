@@ -61,6 +61,7 @@
     "@tiptap/pm": "^2.11.2",
     "@tiptap/starter-kit": "^2.11.2",
     "@uploadthing/svelte": "^7.1.5",
+    "bits-ui": "^0.22.0",
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.4.7",
     "date-fns": "^4.1.0",
