@@ -4,11 +4,69 @@
   import { AlertCircle } from 'lucide-svelte';
   import { Badge } from '$lib/components/ui/badge';
   import { formatNumber } from '$lib/utils/format';
-  import { getUser, getOrg } from '$lib/server/auth';
-  let { data } = $props();
 
-  // Using $derived to maintain reactivity
-  let { auth, metadata, streaming, followers } = $derived(data);
+  // Define the props interface
+  interface PageData {
+    auth: any;
+    user: {
+      firstName: string;
+      lastName: string;
+      username: string;
+      email: string;
+      phone?: string;
+      lastSignedInAt: string;
+      imageUrl: string;
+    };
+    org: {
+      name: string;
+      membersCount: number;
+      maxAllowedMemberships: number;
+      slug: string;
+      imageUrl: string;
+      updatedAt: string;
+      createdAt: string;
+    };
+    metadata: {
+      object: {
+        genres: Array<{
+          root: string;
+          sub: string[];
+        }>;
+        isni?: string;
+        ipi?: string;
+      };
+    } | null;
+    streaming: {
+      object: {
+        spotify: {
+          popularity: number;
+          monthlyListeners: number;
+          playlists: number;
+        };
+      };
+    } | null;
+    followers: {
+      object: {
+        total: number;
+        platforms: {
+          spotify: number;
+        };
+      };
+      engagement: number;
+      views: number;
+    } | null;
+  }
+
+  // Use $props with the interface
+  let { data } = $props<{ data: PageData }>();
+
+  // Use $derived for reactive values
+  let auth = $derived(data.auth);
+  let user = $derived(data.user);
+  let org = $derived(data.org);
+  let metadata = $derived(data.metadata);
+  let streaming = $derived(data.streaming);
+  let followers = $derived(data.followers);
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -52,12 +110,12 @@
               <div class="flex-1 space-y-4">
                 <div>
                   <p class="text-sm text-muted-foreground">Organization</p>
-                  <p class="text-lg font-semibold">{auth.org.name}</p>
+                  <p class="text-lg font-semibold">{org.name}</p>
                 </div>
                 <div>
                   <p class="text-sm text-muted-foreground">Members</p>
                   <p class="text-base">
-                    {auth.org.membersCount} / {auth.org.maxAllowedMemberships}
+                    {org.membersCount} / {org.maxAllowedMemberships}
                   </p>
                 </div>
                 <div>
@@ -84,7 +142,7 @@
               <CardTitle>🎵 Genres</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
-              {#each metadata.genres as genre}
+              {#each metadata.object.genres as genre}
                 <div class="mb-4">
                   <p class="text-lg font-semibold capitalize">{genre.root}</p>
                   {#if genre.sub.length > 0}
@@ -106,16 +164,16 @@
               <CardTitle>📋 Professional Info</CardTitle>
             </CardHeader>
             <CardContent class="pt-6 space-y-4">
-              {#if metadata.isni}
+              {#if metadata.object.isni}
                 <div>
                   <p class="text-sm text-muted-foreground">ISNI</p>
-                  <p class="text-lg font-mono">{metadata.isni}</p>
+                  <p class="text-lg font-mono">{metadata.object.isni}</p>
                 </div>
               {/if}
-              {#if metadata.ipi}
+              {#if metadata.object.ipi}
                 <div>
                   <p class="text-sm text-muted-foreground">IPI</p>
-                  <p class="text-lg font-mono">{metadata.ipi}</p>
+                  <p class="text-lg font-mono">{metadata.object.ipi}</p>
                 </div>
               {/if}
               <div>
@@ -205,10 +263,10 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(followers.followers)}
+                {formatNumber(followers.object.total)}
               </div>
               <p class="text-xs text-muted-foreground">
-                Platform: {followers.platform}
+                Platform: {followers.object.platforms.spotify}
               </p>
             </CardContent>
           </Card>
@@ -249,7 +307,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(followers.engagement)}
+                {formatNumber(followers.object.total)}
               </div>
               <p class="text-xs text-muted-foreground">Comments, likes & shares</p>
             </CardContent>
@@ -277,11 +335,9 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(streaming.streams)}
+                {formatNumber(streaming.object.spotify.popularity)}
               </div>
-              <p class="text-xs text-muted-foreground">
-                Platform: {streaming.platform}
-              </p>
+              <p class="text-xs text-muted-foreground">Platform: Spotify</p>
             </CardContent>
           </Card>
 
@@ -293,7 +349,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(streaming.listeners)}
+                {formatNumber(streaming.object.spotify.monthlyListeners)}
               </div>
               <p class="text-xs text-muted-foreground">Unique listeners</p>
             </CardContent>
@@ -307,7 +363,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(streaming.playlists)}
+                {formatNumber(streaming.object.spotify.playlists)}
               </div>
               <p class="text-xs text-muted-foreground">Total playlists</p>
             </CardContent>
@@ -321,7 +377,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(streaming.engagement)}
+                {formatNumber(streaming.object.spotify.popularity)}
               </div>
               <p class="text-xs text-muted-foreground">Streams & listeners combined</p>
             </CardContent>

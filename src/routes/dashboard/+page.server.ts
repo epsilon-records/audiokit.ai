@@ -3,7 +3,7 @@ import { db } from '$lib/db';
 import { eq } from 'drizzle-orm';
 import { artists } from '$lib/db/schema';
 import { soundcharts } from '$lib/server/soundcharts';
-import { requireOrg } from '$lib/server/auth';
+import { getUser, getOrg, requireAuth } from '$lib/server/auth';
 
 const defaultMetadata = {
   type: 'artist' as const,
@@ -68,7 +68,9 @@ const defaultFollowers = {
 };
 
 export const load = (async ({ locals }) => {
-  const auth = requireAuth(locals);
+  const auth = await requireAuth(locals);
+  const user = await getUser(auth.userId);
+  const org = await getOrg(auth.orgId);
 
   const artistData = await db
     .select()
@@ -79,6 +81,8 @@ export const load = (async ({ locals }) => {
   if (!artistData.length) {
     return {
       auth,
+      user,
+      org,
       metadata: defaultMetadata,
       streaming: defaultStreaming,
       followers: defaultFollowers,
@@ -92,6 +96,8 @@ export const load = (async ({ locals }) => {
     if (!spotifyId) {
       return {
         auth,
+        user,
+        org,
         metadata: defaultMetadata,
         streaming: defaultStreaming,
         followers: defaultFollowers,
@@ -102,6 +108,8 @@ export const load = (async ({ locals }) => {
 
     return {
       auth,
+      user,
+      org,
       metadata: metadata,
       streaming: streaming,
       followers: followers,
@@ -109,6 +117,8 @@ export const load = (async ({ locals }) => {
   } catch (err) {
     return {
       auth,
+      user,
+      org,
       metadata: defaultMetadata,
       streaming: defaultStreaming,
       followers: defaultFollowers,

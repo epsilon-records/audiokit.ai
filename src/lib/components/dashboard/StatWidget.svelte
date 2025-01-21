@@ -19,9 +19,6 @@
 <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
   <div class="flex items-center justify-between">
     <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium">{title}</h3>
-    {#if icon}
-      <Icon {icon} class="w-6 h-6 text-purple-500" />
-    {/if}
   </div>
   <div class="mt-2">
     <p class="text-3xl font-bold text-gray-900 dark:text-white">
