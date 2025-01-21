@@ -1,4 +1,4 @@
-import adapter from '@sveltejs/adapter-netlify';
+import adapter from '@sveltejs/adapter-vercel';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
 
 /** @type {import('@sveltejs/kit').Config} */
@@ -11,7 +11,25 @@ const config = {
     // adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
     // If your environment is not supported, or you settled on a specific environment, switch out the adapter.
     // See https://svelte.dev/docs/kit/adapters for more information about adapters.
-    adapter: adapter(),
+    adapter: adapter({
+      // Runtime configuration
+      runtime: 'edge', // 'edge' or 'nodejs' (default: 'nodejs')
+
+      // Regions configuration
+      regions: ['fra1'], // Optional: specify Vercel regions (default: auto-detected)
+
+      // Split configuration
+      split: true, // Optional: enable/disable code splitting (default: true)
+
+      // Output configuration
+      out: 'build', // Optional: output directory (default: 'build')
+
+      // Edge middleware configuration
+      edgeMiddleware: true, // Optional: enable edge middleware (default: false)
+
+      // Image optimization configuration
+      imageService: true, // Optional: enable Vercel Image Optimization (default: true)
+    }),
   },
 };
 
