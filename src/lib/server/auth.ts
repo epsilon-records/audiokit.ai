@@ -5,7 +5,7 @@ import { clerkClient } from 'svelte-clerk/server';
 /**
  * Common error messages as constants to maintain consistency
  */
-const AUTH_ERRORS = {
+export const AUTH_ERRORS = {
   NO_EMAIL: 'No email address found',
   INVALID_AUTH: 'Invalid authentication state',
   STRIPE_CUSTOMER_ERROR: 'Unable to create Stripe customer',
