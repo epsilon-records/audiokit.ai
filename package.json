@@ -74,6 +74,7 @@
     "lucide-svelte": "^0.473.0",
     "postgres": "^3.4.5",
     "posthog-js": "^1.207.0",
+    "rollup-plugin-visualizer": "^5.14.0",
     "simple-icons": "^14.3.0",
     "stripe": "^17.5.0",
     "svelte-clerk": "^0.6.0",

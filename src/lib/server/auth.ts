@@ -13,26 +13,28 @@ export const AUTH_ERRORS = {
 } as const;
 
 /**
- * Interface defining authentication state
- * @property userId - Unique identifier for the user from Clerk
- * @property orgId - Optional organization/artist profile identifier
- * @property email - User's primary email address
- * @property customerId - Stripe customer identifier
- * @property hasActiveSubscription - Indicates if user has an active Stripe subscription
+ * Authentication state interface
+ * @interface Auth
+ * @property {string} userId - Clerk user identifier
+ * @property {string} orgId - Organization/artist profile identifier
+ * @property {string} [email] - User's primary email address
+ * @property {string} [customerId] - Stripe customer identifier
+ * @property {boolean} [hasActiveSubscription] - Whether user has active Stripe subscription
  */
 interface Auth {
   userId: string;
   orgId: string;
-  email: string;
-  customerId: string;
-  hasActiveSubscription: boolean;
+  email?: string;
+  customerId?: string;
+  hasActiveSubscription?: boolean;
 }
 
 /**
- * Retrieves the primary email address for a given user
- * @param userId - The Clerk user ID
- * @returns The user's primary email address
- * @throws {error} 400 if no email address is found
+ * Retrieves user's primary email address from Clerk
+ * @async
+ * @param {string} userId - The unique identifier of the Clerk user
+ * @returns {Promise<string>} The user's primary email address
+ * @throws {Error} 400 error if no primary email is associated with the account
  */
 async function getUserEmail(userId: string) {
   const user = await clerkClient.users.getUser(userId);
@@ -46,17 +48,19 @@ async function getUserEmail(userId: string) {
 }
 
 /**
- * Gets or creates a Stripe customer ID for a user
- * @param userId - The Clerk user ID
- * @returns The Stripe customer ID
- * @throws {error} 400 if no email found
- * @throws {error} 400 if unable to create Stripe customer
- * @description
- * First attempts to find an existing Stripe customer by email.
- * If none exists, creates a new customer and links it to the Clerk user ID.
+ * Retrieves an existing Stripe customer or creates a new one for the user
+ * @async
+ * @param {string} userId - The unique identifier of the Clerk user
+ * @returns {Promise<string>} The Stripe customer ID
+ * @throws {Error} 400 error if email not found or Stripe customer creation fails
  */
-async function getStripeCustomerId(userId: string) {
-  const email = await getUserEmail(userId);
+async function getOrCreateStripeCustomer(userId: string) {
+  const user = await clerkClient.users.getUser(userId);
+  const email = user.primaryEmailAddress?.emailAddress;
+
+  if (!email) {
+    throw error(400, AUTH_ERRORS.NO_EMAIL);
+  }
 
   const [existingCustomer] = (await stripe.customers.list({ email, limit: 1 })).data;
 
@@ -79,92 +83,65 @@ async function getStripeCustomerId(userId: string) {
 }
 
 /**
- * Ensures user is authenticated, redirects to sign-in if not
- * @param locals - SvelteKit app locals containing auth state
- * @returns Object containing userId
- * @throws {redirect} 307 to /sign-in if user is not authenticated
- * @description
- * Basic authentication check that ensures a user is logged in.
- * Used as a building block for more comprehensive auth checks.
+ * Basic auth guard requiring user login
+ * @param {App.Locals} locals - SvelteKit app locals
+ * @returns {Auth} Authentication state with userId and orgId
+ * @throws {redirect} 307 to /sign-in if authentication guard fails
  */
 function requireUser(locals: App.Locals): Auth {
   if (!locals.auth?.userId) {
     throw redirect(307, '/sign-in');
   }
+
   return {
     userId: locals.auth.userId,
     orgId: locals.auth.orgId,
-    email: '',
-    customerId: '',
-    hasActiveSubscription: false,
   };
 }
 
 /**
- * Ensures user has selected an organization/artist profile
- * @param locals - SvelteKit app locals containing auth state
- * @returns Object containing userId and orgId
- * @throws {redirect} 307 to /dashboard/create-artist if no org selected
- * @throws {redirect} 307 to /sign-in if user is not authenticated
- * @description
- * Builds on requireUser to ensure the user has also selected an artist profile.
- * Essential for routes that require artist context.
+ * Auth guard ensuring user has selected an organization
+ * @param {App.Locals} locals - SvelteKit application locals containing auth state
+ * @returns {Auth} Authentication state containing userId and orgId
+ * @throws {Error} Redirects to /sign-in if auth guard fails or /dashboard/create-artist if org guard fails
  */
-function requireOrg(locals: App.Locals): Auth {
+async function requireOrg(locals: App.Locals): Promise<Auth> {
   const auth = requireUser(locals);
 
   if (!locals.auth?.orgId) {
     throw redirect(307, '/dashboard/create-artist');
   }
 
+  // Validate org exists
+  await getOrg(locals.auth.orgId);
+
   return { ...auth, orgId: locals.auth.orgId };
 }
 
 /**
- * Main authentication guard that ensures both user and org are valid
- * @param locals - SvelteKit app locals containing auth state
- * @returns Object containing authenticated userId and orgId
- * @throws {error} 401 if authentication state is invalid
+ * Auth guard ensuring user has Stripe customer account
+ * @async
+ * @param {App.Locals} locals - SvelteKit application locals containing auth state
+ * @returns {Promise<Auth>} Authentication state with Stripe customer information
+ * @throws {Error} 401 if auth guard fails, 400 if Stripe guard fails
  */
-export async function requireAuth(locals: App.Locals): Promise<Auth> {
-  const auth = requireOrg(locals);
-  const email = await getUserEmail(auth.userId);
-
-  if (!auth.userId || !auth.orgId || !email) {
-    throw error(401, AUTH_ERRORS.INVALID_AUTH);
-  }
-
-  return { ...auth, email };
-}
-
-/**
- * Ensures user has a valid Stripe customer ID
- * @param locals - SvelteKit app locals containing auth state
- * @returns Stripe customer ID
- * @throws {error} 401 if user is not authenticated
- * @throws {error} 400 if unable to get/create Stripe customer
- */
-export async function requireCustomer(locals: App.Locals): Promise<Auth> {
+async function requireCustomer(locals: App.Locals): Promise<Auth> {
   const auth = requireUser(locals);
   const email = await getUserEmail(auth.userId);
-  const customerId = await getStripeCustomerId(auth.userId);
+  const customerId = await getOrCreateStripeCustomer(auth.userId);
 
   return { ...auth, email, customerId };
 }
 
 /**
- * Ensures user has a valid Stripe subscription
- * @param locals - SvelteKit app locals containing auth state
- * @returns Auth object with subscription status
- * @throws {error} Various errors from requireCustomer
- * @description
- * Comprehensive check that ensures:
- * 1. User is authenticated
- * 2. Has a valid Stripe customer ID
- * 3. Has an active subscription
- * Used to protect premium features and paid content.
+ * Auth guard ensuring user has active subscription
+ * @async
+ * @param {App.Locals} locals - SvelteKit application locals containing auth state
+ * @returns {Promise<Auth>} Authentication state including subscription status
+ * @throws {Error} Various errors from customer verification and subscription guard
+ * @throws {redirect} 307 to billing page if no active subscription
  */
-export async function requireSubscription(locals: App.Locals): Promise<Auth> {
+async function requireSubscription(locals: App.Locals): Promise<Auth> {
   const auth = await requireCustomer(locals);
 
   const [subscription] = (
@@ -175,9 +152,20 @@ export async function requireSubscription(locals: App.Locals): Promise<Auth> {
     })
   ).data;
 
-  return { ...auth, hasActiveSubscription: !!subscription };
+  if (!subscription) {
+    throw redirect(307, '/dashboard/billing');
+  }
+
+  return { ...auth, hasActiveSubscription: true };
 }
 
+/**
+ * Redirects authenticated users
+ * @param {App.Locals} locals - SvelteKit app locals
+ * @param {number} redirectCode - HTTP redirect status code
+ * @param {string} redirectUrl - Destination URL
+ * @throws {redirect} If user is authenticated
+ */
 export function redirectAuthenticated(
   locals: App.Locals,
   redirectCode: number,
@@ -188,6 +176,13 @@ export function redirectAuthenticated(
   }
 }
 
+/**
+ * Redirects unauthenticated users
+ * @param {App.Locals} locals - SvelteKit app locals
+ * @param {number} redirectCode - HTTP redirect status code
+ * @param {string} redirectUrl - Destination URL
+ * @throws {redirect} If user is not authenticated
+ */
 export function redirectUnauthenticated(
   locals: App.Locals,
   redirectCode: number,
@@ -197,3 +192,56 @@ export function redirectUnauthenticated(
     throw redirect(redirectCode, redirectUrl);
   }
 }
+
+/**
+ * Fetches detailed user information from Clerk
+ * @async
+ * @param {string} userId - The unique identifier of the Clerk user
+ * @returns {Promise<Object>} Comprehensive user profile including personal and account details
+ * @throws {Error} 400 error if user data cannot be retrieved
+ */
+async function getUser(userId: string) {
+  try {
+    const user = await clerkClient.users.getUser(userId);
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.primaryEmailAddress?.emailAddress,
+      phone: user.primaryPhoneNumber?.phoneNumber,
+      imageUrl: user.imageUrl,
+      lastSignedInAt: user.lastSignInAt,
+      createdAt: user.createdAt,
+    };
+  } catch (err) {
+    throw error(400, 'Unable to fetch user details');
+  }
+}
+
+/**
+ * Fetches detailed organization information from Clerk
+ * @async
+ * @param {string} orgId - The unique identifier of the Clerk organization
+ * @returns {Promise<Object>} Comprehensive organization profile including membership details
+ * @throws {Error} 400 error if organization data cannot be retrieved
+ */
+async function getOrg(orgId: string) {
+  try {
+    const org = await clerkClient.organizations.getOrganization({ organizationId: orgId });
+    return {
+      id: org.id,
+      name: org.name,
+      slug: org.slug,
+      imageUrl: org.imageUrl,
+      membersCount: org.membersCount,
+      maxAllowedMemberships: org.maxAllowedMemberships,
+      createdAt: org.createdAt,
+      updatedAt: org.updatedAt,
+    };
+  } catch (err) {
+    throw error(400, 'Unable to fetch organization details');
+  }
+}
+
+export { requireCustomer, requireSubscription, getUser, getOrg };

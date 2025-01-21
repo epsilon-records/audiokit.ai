@@ -4,50 +4,19 @@
   import { AlertCircle } from 'lucide-svelte';
   import { Badge } from '$lib/components/ui/badge';
   import { formatNumber } from '$lib/utils/format';
-
-  interface PageData {
-    metadata: {
-      genres: Array<{ root: string; sub: string[] }>;
-      isni?: string;
-      ipi?: string;
-    };
-    streaming?: {
-      streams: number;
-      platform: string;
-      listeners: number;
-      playlists: number;
-      engagement: number;
-    };
-    followers?: {
-      followers: number;
-      platform: string;
-      engagement: number;
-      views: number;
-    };
-    user: {
-      firstName: string;
-      lastName: string;
-      username: string;
-      email: string;
-      phone?: string;
-      lastSignedInAt: string;
-      imageUrl: string;
-    };
-    org: {
-      name: string;
-      membersCount: number;
-      maxAllowedMemberships: number;
-      slug: string;
-      imageUrl: string;
-      updatedAt: string;
-      createdAt: string;
-    };
-  }
-
-  let { data } = $props<{ data: PageData }>();
+  import { getUser, getOrg } from '$lib/server/auth';
+  let { data } = $props();
 
   // Using $derived to maintain reactivity
-  let { metadata, streaming, followers, user, org } = $derived(data);
+  let { auth, metadata, streaming, followers } = $derived(data);
+  let user = $derived.by(async () => {
+    const authData = await auth;
+    return await getUser(authData.userId);
+  });
+  let org = $derived.by(async () => {
+    const authData = await auth;
+    return await getOrg(authData.orgId);
+  });
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -91,11 +60,13 @@
               <div class="flex-1 space-y-4">
                 <div>
                   <p class="text-sm text-muted-foreground">Organization</p>
-                  <p class="text-lg font-semibold">{org.name}</p>
+                  <p class="text-lg font-semibold">{auth.org.name}</p>
                 </div>
                 <div>
                   <p class="text-sm text-muted-foreground">Members</p>
-                  <p class="text-base">{org.membersCount} / {org.maxAllowedMemberships}</p>
+                  <p class="text-base">
+                    {auth.org.membersCount} / {auth.org.maxAllowedMemberships}
+                  </p>
                 </div>
                 <div>
                   <p class="text-sm text-muted-foreground">Slug</p>
