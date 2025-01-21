@@ -77,7 +77,6 @@
     "svelte-motion": "^0.12.2",
     "svelte-sonner": "^0.3.28",
     "sveltekit-superforms": "^2.22.1",
-    "ts-node": "^10.9.2",
     "typewriter-effect": "^2.21.0",
     "uploadthing": "^7.4.4",
     "wavesurfer.js": "^7.8.16",
