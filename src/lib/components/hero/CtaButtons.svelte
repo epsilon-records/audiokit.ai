@@ -2,10 +2,7 @@
   import { fly } from 'svelte/transition';
   import { Button } from '$lib/components/ui/button';
 
-  interface Props {
-    ANIMATION_BASE_DELAY: number;
-  }
-  const { ANIMATION_BASE_DELAY } = $props<Props>();
+  const { ANIMATION_BASE_DELAY } = $props();
 </script>
 
 <div

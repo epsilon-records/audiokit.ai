@@ -7,11 +7,20 @@
   import { format } from 'date-fns';
 
   interface DateRange {
-    start: Date;
-    end: Date;
+    start: Date | undefined;
+    end: Date | undefined;
   }
 
-  let { date, onSelect, className = '' } = $props();
+  let {
+    date,
+    onSelect,
+    className = '',
+  } = $props<{
+    date: DateRange;
+    onSelect: (date: DateRange) => void;
+    className?: string;
+  }>();
+
   let isOpen = $state(false);
 
   function handleSelect(selectedDate: Date | undefined) {
@@ -64,15 +73,7 @@
       </Button>
     </PopoverTrigger>
     <PopoverContent class="w-auto p-0" align="start">
-      <Calendar
-        fromDate={date?.start}
-        toDate={date?.end}
-        onSelect={(range: { from?: Date; to?: Date } | undefined) => {
-          if (!range) return;
-          handleSelect(range.from || range.to);
-        }}
-        numberOfMonths={2}
-      />
+      <Calendar value={date?.start} />
     </PopoverContent>
   </Popover>
 </div>

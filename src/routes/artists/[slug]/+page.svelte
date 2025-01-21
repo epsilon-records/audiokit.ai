@@ -9,7 +9,7 @@
   let { data } = $props<{ data: PageData }>();
 </script>
 
-<PageContainer bgColor="bg-black" textColor="text-[#00ff00]">
+<PageContainer bgColor="bg-black" textColor="text-[#00ff00]" title="Artist">
   <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
     <ArtistImage artist={data.artist} />
     <div class="flex flex-col gap-6">

@@ -4,16 +4,16 @@ import { requireCustomer } from '$lib/server/auth';
 import { PUBLIC_ORIGIN } from '$env/static/public';
 
 export const POST: RequestHandler = async ({ locals }) => {
-  // requireCustomer includes auth check and returns stripe customer ID
-  const customerId = await requireCustomer(locals);
+  const { customerId } = await requireCustomer(locals);
 
   try {
-    // Create the portal session
+    if (!customerId) {
+      throw error(400, 'No customer ID found');
+    }
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
       return_url: `${PUBLIC_ORIGIN}/dashboard`,
     });
-
     return json({ url: session.url });
   } catch (err) {
     throw error(500, 'Could not create portal session');

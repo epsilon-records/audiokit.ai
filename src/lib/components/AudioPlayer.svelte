@@ -109,13 +109,12 @@
 
           <div class="flex-1 relative h-10 flex items-center group cursor-pointer">
             <div bind:this={waveformRef} class="absolute inset-0" />
-            <Slider
-              value={[currentTime]}
-              max={duration || 100}
+            <input
+              type="range"
               step={1}
-              onvaluechange={handleSliderChange}
+              onchange={handleSliderChange}
               class="opacity-75 group-hover:opacity-100 transition-opacity"
-            />
+            ></div>
           </div>
 
           <span class="text-xs w-12 text-muted-foreground">

@@ -6,6 +6,7 @@
   import { OrganizationSwitcher } from 'svelte-clerk';
   import { slide } from 'svelte/transition';
 
+  let { children } = $props();
   let isMenuOpen = $state(false);
 
   async function handleManageSubscription() {
@@ -58,7 +59,7 @@
           afterSelectOrganizationUrl="/dashboard/reload"
           afterLeaveOrganizationUrl="/dashboard/reload"
         />
-        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
+        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
         <a
           href="/dashboard"
           class={cn(
@@ -160,7 +161,7 @@
         </a>
       </div>
       <div class="hidden md:flex items-center gap-3">
-        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700" />
+        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
         <span class="text-sm text-gray-600 dark:text-gray-400">
           Status:
           {#if page.data.hasActiveSubscription}
@@ -342,5 +343,5 @@
 </nav>
 
 <div class="bg-gray-50 dark:bg-gray-900">
-  <slot />
+  {@render children()}
 </div>

@@ -1,7 +1,6 @@
 <script lang="ts">
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { Badge } from '$lib/components/ui/badge';
-  import { goto } from '$app/navigation';
   import { PlusCircle } from 'lucide-svelte';
 
   let { data } = $props();
@@ -26,13 +25,13 @@
           <a
             href="/dashboard/releases/create"
             class="btn btn-primary gap-2"
-            class:btn-disabled={!data.hasActiveSubscription}
+            class:btn-disabled={!data.auth.hasActiveSubscription}
           >
             <PlusCircle class="h-4 w-4" />
             Create Release
           </a>
 
-          {#if !data.hasActiveSubscription}
+          {#if !data.auth.hasActiveSubscription}
             <div class="flex items-center gap-2">
               <Badge variant="destructive">
                 You need an active subscription to create releases.

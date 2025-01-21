@@ -23,9 +23,9 @@ export const AUTH_ERRORS = {
 interface Auth {
   userId: string;
   orgId: string;
-  email?: string;
-  customerId?: string;
-  hasActiveSubscription?: boolean;
+  email: string;
+  customerId: string;
+  hasActiveSubscription: boolean;
 }
 
 /**
@@ -94,6 +94,9 @@ function requireUser(locals: App.Locals): Auth {
   return {
     userId: locals.auth.userId,
     orgId: locals.auth.orgId,
+    email: '',
+    customerId: '',
+    hasActiveSubscription: false,
   };
 }
 

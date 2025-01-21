@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { Icon } from 'svelte-hero-icons';
-  import type { WidgetProps } from '$lib/types/dashboard';
   import { cn } from '$lib/utils';
+  import { Icon } from 'svelte-heros-v2';
 
-  let { title, value, change, icon } = $props<WidgetProps>();
+  let { title, value, change, icon } = $props();
 
   const formattedValue = $derived(
     new Intl.NumberFormat('en-US', { notation: 'compact' }).format(value)
@@ -21,7 +20,7 @@
   <div class="flex items-center justify-between">
     <h3 class="text-gray-500 dark:text-gray-400 text-sm font-medium">{title}</h3>
     {#if icon}
-      <Icon src={icon} class="w-6 h-6 text-purple-500" />
+      <Icon {icon} class="w-6 h-6 text-purple-500" />
     {/if}
   </div>
   <div class="mt-2">

@@ -2,7 +2,11 @@
   import type { FieldValidation } from '$lib/utils/validation';
   import { validateForm } from '$lib/utils/validation';
 
-  let { validation = {}, class: className = '' } = $props<{
+  let {
+    children,
+    validation = {},
+    class: className = '',
+  } = $props<{
     validation?: FieldValidation;
     class?: string;
   }>();
@@ -24,10 +28,6 @@
   }
 </script>
 
-<form 
-  bind:this={formElement} 
-  onsubmit={handleSubmit} 
-  class="space-y-6 {className}"
->
+<form bind:this={formElement} onsubmit={handleSubmit} class="space-y-6 {className}">
   {@render children({ formData, errors })}
 </form>
