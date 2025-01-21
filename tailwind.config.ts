@@ -1,6 +1,5 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
 import type { Config } from 'tailwindcss';
-import typography from '@tailwindcss/typography';
 import { withUt } from 'uploadthing/tw';
 
 const config: Config = {
