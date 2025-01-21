@@ -1,5 +1,6 @@
 <script lang="ts">
   import { Chart, type ChartConfiguration } from 'chart.js/auto';
+  import { fade } from 'svelte/transition';
 
   // Define the type for data points
   interface DataPoint {
@@ -8,14 +9,17 @@
   }
 
   // Use runes for props
-  let data = $state<DataPoint[]>([
-    { x: 'Jan', y: 10 },
-    { x: 'Feb', y: 20 },
-    { x: 'Mar', y: 30 },
-  ]);
+  let data = $state<DataPoint[]>([]);
   let xAxis = $state<'x' | 'y'>('x');
   let yAxis = $state<'x' | 'y'>('y');
   let className = $state('');
+  let title = $state('');
+  let color = $state('#4F46E5');
+  let showGrid = $state(true);
+  let showLegend = $state(true);
+  let animate = $state(true);
+  let tension = $state(0.4);
+  let fill = $state(true);
 
   // State management
   let canvas = $state<HTMLCanvasElement | null>(null);
@@ -33,25 +37,62 @@
         labels: data.map((d) => d[xAxis]),
         datasets: [
           {
-            label: yAxis.charAt(0).toUpperCase() + yAxis.slice(1),
+            label: title || yAxis.charAt(0).toUpperCase() + yAxis.slice(1),
             data: data.map((d) => d[yAxis] as number),
-            borderColor: 'rgb(75, 192, 192)',
-            tension: 0.1,
+            borderColor: color,
+            backgroundColor: fill ? `${color}20` : undefined,
+            fill,
+            tension,
+            borderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            pointBackgroundColor: 'white',
+            pointBorderColor: color,
+            pointHoverBackgroundColor: color,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        animation: {
+          duration: animate ? 1000 : 0,
+          easing: 'easeInOutQuart',
+        },
         plugins: {
           legend: {
+            display: showLegend,
             position: 'top',
           },
         },
         scales: {
+          x: {
+            grid: {
+              display: showGrid,
+              color: '#e2e8f0',
+            },
+            ticks: {
+              font: {
+                family: 'Inter',
+              },
+            },
+          },
           y: {
             beginAtZero: true,
+            grid: {
+              display: showGrid,
+              color: '#e2e8f0',
+            },
+            ticks: {
+              font: {
+                family: 'Inter',
+              },
+            },
           },
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index',
         },
       },
     };
@@ -68,4 +109,4 @@
   });
 </script>
 
-<canvas bind:this={canvas} class={className}></canvas>
+<canvas bind:this={canvas} class={className} in:fade={{ duration: 500 }}></canvas>

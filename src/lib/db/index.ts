@@ -1,7 +1,7 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
-import { DATABASE_URL } from '$env/static/private';
+import { PUBLIC_SUPABASE_URL } from '$env/static/public';
 
 // Disable prefetch as it is not supported for "Transaction" pool mode
-const client = postgres(DATABASE_URL, { prepare: false });
+const client = postgres(PUBLIC_SUPABASE_URL, { prepare: false, ssl: 'require' });
 export const db = drizzle({ client });
