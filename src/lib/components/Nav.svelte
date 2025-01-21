@@ -14,13 +14,12 @@
   // Close menu when clicking outside
   function handleClickOutside(event: MouseEvent) {
     const target = event.target as HTMLElement;
-    if (
-      isOpen &&
-      menuRef &&
-      buttonRef &&
-      !menuRef.contains(target) &&
-      !buttonRef.contains(target)
-    ) {
+    // Check if the click is on the menu button itself
+    if (buttonRef?.contains(target)) {
+      return;
+    }
+
+    if (isOpen && menuRef && !menuRef.contains(target)) {
       isOpen = false;
     }
   }
@@ -28,7 +27,10 @@
   // Add click outside listener
   $effect(() => {
     if (isOpen) {
-      document.addEventListener('click', handleClickOutside);
+      // Use setTimeout to add the listener on the next tick
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside);
+      }, 0);
       return () => document.removeEventListener('click', handleClickOutside);
     }
   });
