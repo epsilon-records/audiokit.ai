@@ -22,7 +22,7 @@ const AUTH_ERRORS = {
  */
 interface Auth {
   userId: string;
-  orgId?: string;
+  orgId: string;
   email?: string;
   customerId?: string;
   hasActiveSubscription?: boolean;
@@ -91,7 +91,10 @@ function requireUser(locals: App.Locals): Auth {
   if (!locals.auth?.userId) {
     throw redirect(307, '/sign-in');
   }
-  return { userId: locals.auth.userId };
+  return {
+    userId: locals.auth.userId,
+    orgId: locals.auth.orgId,
+  };
 }
 
 /**

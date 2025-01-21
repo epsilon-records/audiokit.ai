@@ -1,10 +1,9 @@
 import { fontFamily } from 'tailwindcss/defaultTheme';
-import type { Config } from 'tailwindcss';
 import { withUt } from 'uploadthing/tw';
 
-const config: Config = {
+export default withUt({
   darkMode: ['class'],
-  content: ['./src/**/*.{html,js,svelte,ts}', './node_modules/uploadthing/themes/**/*.{js,ts}'],
+  content: ['./src/**/*.{html,js,svelte,ts}'],
   daisyui: {
     themes: ['light'],
   },
@@ -63,6 +62,4 @@ const config: Config = {
     },
   },
   plugins: [require('@tailwindcss/typography'), require('daisyui')],
-};
-
-export default withUt(config);
+});
