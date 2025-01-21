@@ -1,12 +1,9 @@
 import { redirect } from '@sveltejs/kit';
+import { requireAuth } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
-  if (!locals.auth?.userId) {
-    throw redirect(307, '/sign-in');
-  } else if (!locals.auth.orgId) {
-    throw redirect(307, '/dashboard/create-artist');
-  }
+  requireAuth(locals);
 
   try {
     return {

@@ -1,20 +1,17 @@
 import { error, json, type RequestHandler } from '@sveltejs/kit';
 import { stripe } from '$lib/server/stripe';
-import { getStripeCustomerId } from '$lib/server/auth';
+import { requireCustomer } from '$lib/server/auth';
+import { PUBLIC_ORIGIN } from '$env/static/public';
 
 export const POST: RequestHandler = async ({ locals }) => {
+  // requireCustomer includes auth check and returns stripe customer ID
+  const customerId = await requireCustomer(locals);
+
   try {
-    // Get the current user's Stripe customer ID
-    const customerId = await getStripeCustomerId(locals.user);
-
-    if (!customerId) {
-      throw error(400, 'No Stripe customer ID found');
-    }
-
     // Create the portal session
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,
-      return_url: `${locals.origin}/dashboard`,
+      return_url: `${PUBLIC_ORIGIN}/dashboard`,
     });
 
     return json({ url: session.url });
