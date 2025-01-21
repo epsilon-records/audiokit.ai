@@ -63,7 +63,6 @@
     "@uploadthing/svelte": "^7.1.5",
     "canvas-confetti": "^1.9.3",
     "chart.js": "^4.4.7",
-    "clerk": "^0.8.3",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.4",
@@ -81,8 +80,5 @@
     "uploadthing": "^7.4.4",
     "wavesurfer.js": "^7.8.16",
     "zod": "^3.24.1"
-  },
-  "resolutions": {
-    "follow": "latest"
   }
 }
