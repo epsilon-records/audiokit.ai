@@ -1,6 +1,6 @@
 // import * as Sentry from '@sentry/sveltekit';
 import { withClerkHandler } from 'svelte-clerk/server';
-import { sequence } from '@sveltejs/kit/hooks';
+// import { sequence } from '@sveltejs/kit/hooks';
 import '@stripe/stripe-js';
 
 // Sentry.init({
