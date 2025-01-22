@@ -14,6 +14,7 @@ const config = {
     adapter: adapter({
       runtime: 'edge',
       regions: ['fra1'], // Optional: specify deployment regions
+      external: ['$app/stores'], // Add external modules for Edge runtime
     }),
   },
 };
