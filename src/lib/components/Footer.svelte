@@ -52,7 +52,7 @@
         <h3 class="font-bold mb-4">Connect</h3>
         <ul class="space-y-2 text-sm">
           <li><a href="/contact" class="hover:underline">Contact</a></li>
-          <li><a href="https://newsletter.audiokit.ai/" class="hover:underline">Newsletter</a></li>
+          <li><a href="/newsletter" class="hover:underline">Newsletter</a></li>
           <li>
             <a
               href="/demos"
