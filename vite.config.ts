@@ -1,4 +1,4 @@
-import { sentrySvelteKit } from '@sentry/sveltekit';
+// import { sentrySvelteKit } from '@sentry/sveltekit';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
 import { visualizer } from 'rollup-plugin-visualizer';
@@ -10,12 +10,12 @@ export default defineConfig({
       }
     : undefined,
   plugins: [
-    sentrySvelteKit({
-      sourceMapsUploadOptions: {
-        org: 'epsilon-records',
-        project: 'audiokit',
-      },
-    }),
+    // sentrySvelteKit({
+    //   sourceMapsUploadOptions: {
+    //     org: 'epsilon-records',
+    //     project: 'audiokit',
+    //   },
+    // }),
     sveltekit(),
     visualizer({
       emitFile: true,
