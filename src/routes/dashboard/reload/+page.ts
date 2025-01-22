@@ -4,8 +4,8 @@ import { browser } from '$app/environment';
 
 export const load = async () => {
   if (browser) {
-    invalidateAll();
+    await invalidateAll();
     throw redirect(307, '/dashboard');
   }
-  throw redirect(307, '/sign-in');
+  throw redirect(307, '/dashboard');
 };
