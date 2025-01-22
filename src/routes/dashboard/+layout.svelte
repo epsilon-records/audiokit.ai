@@ -3,11 +3,12 @@
   import { error } from '@sveltejs/kit';
   import { cn } from '$lib/utils';
   import { toast } from 'svelte-sonner';
-  import { OrganizationSwitcher } from 'svelte-clerk';
+  import { OrganizationSwitcher, useClerkContext } from 'svelte-clerk';
   import { slide } from 'svelte/transition';
 
   let { children } = $props();
   let isMenuOpen = $state(false);
+  const { isLoaded } = $derived(useClerkContext());
 
   async function handleManageSubscription() {
     try {
@@ -53,14 +54,18 @@
     <div class="flex h-8 items-center justify-between">
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-3">
-        <OrganizationSwitcher
-          hidePersonal={true}
-          createOrganizationUrl="/dashboard/create-artist"
-          organizationProfileUrl="/dashboard/team"
-          afterCreateOrganizationUrl="/dashboard/reload"
-          afterSelectOrganizationUrl="/dashboard/reload"
-          afterLeaveOrganizationUrl="/dashboard/reload"
-        />
+        {#if !isLoaded}
+          <div class="h-7 w-[180px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        {:else}
+          <OrganizationSwitcher
+            hidePersonal={true}
+            createOrganizationUrl="/dashboard/create-artist"
+            organizationProfileUrl="/dashboard/team"
+            afterCreateOrganizationUrl="/dashboard/reload"
+            afterSelectOrganizationUrl="/dashboard/reload"
+            afterLeaveOrganizationUrl="/dashboard/reload"
+          />
+        {/if}
         <div class="h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
         <a
           href="/dashboard"
@@ -209,14 +214,18 @@
               {/if}
             </svg>
           </button>
-          <OrganizationSwitcher
-            hidePersonal={true}
-            createOrganizationUrl="/dashboard/create-artist"
-            organizationProfileUrl="/dashboard/team"
-            afterCreateOrganizationUrl="/dashboard/reload"
-            afterSelectOrganizationUrl="/dashboard/reload"
-            afterLeaveOrganizationUrl="/dashboard/reload"
-          />
+          {#if !isLoaded}
+            <div class="h-7 w-[180px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          {:else}
+            <OrganizationSwitcher
+              hidePersonal={true}
+              createOrganizationUrl="/dashboard/create-artist"
+              organizationProfileUrl="/dashboard/team"
+              afterCreateOrganizationUrl="/dashboard/reload"
+              afterSelectOrganizationUrl="/dashboard/reload"
+              afterLeaveOrganizationUrl="/dashboard/reload"
+            />
+          {/if}
         </div>
 
         <!-- Status Indicator (visible on all screens) -->
