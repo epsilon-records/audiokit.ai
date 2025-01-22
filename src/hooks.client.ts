@@ -24,5 +24,5 @@ posthog.init('phc_j5S8Foca22TArMjuKIWR0DhyRt821XV9IqUY1mrOkQJ', {
   person_profiles: 'always',
 });
 
-// If you have a custom error handler, pass it to `handleErrorWithSentry`
-export const handleError = handleErrorWithSentry();
+// // If you have a custom error handler, pass it to `handleErrorWithSentry`
+// export const handleError = handleErrorWithSentry();
