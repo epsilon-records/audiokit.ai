@@ -55,6 +55,8 @@
       <div class="hidden md:flex items-center gap-3">
         <OrganizationSwitcher
           hidePersonal={true}
+          createOrganizationUrl="/dashboard/create-artist"
+          organizationProfileUrl="/dashboard/team"
           afterCreateOrganizationUrl="/dashboard/reload"
           afterSelectOrganizationUrl="/dashboard/reload"
           afterLeaveOrganizationUrl="/dashboard/reload"
@@ -209,6 +211,8 @@
           </button>
           <OrganizationSwitcher
             hidePersonal={true}
+            createOrganizationUrl="/dashboard/create-artist"
+            organizationProfileUrl="/dashboard/team"
             afterCreateOrganizationUrl="/dashboard/reload"
             afterSelectOrganizationUrl="/dashboard/reload"
             afterLeaveOrganizationUrl="/dashboard/reload"
