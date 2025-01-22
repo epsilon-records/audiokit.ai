@@ -66,6 +66,7 @@
     "@tiptap/starter-kit": "^2.11.2",
     "@uploadthing/svelte": "^7.1.5",
     "@vercel/analytics": "^1.4.1",
+    "@vercel/og": "^0.6.4",
     "@vercel/speed-insights": "^1.1.0",
     "bits-ui": "^0.22.0",
     "canvas-confetti": "^1.9.3",
