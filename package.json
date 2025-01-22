@@ -54,6 +54,7 @@
   "dependencies": {
     "@clerk/themes": "^2.2.9",
     "@sentry/sveltekit": "^8.50.0",
+    "@sentry/vercel-edge": "^8.50.0",
     "@stripe/stripe-js": "^5.5.0",
     "@sveltejs/adapter-auto": "^3.3.1",
     "@sveltejs/adapter-netlify": "^4.4.0",
