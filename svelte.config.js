@@ -12,9 +12,8 @@ const config = {
     // If your environment is not supported, or you settled on a specific environment, switch out the adapter.
     // See https://svelte.dev/docs/kit/adapters for more information about adapters.
     adapter: adapter({
-      runtime: 'edge',
+      runtime: 'nodejs20.x',
       regions: ['fra1'], // Optional: specify deployment regions
-      external: ['$app/stores', 'os', 'fs', 'stream', 'perf_hooks', 'crypto', 'tls', 'net'],
     }),
   },
 };
