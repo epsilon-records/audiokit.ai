@@ -5,8 +5,8 @@ import type { Config } from 'tailwindcss';
 const config: Config = {
   darkMode: ['class'],
   content: [
-    './src/**/*.{html,js,svelte,ts}',
-    './node_modules/@uploadthing/svelte/dist/**/*.{svelte,js}',
+    './src/**/*.{html,svelte,ts,js}',
+    './node_modules/@uploadthing/svelte/dist/**/*.{svelte,ts,js}',
   ],
   daisyui: {
     themes: ['light'],
