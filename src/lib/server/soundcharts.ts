@@ -1,5 +1,7 @@
 import { SOUNDCHARTS_API_BASE, SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
-import { debug, info, warn } from '$lib/utils/logger';
+import { debug, warn } from '$lib/utils/logger';
+import type { Track, TrackCollectionResponse } from '$lib/types/track';
+import { error } from '@sveltejs/kit';
 
 /**
  * Get Soundcharts artist ID from Spotify ID
@@ -281,11 +283,94 @@ export async function getArtistStats(uuid: string): Promise<{
   }
 }
 
-export async function getArtistAlbums(uuid: string): Promise<any | null> {
-  const url = `${SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/albums`;
+interface GetArtistTracksOptions {
+  offset?: number;
+  limit?: number;
+  sortBy?:
+    | 'name'
+    | 'releaseDate'
+    | 'spotifyStream'
+    | 'shazamCount'
+    | 'youtubeViews'
+    | 'spotifyPopularity';
+  sortOrder?: 'asc' | 'desc';
+}
+
+export async function getArtistTracks(
+  uuid: string,
+  options: GetArtistTracksOptions = {}
+): Promise<TrackCollectionResponse | null> {
+  const { offset, limit, sortBy, sortOrder } = options;
+
+  const url = `${SOUNDCHARTS_API_BASE}/api/v2.21/artist/${uuid}/songs`;
+
+  const params = new URLSearchParams();
+
+  if (offset !== undefined) params.set('offset', String(offset));
+  if (limit !== undefined) params.set('limit', String(limit));
+  if (sortBy !== undefined) params.set('sortBy', sortBy);
+  if (sortOrder !== undefined) params.set('sortOrder', sortOrder);
+
   try {
     debug({
-      msg: 'Fetching artist albums',
+      msg: 'Fetching artist tracks',
+      url,
+      uuid,
+      params: params.toString(),
+    });
+
+    const response = await fetch(`${url}?${params}`, {
+      headers: {
+        'x-app-id': SOUNDCHARTS_APP_ID,
+        'x-api-key': SOUNDCHARTS_API_KEY,
+        Accept: 'application/json',
+      },
+    });
+
+    if (response.status === 401) {
+      throw error(401, 'Unauthorized: You are not logged in');
+    }
+
+    if (response.status === 403) {
+      throw error(403, 'Forbidden: You are not authorized to perform this operation');
+    }
+
+    if (response.status === 404) {
+      debug({
+        msg: 'Artist not found',
+        uuid,
+      });
+      return null;
+    }
+
+    if (!response.ok) {
+      throw error(response.status, 'Failed to fetch artist tracks');
+    }
+
+    const data = await response.json();
+
+    debug({
+      msg: 'Soundcharts artist tracks response',
+      data,
+    });
+
+    return data as TrackCollectionResponse;
+  } catch (err) {
+    debug({
+      msg: 'Error fetching artist tracks',
+      uuid,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+    return null;
+  }
+}
+
+export async function getTrackMetadata(uuid: string): Promise<Track | null> {
+  const url = `${SOUNDCHARTS_API_BASE}/api/v2.25/song/${uuid}`;
+
+  try {
+    debug({
+      msg: 'Fetching track metadata',
       url,
       uuid,
     });
@@ -298,27 +383,42 @@ export async function getArtistAlbums(uuid: string): Promise<any | null> {
       },
     });
 
-    if (!response.ok) {
-      warn({
-        msg: 'Failed to fetch artist albums',
+    if (response.status === 401) {
+      throw error(401, 'Unauthorized: You are not logged in');
+    }
+
+    if (response.status === 403) {
+      throw error(403, 'Forbidden: This endpoint is not included in your current plan');
+    }
+
+    if (response.status === 404) {
+      debug({
+        msg: 'Track not found',
         uuid,
-        status: response.status,
       });
       return null;
     }
 
+    if (!response.ok) {
+      throw error(response.status, 'Failed to fetch track metadata');
+    }
+
     const data = await response.json();
-    info({
-      msg: 'Soundcharts artist albums response',
-      data,
-    });
-    return data;
-  } catch (error) {
+
+    const track = data.object as Track;
+
     debug({
-      msg: 'Error fetching artist albums',
-      uuid,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      msg: 'Track metadata response',
+      data: track,
     });
-    return null;
+
+    return track;
+  } catch (err) {
+    debug({
+      msg: 'Error fetching track metadata',
+      uuid,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+    throw err;
   }
 }

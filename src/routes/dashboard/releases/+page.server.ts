@@ -4,7 +4,7 @@ import { db } from '$lib/db';
 import { releases, artists } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
-import { getArtistReleases } from '$lib/server/soundcharts';
+// import { getArtistReleases } from '$lib/server/soundcharts';
 
 export const load: PageServerLoad = async ({ locals }) => {
   const auth = await requireAuth(locals);
@@ -15,13 +15,9 @@ export const load: PageServerLoad = async ({ locals }) => {
   const [artist] = await db.select().from(artists).where(eq(artists.orgId, auth.orgId));
 
   let releases = [];
-  if (artist?.soundchartsId) {
-    const releasesData = await getArtistReleases(artist.soundchartsId);
-    releases = releasesData?.releases || [];
-  }
 
   return {
     auth,
-    release,
+    releases,
   };
 };

@@ -260,7 +260,7 @@ function buildUpdateFields(
   });
 
   const { firstname, lastname } = properties;
-  info({
+  debug({
     artistId: artist.id,
     artistLegalName: artist.legalName,
     firstname,
@@ -279,7 +279,7 @@ async function applyUpdates(
   updates: HubspotUpdateFields,
   requestId: string
 ) {
-  info({
+  debug({
     requestId,
     email: artist.email,
     artistId: artist.id,
@@ -289,7 +289,7 @@ async function applyUpdates(
 
   await db.update(artists).set(updates).where(eq(artists.id, artist.id));
 
-  info({
+  debug({
     requestId,
     email: artist.email,
     artistId: artist.id,
