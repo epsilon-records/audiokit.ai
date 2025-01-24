@@ -424,6 +424,19 @@ export class SoundchartsAPI {
       return [];
     }
   }
+
+  async getArtistIdFromSpotify(spotifyId: string): Promise<string | null> {
+    try {
+      const response = await this.fetch<SoundchartsResponse<{ id: string }>>(
+        '/api/v2/artist/spotify',
+        { id: spotifyId }
+      );
+      return response.data.id;
+    } catch (err) {
+      console.error('Failed to fetch artist ID from Spotify:', err);
+      return null;
+    }
+  }
 }
 
 // Export singleton instance

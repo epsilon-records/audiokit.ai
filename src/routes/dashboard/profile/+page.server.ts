@@ -49,7 +49,7 @@ export const load = (async ({ locals }) => {
     throw error(500, 'Failed to create or retrieve artist record');
   }
 
-  // Fetch Soundcharts data if we have an ID
+  // Fetch Soundcharts data, first getting ID from Spotify if needed
   let soundchartsData = null;
   if (artist.soundchartsId) {
     try {
@@ -59,6 +59,37 @@ export const load = (async ({ locals }) => {
         error: err,
         artistId: artist.id,
         soundchartsId: artist.soundchartsId,
+      });
+    }
+  } else if (artist.spotify) {
+    try {
+      // Extract Spotify ID from URL
+      const spotifyUrl = new URL(artist.spotify);
+      const spotifyId = spotifyUrl.pathname.split('/').pop();
+
+      if (spotifyId) {
+        // Get Soundcharts ID using Spotify ID
+        const soundchartsId = await soundcharts.getArtistIdFromSpotify(spotifyId);
+
+        if (soundchartsId) {
+          // Update artist record with new Soundcharts ID
+          await db
+            .update(artists)
+            .set({
+              soundchartsId,
+              updated: new Date(),
+            })
+            .where(sql`${artists.orgId} = ${auth.orgId}`);
+
+          // Fetch the stats with the new ID
+          soundchartsData = await soundcharts.getArtistStats(soundchartsId);
+        }
+      }
+    } catch (err) {
+      logger.error('Failed to fetch/update Soundcharts data from Spotify ID', {
+        error: err,
+        artistId: artist.id,
+        spotifyUrl: artist.spotify,
       });
     }
   }
@@ -100,31 +131,11 @@ export const actions = {
       tiktok: sanitizeUrl(form.data.tiktok),
     };
 
-    // Try to get Soundcharts ID if spotify URL is provided and soundchartsId is empty
-    let soundchartsId = form.data.soundchartsId;
-    if (!soundchartsId && sanitizedData.spotify) {
-      try {
-        const spotifyId = sanitizedData.spotify.split('/').pop();
-        if (spotifyId) {
-          const artistData = await soundcharts.getArtistStats(spotifyId);
-          if (artistData?.metadata?.object?.uuid) {
-            soundchartsId = artistData.metadata.object.uuid;
-          }
-        }
-      } catch (err) {
-        logger.error('Failed to fetch Soundcharts ID', {
-          error: err,
-          orgId: auth.orgId,
-          spotifyUrl: sanitizedData.spotify,
-        });
-      }
-    }
-
     const [updatedArtist] = await db
       .insert(artists)
       .values({
         ...sanitizedData,
-        soundchartsId,
+        soundchartsId: form.data.soundchartsId,
         orgId: locals.auth.orgId,
         created: new Date(),
         updated: new Date(),
@@ -133,7 +144,7 @@ export const actions = {
         target: artists.orgId,
         set: {
           ...sanitizedData,
-          soundchartsId,
+          soundchartsId: form.data.soundchartsId,
           updated: new Date(),
         },
       })
