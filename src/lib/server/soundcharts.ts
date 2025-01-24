@@ -33,7 +33,7 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
       data,
     });
 
-    if (!data.data.object.uuid) {
+    if (!data.object?.uuid) {
       logger.warn({
         msg: 'No Soundcharts ID found for Spotify',
         spotifyId,
@@ -41,7 +41,7 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
       return null;
     }
 
-    return data.id;
+    return data.object.uuid;
   } catch (error) {
     logger.error({
       msg: 'Error fetching Soundcharts ID from Spotify',
