@@ -7,7 +7,7 @@ import { artistSchema } from '$lib/schemas/artist';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { sql } from 'drizzle-orm';
-import { soundcharts } from '$lib/server/soundcharts';
+import { getArtistIdFromSpotify, getArtistStats } from '$lib/server/soundcharts';
 import logger from '$lib/utils/logger';
 
 // Add this helper function at the top of the file
@@ -49,11 +49,11 @@ export const load = (async ({ locals }) => {
     throw error(500, 'Failed to create or retrieve artist record');
   }
 
-  // Fetch Soundcharts data, first getting ID from Spotify if needed
+  // Fetch Soundcharts data
   let soundchartsData = null;
   if (artist.soundchartsId) {
     try {
-      soundchartsData = await soundcharts.getArtistStats(artist.soundchartsId);
+      soundchartsData = await getArtistStats(artist.soundchartsId);
     } catch (err) {
       logger.error('Failed to fetch Soundcharts data', {
         error: err,
@@ -69,7 +69,7 @@ export const load = (async ({ locals }) => {
 
       if (spotifyId) {
         // Get Soundcharts ID using Spotify ID
-        const soundchartsId = await soundcharts.getArtistIdFromSpotify(spotifyId);
+        const soundchartsId = await getArtistIdFromSpotify(spotifyId);
 
         if (soundchartsId) {
           // Update artist record with new Soundcharts ID
@@ -82,7 +82,7 @@ export const load = (async ({ locals }) => {
             .where(sql`${artists.orgId} = ${auth.orgId}`);
 
           // Fetch the stats with the new ID
-          soundchartsData = await soundcharts.getArtistStats(soundchartsId);
+          soundchartsData = await getArtistStats(soundchartsId);
         }
       }
     } catch (err) {
