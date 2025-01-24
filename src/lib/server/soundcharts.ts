@@ -255,7 +255,7 @@ export async function getArtistStats(artistId: string) {
 export async function getArtistIdFromSpotify(spotifyId: string): Promise<string | null> {
   try {
     const response = await fetchFromSoundcharts<SoundchartsResponse<{ id: string }>>(
-      `/api/v2.9/artist/by-platform/spotify/${spotifyId}`
+      `/api/v2.9/artist/spotify/${spotifyId}`
     );
     return response?.data?.id || null;
   } catch (err) {
