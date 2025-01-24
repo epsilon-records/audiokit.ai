@@ -6,6 +6,7 @@ export const artistSchema = z
     orgId: z.string().optional(),
     stageName: z.string().min(1, 'Stage name is required'),
     legalName: z.string().optional(),
+    address: z.string().optional(),
     isSigned: z.boolean().optional(),
     email: z.string().email(),
     phone: z.string().optional(),

@@ -2,9 +2,10 @@ import { HUBSPOT_API_KEY } from '$env/static/private';
 import type { artistSchema } from '$lib/schemas/artist';
 import type { z } from 'zod';
 import { info } from '$lib/utils/logger';
-import { HUBSPOT_API_BASE } from '$env/static/private';
+import { HUBSPOT_API_BASE, HUBSPOT_LIFECYCLE_STAGE_ARTIST } from '$env/static/private';
 
 interface HubspotContact {
+  id: string;
   properties: {
     email: string;
     phone?: string;
@@ -14,10 +15,11 @@ interface HubspotContact {
     spotify?: string;
     instagram?: string;
     facebook?: string;
-    twitter?: string;
+    x?: string;
     tiktok?: string;
     soundcloud?: string;
     youtube?: string;
+    lifecyclestage?: string;
   };
 }
 
@@ -74,7 +76,7 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
 
     // Make a second request to get all properties
     const detailResponse = await fetch(
-      `${HUBSPOT_API_BASE}/crm/v3/objects/contacts/${contactId}?properties=email,phone,city,country,website,spotify,instagram,facebook,twitter,tiktok,soundcloud,youtube`,
+      `${HUBSPOT_API_BASE}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone,city,country,website,spotify,instagram,facebook,x,tiktok,soundcloud,youtube`,
       {
         headers: {
           Authorization: `Bearer ${HUBSPOT_API_KEY}`,
@@ -97,6 +99,7 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
     });
 
     return {
+      id: contactId,
       properties: detailData.properties,
     };
   } catch (error) {
@@ -119,19 +122,25 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
   try {
     // First try to find existing contact
     const existingContact = await getHubspotContact(artist.email);
+
+    info({
+      msg: 'Existing HubSpot contact',
+      existingContact,
+    });
+
     const endpoint = existingContact
-      ? `${HUBSPOT_API_BASE}/crm/v3/objects/contacts/${existingContact.properties.email}`
+      ? `${HUBSPOT_API_BASE}/crm/v3/objects/contacts/${existingContact.id}`
       : `${HUBSPOT_API_BASE}/crm/v3/objects/contacts`;
 
     const method = existingContact ? 'PATCH' : 'POST';
 
-    const response = await fetch(endpoint, {
+    const payload = {
       method,
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${HUBSPOT_API_KEY}`,
       },
-      body: JSON.stringify({
+      body: {
         properties: {
           email: artist.email,
           phone: artist.phone,
@@ -141,24 +150,60 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
           spotify: artist.spotify,
           instagram: artist.instagram,
           facebook: artist.facebook,
-          twitter: artist.x,
+          x: artist.x,
           tiktok: artist.tiktok,
           soundcloud: artist.soundcloud,
           youtube: artist.youtube,
-          lifecyclestage: 'artist',
+          lifecyclestage: HUBSPOT_LIFECYCLE_STAGE_ARTIST,
         },
-      }),
+      },
+    };
+    info({
+      msg: 'HubSpot sync payload',
+      endpoint,
+      payload,
+    });
+
+    const response = await fetch(endpoint, {
+      method: payload.method,
+      headers: payload.headers,
+      body: JSON.stringify(payload.body),
+    });
+
+    info({
+      msg: 'HubSpot sync response status',
+      status: response.status,
+      statusText: response.statusText,
     });
 
     if (!response.ok) {
-      throw new Error(`HubSpot API error: ${await response.text()}`);
+      const errorText = await response.text();
+      info({
+        msg: 'HubSpot API error',
+        errorText,
+      });
+      throw new Error(`HubSpot API error: ${errorText}`);
     }
 
-    const responseData = await response.json();
-    info({
-      msg: 'HubSpot sync response',
-      responseData,
-    });
+    let responseData;
+    try {
+      responseData = await response.json();
+      info({
+        msg: 'HubSpot sync response data',
+        responseData,
+      });
+    } catch (parseError) {
+      info({
+        msg: 'Error parsing HubSpot response JSON',
+        parseError,
+      });
+      // Handle parsing error, possibly by reading response as text
+      const responseText = await response.text();
+      info({
+        msg: 'HubSpot response text',
+        responseText,
+      });
+    }
   } catch (error) {
     info({
       msg: 'Error syncing to HubSpot',

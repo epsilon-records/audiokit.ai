@@ -235,55 +235,40 @@ function buildUpdateFields(
   hubspotData: { properties: Record<string, string | null> }
 ): HubspotUpdateFields {
   const updates: HubspotUpdateFields = {};
+  const { properties } = hubspotData;
 
-  // Only update fields if they're empty or null in the database
-  if ((!artist.city || artist.city === '') && hubspotData.properties.city) {
-    updates.city = hubspotData.properties.city;
-  }
-  if ((!artist.country || artist.country === '') && hubspotData.properties.country) {
-    updates.country = hubspotData.properties.country;
-  }
-  if ((!artist.website || artist.website === '') && hubspotData.properties.website) {
-    updates.website = hubspotData.properties.website;
-  }
-  if ((!artist.phone || artist.phone === '') && hubspotData.properties.phone) {
-    updates.phone = hubspotData.properties.phone;
-  }
+  const fieldsToUpdate: [keyof HubspotUpdateFields, keyof typeof properties][] = [
+    ['city', 'city'],
+    ['country', 'country'],
+    ['website', 'website'],
+    ['phone', 'phone'],
+    ['spotify', 'spotify'],
+    ['appleMusic', 'apple_music'],
+    ['soundcloud', 'soundcloud'],
+    ['bandcamp', 'bandcamp'],
+    ['facebook', 'facebook'],
+    ['instagram', 'instagram'],
+    ['mixcloud', 'mixcloud'],
+    ['tiktok', 'tiktok'],
+    ['twitch', 'twitch'],
+  ];
 
-  // Combine first and last name for legal name if both exist
-  const firstName = hubspotData.properties.firstname;
-  const lastName = hubspotData.properties.lastname;
-  if ((!artist.legalName || artist.legalName === '') && firstName && lastName) {
-    updates.legalName = `${firstName} ${lastName}`;
-  }
+  fieldsToUpdate.forEach(([artistField, hubspotField]) => {
+    if (properties[hubspotField]) {
+      updates[artistField] = properties[hubspotField] as string;
+    }
+  });
 
-  // Update additional fields from Hubspot
-  if ((!artist.spotify || artist.spotify === '') && hubspotData.properties.spotify) {
-    updates.spotify = hubspotData.properties.spotify;
-  }
-  if ((!artist.appleMusic || artist.appleMusic === '') && hubspotData.properties.apple_music) {
-    updates.appleMusic = hubspotData.properties.apple_music;
-  }
-  if ((!artist.soundcloud || artist.soundcloud === '') && hubspotData.properties.soundcloud) {
-    updates.soundcloud = hubspotData.properties.soundcloud;
-  }
-  if ((!artist.bandcamp || artist.bandcamp === '') && hubspotData.properties.bandcamp) {
-    updates.bandcamp = hubspotData.properties.bandcamp;
-  }
-  if ((!artist.facebook || artist.facebook === '') && hubspotData.properties.facebook) {
-    updates.facebook = hubspotData.properties.facebook;
-  }
-  if ((!artist.instagram || artist.instagram === '') && hubspotData.properties.instagram) {
-    updates.instagram = hubspotData.properties.instagram;
-  }
-  if ((!artist.mixcloud || artist.mixcloud === '') && hubspotData.properties.mixcloud) {
-    updates.mixcloud = hubspotData.properties.mixcloud;
-  }
-  if ((!artist.tiktok || artist.tiktok === '') && hubspotData.properties.tiktok) {
-    updates.tiktok = hubspotData.properties.tiktok;
-  }
-  if ((!artist.twitch || artist.twitch === '') && hubspotData.properties.twitch) {
-    updates.twitch = hubspotData.properties.twitch;
+  const { firstname, lastname } = properties;
+  info({
+    artistId: artist.id,
+    artistLegalName: artist.legalName,
+    firstname,
+    lastname,
+    msg: 'Building updates',
+  });
+  if (!artist.legalName && firstname && lastname) {
+    updates.legalName = `${firstname} ${lastname}`;
   }
 
   return updates;
@@ -309,7 +294,7 @@ async function applyUpdates(
     email: artist.email,
     artistId: artist.id,
     updates,
-    msg: 'Updated empty fields with Hubspot data',
+    msg: 'Merged Hubspot data',
   });
 }
 

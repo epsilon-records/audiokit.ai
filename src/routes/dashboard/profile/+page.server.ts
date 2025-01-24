@@ -3,11 +3,12 @@ import { message, superValidate } from 'sveltekit-superforms/server';
 import { zod } from 'sveltekit-superforms/adapters';
 import { error, fail } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { artistSchema } from '$lib/schemas/artist';
+import { artistSchema, type Artist } from '$lib/schemas/artist';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { sql } from 'drizzle-orm';
-import { debug, warn } from '$lib/utils/logger';
+import { warn } from '$lib/utils/logger';
+import { syncToHubspot } from '$lib/server/hubspot';
 
 // Add this helper function at the top of the file
 function sanitizeUrl(url: string | null | undefined): string | null {
@@ -119,6 +120,9 @@ export const actions = {
     if (!updatedArtist) {
       throw new Error('Failed to update artist record');
     }
+
+    // Sync the updated artist data to HubSpot
+    await syncToHubspot(updatedArtist as Artist);
 
     return message(form, 'Profile updated successfully!');
   },

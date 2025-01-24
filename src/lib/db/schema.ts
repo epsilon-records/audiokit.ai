@@ -3,6 +3,7 @@ import { sql } from 'drizzle-orm';
 
 export const artists = pgTable('artists', {
   appleMusic: text('apple_music').default(''),
+  address: text('address').default(''),
   artistPhotos: json('artist_photos').default([]),
   bandcamp: text().default(''),
   bandsintown: text().default(''),

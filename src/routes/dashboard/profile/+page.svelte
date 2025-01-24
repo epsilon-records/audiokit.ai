@@ -1,14 +1,6 @@
 <script lang="ts">
   import '$lib/styles/tiptap.css';
-  import {
-    Bold,
-    Italic,
-    Strikethrough,
-    List,
-    ListOrdered,
-    Quote as QuoteIcon,
-    Save,
-  } from 'lucide-svelte';
+  import { Save } from 'lucide-svelte';
   import { zodClient } from 'sveltekit-superforms/adapters';
   import { superForm } from 'sveltekit-superforms';
   import { Field, Control, Label, Description, FieldErrors } from 'formsnap';
@@ -16,7 +8,7 @@
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { toast } from 'svelte-sonner';
   import confetti from 'canvas-confetti';
-  import SuperDebug from 'sveltekit-superforms';
+  // import SuperDebug from 'sveltekit-superforms';
 
   let { data } = $props();
 
@@ -79,14 +71,6 @@
     <p class="mt-2 text-lg text-muted-foreground">
       Manage your artist information, biography, and social media presence.
     </p>
-    <div class="mt-4">
-      <span
-        class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
-      >
-        <span class="mr-1.5 h-1.5 w-1.5 rounded-full bg-green-600"></span>
-        Profile is public and visible to fans
-      </span>
-    </div>
   </div>
 
   <div class:opacity-50={isSubmitting} class:pointer-events-none={isSubmitting}>
@@ -133,18 +117,16 @@
                       {...props}
                       class="input input-bordered bg-white text-gray-900"
                       bind:value={$formData.stageName}
-                      disabled={$formData.stageName !== ''}
+                      disabled={!!data.form?.data?.stageName}
                     />
                   {/snippet}
                 </Control>
                 <Description class="text-sm">
-                  {#if $formData.stageName !== undefined && $formData.stageName !== null && $formData.stageName !== ''}
-                    Platform links can be changed by contacting <a
-                      href="/support"
-                      class="text-green-700 hover:underline">support</a
-                    >.
+                  {#if !!data.form?.data?.stageName}
+                    Artist stage name cannot be changed.
                   {:else}
-                    This is your public artist stage name.
+                    Enter your exact public artist/stage name with desired spelling and
+                    capitalization. This will be displayed on your profile and releases.
                   {/if}
                 </Description>
               </Field>
@@ -172,10 +154,20 @@
                       {...props}
                       class="input input-bordered bg-white text-gray-900"
                       bind:value={$formData.legalName}
+                      disabled={!!data.form?.data?.legalName}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm">Be sure to use your real name.</Description>
+                <Description class="text-sm">
+                  {#if !!data.form?.data?.legalName}
+                    Legal name can be changed by contacting <a
+                      href="/support"
+                      class="text-green-700 hover:underline">support</a
+                    >.
+                  {:else}
+                    Be sure to use your full legal name.
+                  {/if}
+                </Description>
               </Field>
             </div>
             <div class="form-control w-full max-w-lg mb-2">
@@ -194,9 +186,9 @@
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm"
-                  >Used for urgent booking communications only.</Description
-                >
+                <Description class="text-sm">
+                  Used for urgent booking communications only.
+                </Description>
               </Field>
             </div>
             <div class="form-control w-full max-w-lg mb-2">
@@ -213,12 +205,20 @@
                       type="email"
                       bind:value={$formData.email}
                       required
+                      disabled={!!data.form?.data?.email}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm"
-                  >It's preferred that you use your company email.</Description
-                >
+                <Description class="text-sm">
+                  {#if !!data.form?.data?.email}
+                    Email can be changed by contacting <a
+                      href="/support"
+                      class="text-green-700 hover:underline">support</a
+                    >.
+                  {:else}
+                    It's preferred that you use your company email.
+                  {/if}
+                </Description>
               </Field>
             </div>
             <div class="form-control w-full max-w-lg mb-2">
@@ -234,12 +234,34 @@
                       class="input input-bordered bg-white text-gray-900"
                       type="date"
                       bind:value={$formData.birthdate}
+                      disabled={!!data.form?.data?.birthdate}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm"
-                  >Required for age-restricted venues and events.</Description
-                >
+                <Description class="text-sm">
+                  Required for age-restricted venues and events.
+                </Description>
+              </Field>
+            </div>
+            <div class="form-control w-full max-w-lg mb-2">
+              <Field {form} name="address">
+                <Control>
+                  {#snippet children({ props })}
+                    <div class="flex justify-between items-center">
+                      <Label class="text-base font-bold">Address</Label>
+                      <FieldErrors class="font-bold text-destructive text-sm" />
+                    </div>
+                    <input
+                      {...props}
+                      class="input input-bordered bg-white text-gray-900"
+                      type="text"
+                      bind:value={$formData.address}
+                    />
+                  {/snippet}
+                </Control>
+                <Description class="text-sm">
+                  Your legal address for contracts and payments.
+                </Description>
               </Field>
             </div>
           </div>
@@ -249,7 +271,7 @@
       <!-- Location Card -->
       <Card>
         <CardHeader class="bg-gradient-to-r from-green-50 to-green-100 pb-4">
-          <CardTitle>📍 Current Location</CardTitle>
+          <CardTitle>📍 Origin Location</CardTitle>
         </CardHeader>
         <CardContent>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -266,10 +288,20 @@
                       class="input input-bordered bg-white text-gray-900"
                       type="text"
                       bind:value={$formData.city}
+                      disabled={!!data.form?.data?.city}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm">The city you're primarily based in.</Description>
+                <Description class="text-sm">
+                  {#if !!data.form?.data?.city}
+                    City of origin can be changed by contacting <a
+                      href="/support"
+                      class="text-green-700 hover:underline">support</a
+                    >.
+                  {:else}
+                    The city you're originally from or started your career in.
+                  {/if}
+                </Description>
               </Field>
             </div>
             <div class="form-control w-full max-w-lg mb-2">
@@ -284,13 +316,23 @@
                       {...props}
                       class="select select-bordered w-full bg-white text-gray-900"
                       bind:value={$formData.country}
+                      disabled={!!data.form?.data?.country}
                     >
                       <option value="">Select Country</option>
                       <!-- Add your country options here -->
                     </select>
                   {/snippet}
                 </Control>
-                <Description class="text-sm">Your primary country of residence.</Description>
+                <Description class="text-sm">
+                  {#if !!data.form?.data?.country}
+                    Country of origin can be changed by contacting <a
+                      href="/support"
+                      class="text-green-700 hover:underline">support</a
+                    >.
+                  {:else}
+                    Your country of origin or where you started your career.
+                  {/if}
+                </Description>
               </Field>
             </div>
           </div>
@@ -317,11 +359,13 @@
                       class="input input-bordered bg-white text-gray-900"
                       type="url"
                       bind:value={$formData.website}
+                      disabled={!!data.form?.data?.website}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm">Your official artist website or portfolio.</Description
-                >
+                <Description class="text-sm">
+                  Your official artist website or portfolio.
+                </Description>
               </Field>
             </div>
           </div>
@@ -349,12 +393,12 @@
                       type="url"
                       bind:value={$formData.appleMusic}
                       placeholder="https://music.apple.com/artist/..."
-                      disabled={$formData.appleMusic !== ''}
+                      disabled={!!data.form?.data?.appleMusic}
                     />
                   {/snippet}
                 </Control>
                 <Description class="text-sm">
-                  {#if $formData.appleMusic !== ''}
+                  {#if !!data.form?.data?.appleMusic}
                     Platform links can be changed by contacting <a
                       href="/support"
                       class="text-green-700 hover:underline">support</a
@@ -379,12 +423,12 @@
                       type="url"
                       bind:value={$formData.spotify}
                       placeholder="https://open.spotify.com/artist/..."
-                      disabled={$formData.spotify !== ''}
+                      disabled={!!data.form?.data?.spotify}
                     />
                   {/snippet}
                 </Control>
                 <Description class="text-sm">
-                  {#if $formData.spotify !== ''}
+                  {#if !!data.form?.data?.spotify}
                     Platform links can be changed by contacting <a
                       href="/support"
                       class="text-green-700 hover:underline">support</a
@@ -409,6 +453,7 @@
                       type="url"
                       bind:value={$formData.soundcloud}
                       placeholder="https://soundcloud.com/..."
+                      disabled={!!data.form?.data?.soundcloud}
                     />
                   {/snippet}
                 </Control>
@@ -429,6 +474,7 @@
                       type="url"
                       bind:value={$formData.bandcamp}
                       placeholder="https://artist.bandcamp.com"
+                      disabled={!!data.form?.data?.bandcamp}
                     />
                   {/snippet}
                 </Control>
@@ -449,6 +495,7 @@
                       type="url"
                       bind:value={$formData.youtube}
                       placeholder="https://youtube.com/@..."
+                      disabled={!!data.form?.data?.youtube}
                     />
                   {/snippet}
                 </Control>
@@ -469,6 +516,7 @@
                       type="url"
                       bind:value={$formData.mixcloud}
                       placeholder="https://mixcloud.com/..."
+                      disabled={!!data.form?.data?.mixcloud}
                     />
                   {/snippet}
                 </Control>
@@ -500,12 +548,12 @@
                       type="url"
                       bind:value={$formData.instagram}
                       placeholder="https://instagram.com/..."
-                      disabled={$formData.instagram !== ''}
+                      disabled={!!data.form?.data?.instagram}
                     />
                   {/snippet}
                 </Control>
                 <Description class="text-sm">
-                  {#if $formData.instagram !== ''}
+                  {#if !!data.form?.data?.instagram}
                     Platform links can be changed by contacting <a
                       href="/support"
                       class="text-green-700 hover:underline">support</a
@@ -530,6 +578,7 @@
                       type="url"
                       bind:value={$formData.facebook}
                       placeholder="https://facebook.com/..."
+                      disabled={!!data.form?.data?.facebook}
                     />
                   {/snippet}
                 </Control>
@@ -550,6 +599,7 @@
                       type="url"
                       bind:value={$formData.x}
                       placeholder="https://x.com/..."
+                      disabled={!!data.form?.data?.x}
                     />
                   {/snippet}
                 </Control>
@@ -570,6 +620,7 @@
                       type="url"
                       bind:value={$formData.tiktok}
                       placeholder="https://tiktok.com/@..."
+                      disabled={!!data.form?.data?.tiktok}
                     />
                   {/snippet}
                 </Control>
@@ -590,6 +641,7 @@
                       type="url"
                       bind:value={$formData.twitch}
                       placeholder="https://twitch.tv/..."
+                      disabled={!!data.form?.data?.twitch}
                     />
                   {/snippet}
                 </Control>
@@ -610,6 +662,7 @@
                       type="url"
                       bind:value={$formData.linkedin}
                       placeholder="https://linkedin.com/in/..."
+                      disabled={!!data.form?.data?.linkedin}
                     />
                   {/snippet}
                 </Control>
@@ -641,12 +694,12 @@
                       type="url"
                       bind:value={$formData.songkick}
                       placeholder="https://songkick.com/artists/..."
-                      disabled={$formData.songkick !== ''}
+                      disabled={!!data.form?.data?.songkick}
                     />
                   {/snippet}
                 </Control>
                 <Description class="text-sm">
-                  {#if $formData.songkick !== ''}
+                  {#if !!data.form?.data?.songkick}
                     Platform links can be changed by contacting <a
                       href="/support"
                       class="text-green-700 hover:underline">support</a
@@ -671,6 +724,7 @@
                       type="url"
                       bind:value={$formData.bandsintown}
                       placeholder="https://bandsintown.com/a/..."
+                      disabled={!!data.form?.data?.bandsintown}
                     />
                   {/snippet}
                 </Control>
@@ -701,14 +755,14 @@
       </Card>
 
       <!-- Debug -->
-      <Card>
+      <!-- <Card>
         <CardHeader class="bg-gradient-to-r from-gray-50 to-gray-100 pb-4">
           <CardTitle>Debug Data</CardTitle>
         </CardHeader>
         <CardContent>
           <SuperDebug data={$formData} />
         </CardContent>
-      </Card>
+      </Card> -->
     </form>
   </div>
 </div>
