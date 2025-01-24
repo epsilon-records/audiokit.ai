@@ -8,7 +8,7 @@ import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { sql } from 'drizzle-orm';
 import { soundcharts } from '$lib/server/soundcharts';
-import { logger } from '$lib/utils/logger';
+import logger from '$lib/utils/logger';
 
 // Add this helper function at the top of the file
 function sanitizeUrl(url: string | null | undefined): string | null {
