@@ -1,6 +1,6 @@
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
-import { soundcharts } from '$lib/server/soundcharts';
+import { getArtistIdFromSpotify, getArtistStats } from '$lib/server/soundcharts';
 import { error } from '@sveltejs/kit';
 import { eq, not, or } from 'drizzle-orm';
 import logger from '$lib/utils/logger';
@@ -44,7 +44,7 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
 
       const spotifyId = extractSpotifyId(artist.spotify);
       if (spotifyId) {
-        soundchartsId = await soundcharts.getArtistIdFromSpotify(spotifyId);
+        soundchartsId = await getArtistIdFromSpotify(spotifyId);
 
         if (soundchartsId) {
           logger.info({
@@ -79,7 +79,7 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       msg: 'Fetching Soundcharts stats',
     });
 
-    const soundchartsData = await soundcharts.getArtistStats(soundchartsId);
+    const soundchartsData = await getArtistStats(soundchartsId);
 
     if (!soundchartsData) {
       logger.warn({
