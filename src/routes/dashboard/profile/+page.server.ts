@@ -1,4 +1,4 @@
-import { requireAuth } from '$lib/server/auth';
+import { requireAuth, requireOrg, getOrg } from '$lib/server/auth';
 import { message, superValidate } from 'sveltekit-superforms/server';
 import { zod } from 'sveltekit-superforms/adapters';
 import { error, fail } from '@sveltejs/kit';
@@ -22,9 +22,15 @@ function sanitizeUrl(url: string | null | undefined): string | null {
 }
 
 export const load = (async ({ locals }) => {
-  const auth = await requireAuth(locals);
+  const auth = await requireOrg(locals);
   if (!auth) {
     throw error(401, 'Unauthorized');
+  }
+
+  // Get organization details
+  const org = await getOrg(auth.orgId);
+  if (!org) {
+    throw error(404, 'Organization not found');
   }
 
   // Get or create artist data using Drizzle
@@ -49,8 +55,14 @@ export const load = (async ({ locals }) => {
     throw error(500, 'Failed to create or retrieve artist record');
   }
 
+  // Create mergedData with org.name as stageName
+  const mergedData = {
+    ...artist,
+    stageName: org.name,
+  };
+
   const formData = Object.fromEntries(
-    Object.entries(artist).map(([key, value]) => [key, value === null ? undefined : value])
+    Object.entries(mergedData).map(([key, value]) => [key, value === null ? undefined : value])
   );
 
   const form = await superValidate(formData, zod(artistSchema));

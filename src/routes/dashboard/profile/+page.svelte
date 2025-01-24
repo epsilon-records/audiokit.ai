@@ -108,7 +108,7 @@
             <Field {form} name="orgId">
               <Control>
                 {#snippet children({ props })}
-                  <input {...props} type="hidden" bind:value={$formData.org_id} />
+                  <input {...props} type="hidden" bind:value={$formData.orgId} />
                 {/snippet}
               </Control>
             </Field>
@@ -133,10 +133,20 @@
                       {...props}
                       class="input input-bordered bg-white text-gray-900"
                       bind:value={$formData.stageName}
+                      disabled={$formData.stageName !== ''}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm">This is your public artist stage name.</Description>
+                <Description class="text-sm">
+                  {#if $formData.stageName !== undefined && $formData.stageName !== null && $formData.stageName !== ''}
+                    Stage name can be changed in the <a
+                      href="/dashboard/team"
+                      class="text-green-700 hover:underline">team settings</a
+                    >.
+                  {:else}
+                    This is your public artist stage name.
+                  {/if}
+                </Description>
               </Field>
             </div>
           </div>
@@ -641,7 +651,6 @@
           <button
             class="btn btn-accent hover:bg-accent hover:text-accent-foreground transition-colors"
             type="submit"
-            disabled={isSubmitting}
           >
             {#if isSubmitting}
               <span class="loading loading-spinner loading-sm"></span>

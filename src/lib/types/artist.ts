@@ -31,4 +31,4 @@ export interface Artist {
   anr?: string;
   created?: string;
   updated?: string;
-} 
+}
