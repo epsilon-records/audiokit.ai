@@ -261,7 +261,7 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
   } catch (err) {
     logger.error('Failed to fetch artist ID from Spotify:', {
       spotifyId,
-      url: `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`,
+      url: `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/spotify/${spotifyId}`,
       error: err,
     });
     return null;
