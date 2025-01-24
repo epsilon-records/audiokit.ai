@@ -12,6 +12,7 @@
   let user = $derived(data.user);
   let org = $derived(data.org);
   let stats = $derived(data.stats);
+  let tracks = $derived(data.tracks);
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -84,9 +85,13 @@
             <CardHeader
               class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 pb-6"
             >
-              <CardTitle>🎵 Genres</CardTitle>
+              <CardTitle>🎵 Catalog</CardTitle>
             </CardHeader>
-            <CardContent class="pt-6">
+            <CardContent class="pt-6 space-y-4">
+              <div>
+                <p class="text-sm text-muted-foreground">Tracks Released</p>
+                <p class="text-2xl font-bold">{formatNumber(tracks?.items.length ?? 0)}</p>
+              </div>
               {#each stats?.metadata.genres as genre}
                 <div class="mb-4">
                   <p class="text-lg font-semibold capitalize">{genre.root}</p>

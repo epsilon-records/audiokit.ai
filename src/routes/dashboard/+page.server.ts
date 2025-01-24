@@ -1,7 +1,7 @@
 import { getOrg, getUser, requireAuth } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getArtistStats } from '$lib/server/soundcharts';
+import { getArtistStats, getArtistTracks } from '$lib/server/soundcharts';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -23,12 +23,16 @@ export const load = (async ({ locals }) => {
     throw error(404, 'Organization not found');
   }
 
-  // Get artist record to find soundchartsId
   const [artist] = await db.select().from(artists).where(eq(artists.orgId, auth.orgId));
 
   let stats = null;
   if (artist?.soundchartsId) {
     stats = await getArtistStats(artist.soundchartsId);
+  }
+
+  let tracks = null;
+  if (artist?.soundchartsId) {
+    tracks = await getArtistTracks(artist.soundchartsId);
   }
 
   info({
@@ -48,5 +52,6 @@ export const load = (async ({ locals }) => {
     },
     org,
     stats,
+    tracks,
   };
 }) satisfies PageServerLoad;
