@@ -3,7 +3,7 @@
 
 import { error } from '@sveltejs/kit';
 import type { ArtistMetadata } from '$lib/types/stats';
-import { SOUNDCHARTS_BASE_URL, SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
+import { SOUNDCHARTS_API_BASE, SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
 
 // Core API Types
 type SoundchartsErrorResponse = {
@@ -286,7 +286,7 @@ export class SoundchartsAPI {
    * @param params - Optional query parameters
    */
   private async fetch<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
-    const url = new URL(`${SOUNDCHARTS_BASE_URL}${endpoint}`);
+    const url = new URL(`${SOUNDCHARTS_API_BASE}${endpoint}`);
 
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
