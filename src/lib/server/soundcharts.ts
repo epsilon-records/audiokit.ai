@@ -181,260 +181,89 @@ export interface SoundchartsArtistStats {
   followers: SoundchartsSocial;
 }
 
-async function fetchFromSoundcharts(endpoint: string) {
+// Core API functions
+async function fetchFromSoundcharts<T>(
+  endpoint: string,
+  params?: Record<string, string>
+): Promise<T | null> {
+  if (!SOUNDCHARTS_API_KEY || !SOUNDCHARTS_APP_ID) {
+    logger.error('Missing required Soundcharts API credentials');
+    return null;
+  }
+
+  const url = new URL(`${SOUNDCHARTS_API_BASE}${endpoint}`);
+
+  if (params) {
+    Object.entries(params).forEach(([key, value]) => {
+      url.searchParams.append(key, value);
+    });
+  }
+
   try {
-    const response = await fetch(`${SOUNDCHARTS_API_BASE}${endpoint}`, {
+    const response = await fetch(url.toString(), {
       headers: {
-        'x-api-key': SOUNDCHARTS_API_KEY,
         Accept: 'application/json',
+        'x-app-id': SOUNDCHARTS_APP_ID,
+        'x-api-key': SOUNDCHARTS_API_KEY,
       },
     });
 
     if (!response.ok) {
-      if (response.status === 404) {
-        return null;
-      }
-      logger.error(`Soundcharts API error: ${response.statusText}`);
+      logger.error(`Soundcharts API request failed for URL: ${url.toString()}`);
       return null;
     }
 
     return response.json();
   } catch (err) {
-    logger.error('Error fetching from Soundcharts:', err);
+    logger.error(`Failed to fetch from Soundcharts API URL: ${url.toString()}`, err);
     return null;
   }
 }
 
-export async function getArtistStats(spotifyId: string): Promise<SoundchartsArtistStats | null> {
+export async function getArtistStats(artistId: string) {
   try {
-    const data = await fetchFromSoundcharts(`/artist/spotify/${spotifyId}`);
-    if (!data) return null;
+    const [metadataRes, streamingRes, followersRes] = await Promise.all([
+      fetchFromSoundcharts<SoundchartsResponse<ArtistMetadata>>(`/api/v2.9/artist/${artistId}`),
+      fetchFromSoundcharts<SoundchartsResponse<StreamingStats>>(
+        `/api/v2/artist/${artistId}/streaming`
+      ),
+      fetchFromSoundcharts<SoundchartsResponse<FollowersStats>>(
+        `/api/v2/artist/${artistId}/followers`
+      ),
+    ]);
 
-    // Transform the API response into our standardized format
     return {
       metadata: {
-        name: data.name,
-        image: data.image,
-        genres: data.genres,
-        country: data.country,
+        ...defaultResponses.metadata,
+        object: { ...defaultResponses.metadata.object, ...(metadataRes?.data || {}) },
       },
       streaming: {
-        spotify_monthly_listeners: data.platforms?.spotify?.monthlyListeners,
-        spotify_followers: data.platforms?.spotify?.followers,
-        youtube_subscribers: data.platforms?.youtube?.subscribers,
-        youtube_views: data.platforms?.youtube?.views,
+        ...defaultResponses.streaming,
+        object: { ...defaultResponses.streaming.object, ...(streamingRes?.data || {}) },
       },
       followers: {
-        instagram_followers: data.platforms?.instagram?.followers,
-        twitter_followers: data.platforms?.twitter?.followers,
-        tiktok_followers: data.platforms?.tiktok?.followers,
-        facebook_followers: data.platforms?.facebook?.followers,
+        ...defaultResponses.followers,
+        object: { ...defaultResponses.followers.object, ...(followersRes?.data || {}) },
       },
     };
-  } catch (error) {
-    logger.error('Error fetching Soundcharts data:', error);
+  } catch (err) {
+    logger.error('Failed to fetch artist stats:', err);
+    return defaultResponses;
+  }
+}
+
+export async function getArtistIdFromSpotify(spotifyId: string): Promise<string | null> {
+  try {
+    const response = await fetchFromSoundcharts<SoundchartsResponse<{ id: string }>>(
+      `/api/v2.9/artist/by-platform/spotify/${spotifyId}`
+    );
+    return response?.data?.id || null;
+  } catch (err) {
+    logger.error('Failed to fetch artist ID from Spotify:', {
+      spotifyId,
+      url: `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`,
+      error: err,
+    });
     return null;
   }
 }
-
-export async function searchArtist(query: string) {
-  try {
-    const data = await fetchFromSoundcharts(`/search/artist?q=${encodeURIComponent(query)}`);
-    if (!data?.results) return [];
-
-    return data.results.map((artist: any) => ({
-      id: artist.id,
-      name: artist.name,
-      image: artist.image,
-      spotifyId: artist.platforms?.spotify?.id,
-    }));
-  } catch (error) {
-    logger.error('Error searching Soundcharts:', error);
-    return [];
-  }
-}
-
-export class SoundchartsAPI {
-  private readonly apiKey: string;
-  private readonly appId: string;
-
-  constructor() {
-    if (!SOUNDCHARTS_API_KEY || !SOUNDCHARTS_APP_ID) {
-      logger.error('Missing required Soundcharts API credentials');
-      this.apiKey = '';
-      this.appId = '';
-      return;
-    }
-    this.apiKey = SOUNDCHARTS_API_KEY;
-    this.appId = SOUNDCHARTS_APP_ID;
-  }
-
-  /**
-   * Verify JWT token from request headers
-   * @param authHeader - Authorization header from request
-   */
-  private async verifyAuth(authHeader: string): Promise<boolean> {
-    try {
-      if (!authHeader?.startsWith('Bearer ')) {
-        return false;
-      }
-      const token = authHeader.split(' ')[1];
-      // Implement JWT verification here using this.serviceRoleKey
-      // Return true if valid, false if invalid
-      return true; // Placeholder - implement actual verification
-    } catch (error) {
-      logger.error('Auth verification error:', error);
-      return false;
-    }
-  }
-
-  /**
-   * Generic fetch method for Soundcharts API
-   * Handles authentication and error responses
-   * @param endpoint - API endpoint path
-   * @param params - Optional query parameters
-   */
-  private async fetch<T>(endpoint: string, params?: Record<string, string>): Promise<T | null> {
-    const url = new URL(`${SOUNDCHARTS_API_BASE}${endpoint}`);
-
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        url.searchParams.append(key, value);
-      });
-    }
-
-    try {
-      const response = await fetch(url.toString(), {
-        headers: {
-          Accept: 'application/json',
-          'x-app-id': this.appId,
-          'x-api-key': this.apiKey,
-        },
-      });
-
-      if (!response.ok) {
-        logger.error(`Soundcharts API request failed for URL: ${url.toString()}`);
-        return null;
-      }
-
-      return response.json();
-    } catch (err) {
-      logger.error(`Failed to fetch from Soundcharts API URL: ${url.toString()}`, err);
-      return null;
-    }
-  }
-
-  /**
-   * Get comprehensive artist statistics
-   * Includes metadata, streaming stats, and social media followers
-   * @param artistId - Soundcharts artist UUID
-   */
-  async getArtistStats(artistId: string) {
-    try {
-      const [metadataRes, streamingRes, followersRes] = await Promise.all([
-        this.fetch<SoundchartsResponse<ArtistMetadata>>(`/api/v2.9/artist/${artistId}`),
-        this.fetch<SoundchartsResponse<StreamingStats>>(`/api/v2/artist/${artistId}/streaming`),
-        this.fetch<SoundchartsResponse<FollowersStats>>(`/api/v2/artist/${artistId}/followers`),
-      ]);
-
-      return {
-        metadata: {
-          ...defaultResponses.metadata,
-          object: { ...defaultResponses.metadata.object, ...(metadataRes?.data || {}) },
-        },
-        streaming: {
-          ...defaultResponses.streaming,
-          object: { ...defaultResponses.streaming.object, ...(streamingRes?.data || {}) },
-        },
-        followers: {
-          ...defaultResponses.followers,
-          object: { ...defaultResponses.followers.object, ...(followersRes?.data || {}) },
-        },
-      };
-    } catch (err) {
-      logger.error('Failed to fetch artist stats:', err);
-      return defaultResponses;
-    }
-  }
-
-  // Implement additional methods
-  async getArtistSongs(artistId: string): Promise<Song[]> {
-    try {
-      const response = await this.fetch<SoundchartsResponse<Song[]>>(
-        `/api/v2/artist/${artistId}/songs`
-      );
-      return response?.data || [];
-    } catch (err) {
-      logger.error('Failed to fetch artist songs:', err);
-      return [];
-    }
-  }
-
-  async getArtistAlbums(artistId: string): Promise<Album[]> {
-    try {
-      const response = await this.fetch<SoundchartsResponse<Album[]>>(
-        `/api/v2/artist/${artistId}/albums`
-      );
-      return response?.data || [];
-    } catch (err) {
-      logger.error('Failed to fetch artist albums:', err);
-      return [];
-    }
-  }
-
-  async getArtistAudience(artistId: string): Promise<AudienceStats> {
-    try {
-      const response = await this.fetch<SoundchartsResponse<AudienceStats>>(
-        `/api/v2/artist/${artistId}/audience`
-      );
-      return response?.data || { demographics: { age: [], gender: [] }, topCountries: [] };
-    } catch (err) {
-      logger.error('Failed to fetch artist audience:', err);
-      return { demographics: { age: [], gender: [] }, topCountries: [] };
-    }
-  }
-
-  async getArtistPopularity(artistId: string): Promise<PopularityStats> {
-    try {
-      const response = await this.fetch<SoundchartsResponse<PopularityStats>>(
-        `/api/v2/artist/${artistId}/popularity`
-      );
-      return response?.data || { score: 0, trend: 'stable', history: [] };
-    } catch (err) {
-      logger.error('Failed to fetch artist popularity:', err);
-      return { score: 0, trend: 'stable', history: [] };
-    }
-  }
-
-  async searchArtist(query: string): Promise<ArtistMetadata[]> {
-    try {
-      const response = await this.fetch<SoundchartsResponse<ArtistMetadata[]>>(
-        '/api/v2/search/artists',
-        { q: query }
-      );
-      return response?.data || [];
-    } catch (err) {
-      logger.error('Failed to search artists:', err);
-      return [];
-    }
-  }
-
-  async getArtistIdFromSpotify(spotifyId: string): Promise<string | null> {
-    try {
-      const response = await this.fetch<SoundchartsResponse<{ id: string }>>(
-        `/api/v2.9/artist/by-platform/spotify/${spotifyId}`
-      );
-      return response?.data?.id || null;
-    } catch (err) {
-      logger.error('Failed to fetch artist ID from Spotify:', {
-        spotifyId,
-        url: `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`,
-        error: err,
-      });
-      return null;
-    }
-  }
-}
-
-// Export singleton instance
-export const soundcharts = new SoundchartsAPI();
