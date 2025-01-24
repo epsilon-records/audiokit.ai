@@ -139,9 +139,9 @@
                 </Control>
                 <Description class="text-sm">
                   {#if $formData.stageName !== undefined && $formData.stageName !== null && $formData.stageName !== ''}
-                    Stage name can be changed in the <a
-                      href="/dashboard/team"
-                      class="text-green-700 hover:underline">team settings</a
+                    Platform links can be changed by contacting <a
+                      href="/support"
+                      class="text-green-700 hover:underline">support</a
                     >.
                   {:else}
                     This is your public artist stage name.
@@ -349,10 +349,20 @@
                       type="url"
                       bind:value={$formData.appleMusic}
                       placeholder="https://music.apple.com/artist/..."
+                      disabled={$formData.appleMusic !== ''}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm">Your official Apple Music artist profile.</Description>
+                <Description class="text-sm">
+                  {#if $formData.appleMusic !== ''}
+                    Platform links can be changed by contacting <a
+                      href="/support"
+                      class="text-green-700 hover:underline">support</a
+                    >.
+                  {:else}
+                    Your official Apple Music artist profile.
+                  {/if}
+                </Description>
               </Field>
             </div>
             <div class="form-control w-full max-w-lg mb-2">
@@ -369,10 +379,20 @@
                       type="url"
                       bind:value={$formData.spotify}
                       placeholder="https://open.spotify.com/artist/..."
+                      disabled={$formData.spotify !== ''}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm">Your official Spotify artist profile.</Description>
+                <Description class="text-sm">
+                  {#if $formData.spotify !== ''}
+                    Platform links can be changed by contacting <a
+                      href="/support"
+                      class="text-green-700 hover:underline">support</a
+                    >.
+                  {:else}
+                    Your official Spotify artist profile.
+                  {/if}
+                </Description>
               </Field>
             </div>
             <div class="form-control w-full max-w-lg mb-2">
@@ -480,10 +500,20 @@
                       type="url"
                       bind:value={$formData.instagram}
                       placeholder="https://instagram.com/..."
+                      disabled={$formData.instagram !== ''}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm">Your official Instagram profile.</Description>
+                <Description class="text-sm">
+                  {#if $formData.instagram !== ''}
+                    Platform links can be changed by contacting <a
+                      href="/support"
+                      class="text-green-700 hover:underline">support</a
+                    >.
+                  {:else}
+                    Your official Instagram profile.
+                  {/if}
+                </Description>
               </Field>
             </div>
             <div class="form-control w-full max-w-lg mb-2">
@@ -611,12 +641,20 @@
                       type="url"
                       bind:value={$formData.songkick}
                       placeholder="https://songkick.com/artists/..."
+                      disabled={$formData.songkick !== ''}
                     />
                   {/snippet}
                 </Control>
-                <Description class="text-sm"
-                  >Your Songkick artist profile for tour dates.</Description
-                >
+                <Description class="text-sm">
+                  {#if $formData.songkick !== ''}
+                    Platform links can be changed by contacting <a
+                      href="/support"
+                      class="text-green-700 hover:underline">support</a
+                    >.
+                  {:else}
+                    Your Songkick artist profile for tour dates.
+                  {/if}
+                </Description>
               </Field>
             </div>
             <div class="form-control w-full max-w-lg mb-2">
