@@ -209,7 +209,12 @@ async function fetchFromSoundcharts<T>(
     });
 
     if (!response.ok) {
-      logger.error(`Soundcharts API request failed for URL: ${url.toString()}`);
+      const errorBody = await response.text();
+      logger.error(`Soundcharts API request failed for URL: ${url.toString()}`, {
+        status: response.status,
+        statusText: response.statusText,
+        body: errorBody,
+      });
       return null;
     }
 
