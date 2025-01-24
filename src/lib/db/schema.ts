@@ -37,7 +37,7 @@ export const artists = pgTable('artists', {
   country: text().default(''),
   anr: text().default(''),
   isSigned: boolean('is_signed').default(false),
-  orgId: text('org_id').default(''),
+  orgId: text('org_id').default('').unique(),
   soundchartsId: text('soundcharts_id').default(''),
   metadata: json('metadata').default({}),
   streaming: json('streaming').default({}),

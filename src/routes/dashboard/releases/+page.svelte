@@ -48,4 +48,16 @@
       </CardContent>
     </Card>
   {/if}
+
+  {#if data.releases.length}
+    <ul>
+      {#each data.releases as release}
+        <li>{release.title}</li>
+      {/each}
+    </ul>
+  {:else}
+    <p>
+      No releases found. Update your artist profile to sync releases. The more complete the better.
+    </p>
+  {/if}
 </div>

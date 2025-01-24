@@ -1,10 +1,11 @@
 import { requireAuth } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db';
-import { releases, artists } from '$lib/db/schema';
+import { artists } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
-import { getArtistReleases } from '$lib/server/soundcharts';
+import { getArtistAlbums } from '$lib/server/soundcharts';
+import { info } from '$lib/utils/logger';
 
 export const load: PageServerLoad = async ({ locals }) => {
   const auth = await requireAuth(locals);
@@ -14,14 +15,18 @@ export const load: PageServerLoad = async ({ locals }) => {
 
   const [artist] = await db.select().from(artists).where(eq(artists.orgId, auth.orgId));
 
-  let releases = [];
+  let albums = [];
   if (artist?.soundchartsId) {
-    const releasesData = await getArtistReleases(artist.soundchartsId);
-    releases = releasesData?.releases || [];
+    const albumsData = await getArtistAlbums(artist.soundchartsId);
+    info({
+      msg: 'Albums data',
+      data: albumsData,
+    });
+    albums = albumsData?.items || [];
   }
 
   return {
     auth,
-    release,
+    albums,
   };
 };

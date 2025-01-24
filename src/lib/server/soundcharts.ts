@@ -1,5 +1,5 @@
 import { SOUNDCHARTS_API_BASE, SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
-import { debug, warn } from '$lib/utils/logger';
+import { debug, info, warn } from '$lib/utils/logger';
 
 /**
  * Get Soundcharts artist ID from Spotify ID
@@ -274,6 +274,48 @@ export async function getArtistStats(uuid: string): Promise<{
   } catch (error) {
     debug({
       msg: 'Error fetching Soundcharts artist stats',
+      uuid,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    return null;
+  }
+}
+
+export async function getArtistAlbums(uuid: string): Promise<any | null> {
+  const url = `${SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/albums`;
+  try {
+    debug({
+      msg: 'Fetching artist albums',
+      url,
+      uuid,
+    });
+
+    const response = await fetch(url, {
+      headers: {
+        'x-app-id': SOUNDCHARTS_APP_ID,
+        'x-api-key': SOUNDCHARTS_API_KEY,
+        Accept: 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      warn({
+        msg: 'Failed to fetch artist albums',
+        uuid,
+        status: response.status,
+      });
+      return null;
+    }
+
+    const data = await response.json();
+    info({
+      msg: 'Soundcharts artist albums response',
+      data,
+    });
+    return data;
+  } catch (error) {
+    debug({
+      msg: 'Error fetching artist albums',
       uuid,
       error: error instanceof Error ? error.message : 'Unknown error',
     });

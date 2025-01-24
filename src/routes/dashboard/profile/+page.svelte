@@ -57,7 +57,12 @@
             origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
           });
         }, 250);
+      } else {
+        toast.error('Error updating profile', {
+          description: 'Please check the form for errors and try again',
+        });
       }
+
       // Re-enable the button after the submission is complete
       isSubmitting = false;
     },
