@@ -255,13 +255,13 @@ export async function getArtistStats(artistId: string) {
 export async function getArtistIdFromSpotify(spotifyId: string): Promise<string | null> {
   try {
     const response = await fetchFromSoundcharts<SoundchartsResponse<{ id: string }>>(
-      `/api/v2.9/artist/spotify/${spotifyId}`
+      `/api/v2.9/artist/by-platform/spotify/${spotifyId}`
     );
     return response?.data?.id || null;
   } catch (err) {
     logger.error('Failed to fetch artist ID from Spotify:', {
       spotifyId,
-      url: `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/spotify/${spotifyId}`,
+      url: `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`,
       error: err,
     });
     return null;
