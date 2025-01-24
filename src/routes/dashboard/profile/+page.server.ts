@@ -9,6 +9,17 @@ import { artists } from '$lib/db/schema';
 import { sql } from 'drizzle-orm';
 import { soundcharts } from '$lib/server/soundcharts';
 
+// Add this helper function at the top of the file
+function sanitizeUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const urlObj = new URL(url);
+    return urlObj.origin + urlObj.pathname;
+  } catch {
+    return url;
+  }
+}
+
 export const load = (async ({ locals }) => {
   const auth = await requireAuth(locals);
   if (!auth) {
@@ -69,11 +80,23 @@ export const actions = {
       return fail(400, { form });
     }
 
+    // Sanitize all URL fields
+    const sanitizedData = {
+      ...form.data,
+      website: sanitizeUrl(form.data.website),
+      spotify: sanitizeUrl(form.data.spotify),
+      instagram: sanitizeUrl(form.data.instagram),
+      facebook: sanitizeUrl(form.data.facebook),
+      x: sanitizeUrl(form.data.x),
+      youtube: sanitizeUrl(form.data.youtube),
+      tiktok: sanitizeUrl(form.data.tiktok),
+    };
+
     // Try to get Soundcharts ID if spotify URL is provided and soundchartsId is empty
     let soundchartsId = form.data.soundchartsId;
-    if (!soundchartsId && form.data.spotify) {
+    if (!soundchartsId && sanitizedData.spotify) {
       try {
-        const spotifyId = form.data.spotify.split('/').pop();
+        const spotifyId = sanitizedData.spotify.split('/').pop();
         if (spotifyId) {
           const artistData = await soundcharts.getArtistStats(spotifyId);
           if (artistData?.metadata?.object?.uuid) {
@@ -88,7 +111,7 @@ export const actions = {
     const [updatedArtist] = await db
       .insert(artists)
       .values({
-        ...form.data,
+        ...sanitizedData,
         soundchartsId,
         orgId: locals.auth.orgId,
         created: new Date(),
@@ -97,7 +120,7 @@ export const actions = {
       .onConflictDoUpdate({
         target: artists.orgId,
         set: {
-          ...form.data,
+          ...sanitizedData,
           soundchartsId,
           updated: new Date(),
         },
