@@ -8,6 +8,7 @@ import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { sql } from 'drizzle-orm';
 import { soundcharts } from '$lib/server/soundcharts';
+import { logger } from '$lib/utils/logger';
 
 // Add this helper function at the top of the file
 function sanitizeUrl(url: string | null | undefined): string | null {
@@ -54,7 +55,11 @@ export const load = (async ({ locals }) => {
     try {
       soundchartsData = await soundcharts.getArtistStats(artist.soundchartsId);
     } catch (err) {
-      console.error('Error fetching Soundcharts data:', err);
+      logger.error('Failed to fetch Soundcharts data', {
+        error: err,
+        artistId: artist.id,
+        soundchartsId: artist.soundchartsId,
+      });
     }
   }
 
@@ -76,7 +81,10 @@ export const actions = {
 
     const form = await superValidate(request, zod(artistSchema));
     if (!form.valid) {
-      console.warn('Form validation failed:', form.errors);
+      logger.warn('Profile form validation failed', {
+        errors: form.errors,
+        orgId: auth.orgId,
+      });
       return fail(400, { form });
     }
 
@@ -104,7 +112,11 @@ export const actions = {
           }
         }
       } catch (err) {
-        console.error('Error fetching Soundcharts ID:', err);
+        logger.error('Failed to fetch Soundcharts ID', {
+          error: err,
+          orgId: auth.orgId,
+          spotifyUrl: sanitizedData.spotify,
+        });
       }
     }
 
