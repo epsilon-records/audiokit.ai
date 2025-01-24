@@ -3,10 +3,7 @@
 
 import { error } from '@sveltejs/kit';
 import type { ArtistMetadata } from '$lib/types/stats';
-import { SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
-
-// Base URL for all Soundcharts API endpoints
-const SOUNDCHARTS_BASE_URL = 'https://customer.api.soundcharts.com';
+import { SOUNDCHARTS_BASE_URL, SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
 
 // Core API Types
 type SoundchartsErrorResponse = {
@@ -157,6 +154,100 @@ const defaultResponses = {
   },
 } as const;
 
+interface SoundchartsMetadata {
+  name: string;
+  image?: string;
+  genres?: string[];
+  country?: string;
+}
+
+interface SoundchartsStreaming {
+  spotify_monthly_listeners?: number;
+  spotify_followers?: number;
+  youtube_subscribers?: number;
+  youtube_views?: number;
+}
+
+interface SoundchartsSocial {
+  instagram_followers?: number;
+  twitter_followers?: number;
+  tiktok_followers?: number;
+  facebook_followers?: number;
+}
+
+export interface SoundchartsArtistStats {
+  metadata: SoundchartsMetadata;
+  streaming: SoundchartsStreaming;
+  followers: SoundchartsSocial;
+}
+
+async function fetchFromSoundcharts(endpoint: string) {
+  const response = await fetch(`${SOUNDCHARTS_API_BASE}${endpoint}`, {
+    headers: {
+      'x-api-key': SOUNDCHARTS_API_KEY,
+      Accept: 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      return null;
+    }
+    throw new Error(`Soundcharts API error: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function getArtistStats(spotifyId: string): Promise<SoundchartsArtistStats | null> {
+  try {
+    const data = await fetchFromSoundcharts(`/artist/spotify/${spotifyId}`);
+    if (!data) return null;
+
+    // Transform the API response into our standardized format
+    return {
+      metadata: {
+        name: data.name,
+        image: data.image,
+        genres: data.genres,
+        country: data.country,
+      },
+      streaming: {
+        spotify_monthly_listeners: data.platforms?.spotify?.monthlyListeners,
+        spotify_followers: data.platforms?.spotify?.followers,
+        youtube_subscribers: data.platforms?.youtube?.subscribers,
+        youtube_views: data.platforms?.youtube?.views,
+      },
+      followers: {
+        instagram_followers: data.platforms?.instagram?.followers,
+        twitter_followers: data.platforms?.twitter?.followers,
+        tiktok_followers: data.platforms?.tiktok?.followers,
+        facebook_followers: data.platforms?.facebook?.followers,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching Soundcharts data:', error);
+    return null;
+  }
+}
+
+export async function searchArtist(query: string) {
+  try {
+    const data = await fetchFromSoundcharts(`/search/artist?q=${encodeURIComponent(query)}`);
+    if (!data?.results) return [];
+
+    return data.results.map((artist: any) => ({
+      id: artist.id,
+      name: artist.name,
+      image: artist.image,
+      spotifyId: artist.platforms?.spotify?.id,
+    }));
+  } catch (error) {
+    console.error('Error searching Soundcharts:', error);
+    return [];
+  }
+}
+
 export class SoundchartsAPI {
   private readonly apiKey: string;
   private readonly appId: string;
@@ -194,12 +285,9 @@ export class SoundchartsAPI {
    * @param endpoint - API endpoint path
    * @param params - Optional query parameters
    */
-  private async fetch<T>(
-    endpoint: string,
-    params?: Record<string, string>
-  ): Promise<T> {
+  private async fetch<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
     const url = new URL(`${SOUNDCHARTS_BASE_URL}${endpoint}`);
-    
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         url.searchParams.append(key, value);
