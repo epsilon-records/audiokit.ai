@@ -1,75 +1,109 @@
-import { pgTable, text, json, boolean, timestamp, integer } from 'drizzle-orm/pg-core';
+import {
+  pgTable,
+  text,
+  json,
+  boolean,
+  uniqueIndex,
+  uuid,
+  timestamp,
+  date,
+} from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
-export const artists = pgTable('artists', {
-  appleMusic: text('apple_music').default(''),
-  artistPhotos: json('artist_photos').default([]),
-  bandcamp: text().default(''),
-  bandsintown: text().default(''),
-  biography: text().default(''),
-  birthdate: text().default(''),
-  city: text().default(''),
-  created: text().default(''),
-  email: text().default(''),
-  facebook: text().default(''),
-  id: text().default("'r'||lower(hex(randomblob(7)))").primaryKey().notNull(),
-  instagram: text().default(''),
-  legalName: text('legal_name').default(''),
-  linkedin: text().default(''),
-  mixcloud: text().default(''),
-  phone: text().default(''),
-  slug: text().default(''),
-  snapchat: text().default(''),
-  songkick: text().default(''),
-  soundcloud: text().default(''),
-  spotify: text().default(''),
-  stageName: text('stage_name').default(''),
-  tiktok: text().default(''),
-  twitch: text().default(''),
-  updated: text().default(''),
-  website: text().default(''),
-  x: text().default(''),
-  youtube: text().default(''),
-  country: text().default(''),
-  anr: text().default(''),
-  isSigned: boolean('is_signed').default(false),
-  orgId: text('org_id').default(''),
-});
+export const artists = pgTable(
+  'artists',
+  {
+    appleMusic: text('apple_music').default(''),
+    artistPhotos: json('artist_photos').default([]),
+    bandcamp: text().default(''),
+    bandsintown: text().default(''),
+    biography: text().default(''),
+    birthdate: date('birthdate'),
+    city: text().default(''),
+    created: timestamp('created', { withTimezone: true }).defaultNow().notNull(),
+    email: text().default(''),
+    facebook: text().default(''),
+    id: uuid('id')
+      .default(sql`uuid_generate_v4()`)
+      .notNull()
+      .primaryKey(),
+    instagram: text().default(''),
+    legalName: text('legal_name').default(''),
+    linkedin: text().default(''),
+    mixcloud: text().default(''),
+    phone: text().default(''),
+    slug: text().default(''),
+    snapchat: text().default(''),
+    songkick: text().default(''),
+    soundcloud: text().default(''),
+    spotify: text().default(''),
+    stageName: text('stage_name').default(''),
+    tiktok: text().default(''),
+    twitch: text().default(''),
+    updated: timestamp('updated', { withTimezone: true }).defaultNow().notNull(),
+    website: text().default(''),
+    x: text().default(''),
+    youtube: text().default(''),
+    country: text().default(''),
+    anr: text().default(''),
+    isSigned: boolean('is_signed').default(false),
+    orgId: text('org_id').default(''),
+    soundchartsId: text('soundcharts_id').default(''),
+    metadata: json('metadata').default({}),
+    streaming: json('streaming').default({}),
+    followers: json('followers').default({}),
+  },
+  (table) => ({
+    orgIdIdx: uniqueIndex('artists_org_id_idx').on(table.orgId),
+  })
+);
 
 export const labels = pgTable('labels', {
-  created: text().default(''),
-  id: text().default("'r'||lower(hex(randomblob(7)))").primaryKey().notNull(),
+  created: timestamp('created', { withTimezone: true }).defaultNow().notNull(),
+  id: uuid('id')
+    .default(sql`uuid_generate_v4()`)
+    .notNull()
+    .primaryKey(),
   name: text().default(''),
-  updated: text().default(''),
+  updated: timestamp('updated', { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const genres = pgTable('genres', {
-  created: text().default(''),
-  id: text().default("'r'||lower(hex(randomblob(7)))").primaryKey().notNull(),
+  created: timestamp('created', { withTimezone: true }).defaultNow().notNull(),
+  id: uuid('id')
+    .default(sql`uuid_generate_v4()`)
+    .notNull()
+    .primaryKey(),
   name: text().default(''),
-  updated: text().default(''),
+  updated: timestamp('updated', { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const subgenres = pgTable('subgenres', {
-  created: text().default(''),
+  created: timestamp('created', { withTimezone: true }).defaultNow().notNull(),
   genre: text().default(''),
-  id: text().default("'r'||lower(hex(randomblob(7)))").primaryKey().notNull(),
+  id: uuid('id')
+    .default(sql`uuid_generate_v4()`)
+    .notNull()
+    .primaryKey(),
   name: text().default(''),
-  updated: text().default(''),
+  updated: timestamp('updated', { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const releases = pgTable('releases', {
   catalogNumber: text('catalog_number').default(''),
-  created: text().default(''),
+  created: timestamp('created', { withTimezone: true }).defaultNow().notNull(),
   genre: text().default(''),
-  id: text().default("'r'||lower(hex(randomblob(7)))").primaryKey().notNull(),
+  id: uuid('id')
+    .default(sql`uuid_generate_v4()`)
+    .notNull()
+    .primaryKey(),
   isCompilation: boolean('is_compilation').default(false),
   label: text().default(''),
-  releaseDate: text('release_date').default(''),
+  releaseDate: date('release_date'),
   subgenre: text().default(''),
   releaseTitle: text('release_title').default(''),
   upcCode: text('upc_code').default(''),
-  updated: text().default(''),
+  updated: timestamp('updated', { withTimezone: true }).defaultNow().notNull(),
   releaseVersion: text('release_version').default(''),
   contracts: json().default([]),
   mediaAssets: json('media_assets').default([]),
@@ -81,34 +115,46 @@ export const releases = pgTable('releases', {
   bandcamp: text().default(''),
   vinyl: text().default(''),
   orgId: text('org_id').default(''),
+  labelId: uuid('label_id').references(() => labels.id),
+  genreId: uuid('genre_id').references(() => genres.id),
+  subgenreId: uuid('subgenre_id').references(() => subgenres.id),
 });
 
 export const languages = pgTable('languages', {
-  created: text().default(''),
-  id: text().default("'r'||lower(hex(randomblob(7)))").primaryKey().notNull(),
+  created: timestamp('created', { withTimezone: true }).defaultNow().notNull(),
+  id: uuid('id')
+    .default(sql`uuid_generate_v4()`)
+    .notNull()
+    .primaryKey(),
   name: text().default(''),
-  updated: text().default(''),
+  updated: timestamp('updated', { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const countries = pgTable('countries', {
-  created: text().default(''),
-  id: text().default("'r'||lower(hex(randomblob(7)))").primaryKey().notNull(),
+  created: timestamp('created', { withTimezone: true }).defaultNow().notNull(),
+  id: uuid('id')
+    .default(sql`uuid_generate_v4()`)
+    .notNull()
+    .primaryKey(),
   name: text().default(''),
-  updated: text().default(''),
+  updated: timestamp('updated', { withTimezone: true }).defaultNow().notNull(),
 });
 
 export const tracks = pgTable('tracks', {
   audioFile: text('audio_file').default(''),
-  created: text().default(''),
+  created: timestamp('created', { withTimezone: true }).defaultNow().notNull(),
   demoFiles: json('demo_files').default([]),
   explicitStatus: text('explicit_status').default(''),
   genre: text().default(''),
-  id: text().default("'r'||lower(hex(randomblob(7)))").primaryKey().notNull(),
+  id: uuid('id')
+    .default(sql`uuid_generate_v4()`)
+    .notNull()
+    .primaryKey(),
   mixVersion: text('mix_version').default(''),
   recordingLocation: text('recording_location').default(''),
   subgenre: text().default(''),
   trackTitle: text('track_title').default(''),
-  updated: text().default(''),
+  updated: timestamp('updated', { withTimezone: true }).defaultNow().notNull(),
   recordingYear: text('recording_year').default(''),
   isrcCode: text('isrc_code').default(''),
   lyrics: text().default(''),

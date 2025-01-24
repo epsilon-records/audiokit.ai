@@ -1,20 +1,20 @@
 import { z } from 'zod';
 
 export const artistSchema = z.object({
-  id: z
-    .string()
-    .length(15)
-    .regex(/^[a-z0-9]+$/),
-  org_id: z.string().optional(),
-  stage_name: z.string().min(1),
-  legal_name: z.string().min(1),
-  is_signed: z.boolean().optional(),
+  id: z.string().uuid(),
+  orgId: z.string().optional(),
+  stageName: z.string().min(1),
+  legalName: z.string().min(1),
+  isSigned: z.boolean().optional(),
   email: z.string().email(),
   phone: z.string().optional(),
   birthdate: z.string().optional(),
   city: z.string().optional(),
   country: z.string().optional(),
   biography: z.string().optional(),
+  artistPhotos: z.array(z.any()).optional(),
+  slug: z.string().optional(),
+  anr: z.string().optional(),
 
   // URLs with domain validation where specified
   website: z.string().url().optional().or(z.literal('')),
@@ -24,7 +24,7 @@ export const artistSchema = z.object({
     .regex(/^https?:\/\/open\.spotify\.com/)
     .optional()
     .or(z.literal('')),
-  apple_music: z
+  appleMusic: z
     .string()
     .url()
     .regex(/^https?:\/\/music\.apple\.com/)
@@ -104,6 +104,7 @@ export const artistSchema = z.object({
     .optional()
     .or(z.literal('')),
 
+  soundchartsId: z.string().optional(),
   created: z.string().optional(),
   updated: z.string().optional(),
 });

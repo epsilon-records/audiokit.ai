@@ -26,6 +26,12 @@ const defaultMetadata = {
     gender: 'other' as const,
     type: 'person' as const,
     birthDate: '',
+    location: '',
+    websiteUrl: '',
+    labels: [],
+    status: 'active' as const,
+    createdAt: '',
+    updatedAt: '',
   },
   errors: [],
 };
@@ -38,12 +44,26 @@ const defaultStreaming = {
       followers: 0,
       popularity: 0,
       playlists: 0,
+      topCities: [],
+      topTracks: [],
     },
     appleMusic: {
       playlists: 0,
+      rank: 0,
+      listeners: 0,
     },
     deezer: {
       fans: 0,
+      playlists: 0,
+      rank: 0,
+    },
+    amazonMusic: {
+      rank: 0,
+      playlists: 0,
+    },
+    youtubeMusic: {
+      subscribers: 0,
+      views: 0,
       playlists: 0,
     },
   },
@@ -61,8 +81,29 @@ const defaultFollowers = {
       tiktok: 0,
       facebook: 0,
       twitter: 0,
+      soundcloud: 0,
+      bandcamp: 0,
     },
     history: [] as { date: string; count: number }[],
+    engagement: {
+      instagram: {
+        avgLikes: 0,
+        avgComments: 0,
+        engagementRate: 0,
+      },
+      tiktok: {
+        avgLikes: 0,
+        avgComments: 0,
+        avgShares: 0,
+        engagementRate: 0,
+      },
+      youtube: {
+        avgViews: 0,
+        avgLikes: 0,
+        avgComments: 0,
+        engagementRate: 0,
+      },
+    },
   },
   errors: [],
 };
@@ -110,11 +151,12 @@ export const load = (async ({ locals }) => {
       auth,
       user,
       org,
-      metadata: metadata,
-      streaming: streaming,
-      followers: followers,
+      metadata,
+      streaming,
+      followers,
     };
   } catch (err) {
+    console.error('Error in dashboard load:', err);
     return {
       auth,
       user,

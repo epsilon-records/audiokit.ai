@@ -1,0 +1,7 @@
+{
+  "imports": {},
+  "scopes": {},
+  "allow": {
+    "net": ["customer.api.soundcharts.com"]
+  }
+}

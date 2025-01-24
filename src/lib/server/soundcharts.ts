@@ -1,7 +1,6 @@
 // Soundcharts API v2 Integration
 // Documentation: https://doc.api.soundcharts.com/api/v2/doc
 
-import { SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
 import type { ArtistMetadata } from '$lib/types/stats';
 
 // Base URL for all Soundcharts API endpoints
@@ -26,9 +25,82 @@ interface SoundchartsResponse<T> {
   }>;
 }
 
-// Default artist metadata structure
-const defaultMetadata = {
-  type: 'artist' as const,
+// Add these interfaces after the SoundchartsResponse interface
+interface StreamingStats {
+  spotify: {
+    monthlyListeners: number;
+    followers: number;
+    popularity: number;
+    playlists: number;
+  };
+  appleMusic: {
+    playlists: number;
+  };
+  deezer: {
+    fans: number;
+    playlists: number;
+  };
+}
+
+interface FollowersStats {
+  total: number;
+  platforms: {
+    spotify: number;
+    instagram: number;
+    youtube: number;
+    tiktok: number;
+    facebook: number;
+    twitter: number;
+  };
+  history: Array<{ date: string; count: number }>;
+}
+
+interface Song {
+  id: string;
+  title: string;
+  duration: number;
+  releaseDate: string;
+  isrc?: string;
+}
+
+interface Album {
+  id: string;
+  title: string;
+  type: 'album' | 'ep' | 'single';
+  releaseDate: string;
+  trackCount: number;
+  upc?: string;
+}
+
+interface AudienceStats {
+  demographics: {
+    age: Array<{ range: string; percentage: number }>;
+    gender: Array<{ type: string; percentage: number }>;
+  };
+  topCountries: Array<{ code: string; listeners: number }>;
+}
+
+interface PopularityStats {
+  score: number;
+  trend: 'up' | 'down' | 'stable';
+  history: Array<{ date: string; score: number }>;
+}
+
+// Define the base response type
+interface BaseResponse<T, K extends string> {
+  type: K;
+  object: T;
+  errors: string[];
+}
+
+// Define specific response types
+type ArtistResponse = BaseResponse<ArtistMetadata, 'artist'>;
+type StreamingResponse = BaseResponse<StreamingStats, 'streaming'>;
+type FollowersResponse = BaseResponse<FollowersStats, 'followers'>;
+
+// Update the default structures
+const defaultMetadata: ArtistResponse = {
+  type: 'artist',
   object: {
     uuid: '',
     slug: '',
@@ -40,16 +112,15 @@ const defaultMetadata = {
     biography: '',
     isni: '',
     ipi: '',
-    gender: 'other' as const,
-    type: 'person' as const,
+    gender: 'other',
+    type: 'person',
     birthDate: '',
   },
   errors: [],
 };
 
-// Default streaming statistics structure
-const defaultStreaming = {
-  type: 'streaming' as const,
+const defaultStreaming: StreamingResponse = {
+  type: 'streaming',
   object: {
     spotify: {
       monthlyListeners: 0,
@@ -68,9 +139,8 @@ const defaultStreaming = {
   errors: [],
 };
 
-// Default social media followers structure
-const defaultFollowers = {
-  type: 'followers' as const,
+const defaultFollowers: FollowersResponse = {
+  type: 'followers',
   object: {
     total: 0,
     platforms: {
@@ -81,18 +151,46 @@ const defaultFollowers = {
       facebook: 0,
       twitter: 0,
     },
-    history: [] as Array<{ date: string; count: number }>,
+    history: [],
   },
   errors: [],
 };
 
+const SOUNDCHARTS_API_KEY = Deno.env.get("SOUNDCHARTS_API_KEY") ?? "";
+const SOUNDCHARTS_APP_ID = Deno.env.get("SOUNDCHARTS_APP_ID") ?? "";
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+
 export class SoundchartsAPI {
   private apiKey: string;
   private appId: string;
+  private serviceRoleKey: string;
 
   constructor() {
+    if (!SOUNDCHARTS_API_KEY || !SOUNDCHARTS_APP_ID || !SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("Missing required environment variables");
+    }
     this.apiKey = SOUNDCHARTS_API_KEY;
     this.appId = SOUNDCHARTS_APP_ID;
+    this.serviceRoleKey = SUPABASE_SERVICE_ROLE_KEY;
+  }
+
+  /**
+   * Verify JWT token from request headers
+   * @param authHeader - Authorization header from request
+   */
+  private async verifyAuth(authHeader: string): Promise<boolean> {
+    try {
+      if (!authHeader?.startsWith('Bearer ')) {
+        return false;
+      }
+      const token = authHeader.split(' ')[1];
+      // Implement JWT verification here using this.serviceRoleKey
+      // Return true if valid, false if invalid
+      return true; // Placeholder - implement actual verification
+    } catch (error) {
+      console.error('Auth verification error:', error);
+      return false;
+    }
   }
 
   /**
@@ -136,37 +234,107 @@ export class SoundchartsAPI {
    */
   async getArtistStats(artistId: string) {
     try {
-      // Fetch artist metadata
-      const metadata = await this.fetch<SoundchartsResponse<ArtistMetadata>>(
-        `/api/v2.9/artist/${artistId}`
-      );
-
-      // TODO: Add additional API calls for streaming and followers data
-      // const streaming = await this.fetch(`/api/v2/artist/${artistId}/streaming`);
-      // const followers = await this.fetch(`/api/v2/artist/${artistId}/followers`);
+      const [metadataRes, streamingRes, followersRes] = await Promise.all([
+        this.fetch<SoundchartsResponse<ArtistMetadata>>(`/api/v2.9/artist/${artistId}`),
+        this.fetch<SoundchartsResponse<StreamingStats>>(`/api/v2/artist/${artistId}/streaming`),
+        this.fetch<SoundchartsResponse<FollowersStats>>(`/api/v2/artist/${artistId}/followers`)
+      ]);
 
       return {
-        metadata: { ...defaultMetadata, ...metadata.data },
-        streaming: { ...defaultStreaming },
-        followers: { ...defaultFollowers },
+        metadata: {
+          ...defaultMetadata,
+          object: { ...defaultMetadata.object, ...metadataRes.data }
+        },
+        streaming: {
+          ...defaultStreaming,
+          object: { ...defaultStreaming.object, ...streamingRes.data }
+        },
+        followers: {
+          ...defaultFollowers,
+          object: { ...defaultFollowers.object, ...followersRes.data }
+        }
       };
     } catch (error) {
       console.error('Error fetching artist stats:', error);
-      // Return default values if API calls fail
       return {
         metadata: { ...defaultMetadata },
         streaming: { ...defaultStreaming },
-        followers: { ...defaultFollowers },
+        followers: { ...defaultFollowers }
       };
     }
   }
 
-  // TODO: Add additional methods for other API endpoints:
-  // - getArtistSongs(artistId: string)
-  // - getArtistAlbums(artistId: string)
-  // - getArtistAudience(artistId: string)
-  // - getArtistPopularity(artistId: string)
-  // - searchArtist(query: string)
+  // Implement additional methods
+  async getArtistSongs(artistId: string) {
+    try {
+      const response = await this.fetch<SoundchartsResponse<Song[]>>(
+        `/api/v2/artist/${artistId}/songs`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching artist songs:', error);
+      return [];
+    }
+  }
+
+  async getArtistAlbums(artistId: string) {
+    try {
+      const response = await this.fetch<SoundchartsResponse<Album[]>>(
+        `/api/v2/artist/${artistId}/albums`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching artist albums:', error);
+      return [];
+    }
+  }
+
+  async getArtistAudience(artistId: string) {
+    try {
+      const response = await this.fetch<SoundchartsResponse<AudienceStats>>(
+        `/api/v2/artist/${artistId}/audience`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching artist audience:', error);
+      return {
+        demographics: {
+          age: [],
+          gender: []
+        },
+        topCountries: []
+      };
+    }
+  }
+
+  async getArtistPopularity(artistId: string) {
+    try {
+      const response = await this.fetch<SoundchartsResponse<PopularityStats>>(
+        `/api/v2/artist/${artistId}/popularity`
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching artist popularity:', error);
+      return {
+        score: 0,
+        trend: 'stable',
+        history: []
+      };
+    }
+  }
+
+  async searchArtist(query: string) {
+    try {
+      const response = await this.fetch<SoundchartsResponse<ArtistMetadata[]>>(
+        '/api/v2/search/artists',
+        { q: query }
+      );
+      return response.data;
+    } catch (error) {
+      console.error('Error searching artists:', error);
+      return [];
+    }
+  }
 }
 
 // Export singleton instance
