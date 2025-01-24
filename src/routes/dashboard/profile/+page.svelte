@@ -661,7 +661,7 @@
         <CardContent>
           <SuperDebug data={$formData} />
         </CardContent>
-      </Card>
+      </Card
     </form>
   </div>
 </div>
