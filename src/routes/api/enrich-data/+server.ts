@@ -202,6 +202,15 @@ interface HubspotUpdateFields {
   website?: string;
   phone?: string;
   legalName?: string;
+  spotify?: string;
+  appleMusic?: string;
+  soundcloud?: string;
+  bandcamp?: string;
+  facebook?: string;
+  instagram?: string;
+  mixcloud?: string;
+  tiktok?: string;
+  twitch?: string;
 }
 
 function validateArtistEmail(artist: typeof artists.$inferSelect, requestId: string) {
@@ -246,6 +255,35 @@ function buildUpdateFields(
   const lastName = hubspotData.properties.lastname;
   if ((!artist.legalName || artist.legalName === '') && firstName && lastName) {
     updates.legalName = `${firstName} ${lastName}`;
+  }
+
+  // Update additional fields from Hubspot
+  if ((!artist.spotify || artist.spotify === '') && hubspotData.properties.spotify) {
+    updates.spotify = hubspotData.properties.spotify;
+  }
+  if ((!artist.appleMusic || artist.appleMusic === '') && hubspotData.properties.apple_music) {
+    updates.appleMusic = hubspotData.properties.apple_music;
+  }
+  if ((!artist.soundcloud || artist.soundcloud === '') && hubspotData.properties.soundcloud) {
+    updates.soundcloud = hubspotData.properties.soundcloud;
+  }
+  if ((!artist.bandcamp || artist.bandcamp === '') && hubspotData.properties.bandcamp) {
+    updates.bandcamp = hubspotData.properties.bandcamp;
+  }
+  if ((!artist.facebook || artist.facebook === '') && hubspotData.properties.facebook) {
+    updates.facebook = hubspotData.properties.facebook;
+  }
+  if ((!artist.instagram || artist.instagram === '') && hubspotData.properties.instagram) {
+    updates.instagram = hubspotData.properties.instagram;
+  }
+  if ((!artist.mixcloud || artist.mixcloud === '') && hubspotData.properties.mixcloud) {
+    updates.mixcloud = hubspotData.properties.mixcloud;
+  }
+  if ((!artist.tiktok || artist.tiktok === '') && hubspotData.properties.tiktok) {
+    updates.tiktok = hubspotData.properties.tiktok;
+  }
+  if ((!artist.twitch || artist.twitch === '') && hubspotData.properties.twitch) {
+    updates.twitch = hubspotData.properties.twitch;
   }
 
   return updates;
