@@ -3,7 +3,7 @@
   import { Badge } from '$lib/components/ui/badge';
   import { Button } from '$lib/components/ui/button';
 
-  let { data } = $props<{ tracks: Track[] }>();
+  let { data } = $props();
   let tracks = $derived(data.tracks);
 </script>
 

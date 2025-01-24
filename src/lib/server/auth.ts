@@ -1,6 +1,11 @@
 import { stripe } from './stripe';
 import { redirect, error } from '@sveltejs/kit';
-import { clerkClient } from 'svelte-clerk/server';
+import {
+  clerkClient,
+  type EmailAddress,
+  type PhoneNumber,
+  type ExternalAccount,
+} from 'svelte-clerk/server';
 
 /**
  * Common error messages as constants to maintain consistency
@@ -197,26 +202,79 @@ export function redirectUnauthenticated(
  * Fetches detailed user information from Clerk
  * @async
  * @param {string} userId - The unique identifier of the Clerk user
- * @returns {Promise<Object>} Comprehensive user profile including personal and account details
+ * @returns {Promise<User>} Comprehensive user profile including personal and account details
  * @throws {Error} 400 error if user data cannot be retrieved
  */
-async function getUser(userId: string) {
+async function getUser(userId: string): Promise<User> {
   try {
     const user = await clerkClient.users.getUser(userId);
+
     return {
       id: user.id,
+      passwordEnabled: user.passwordEnabled,
+      totpEnabled: user.totpEnabled,
+      backupCodeEnabled: user.backupCodeEnabled,
+      twoFactorEnabled: user.twoFactorEnabled,
+      banned: user.banned,
+      locked: user.locked,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      imageUrl: user.imageUrl,
+      hasImage: user.hasImage,
+      primaryEmailAddressId: user.primaryEmailAddressId,
+      primaryPhoneNumberId: user.primaryPhoneNumberId,
+      primaryWeb3WalletId: user.primaryWeb3WalletId,
+      lastSignInAt: user.lastSignInAt,
+      externalId: user.externalId,
+      username: user.username,
       firstName: user.firstName,
       lastName: user.lastName,
-      username: user.username,
-      email: user.primaryEmailAddress?.emailAddress,
-      phone: user.primaryPhoneNumber?.phoneNumber,
-      imageUrl: user.imageUrl,
-      lastSignedInAt: user.lastSignInAt,
-      createdAt: user.createdAt,
+      publicMetadata: user.publicMetadata,
+      privateMetadata: user.privateMetadata,
+      unsafeMetadata: user.unsafeMetadata,
+      emailAddresses: user.emailAddresses,
+      phoneNumbers: user.phoneNumbers,
+      lastActiveAt: user.lastActiveAt,
+      createOrganizationEnabled: user.createOrganizationEnabled,
+      legalAcceptedAt: user.legalAcceptedAt,
     };
   } catch (err) {
     throw error(400, 'Unable to fetch user details');
   }
+}
+
+/**
+ * User interface matching Clerk's user schema
+ * @see https://clerk.com/docs/references/backend/user/get-user
+ */
+interface User {
+  id: string;
+  passwordEnabled: boolean;
+  totpEnabled: boolean;
+  backupCodeEnabled: boolean;
+  twoFactorEnabled: boolean;
+  banned: boolean;
+  locked: boolean;
+  createdAt: number;
+  updatedAt: number;
+  imageUrl: string | null;
+  hasImage: boolean;
+  primaryEmailAddressId: string | null;
+  primaryPhoneNumberId: string | null;
+  primaryWeb3WalletId: string | null;
+  lastSignInAt: number | null;
+  externalId: string | null;
+  username: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  publicMetadata: Record<string, any>;
+  privateMetadata: Record<string, any>;
+  unsafeMetadata: Record<string, any>;
+  emailAddresses: EmailAddress[];
+  phoneNumbers: PhoneNumber[];
+  lastActiveAt: number | null;
+  createOrganizationEnabled: boolean;
+  legalAcceptedAt: number | null;
 }
 
 /**

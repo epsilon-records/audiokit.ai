@@ -9,12 +9,9 @@
   let { data } = $props();
 
   // Use $derived for reactive values
-  let auth = $derived(data.auth);
   let user = $derived(data.user);
   let org = $derived(data.org);
-  let metadata = $derived(data.stats?.metadata);
-  let streaming = $derived(data.stats?.streaming);
-  let followers = $derived(data.stats?.followers);
+  let stats = $derived(data.stats);
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -23,7 +20,7 @@
     <p class="mt-2 text-lg text-muted-foreground">
       Get insights into your performance metrics and manage your artist profile.
     </p>
-    {#if !metadata}
+    {#if !stats?.metadata}
       <div class="mt-4" in:fly={{ y: 20, duration: 400, delay: 200 }}>
         <Badge
           variant="outline"
@@ -46,7 +43,7 @@
           Artist Information
         </h2>
       </div>
-      {#if metadata}
+      {#if stats?.metadata}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -61,9 +58,9 @@
                   <p class="text-lg font-semibold">{org.name}</p>
                 </div>
                 <div>
-                  <p class="text-sm text-muted-foreground">Members</p>
+                  <p class="text-sm text-muted-foreground">Team Members</p>
                   <p class="text-base">
-                    {org.membersCount} / {org.maxAllowedMemberships}
+                    {org.membersCount || 1} / {org.maxAllowedMemberships}
                   </p>
                 </div>
                 <div>
@@ -90,7 +87,7 @@
               <CardTitle>🎵 Genres</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
-              {#each metadata.genres as genre}
+              {#each stats?.metadata.genres as genre}
                 <div class="mb-4">
                   <p class="text-lg font-semibold capitalize">{genre.root}</p>
                   {#if genre.sub && genre.sub.length > 0}
@@ -117,16 +114,16 @@
               <CardTitle>📋 Professional Info</CardTitle>
             </CardHeader>
             <CardContent class="pt-6 space-y-4">
-              {#if metadata?.object?.isni}
+              {#if stats?.metadata?.object?.isni}
                 <div>
                   <p class="text-sm text-muted-foreground">ISNI</p>
-                  <p class="text-lg font-mono">{metadata?.object?.isni}</p>
+                  <p class="text-lg font-mono">{stats?.metadata?.object?.isni}</p>
                 </div>
               {/if}
-              {#if metadata?.object?.ipi}
+              {#if stats?.metadata?.object?.ipi}
                 <div>
                   <p class="text-sm text-muted-foreground">IPI</p>
-                  <p class="text-lg font-mono">{metadata?.object?.ipi}</p>
+                  <p class="text-lg font-mono">{stats?.metadata?.object?.ipi}</p>
                 </div>
               {/if}
               <div>
@@ -156,7 +153,7 @@
           Artist & Repertoire
         </h2>
       </div>
-      {#if metadata}
+      {#if user}
         <div class="grid gap-4">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -175,14 +172,22 @@
               </div>
               <div>
                 <p class="text-sm text-muted-foreground">Contact</p>
-                <p class="text-base">{user.email}</p>
-                {#if user.phone}
-                  <p class="text-base">{user.phone}</p>
+                {#each user.emailAddresses as email}
+                  <p class="text-base">{email}</p>
+                {/each}
+                {#each user.phoneNumbers as phone}
+                  <p class="text-base">{phone}</p>
+                {/each}
+              </div>
+              <div>
+                <p class="text-sm text-muted-foreground">Last Active</p>
+                {#if user.lastActiveAt}
+                  <p class="text-base">{new Date(user.lastActiveAt).toLocaleDateString()}</p>
                 {/if}
               </div>
               <div>
-                <p class="text-sm text-muted-foreground">Last Sign In</p>
-                <p class="text-base">{new Date(user.lastSignedInAt).toLocaleDateString()}</p>
+                <p class="text-sm text-muted-foreground">Joined</p>
+                <p class="text-base">{new Date(user.createdAt).toLocaleDateString()}</p>
               </div>
               <div class="flex justify-center">
                 <img
@@ -206,7 +211,7 @@
           Social Media Performance
         </h2>
       </div>
-      {#if followers}
+      {#if stats?.followers}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -223,7 +228,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(followers.spotify)}
+                {formatNumber(stats?.followers.spotify)}
               </div>
               <p class="text-xs text-muted-foreground">Followers</p>
             </CardContent>
@@ -244,7 +249,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(followers.instagram)}
+                {formatNumber(stats?.followers.instagram)}
               </div>
               <p class="text-xs text-muted-foreground">Followers</p>
             </CardContent>
@@ -265,7 +270,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(followers.twitter)}
+                {formatNumber(stats?.followers.twitter)}
               </div>
               <p class="text-xs text-muted-foreground">Followers</p>
             </CardContent>
@@ -286,7 +291,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(followers.facebook)}
+                {formatNumber(stats?.followers.facebook)}
               </div>
               <p class="text-xs text-muted-foreground">Followers</p>
             </CardContent>
@@ -304,7 +309,7 @@
           Streaming Analytics
         </h2>
       </div>
-      {#if streaming?.spotify}
+      {#if stats?.streaming}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -321,11 +326,13 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(streaming.spotify.items[streaming.spotify.items.length - 1].value)}
+                {formatNumber(
+                  stats?.streaming.spotify.items[stats?.streaming.spotify.items.length - 1].value
+                )}
               </div>
               <p class="text-xs text-muted-foreground">
                 As of {new Date(
-                  streaming.spotify.items[streaming.spotify.items.length - 1].date
+                  stats?.streaming.spotify.items[stats?.streaming.spotify.items.length - 1].date
                 ).toLocaleDateString()}
               </p>
             </CardContent>
@@ -340,7 +347,7 @@
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
                 {formatNumber(
-                  Math.max(...streaming.spotify.items.slice(-30).map((item) => item.value))
+                  Math.max(...stats?.streaming.spotify.items.slice(-30).map((item) => item.value))
                 )}
               </div>
               <p class="text-xs text-muted-foreground">Highest in last 30 days</p>
@@ -357,8 +364,9 @@
               <div class="text-2xl font-bold">
                 {formatNumber(
                   Math.round(
-                    streaming.spotify.items.slice(-30).reduce((acc, item) => acc + item.value, 0) /
-                      30
+                    stats?.streaming.spotify.items
+                      .slice(-30)
+                      .reduce((acc, item) => acc + item.value, 0) / 30
                   )
                 )}
               </div>
@@ -373,11 +381,11 @@
               <CardTitle>📱 Trend</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
-              {#if streaming.spotify.items.length >= 2}
+              {#if stats?.streaming.spotify.items.length >= 2}
                 {@const lastValue =
-                  streaming.spotify.items[streaming.spotify.items.length - 1].value}
+                  stats?.streaming.spotify.items[stats?.streaming.spotify.items.length - 1].value}
                 {@const prevValue =
-                  streaming.spotify.items[streaming.spotify.items.length - 2].value}
+                  stats?.streaming.spotify.items[stats?.streaming.spotify.items.length - 2].value}
                 {@const change = ((lastValue - prevValue) / prevValue) * 100}
                 <div class="text-2xl font-bold flex items-center gap-2">
                   <span class={change >= 0 ? 'text-green-600' : 'text-red-600'}>

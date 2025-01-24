@@ -19,7 +19,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   let tracks: Track[] = [];
   if (artist?.soundchartsId) {
     const tracksData = await getArtistTracks(artist.soundchartsId);
-    info({
+    debug({
       msg: 'Tracks data',
       data: tracksData,
     });

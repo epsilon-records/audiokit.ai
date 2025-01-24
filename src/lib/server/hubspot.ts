@@ -1,7 +1,7 @@
 import { HUBSPOT_API_KEY } from '$env/static/private';
 import type { artistSchema } from '$lib/schemas/artist';
 import type { z } from 'zod';
-import { info } from '$lib/utils/logger';
+import { debug } from '$lib/utils/logger';
 import { HUBSPOT_API_BASE, HUBSPOT_LIFECYCLE_STAGE_ARTIST } from '$env/static/private';
 
 interface HubspotContact {
@@ -54,7 +54,7 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
     });
 
     if (!searchResponse.ok) {
-      info({
+      debug({
         msg: 'HubSpot API error',
         searchResponse,
       });
@@ -62,7 +62,7 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
     }
 
     const searchData = await searchResponse.json();
-    info({
+    debug({
       msg: 'HubSpot search response',
       searchData,
     });
@@ -85,7 +85,7 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
     );
 
     if (!detailResponse.ok) {
-      info({
+      debug({
         msg: 'HubSpot API error fetching details',
         detailResponse,
       });
@@ -93,7 +93,7 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
     }
 
     const detailData = await detailResponse.json();
-    info({
+    debug({
       msg: 'HubSpot detail response',
       detailData,
     });
@@ -103,7 +103,7 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
       properties: detailData.properties,
     };
   } catch (error) {
-    info({
+    debug({
       msg: 'Error fetching HubSpot contact',
       error,
     });
@@ -123,7 +123,7 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
     // First try to find existing contact
     const existingContact = await getHubspotContact(artist.email);
 
-    info({
+    debug({
       msg: 'Existing HubSpot contact',
       existingContact,
     });
@@ -158,7 +158,7 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
         },
       },
     };
-    info({
+    debug({
       msg: 'HubSpot sync payload',
       endpoint,
       payload,
@@ -170,7 +170,7 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
       body: JSON.stringify(payload.body),
     });
 
-    info({
+    debug({
       msg: 'HubSpot sync response status',
       status: response.status,
       statusText: response.statusText,
@@ -178,7 +178,7 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
 
     if (!response.ok) {
       const errorText = await response.text();
-      info({
+      debug({
         msg: 'HubSpot API error',
         errorText,
       });
@@ -188,24 +188,24 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
     let responseData;
     try {
       responseData = await response.json();
-      info({
+      debug({
         msg: 'HubSpot sync response data',
         responseData,
       });
     } catch (parseError) {
-      info({
+      debug({
         msg: 'Error parsing HubSpot response JSON',
         parseError,
       });
       // Handle parsing error, possibly by reading response as text
       const responseText = await response.text();
-      info({
+      debug({
         msg: 'HubSpot response text',
         responseText,
       });
     }
   } catch (error) {
-    info({
+    debug({
       msg: 'Error syncing to HubSpot',
       error,
     });

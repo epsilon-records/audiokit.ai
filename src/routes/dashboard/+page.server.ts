@@ -5,6 +5,7 @@ import { getArtistStats } from '$lib/server/soundcharts';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
+import { info } from '$lib/utils/logger';
 
 export const load = (async ({ locals }) => {
   const auth = await requireAuth(locals);
@@ -30,9 +31,21 @@ export const load = (async ({ locals }) => {
     stats = await getArtistStats(artist.soundchartsId);
   }
 
+  info({
+    user: {
+      ...user,
+      emailAddresses: user.emailAddresses?.map((email) => email.emailAddress),
+      phoneNumbers: user.phoneNumbers?.map((phone) => phone.phoneNumber),
+    },
+  });
+
   return {
     auth,
-    user,
+    user: {
+      ...user,
+      emailAddresses: user.emailAddresses?.map((email) => email.emailAddress) ?? [],
+      phoneNumbers: user.phoneNumbers?.map((phone) => phone.phoneNumber) ?? [],
+    },
     org,
     stats,
   };
