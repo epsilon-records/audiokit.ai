@@ -58,14 +58,14 @@
                   <p class="text-lg font-semibold">{org.name}</p>
                 </div>
                 <div>
+                  <p class="text-sm text-muted-foreground">Slug</p>
+                  <p class="text-base font-semibold">@{org.slug}</p>
+                </div>
+                <div>
                   <p class="text-sm text-muted-foreground">Team Members</p>
                   <p class="text-base">
                     {org.membersCount || 1} / {org.maxAllowedMemberships}
                   </p>
-                </div>
-                <div>
-                  <p class="text-sm text-muted-foreground">Slug</p>
-                  <p class="text-base">@{org.slug}</p>
                 </div>
               </div>
               <div class="flex justify-center items-center pr-8">
@@ -114,18 +114,16 @@
               <CardTitle>📋 Professional Info</CardTitle>
             </CardHeader>
             <CardContent class="pt-6 space-y-4">
-              {#if stats?.metadata?.object?.isni}
-                <div>
-                  <p class="text-sm text-muted-foreground">ISNI</p>
-                  <p class="text-lg font-mono">{stats?.metadata?.object?.isni}</p>
-                </div>
-              {/if}
-              {#if stats?.metadata?.object?.ipi}
-                <div>
-                  <p class="text-sm text-muted-foreground">IPI</p>
-                  <p class="text-lg font-mono">{stats?.metadata?.object?.ipi}</p>
-                </div>
-              {/if}
+              <div>
+                <p class="text-sm text-muted-foreground">ISNI</p>
+                <p class="text-lg font-mono">{stats?.metadata?.object?.isni ?? 'Unknown'}</p>
+              </div>
+
+              <div>
+                <p class="text-sm text-muted-foreground">IPI</p>
+                <p class="text-lg font-mono">{stats?.metadata?.object?.ipi ?? 'Unknown'}</p>
+              </div>
+
               <div>
                 <p class="text-sm text-muted-foreground">Updated At</p>
                 <p class="text-lg font-semibold">
@@ -137,64 +135,6 @@
                 <p class="text-lg font-semibold">
                   {new Date(org.createdAt).toLocaleDateString()}
                 </p>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      {/if}
-    </div>
-
-    <!-- Artist & Repertoire -->
-    <div in:fly={{ y: 20, duration: 400, delay: 350 }} class="space-y-4">
-      <div class="flex items-center justify-between">
-        <h2
-          class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-500"
-        >
-          Artist & Repertoire
-        </h2>
-      </div>
-      {#if user}
-        <div class="grid gap-4">
-          <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
-            <CardHeader
-              class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 pb-6"
-            >
-              <CardTitle>👔 A&R Details</CardTitle>
-            </CardHeader>
-            <CardContent class="pt-6 space-y-4">
-              <div>
-                <p class="text-sm text-muted-foreground">Name</p>
-                <p class="text-lg font-semibold">{user.firstName} {user.lastName}</p>
-              </div>
-              <div>
-                <p class="text-sm text-muted-foreground">Username</p>
-                <p class="text-lg font-semibold">@{user.username}</p>
-              </div>
-              <div>
-                <p class="text-sm text-muted-foreground">Contact</p>
-                {#each user.emailAddresses as email}
-                  <p class="text-base">{email}</p>
-                {/each}
-                {#each user.phoneNumbers as phone}
-                  <p class="text-base">{phone}</p>
-                {/each}
-              </div>
-              <div>
-                <p class="text-sm text-muted-foreground">Last Active</p>
-                {#if user.lastActiveAt}
-                  <p class="text-base">{new Date(user.lastActiveAt).toLocaleDateString()}</p>
-                {/if}
-              </div>
-              <div>
-                <p class="text-sm text-muted-foreground">Joined</p>
-                <p class="text-base">{new Date(user.createdAt).toLocaleDateString()}</p>
-              </div>
-              <div class="flex justify-center">
-                <img
-                  src={user.imageUrl}
-                  alt="A&R Representative"
-                  class="w-24 h-24 rounded-full object-cover border-2 border-black"
-                />
               </div>
             </CardContent>
           </Card>
@@ -394,6 +334,68 @@
                 </div>
                 <p class="text-xs text-muted-foreground">Daily change</p>
               {/if}
+            </CardContent>
+          </Card>
+        </div>
+      {/if}
+    </div>
+
+    <!-- Artist & Repertoire -->
+    <div in:fly={{ y: 20, duration: 400, delay: 350 }} class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2
+          class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-500"
+        >
+          Artist & Repertoire
+        </h2>
+      </div>
+      {#if user}
+        <div class="grid gap-4">
+          <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+            <CardHeader
+              class="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900 pb-6"
+            >
+              <CardTitle>👔 A&R Details</CardTitle>
+            </CardHeader>
+            <CardContent class="pt-6 space-y-4 flex justify-between">
+              <div class="flex-1 space-y-4">
+                <div>
+                  <p class="text-sm text-muted-foreground">Name</p>
+                  <p class="text-lg font-semibold">{user.firstName} {user.lastName}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-muted-foreground">Username</p>
+                  <p class="text-lg font-semibold">@{user.username}</p>
+                </div>
+                <div>
+                  <p class="text-sm text-muted-foreground">Contact</p>
+                  {#each user.emailAddresses as email}
+                    <p class="text-base">{email}</p>
+                  {/each}
+                  {#each user.phoneNumbers as phone}
+                    <p class="text-base">{phone}</p>
+                  {/each}
+                </div>
+                <div>
+                  <p class="text-sm text-muted-foreground">Last Active</p>
+                  {#if user.lastActiveAt}
+                    <p class="text-base">{new Date(user.lastActiveAt).toLocaleDateString()}</p>
+                  {/if}
+                </div>
+                <div>
+                  <p class="text-sm text-muted-foreground">Joined</p>
+                  <p class="text-base">{new Date(user.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div class="flex justify-center items-center pr-8">
+                <div class="w-48 h-48 m-4 flex-shrink-0">
+                  <img
+                    src={user.imageUrl}
+                    alt="A&R Representative"
+                    class="w-full h-full rounded-full object-cover border-2 border-black"
+                  />
+                </div>
+              </div>
             </CardContent>
           </Card>
         </div>
