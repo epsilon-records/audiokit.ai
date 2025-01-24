@@ -27,8 +27,8 @@ export const load = (async ({ locals }) => {
       .insert(artists)
       .values({
         orgId: auth.orgId,
-        created: new Date().toISOString(),
-        updated: new Date().toISOString(),
+        created: new Date(),
+        updated: new Date(),
       })
       .returning()
       .then((rows) => rows[0]));
@@ -58,63 +58,56 @@ export const load = (async ({ locals }) => {
 
 export const actions = {
   default: async ({ request, locals }) => {
-    try {
-      const auth = await requireAuth(locals);
-      if (!auth) {
-        throw error(401, 'Unauthorized');
-      }
+    const auth = await requireAuth(locals);
+    if (!auth) {
+      throw error(401, 'Unauthorized');
+    }
 
-      const form = await superValidate(request, zod(artistSchema));
-      if (!form.valid) {
-        console.warn('Form validation failed:', form.errors);
-        return fail(400, { form });
-      }
+    const form = await superValidate(request, zod(artistSchema));
+    if (!form.valid) {
+      console.warn('Form validation failed:', form.errors);
+      return fail(400, { form });
+    }
 
-      // Try to get Soundcharts ID if spotify URL is provided and soundchartsId is empty
-      let soundchartsId = form.data.soundchartsId;
-      if (!soundchartsId && form.data.spotify) {
-        try {
-          const spotifyId = form.data.spotify.split('/').pop();
-          if (spotifyId) {
-            const artistData = await soundcharts.getArtistStats(spotifyId);
-            if (artistData?.metadata?.object?.uuid) {
-              soundchartsId = artistData.metadata.object.uuid;
-            }
+    // Try to get Soundcharts ID if spotify URL is provided and soundchartsId is empty
+    let soundchartsId = form.data.soundchartsId;
+    if (!soundchartsId && form.data.spotify) {
+      try {
+        const spotifyId = form.data.spotify.split('/').pop();
+        if (spotifyId) {
+          const artistData = await soundcharts.getArtistStats(spotifyId);
+          if (artistData?.metadata?.object?.uuid) {
+            soundchartsId = artistData.metadata.object.uuid;
           }
-        } catch (err) {
-          console.error('Error fetching Soundcharts ID:', err);
         }
+      } catch (err) {
+        console.error('Error fetching Soundcharts ID:', err);
       }
+    }
 
-      const [updatedArtist] = await db
-        .insert(artists)
-        .values({
+    const [updatedArtist] = await db
+      .insert(artists)
+      .values({
+        ...form.data,
+        soundchartsId,
+        orgId: locals.auth.orgId,
+        created: new Date(),
+        updated: new Date(),
+      })
+      .onConflictDoUpdate({
+        target: artists.orgId,
+        set: {
           ...form.data,
           soundchartsId,
-          orgId: locals.auth.orgId,
-          created: new Date().toISOString(),
-          updated: new Date().toISOString(),
-        })
-        .onConflictDoUpdate({
-          target: artists.orgId,
-          set: {
-            ...form.data,
-            soundchartsId,
-            updated: new Date().toISOString(),
-          },
-        })
-        .returning();
+          updated: new Date(),
+        },
+      })
+      .returning();
 
-      if (!updatedArtist) {
-        throw new Error('Failed to update artist record');
-      }
-
-      return message(form, 'Profile updated successfully!');
-    } catch (err) {
-      console.error('Error in profile update action:', err);
-      return message(form, `Failed to update profile: ${err.message}`, {
-        status: 500,
-      });
+    if (!updatedArtist) {
+      throw new Error('Failed to update artist record');
     }
+
+    return message(form, 'Profile updated successfully!');
   },
 };
