@@ -305,19 +305,18 @@ export class SoundchartsAPI {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw error(response.status, {
-          message: 'Soundcharts API error',
-          details: errorData?.errors?.[0]?.message ?? 'Unknown error',
-        });
+        console.error(`Soundcharts API request failed for URL: ${url.toString()}`);
+        throw error(
+          response.status,
+          `Soundcharts API error: ${errorData?.errors?.[0]?.message ?? 'Unknown error'}`
+        );
       }
 
       return response.json();
     } catch (err) {
+      console.error(`Failed to fetch from Soundcharts API URL: ${url.toString()}`, err);
       if (err instanceof Error) {
-        throw error(500, {
-          message: 'Failed to fetch from Soundcharts API',
-          details: err.message,
-        });
+        throw error(500, `Failed to fetch from Soundcharts API: ${err.message}`);
       }
       throw err;
     }
