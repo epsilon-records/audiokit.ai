@@ -1,7 +1,6 @@
 // Soundcharts API v2 Integration
 // Documentation: https://doc.api.soundcharts.com/api/v2/doc
 
-import { error } from '@sveltejs/kit';
 import type { ArtistMetadata } from '$lib/types/stats';
 import { SOUNDCHARTS_API_BASE, SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
 import logger from '$lib/utils/logger';
@@ -423,14 +422,13 @@ export class SoundchartsAPI {
   async getArtistIdFromSpotify(spotifyId: string): Promise<string | null> {
     try {
       const response = await this.fetch<SoundchartsResponse<{ id: string }>>(
-        '/api/v2/artist/spotify',
-        { id: spotifyId }
+        `/api/v2.9/artist/by-platform/spotify/${spotifyId}`
       );
       return response?.data?.id || null;
     } catch (err) {
       logger.error('Failed to fetch artist ID from Spotify:', {
         spotifyId,
-        url: `${SOUNDCHARTS_API_BASE}/api/v2/artist/spotify?id=${spotifyId}`,
+        url: `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`,
         error: err,
       });
       return null;
