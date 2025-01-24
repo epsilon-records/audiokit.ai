@@ -183,21 +183,27 @@ export interface SoundchartsArtistStats {
 }
 
 async function fetchFromSoundcharts(endpoint: string) {
-  const response = await fetch(`${SOUNDCHARTS_API_BASE}${endpoint}`, {
-    headers: {
-      'x-api-key': SOUNDCHARTS_API_KEY,
-      Accept: 'application/json',
-    },
-  });
+  try {
+    const response = await fetch(`${SOUNDCHARTS_API_BASE}${endpoint}`, {
+      headers: {
+        'x-api-key': SOUNDCHARTS_API_KEY,
+        Accept: 'application/json',
+      },
+    });
 
-  if (!response.ok) {
-    if (response.status === 404) {
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      logger.error(`Soundcharts API error: ${response.statusText}`);
       return null;
     }
-    throw new Error(`Soundcharts API error: ${response.statusText}`);
-  }
 
-  return response.json();
+    return response.json();
+  } catch (err) {
+    logger.error('Error fetching from Soundcharts:', err);
+    return null;
+  }
 }
 
 export async function getArtistStats(spotifyId: string): Promise<SoundchartsArtistStats | null> {
@@ -255,7 +261,10 @@ export class SoundchartsAPI {
 
   constructor() {
     if (!SOUNDCHARTS_API_KEY || !SOUNDCHARTS_APP_ID) {
-      throw error(500, 'Missing required Soundcharts API credentials');
+      logger.error('Missing required Soundcharts API credentials');
+      this.apiKey = '';
+      this.appId = '';
+      return;
     }
     this.apiKey = SOUNDCHARTS_API_KEY;
     this.appId = SOUNDCHARTS_APP_ID;
@@ -286,7 +295,7 @@ export class SoundchartsAPI {
    * @param endpoint - API endpoint path
    * @param params - Optional query parameters
    */
-  private async fetch<T>(endpoint: string, params?: Record<string, string>): Promise<T> {
+  private async fetch<T>(endpoint: string, params?: Record<string, string>): Promise<T | null> {
     const url = new URL(`${SOUNDCHARTS_API_BASE}${endpoint}`);
 
     if (params) {
@@ -305,21 +314,14 @@ export class SoundchartsAPI {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
         logger.error(`Soundcharts API request failed for URL: ${url.toString()}`);
-        throw error(
-          response.status,
-          `Soundcharts API error: ${errorData?.errors?.[0]?.message ?? 'Unknown error'}`
-        );
+        return null;
       }
 
       return response.json();
     } catch (err) {
       logger.error(`Failed to fetch from Soundcharts API URL: ${url.toString()}`, err);
-      if (err instanceof Error) {
-        throw error(500, `Failed to fetch from Soundcharts API: ${err.message}`);
-      }
-      throw err;
+      return null;
     }
   }
 
@@ -339,15 +341,15 @@ export class SoundchartsAPI {
       return {
         metadata: {
           ...defaultResponses.metadata,
-          object: { ...defaultResponses.metadata.object, ...metadataRes.data },
+          object: { ...defaultResponses.metadata.object, ...(metadataRes?.data || {}) },
         },
         streaming: {
           ...defaultResponses.streaming,
-          object: { ...defaultResponses.streaming.object, ...streamingRes.data },
+          object: { ...defaultResponses.streaming.object, ...(streamingRes?.data || {}) },
         },
         followers: {
           ...defaultResponses.followers,
-          object: { ...defaultResponses.followers.object, ...followersRes.data },
+          object: { ...defaultResponses.followers.object, ...(followersRes?.data || {}) },
         },
       };
     } catch (err) {
@@ -362,7 +364,7 @@ export class SoundchartsAPI {
       const response = await this.fetch<SoundchartsResponse<Song[]>>(
         `/api/v2/artist/${artistId}/songs`
       );
-      return response.data;
+      return response?.data || [];
     } catch (err) {
       logger.error('Failed to fetch artist songs:', err);
       return [];
@@ -374,7 +376,7 @@ export class SoundchartsAPI {
       const response = await this.fetch<SoundchartsResponse<Album[]>>(
         `/api/v2/artist/${artistId}/albums`
       );
-      return response.data;
+      return response?.data || [];
     } catch (err) {
       logger.error('Failed to fetch artist albums:', err);
       return [];
@@ -386,13 +388,10 @@ export class SoundchartsAPI {
       const response = await this.fetch<SoundchartsResponse<AudienceStats>>(
         `/api/v2/artist/${artistId}/audience`
       );
-      return response.data;
+      return response?.data || { demographics: { age: [], gender: [] }, topCountries: [] };
     } catch (err) {
       logger.error('Failed to fetch artist audience:', err);
-      return {
-        demographics: { age: [], gender: [] },
-        topCountries: [],
-      };
+      return { demographics: { age: [], gender: [] }, topCountries: [] };
     }
   }
 
@@ -401,14 +400,10 @@ export class SoundchartsAPI {
       const response = await this.fetch<SoundchartsResponse<PopularityStats>>(
         `/api/v2/artist/${artistId}/popularity`
       );
-      return response.data;
+      return response?.data || { score: 0, trend: 'stable', history: [] };
     } catch (err) {
       logger.error('Failed to fetch artist popularity:', err);
-      return {
-        score: 0,
-        trend: 'stable',
-        history: [],
-      };
+      return { score: 0, trend: 'stable', history: [] };
     }
   }
 
@@ -418,7 +413,7 @@ export class SoundchartsAPI {
         '/api/v2/search/artists',
         { q: query }
       );
-      return response.data;
+      return response?.data || [];
     } catch (err) {
       logger.error('Failed to search artists:', err);
       return [];
@@ -431,7 +426,7 @@ export class SoundchartsAPI {
         '/api/v2/artist/spotify',
         { id: spotifyId }
       );
-      return response.data.id;
+      return response?.data?.id || null;
     } catch (err) {
       logger.error('Failed to fetch artist ID from Spotify:', {
         spotifyId,
