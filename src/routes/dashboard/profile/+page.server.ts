@@ -7,8 +7,7 @@ import { artistSchema } from '$lib/schemas/artist';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { sql } from 'drizzle-orm';
-import { getArtistIdFromSpotify, getArtistStats } from '$lib/server/soundcharts';
-import logger from '$lib/utils/logger';
+import { debug, warn } from '$lib/utils/logger';
 
 // Add this helper function at the top of the file
 function sanitizeUrl(url: string | null | undefined): string | null {
@@ -79,7 +78,7 @@ export const actions = {
 
     const form = await superValidate(request, zod(artistSchema));
     if (!form.valid) {
-      logger.warn('Profile form validation failed', {
+      warn('Profile form validation failed', {
         errors: form.errors,
         orgId: auth.orgId,
       });

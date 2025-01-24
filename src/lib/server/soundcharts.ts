@@ -1,5 +1,5 @@
 import { SOUNDCHARTS_API_BASE, SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
-import logger from '$lib/utils/logger';
+import { debug, warn } from '$lib/utils/logger';
 
 /**
  * Get Soundcharts artist ID from Spotify ID
@@ -7,7 +7,7 @@ import logger from '$lib/utils/logger';
 export async function getArtistIdFromSpotify(spotifyId: string): Promise<string | null> {
   const url = `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`;
   try {
-    logger.info({
+    debug({
       msg: 'Fetching Soundcharts ID',
       url,
       spotifyId,
@@ -22,7 +22,7 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
     });
 
     if (!response.ok) {
-      logger.warn({
+      warn({
         msg: 'Failed to fetch Soundcharts ID from Spotify',
         spotifyId,
         status: response.status,
@@ -32,13 +32,13 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
 
     const data = await response.json();
 
-    logger.info({
+    debug({
       msg: 'Soundcharts artist response',
       data,
     });
 
     if (!data.object?.uuid) {
-      logger.warn({
+      warn({
         msg: 'No Soundcharts ID found for Spotify',
         spotifyId,
       });
@@ -47,7 +47,7 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
 
     return data.object.uuid;
   } catch (error) {
-    logger.error({
+    debug({
       msg: 'Error fetching Soundcharts ID from Spotify',
       spotifyId,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -62,7 +62,7 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
 export async function getArtistMetadata(uuid: string): Promise<any | null> {
   const url = `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/${uuid}`;
   try {
-    logger.info({
+    debug({
       msg: 'Fetching Soundcharts artist metadata',
       url,
       uuid,
@@ -77,7 +77,7 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
     });
 
     if (!response.ok) {
-      logger.warn({
+      warn({
         msg: 'Failed to fetch Soundcharts artist metadata',
         uuid,
         status: response.status,
@@ -87,14 +87,14 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
 
     const data = await response.json();
 
-    logger.info({
+    debug({
       msg: 'Soundcharts artist metadata response',
       data,
     });
 
     return data;
   } catch (error) {
-    logger.error({
+    debug({
       msg: 'Error fetching Soundcharts artist metadata',
       uuid,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -112,7 +112,7 @@ export async function getArtistStreamingAudience(
 ): Promise<any | null> {
   const url = `${SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/streaming/${platform}/listening`;
   try {
-    logger.info({
+    debug({
       msg: 'Fetching Soundcharts streaming audience',
       url,
       uuid,
@@ -128,7 +128,7 @@ export async function getArtistStreamingAudience(
     });
 
     if (!response.ok) {
-      logger.warn({
+      warn({
         msg: 'Failed to fetch Soundcharts streaming audience',
         uuid,
         platform,
@@ -139,14 +139,14 @@ export async function getArtistStreamingAudience(
 
     const data = await response.json();
 
-    logger.info({
+    debug({
       msg: 'Soundcharts streaming audience response',
       data,
     });
 
     return data;
   } catch (error) {
-    logger.error({
+    debug({
       msg: 'Error fetching Soundcharts streaming audience',
       uuid,
       platform,
@@ -162,7 +162,7 @@ export async function getArtistStreamingAudience(
 async function getArtistAudience(uuid: string, platform: string): Promise<any | null> {
   const url = `${SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/audience/${platform}`;
   try {
-    logger.info({
+    debug({
       msg: 'Fetching artist audience data',
       url,
       uuid,
@@ -178,7 +178,7 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
     });
 
     if (!response.ok) {
-      logger.warn({
+      warn({
         msg: 'Failed to fetch artist audience data',
         uuid,
         platform,
@@ -189,7 +189,7 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
 
     return await response.json();
   } catch (error) {
-    logger.error({
+    debug({
       msg: 'Error fetching artist audience data',
       uuid,
       platform,
@@ -272,7 +272,7 @@ export async function getArtistStats(uuid: string): Promise<{
       followers,
     };
   } catch (error) {
-    logger.error({
+    debug({
       msg: 'Error fetching Soundcharts artist stats',
       uuid,
       error: error instanceof Error ? error.message : 'Unknown error',
