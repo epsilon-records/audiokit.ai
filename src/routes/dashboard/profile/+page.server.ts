@@ -49,51 +49,6 @@ export const load = (async ({ locals }) => {
     throw error(500, 'Failed to create or retrieve artist record');
   }
 
-  // Fetch Soundcharts data
-  let soundchartsData = null;
-  if (artist.soundchartsId) {
-    try {
-      soundchartsData = await getArtistStats(artist.soundchartsId);
-    } catch (err) {
-      logger.error('Failed to fetch Soundcharts data', {
-        error: err,
-        artistId: artist.id,
-        soundchartsId: artist.soundchartsId,
-      });
-    }
-  } else if (artist.spotify) {
-    try {
-      // Extract Spotify ID from URL
-      const spotifyUrl = new URL(artist.spotify);
-      const spotifyId = spotifyUrl.pathname.split('/').pop();
-
-      if (spotifyId) {
-        // Get Soundcharts ID using Spotify ID
-        const soundchartsId = await getArtistIdFromSpotify(spotifyId);
-
-        if (soundchartsId) {
-          // Update artist record with new Soundcharts ID
-          await db
-            .update(artists)
-            .set({
-              soundchartsId,
-              updated: new Date(),
-            })
-            .where(sql`${artists.orgId} = ${auth.orgId}`);
-
-          // Fetch the stats with the new ID
-          soundchartsData = await getArtistStats(soundchartsId);
-        }
-      }
-    } catch (err) {
-      logger.error('Failed to fetch/update Soundcharts data from Spotify ID', {
-        error: err,
-        artistId: artist.id,
-        spotifyUrl: artist.spotify,
-      });
-    }
-  }
-
   const formData = Object.fromEntries(
     Object.entries(artist).map(([key, value]) => [key, value === null ? undefined : value])
   );
