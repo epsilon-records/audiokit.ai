@@ -1,6 +1,7 @@
 import { HUBSPOT_API_KEY } from '$env/static/private';
 import type { artistSchema } from '$lib/schemas/artist';
 import type { z } from 'zod';
+import logger from '$lib/utils/logger';
 
 const HUBSPOT_API_BASE = 'https://api.hubapi.com';
 
@@ -116,7 +117,7 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
       throw new Error(`HubSpot API error: ${await response.text()}`);
     }
   } catch (error) {
-    console.error('Error syncing to HubSpot:', error);
+    logger.error('Error syncing to HubSpot:', error);
     // Don't throw the error - we don't want to break the main flow if HubSpot sync fails
   }
 }

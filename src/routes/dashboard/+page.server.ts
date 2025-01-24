@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { artists } from '$lib/db/schema';
 import { soundcharts } from '$lib/server/soundcharts';
 import { getUser, getOrg, requireAuth } from '$lib/server/auth';
+import logger from '$lib/utils/logger';
 
 const defaultMetadata = {
   type: 'artist' as const,
@@ -156,7 +157,7 @@ export const load = (async ({ locals }) => {
       followers,
     };
   } catch (err) {
-    console.error('Error in dashboard load:', err);
+    logger.error('Error in dashboard load:', err);
     return {
       auth,
       user,

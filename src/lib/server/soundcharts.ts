@@ -4,6 +4,7 @@
 import { error } from '@sveltejs/kit';
 import type { ArtistMetadata } from '$lib/types/stats';
 import { SOUNDCHARTS_API_BASE, SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
+import logger from '$lib/utils/logger';
 
 // Core API Types
 type SoundchartsErrorResponse = {
@@ -226,7 +227,7 @@ export async function getArtistStats(spotifyId: string): Promise<SoundchartsArti
       },
     };
   } catch (error) {
-    console.error('Error fetching Soundcharts data:', error);
+    logger.error('Error fetching Soundcharts data:', error);
     return null;
   }
 }
@@ -243,7 +244,7 @@ export async function searchArtist(query: string) {
       spotifyId: artist.platforms?.spotify?.id,
     }));
   } catch (error) {
-    console.error('Error searching Soundcharts:', error);
+    logger.error('Error searching Soundcharts:', error);
     return [];
   }
 }
@@ -274,7 +275,7 @@ export class SoundchartsAPI {
       // Return true if valid, false if invalid
       return true; // Placeholder - implement actual verification
     } catch (error) {
-      console.error('Auth verification error:', error);
+      logger.error('Auth verification error:', error);
       return false;
     }
   }
@@ -305,7 +306,7 @@ export class SoundchartsAPI {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        console.error(`Soundcharts API request failed for URL: ${url.toString()}`);
+        logger.error(`Soundcharts API request failed for URL: ${url.toString()}`);
         throw error(
           response.status,
           `Soundcharts API error: ${errorData?.errors?.[0]?.message ?? 'Unknown error'}`
@@ -314,7 +315,7 @@ export class SoundchartsAPI {
 
       return response.json();
     } catch (err) {
-      console.error(`Failed to fetch from Soundcharts API URL: ${url.toString()}`, err);
+      logger.error(`Failed to fetch from Soundcharts API URL: ${url.toString()}`, err);
       if (err instanceof Error) {
         throw error(500, `Failed to fetch from Soundcharts API: ${err.message}`);
       }
@@ -350,7 +351,7 @@ export class SoundchartsAPI {
         },
       };
     } catch (err) {
-      console.error('Failed to fetch artist stats:', err);
+      logger.error('Failed to fetch artist stats:', err);
       return defaultResponses;
     }
   }
@@ -363,7 +364,7 @@ export class SoundchartsAPI {
       );
       return response.data;
     } catch (err) {
-      console.error('Failed to fetch artist songs:', err);
+      logger.error('Failed to fetch artist songs:', err);
       return [];
     }
   }
@@ -375,7 +376,7 @@ export class SoundchartsAPI {
       );
       return response.data;
     } catch (err) {
-      console.error('Failed to fetch artist albums:', err);
+      logger.error('Failed to fetch artist albums:', err);
       return [];
     }
   }
@@ -387,7 +388,7 @@ export class SoundchartsAPI {
       );
       return response.data;
     } catch (err) {
-      console.error('Failed to fetch artist audience:', err);
+      logger.error('Failed to fetch artist audience:', err);
       return {
         demographics: { age: [], gender: [] },
         topCountries: [],
@@ -402,7 +403,7 @@ export class SoundchartsAPI {
       );
       return response.data;
     } catch (err) {
-      console.error('Failed to fetch artist popularity:', err);
+      logger.error('Failed to fetch artist popularity:', err);
       return {
         score: 0,
         trend: 'stable',
@@ -419,7 +420,7 @@ export class SoundchartsAPI {
       );
       return response.data;
     } catch (err) {
-      console.error('Failed to search artists:', err);
+      logger.error('Failed to search artists:', err);
       return [];
     }
   }
@@ -432,7 +433,11 @@ export class SoundchartsAPI {
       );
       return response.data.id;
     } catch (err) {
-      console.error('Failed to fetch artist ID from Spotify:', err);
+      logger.error('Failed to fetch artist ID from Spotify:', {
+        spotifyId,
+        url: `${SOUNDCHARTS_API_BASE}/api/v2/artist/spotify?id=${spotifyId}`,
+        error: err,
+      });
       return null;
     }
   }
