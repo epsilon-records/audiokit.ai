@@ -1,8 +1,8 @@
-import { db } from '$lib/db';
-import { artists } from '$lib/db/schema';
-import { getHubspotContact } from '$lib/server/hubspot';
+import { db } from '../../db/index.js';
+import { artists } from '../../db/schema.js';
+import { getHubspotContact } from '../hubspot.js';
 import { eq } from 'drizzle-orm';
-import { debug, warn } from '$lib/utils/logger';
+import { debug, warn } from '../../utils/logger.js';
 import { error } from '@sveltejs/kit';
 
 interface HubspotUpdateFields {

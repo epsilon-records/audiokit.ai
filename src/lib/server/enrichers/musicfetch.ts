@@ -1,10 +1,10 @@
-import { db } from '$lib/db';
-import { artists } from '$lib/db/schema';
-import { getMusicfetchData } from '$lib/server/musicfetch';
+import { db } from '../../db/index.js';
+import { artists } from '../../db/schema.js';
+import { getMusicfetchData } from '../musicfetch.js';
 import { eq } from 'drizzle-orm';
-import { debug } from '$lib/utils/logger';
+import { debug } from '../../utils/logger.js';
 import { error } from '@sveltejs/kit';
-import { sanitizeUrl } from '$lib/utils/sanitize';
+import { sanitizeUrl } from '../../utils/sanitize.js';
 
 export async function enrichWithMusicfetch(artistData: (typeof artists.$inferSelect)[]) {
   const requestId = crypto.randomUUID();
