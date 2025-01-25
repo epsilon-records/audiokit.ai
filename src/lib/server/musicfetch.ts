@@ -1,4 +1,4 @@
-import { debug } from '$lib/utils/logger';
+import { debug } from '../utils/logger.js';
 
 export async function getMusicfetchData(spotifyUrl: string, services: string[]) {
   const requestId = crypto.randomUUID();
