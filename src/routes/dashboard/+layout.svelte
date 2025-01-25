@@ -79,6 +79,17 @@
           Overview
         </a>
         <a
+          href="/dashboard/profile"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/profile')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Profile
+        </a>
+        <a
           href="/dashboard/analytics"
           class={cn(
             'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
@@ -122,17 +133,6 @@
           )}
         >
           Tracks
-        </a>
-        <a
-          href="/dashboard/profile"
-          class={cn(
-            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/profile')
-              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-              : 'text-gray-500 dark:text-gray-400'
-          )}
-        >
-          Profile
         </a>
       </div>
       <div class="hidden md:flex items-center gap-3">
@@ -313,6 +313,17 @@
           Overview
         </a>
         <a
+          href="/dashboard/profile"
+          class={cn(
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
+            isActive('/dashboard/profile')
+              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+              : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+          )}
+        >
+          Profile
+        </a>
+        <a
           href="/dashboard/analytics"
           class={cn(
             'block px-3 py-2 text-base font-medium rounded-md transition-colors',
@@ -356,17 +367,7 @@
         >
           Tracks
         </a>
-        <a
-          href="/dashboard/profile"
-          class={cn(
-            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
-            isActive('/dashboard/profile')
-              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
-              : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-          )}
-        >
-          Profile
-        </a>
+
         <a
           href="/dashboard/team"
           class={cn(
