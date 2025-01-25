@@ -7,7 +7,7 @@
   ],
   "functions": {
     "api/enrich-data": {
-      "maxDuration": 300
+      "maxDuration": 60
     }
   }
 }
