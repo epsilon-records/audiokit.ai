@@ -79,15 +79,38 @@
           Overview
         </a>
         <a
-          href="/dashboard/profile"
+          href="/dashboard/analytics"
           class={cn(
             'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/profile')
+            isActive('/dashboard/analytics')
               ? 'text-indigo-600 dark:text-indigo-400 font-medium'
               : 'text-gray-500 dark:text-gray-400'
           )}
         >
-          Profile
+          Analytics
+        </a>
+        <a
+          href="/dashboard/create"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/create')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Create
+        </a>
+
+        <a
+          href="/dashboard/tools"
+          class={cn(
+            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
+            isActive('/dashboard/tools')
+              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+              : 'text-gray-500 dark:text-gray-400'
+          )}
+        >
+          Tools
         </a>
         <a
           href="/dashboard/tracks"
@@ -101,26 +124,15 @@
           Tracks
         </a>
         <a
-          href="/dashboard/tools"
+          href="/dashboard/profile"
           class={cn(
             'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/tools')
+            isActive('/dashboard/profile')
               ? 'text-indigo-600 dark:text-indigo-400 font-medium'
               : 'text-gray-500 dark:text-gray-400'
           )}
         >
-          Tools
-        </a>
-        <a
-          href="/dashboard/analytics"
-          class={cn(
-            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/analytics')
-              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-              : 'text-gray-500 dark:text-gray-400'
-          )}
-        >
-          Analytics
+          Profile
         </a>
         <a
           href="/dashboard/team"
@@ -132,17 +144,6 @@
           )}
         >
           Team
-        </a>
-        <a
-          href="/dashboard/create"
-          class={cn(
-            'text-sm hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors',
-            isActive('/dashboard/create')
-              ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-              : 'text-gray-500 dark:text-gray-400'
-          )}
-        >
-          Create
         </a>
         <button
           onclick={handleManageSubscription}
@@ -263,15 +264,38 @@
           Overview
         </a>
         <a
-          href="/dashboard/profile"
+          href="/dashboard/analytics"
           class={cn(
             'block px-3 py-2 text-base font-medium rounded-md transition-colors',
-            isActive('/dashboard/profile')
+            isActive('/dashboard/analytics')
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
               : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
           )}
         >
-          Profile
+          Analytics
+        </a>
+        <a
+          href="/dashboard/create"
+          class={cn(
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
+            isActive('/dashboard/create')
+              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+              : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+          )}
+        >
+          Create
+        </a>
+
+        <a
+          href="/dashboard/tools"
+          class={cn(
+            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
+            isActive('/dashboard/tools')
+              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+              : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+          )}
+        >
+          Tools
         </a>
         <a
           href="/dashboard/tracks"
@@ -285,26 +309,15 @@
           Tracks
         </a>
         <a
-          href="/dashboard/tools"
+          href="/dashboard/profile"
           class={cn(
             'block px-3 py-2 text-base font-medium rounded-md transition-colors',
-            isActive('/dashboard/tools')
+            isActive('/dashboard/profile')
               ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
               : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
           )}
         >
-          Tools
-        </a>
-        <a
-          href="/dashboard/analytics"
-          class={cn(
-            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
-            isActive('/dashboard/analytics')
-              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
-              : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-          )}
-        >
-          Analytics
+          Profile
         </a>
         <a
           href="/dashboard/team"
@@ -316,17 +329,6 @@
           )}
         >
           Team
-        </a>
-        <a
-          href="/dashboard/create"
-          class={cn(
-            'block px-3 py-2 text-base font-medium rounded-md transition-colors',
-            isActive('/dashboard/create')
-              ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
-              : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
-          )}
-        >
-          Create
         </a>
         <button
           onclick={handleManageSubscription}
