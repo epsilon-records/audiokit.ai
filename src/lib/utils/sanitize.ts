@@ -1,5 +1,6 @@
 export function sanitizeUrl(url: string | null | undefined): string {
-  if (!url) return '';
+  // Early return for invalid inputs
+  if (!url || typeof url !== 'string') return '';
 
   let sanitized = url.trim();
 
@@ -22,13 +23,15 @@ export function sanitizeUrl(url: string | null | undefined): string {
   try {
     const urlObj = new URL(sanitized);
 
-    // Validate the URL structure
+    // Additional validation
     if (!urlObj.hostname || !urlObj.protocol.match(/^https?:$/)) {
+      console.warn('Invalid URL structure:', url);
       return '';
     }
 
     return urlObj.origin + urlObj.pathname;
-  } catch {
+  } catch (error) {
+    console.warn('Failed to parse URL:', url, error);
     return '';
   }
 }
