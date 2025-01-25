@@ -1,7 +1,6 @@
 import { debug, warn } from '../utils/logger.js';
 import type { Track, TrackCollectionResponse } from '../types/track.js';
 import { error } from '@sveltejs/kit';
-import { SOUNDCHARTS_API_BASE } from '$env/static/private';
 
 /**
  * Get Soundcharts artist ID from Spotify ID
@@ -318,7 +317,7 @@ export async function getArtistTracks(
 ): Promise<TrackCollectionResponse | null> {
   const { offset, limit, sortBy, sortOrder } = options;
 
-  const url = `${SOUNDCHARTS_API_BASE}/api/v2.21/artist/${uuid}/songs`;
+  const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.21/artist/${uuid}/songs`;
 
   const params = new URLSearchParams();
 
@@ -386,7 +385,7 @@ export async function getArtistTracks(
 }
 
 export async function getTrackMetadata(uuid: string): Promise<Track | null> {
-  const url = `${SOUNDCHARTS_API_BASE}/api/v2.25/song/${uuid}`;
+  const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.25/song/${uuid}`;
 
   try {
     debug({

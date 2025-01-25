@@ -1,8 +1,6 @@
 import type { artistSchema } from '../schemas/artist.js';
 import type { z } from 'zod';
 import { debug } from '../utils/logger.js';
-import { HUBSPOT_API_BASE } from '$env/static/private';
-import { HUBSPOT_API_KEY } from '$env/static/private';
 
 interface HubspotContact {
   id: string;
@@ -132,8 +130,8 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
     });
 
     const endpoint = existingContact
-      ? `${HUBSPOT_API_BASE}/crm/v3/objects/contacts/${existingContact.id}`
-      : `${HUBSPOT_API_BASE}/crm/v3/objects/contacts`;
+      ? `${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/${existingContact.id}`
+      : `${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts`;
 
     const method = existingContact ? 'PATCH' : 'POST';
 
@@ -141,7 +139,7 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
       method,
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${HUBSPOT_API_KEY}`,
+        Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
       },
       body: {
         properties: {
