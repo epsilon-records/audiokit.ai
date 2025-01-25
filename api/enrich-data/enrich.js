@@ -1,8 +1,7 @@
-import { db } from '../../../lib/db';
-import { artists } from '../../../lib/db/schema';
-import { error } from '@sveltejs/kit';
+import { db } from '../../src/lib/db';
+import { artists } from '../../src/lib/db/schema';
 import { eq, not, or, and } from 'drizzle-orm';
-import { debug } from '../../../lib/utils/logger';
+import { debug } from '../../src/lib/utils/logger';
 import { enrichWithSoundcharts } from './enrichers/soundcharts';
 import { enrichWithHubspot } from './enrichers/hubspot';
 import { enrichWithMusicfetch } from './enrichers/musicfetch';
@@ -88,6 +87,5 @@ export async function enrichData() {
       error: err instanceof Error ? err.message : 'Unknown error',
       msg: 'Error in data enrichment',
     });
-    throw error(500, err instanceof Error ? err.message : 'Unknown error');
   }
 }
