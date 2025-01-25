@@ -11,6 +11,16 @@
 </script>
 
 <svelte:head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-WN04JQMELT"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-WN04JQMELT');
+  </script>
+
   <!-- For old IEs -->
   <link rel="shortcut icon" href="favicon.ico" />
   
