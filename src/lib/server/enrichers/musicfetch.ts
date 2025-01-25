@@ -53,7 +53,8 @@ export async function enrichWithMusicfetch(artistData: (typeof artists.$inferSel
             return { artistId: artist.id, success: false, error: 'No valid service link found' };
           }
 
-          const services = await getMusicfetchData(linkUrl, []);
+          const encodedUrl = encodeURIComponent(linkUrl);
+          const services = await getMusicfetchData(encodedUrl, []);
           await db.update(artists).set({ services }).where(eq(artists.id, artist.id));
 
           const updateFields: {
