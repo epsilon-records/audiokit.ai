@@ -162,7 +162,7 @@
         <h2
           class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500"
         >
-          Services
+          Platforms
         </h2>
       </div>
       {#if Object.keys(services).length > 0}
