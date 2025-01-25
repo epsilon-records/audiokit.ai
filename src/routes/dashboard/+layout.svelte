@@ -134,6 +134,8 @@
         >
           Profile
         </a>
+      </div>
+      <div class="hidden md:flex items-center gap-3">
         <a
           href="/dashboard/team"
           class={cn(
@@ -167,25 +169,46 @@
         >
           Account
         </a>
-      </div>
-      <div class="hidden md:flex items-center gap-3">
-        <div class="h-4 w-px bg-gray-200 dark:bg-gray-700"></div>
-        <span class="text-sm text-gray-600 dark:text-gray-400">
-          Status:
-          {#if page.data.hasActiveSubscription}
-            <span
-              class="ml-1 inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400"
-            >
-              Active
-            </span>
-          {:else}
-            <span
-              class="ml-1 inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400"
-            >
-              Inactive
-            </span>
-          {/if}
-        </span>
+        {#if page.data.hasActiveSubscription}
+          <span
+            class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400"
+          >
+            Active
+          </span>
+        {:else}
+          <a
+            href="/join"
+            class={cn(
+              'text-sm transition-colors group',
+              isActive('/join')
+                ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                : 'text-gray-500 dark:text-gray-400'
+            )}
+          >
+            <div class="flex items-center gap-1 hover:text-indigo-600 dark:hover:text-indigo-400">
+              Settings
+              <svg
+                class="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </div>
+          </a>
+        {/if}
       </div>
 
       <!-- Mobile Navigation -->
@@ -230,22 +253,48 @@
         </div>
 
         <!-- Status Indicator (visible on all screens) -->
-        <span class="text-sm text-gray-600 dark:text-gray-400 flex items-center">
-          Status:
+        <div class="flex items-center gap-3">
           {#if page.data.hasActiveSubscription}
             <span
-              class="ml-1 inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400"
+              class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400"
             >
               Active
             </span>
           {:else}
-            <span
-              class="ml-1 inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 dark:bg-red-900/30 dark:text-red-400"
+            <a
+              href="/join"
+              class={cn(
+                'text-sm transition-colors group',
+                isActive('/join')
+                  ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                  : 'text-gray-500 dark:text-gray-400'
+              )}
             >
-              Inactive
-            </span>
+              <div class="flex items-center gap-1 hover:text-indigo-600 dark:hover:text-indigo-400">
+                Settings
+                <svg
+                  class="w-4 h-4 text-gray-500 dark:text-gray-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                  />
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                </svg>
+              </div>
+            </a>
           {/if}
-        </span>
+        </div>
       </div>
     </div>
 
@@ -285,7 +334,6 @@
         >
           Create
         </a>
-
         <a
           href="/dashboard/tools"
           class={cn(
@@ -352,6 +400,35 @@
         >
           Account
         </a>
+        {#if !page.data.hasActiveSubscription}
+          <a
+            href="/join"
+            class={cn(
+              'block px-3 py-2 text-base font-medium rounded-md transition-colors',
+              isActive('/join')
+                ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+            )}
+          >
+            <div class="flex items-center gap-1">
+              Settings
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                />
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+            </div>
+          </a>
+        {/if}
       </div>
     {/if}
   </div>
