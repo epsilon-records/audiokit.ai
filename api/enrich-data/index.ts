@@ -1,4 +1,4 @@
-import { enrichData } from './enrich.js';
+import { enrichData } from './enrich.ts';
 
 export async function GET() {
   return await enrichData();
