@@ -4,6 +4,7 @@ import { getMusicfetchData } from '$lib/server/musicfetch';
 import { eq } from 'drizzle-orm';
 import { debug } from '$lib/utils/logger';
 import { error } from '@sveltejs/kit';
+import { sanitizeUrl } from '$lib/utils/sanitize';
 
 export async function enrichWithMusicfetch(artistData: (typeof artists.$inferSelect)[]) {
   const requestId = crypto.randomUUID();
@@ -55,13 +56,37 @@ export async function enrichWithMusicfetch(artistData: (typeof artists.$inferSel
           const services = await getMusicfetchData(linkUrl, []);
           await db.update(artists).set({ services }).where(eq(artists.id, artist.id));
 
-          const updateFields: Partial<typeof artists.$inferSelect> = {};
+          const updateFields: {
+            spotify?: string;
+            appleMusic?: string;
+            soundcloud?: string;
+            youtube?: string;
+            bandcamp?: string;
+            facebook?: string;
+            instagram?: string;
+            tiktok?: string;
+            x?: string;
+          } = {};
 
           for (const service in services) {
             if (services[service]?.link) {
-              updateFields[service as keyof typeof artists.$inferSelect] = services[service].link;
+              if (
+                service === 'spotify' ||
+                service === 'appleMusic' ||
+                service === 'soundcloud' ||
+                service === 'youtube' ||
+                service === 'bandcamp' ||
+                service === 'facebook' ||
+                service === 'instagram' ||
+                service === 'tiktok' ||
+                service === 'x'
+              ) {
+                updateFields[service] = sanitizeUrl(services[service].link);
+              }
             }
           }
+
+          console.log(updateFields);
 
           await db.update(artists).set(updateFields).where(eq(artists.id, artist.id));
 
