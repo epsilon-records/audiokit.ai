@@ -34,7 +34,11 @@
         {@const { uuid, name, releaseDate, metadata } = track}
         <Card>
           <a href="/dashboard/tracks/{uuid}" class="block">
-            <img src={metadata.imageUrl} alt={name} class="h-48 w-full object-cover rounded-t-lg" />
+            <img
+              src={metadata?.imageUrl}
+              alt={name}
+              class="h-48 w-full object-cover rounded-t-lg"
+            />
           </a>
           <CardContent>
             <a href="/dashboard/tracks/{uuid}" class="block">
@@ -45,11 +49,11 @@
             </p>
             <div class="mt-2">
               <p class="text-sm text-muted-foreground">
-                {metadata.artists.map((artist: any) => artist.name).join(', ')}
+                {metadata?.artists.map((artist: any) => artist.name).join(', ')}
               </p>
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
-              {#each metadata.genres as genre}
+              {#each metadata?.genres as genre}
                 <Badge>{genre.root}</Badge>
               {/each}
             </div>
