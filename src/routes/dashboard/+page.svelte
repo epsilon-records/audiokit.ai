@@ -13,23 +13,23 @@
   let user = $derived(data.user);
   let org = $derived(data.org);
   let artist: Artist = $derived(data.artist);
-  let metadata = $derived.by(() => artist.metadata as { isni?: string; ipi?: string });
+  let metadata = $derived.by(() => (artist?.metadata as { isni?: string; ipi?: string }) ?? {});
   let followers = $derived.by(
     () =>
-      artist.followers as {
+      (artist?.followers as {
         spotify: number;
         instagram?: number;
         twitter?: number;
         facebook?: number;
-      }
+      }) ?? {}
   );
   let streaming = $derived.by(
-    () => artist.streaming as { spotify: { items: { date: string; value: number }[] } }
+    () => (artist?.streaming as { spotify: { items: { date: string; value: number }[] } }) ?? {}
   );
   let genres = $derived.by(
-    () => (artist.metadata as { genres: { root: string; sub: string[] }[] }).genres
+    () => (artist?.metadata as { genres: { root: string; sub: string[] }[] })?.genres ?? []
   );
-  let tracks = $derived.by(() => (artist.tracks as { items: unknown[] }).items);
+  let tracks = $derived.by(() => (artist?.tracks as { items: unknown[] })?.items ?? []);
 </script>
 
 <div class="container mx-auto px-4 py-8">
