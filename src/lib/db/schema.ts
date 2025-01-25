@@ -42,6 +42,7 @@ export const artists = pgTable('artists', {
   streaming: json('streaming').default({}),
   followers: json('followers').default({}),
   tracks: json('tracks').default({}),
+  services: json('services').default({}),
 });
 
 export const labels = pgTable('labels', {

@@ -1,15 +1,13 @@
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
-import {
-  getArtistIdFromSpotify,
-  getArtistStats,
-  getArtistTracks,
-  getTrackMetadata,
-} from '$lib/server/soundcharts';
+import { getArtistIdFromSpotify, getArtistStats, getArtistTracks } from '$lib/server/soundcharts';
 import { getHubspotContact } from '$lib/server/hubspot';
 import { error } from '@sveltejs/kit';
 import { eq, not, or, and } from 'drizzle-orm';
 import { debug, warn } from '$lib/utils/logger';
+music;
+import { getMusicfetchData } from '$lib/server/musicfetch';
+import music from 'lucide-svelte/icons/music';
 
 // Extract Spotify ID from URL
 function extractSpotifyId(spotifyUrl: string): string | null {
@@ -401,6 +399,93 @@ async function enrichWithHubspot(artistData: (typeof artists.$inferSelect)[]) {
   }
 }
 
+async function enrichWithMusicfetch(artistData: (typeof artists.$inferSelect)[]) {
+  const requestId = crypto.randomUUID();
+
+  try {
+    debug({
+      requestId,
+      msg: 'Starting Musicfetch enrichment process',
+    });
+
+    if (!artistData.length) {
+      debug({
+        requestId,
+        msg: 'No artists found to update with Musicfetch',
+      });
+      return {
+        success: true,
+        message: 'No artists found to update',
+        updates: [],
+      };
+    }
+
+    const updates = await Promise.all(
+      artistData.map(async (artist) => {
+        try {
+          const serviceLinks = [
+            artist.spotify,
+            artist.appleMusic,
+            artist.soundcloud,
+            artist.youtube,
+          ];
+
+          const linkUrl = serviceLinks.find((link) => link !== null && link !== '');
+
+          if (!linkUrl) {
+            debug({
+              requestId,
+              artistId: artist.id,
+              msg: 'No valid service link found for artist',
+            });
+            return { artistId: artist.id, success: false, error: 'No valid service link found' };
+          }
+
+          const services = await getMusicfetchData(linkUrl, []);
+
+          await db.update(artists).set({ services }).where(eq(artists.id, artist.id));
+
+          debug({
+            requestId,
+            artistId: artist.id,
+            msg: 'Updated artist with Musicfetch data',
+          });
+
+          return { artistId: artist.id, success: true };
+        } catch (error) {
+          debug({
+            requestId,
+            artistId: artist.id,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            msg: 'Error updating artist with Musicfetch',
+          });
+          return {
+            artistId: artist.id,
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          };
+        }
+      })
+    );
+
+    debug({
+      requestId,
+      updateCount: updates.length,
+      successCount: updates.filter((u) => u.success).length,
+      msg: 'Completed Musicfetch enrichment process',
+    });
+
+    return { success: true, updates };
+  } catch (err) {
+    debug({
+      requestId,
+      error: err instanceof Error ? err.message : 'Unknown error',
+      msg: 'Error in Musicfetch enrichment',
+    });
+    throw error(500, err instanceof Error ? err.message : 'Unknown error');
+  }
+}
+
 export async function GET() {
   const requestId = crypto.randomUUID();
 
@@ -412,8 +497,9 @@ export async function GET() {
 
     const { soundchartsArtists, hubspotArtists } = await getArtistsToUpdate();
 
-    const [soundchartsResults, hubspotResults] = await Promise.all([
+    const [soundchartsResults, musicfetchResults, hubspotResults] = await Promise.all([
       enrichWithSoundcharts(soundchartsArtists),
+      enrichWithMusicfetch(soundchartsArtists),
       enrichWithHubspot(hubspotArtists),
     ]);
 
@@ -421,6 +507,7 @@ export async function GET() {
       JSON.stringify({
         success: true,
         soundcharts: soundchartsResults,
+        musicfetch: musicfetchResults,
         hubspot: hubspotResults,
       }),
       { headers: { 'Content-Type': 'application/json' } }
