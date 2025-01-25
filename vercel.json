@@ -6,7 +6,7 @@
     }
   ],
   "functions": {
-    "api/enrich-data/index.cjs": {
+    "api/enrich-data/**/*": {
       "maxDuration": 60
     }
   }
