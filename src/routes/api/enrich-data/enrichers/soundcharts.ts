@@ -3,6 +3,7 @@ import { artists } from '$lib/db/schema';
 import { getArtistIdFromSpotify, getArtistStats, getArtistTracks } from '$lib/server/soundcharts';
 import { eq } from 'drizzle-orm';
 import { debug, warn } from '$lib/utils/logger';
+import { error } from '@sveltejs/kit';
 
 function extractSpotifyId(spotifyUrl: string): string | null {
   try {

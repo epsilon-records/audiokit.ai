@@ -1,0 +1,111 @@
+import {
+  siAmazon,
+  siAmazonmusic,
+  siApplemusic,
+  siAudiomack,
+  siBandcamp,
+  siBandsintown,
+  siBeatport,
+  siDiscogs,
+  siGenius,
+  siIheartradio,
+  siImdb,
+  siInstagram,
+  siItunes,
+  siMusicbrainz,
+  siNapster,
+  siPandora,
+  siShazam,
+  siSnapchat,
+  siSongkick,
+  siSoundcloud,
+  siSpotify,
+  siThreads,
+  siTicketmaster,
+  siTidal,
+  siTiktok,
+  siX,
+  siWikipedia,
+  siYoutube,
+  siYoutubemusic,
+  siYoutubeshorts,
+} from 'simple-icons';
+
+const BRAND_COLORS = {
+  amazon: '#FF9900',
+  amazonMusic: '#00A0D2',
+  appleMusic: '#FA243C',
+  audiomack: '#FFC847',
+  bandcamp: '#629AA9',
+  bandsintown: '#00B4B3',
+  beatport: '#A8E00F',
+  discogs: '#333333',
+  genius: '#FFFF64',
+  iheartradio: '#C6002B',
+  imdb: '#F5C518',
+  instagram: '#E4405F',
+  itunes: '#FB5BC5',
+  musicbrainz: '#BA478F',
+  napster: '#2CA6DE',
+  pandora: '#224099',
+  shazam: '#0088FF',
+  snapchat: '#FFFC00',
+  songkick: '#F80046',
+  soundcloud: '#FF3300',
+  spotify: '#1DB954',
+  threads: '#2ABC9D',
+  ticketmaster: '#026CDF',
+  tidal: '#000000',
+  tiktok: '#000000',
+  twitter: '#1DA1F2',
+  wikipedia: '#000000',
+  youtube: '#FF0000',
+  youtubeMusic: '#FF0000',
+  youtubeShorts: '#FF0000',
+} as const;
+
+type ServiceIconMap = Record<string, { svg: string }>;
+
+export function getServiceIcon(service: string) {
+  const iconMap: ServiceIconMap = {
+    amazon: siAmazon,
+    amazonMusic: siAmazonmusic,
+    appleMusic: siApplemusic,
+    audiomack: siAudiomack,
+    bandcamp: siBandcamp,
+    bandsintown: siBandsintown,
+    beatport: siBeatport,
+    discogs: siDiscogs,
+    genius: siGenius,
+    iheartradio: siIheartradio,
+    imdb: siImdb,
+    instagram: siInstagram,
+    itunes: siItunes,
+    musicbrainz: siMusicbrainz,
+    napster: siNapster,
+    pandora: siPandora,
+    shazam: siShazam,
+    snapchat: siSnapchat,
+    songkick: siSongkick,
+    soundcloud: siSoundcloud,
+    spotify: siSpotify,
+    threads: siThreads,
+    ticketmaster: siTicketmaster,
+    tidal: siTidal,
+    tiktok: siTiktok,
+    twitter: siX,
+    wikipedia: siWikipedia,
+    youtube: siYoutube,
+    youtubeMusic: siYoutubemusic,
+    youtubeShorts: siYoutubeshorts,
+  };
+
+  const icon = iconMap[service];
+  const color = BRAND_COLORS[service as keyof typeof BRAND_COLORS] || '#000000';
+
+  if (icon) {
+    return `<svg role="img" viewBox="0 0 24 24" class="w-8 h-8" fill="${color}"><path d="${icon.path}" /></svg>`;
+  } else {
+    return `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-8 h-8"><path stroke-linecap="round" stroke-linejoin="round" d="M13.19 8.688a4.5 4.5 0 0 1 1.242 7.244l-4.5 4.5a4.5 4.5 0 0 1-6.364-6.364l1.757-1.757m13.35-.622 1.757-1.757a4.5 4.5 0 0 0-6.364-6.364l-4.5 4.5a4.5 4.5 0 0 0 1.242 7.244" /></svg>`;
+  }
+}

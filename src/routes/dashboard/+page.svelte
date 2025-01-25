@@ -5,6 +5,7 @@
   import { Badge } from '$lib/components/ui/badge';
   import { formatNumber } from '$lib/utils/format';
   import type { Artist } from '$lib/types';
+  import { getServiceIcon } from '$lib/utils/services';
 
   // Use $props with the interface
   let { data } = $props();
@@ -14,6 +15,7 @@
   let org = $derived(data.org);
   let artist: Artist = $derived(data.artist);
   let metadata = $derived.by(() => (artist?.metadata as { isni?: string; ipi?: string }) ?? {});
+  let services = $derived(data.artist?.services ?? {});
   let followers = $derived.by(
     () =>
       (artist?.followers as {
@@ -102,7 +104,7 @@
             <CardHeader
               class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 pb-6"
             >
-              <CardTitle>�� Catalog</CardTitle>
+              <CardTitle>🎵 Catalog</CardTitle>
             </CardHeader>
             <CardContent class="pt-6 space-y-4">
               <div>
@@ -163,6 +165,43 @@
             </CardContent>
           </Card>
         </div>
+      {/if}
+    </div>
+
+    <!-- Services -->
+    <div in:fly={{ y: 20, duration: 400, delay: 600 }} class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2
+          class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-pink-500 to-violet-500"
+        >
+          Services
+        </h2>
+      </div>
+      {#if Object.keys(services).length > 0}
+        <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
+          <CardHeader
+            class="bg-gradient-to-br from-pink-50 to-violet-100 dark:from-pink-900/30 dark:to-violet-900/30 pb-6"
+          >
+            <CardTitle>Connected Services</CardTitle>
+          </CardHeader>
+          <CardContent class="pt-6 space-y-4">
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {#each Object.entries(services).sort( ([a], [b]) => a.localeCompare(b) ) as [service, url]}
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
+                >
+                  {@html getServiceIcon(service)}
+                  <span class="capitalize">{service.replace(/([a-z])([A-Z])/g, '$1 $2')}</span>
+                </a>
+              {/each}
+            </div>
+          </CardContent>
+        </Card>
+      {:else}
+        <p class="text-muted-foreground">No services connected yet.</p>
       {/if}
     </div>
 
@@ -368,7 +407,7 @@
         <h2
           class="text-2xl font-semibold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-500 to-indigo-500"
         >
-          Artist & Repertoire
+          Artist Representative
         </h2>
       </div>
       {#if user}
