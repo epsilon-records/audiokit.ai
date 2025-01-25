@@ -25,7 +25,9 @@
           </Button>
         </div>
       </div>
-      <div class="flex flex-col h-full bg-card rounded-lg p-6 shadow-lg">
+      <div
+        class="flex flex-col h-full bg-card rounded-lg p-6 shadow-lg opacity-50 cursor-not-allowed"
+      >
         <div class="flex-1">
           <h2 class="text-2xl font-bold mb-4">Create New Release</h2>
           <p class="text-muted-foreground mb-4">
@@ -34,9 +36,9 @@
           </p>
         </div>
         <div class="mt-auto">
-          <Button href="/dashboard/releases/new" class="w-full h-12" size="lg">
-            Create New Release
-          </Button>
+          <Button href="#" class="w-full h-12 opacity-50 cursor-not-allowed" size="lg"
+            >Coming Soon</Button
+          >
         </div>
       </div>
     </div>
