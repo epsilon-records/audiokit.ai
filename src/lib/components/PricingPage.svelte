@@ -82,53 +82,6 @@
     },
   ];
 
-  const upgradeTiers: PricingTier[] = [
-    {
-      name: '🎧 Individual Artist',
-      description: 'Designed for solo artists transitioning to professional careers.',
-      monthlyPrice: 19,
-      annualPrice: 99,
-      highlighted: true,
-      features: [
-        { text: 'Manage one individual artist', icon: '👤' },
-        { text: 'Music distribution to all major platforms', icon: '🎧' },
-        { text: 'Keep 100% of your music royalties', icon: '💰' },
-        { text: 'Up to 5 team members', icon: '🤝' },
-        { text: '5GB media storage', icon: '💾' },
-        { text: 'Basic analytics dashboard', icon: '📊' },
-        { text: 'Release planning & scheduling', icon: '📅' },
-        { text: 'Royalty tracking & reporting', icon: '💰' },
-        { text: 'Contract templates & e-signing', icon: '📝' },
-        { text: 'Creative AI tools', icon: '🤖' },
-        { text: '24/7 Slack private channel support', icon: 'slack' },
-        { text: 'Limited API access', icon: '🔑' },
-      ],
-    },
-    {
-      name: '⭐ Record Label',
-      description:
-        "Unlock enterprise-grade tools to manage your roster, maximize revenue, and scale your label operations. Streamline release workflows, access advanced analytics, and maintain full control over your artists' careers.",
-      monthlyPrice: 79,
-      annualPrice: 599,
-      features: [
-        { text: 'Manage unlimited artists', icon: '👥' },
-        { text: 'Music distribution to all major platforms', icon: '🎧' },
-        { text: 'Keep 100% of your music royalties', icon: '💰' },
-        { text: 'Up to 5 team members', icon: '🤝' },
-        { text: '100GB media storage', icon: '💾' },
-        { text: 'Advanced analytics dashboard', icon: '📊' },
-        { text: 'Release planning & scheduling', icon: '📅' },
-        { text: 'Royalty tracking & reporting', icon: '💰' },
-        { text: 'Contract templates & e-signing', icon: '📝' },
-        { text: 'Creative AI tools', icon: '🤖' },
-        { text: '24/7 Slack private channel support', icon: 'slack' },
-        { text: 'Priority API access', icon: '🔑' },
-        { text: 'Advanced integrations', icon: '🔌' },
-        { text: 'Custom workflows', icon: '⚡' },
-      ],
-    },
-  ];
-
   const savings = $derived({
     basic: Math.round((pricingTiers[0].monthlyPrice * 12 - pricingTiers[0].annualPrice) / 12),
     pro: Math.round((pricingTiers[1].monthlyPrice * 12 - pricingTiers[1].annualPrice) / 12),
