@@ -53,6 +53,20 @@ export async function enrichWithMusicfetch(artistData: (typeof artists.$inferSel
             return { artistId: artist.id, success: false, error: 'No valid service link found' };
           }
 
+          const musicfetchBaseUrl = process.env.MUSICFETCH_BASE_URL;
+          if (!musicfetchBaseUrl) {
+            debug({
+              requestId,
+              artistId: artist.id,
+              msg: 'Musicfetch base URL not configured',
+            });
+            return {
+              artistId: artist.id,
+              success: false,
+              error: 'Musicfetch service not configured',
+            };
+          }
+
           const services = await getMusicfetchData(linkUrl, []);
           await db.update(artists).set({ services }).where(eq(artists.id, artist.id));
 
