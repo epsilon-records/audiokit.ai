@@ -140,12 +140,12 @@
             <CardContent class="pt-6 space-y-4">
               <div>
                 <p class="text-sm text-muted-foreground">ISNI</p>
-                <p class="text-lg font-mono">{metadata?.isni ?? 'Unknown'}</p>
+                <p class="text-lg font-mono">{metadata.isni || 'Unknown'}</p>
               </div>
 
               <div>
                 <p class="text-sm text-muted-foreground">IPI</p>
-                <p class="text-lg font-mono">{metadata?.ipi ?? 'Unknown'}</p>
+                <p class="text-lg font-mono">{metadata.ipi || 'Unknown'}</p>
               </div>
 
               <div>
