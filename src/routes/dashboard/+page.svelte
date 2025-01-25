@@ -101,6 +101,7 @@
               </div>
               {#each genres as genre}
                 <div class="mb-4">
+                  <p class="text-sm text-muted-foreground">Genres</p>
                   <p class="text-lg font-semibold capitalize">{genre.root}</p>
                   {#if genre.sub && genre.sub.length > 0}
                     <div class="flex flex-wrap gap-2 mt-2">
