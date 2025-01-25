@@ -174,7 +174,7 @@
             <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {#each Object.entries(services).sort( ([a], [b]) => a.localeCompare(b) ) as [service, url]}
                 <a
-                  href={url}
+                  href={url.link}
                   target="_blank"
                   rel="noopener noreferrer"
                   class="flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors"
