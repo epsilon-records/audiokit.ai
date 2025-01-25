@@ -6,7 +6,7 @@
     }
   ],
   "functions": {
-    "enrich-data/*.js": {
+    "api/enrich-data/*.js": {
       "maxDuration": 60
     }
   }
