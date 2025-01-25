@@ -15,7 +15,7 @@ import Stripe from 'stripe';
 const stripe = new Stripe(STRIPE_SECRET_KEY);
 
 const LIVE_PRICE_IDS = {
-  '🎵 Individual Artist': {
+  '🎧 Individual Artist': {
     monthly: STRIPE_LIVE_ARTIST_MONTHLY,
     annual: STRIPE_LIVE_ARTIST_ANNUAL,
   },
@@ -26,7 +26,7 @@ const LIVE_PRICE_IDS = {
 } as const;
 
 const TEST_PRICE_IDS = {
-  '🎵 Individual Artist': {
+  '🎧 Individual Artist': {
     monthly: STRIPE_TEST_ARTIST_MONTHLY,
     annual: STRIPE_TEST_ARTIST_ANNUAL,
   },
