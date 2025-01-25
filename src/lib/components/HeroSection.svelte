@@ -17,6 +17,17 @@
     <div class="flex flex-col items-center text-center space-y-4 md:space-y-8 rounded-lg p-6">
       <MainHeading />
       <CtaButtons {ANIMATION_BASE_DELAY} />
+      <a
+        href="https://www.producthunt.com/posts/audiokit?embed=true&utm_source=badge-featured&utm_medium=badge&utm_souce=badge-audiokit"
+        target="_blank"
+        ><img
+          src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=819110&theme=light&t=1737818875047"
+          alt="AudioKit - Music&#0032;distribution&#0032;&#0038;&#0032;label&#0032;services | Product Hunt"
+          style="width: 250px; height: 54px;"
+          width="250"
+          height="54"
+        /></a
+      >
       <PlatformLogos {ANIMATION_BASE_DELAY} />
       <TechStack {ANIMATION_BASE_DELAY} />
       <!-- <Stats {ANIMATION_BASE_DELAY} /> -->
