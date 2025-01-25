@@ -116,6 +116,32 @@
             </li>
             <li class="pt-1">
               <a
+                href="/services"
+                class={cn(
+                  'transition-colors',
+                  isActive('/services')
+                    ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+                )}
+              >
+                Services
+              </a>
+            </li>
+            <li class="pt-1">
+              <a
+                href="/pricing"
+                class={cn(
+                  'transition-colors',
+                  isActive('/pricing')
+                    ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+                )}
+              >
+                Pricing
+              </a>
+            </li>
+            <li class="pt-1">
+              <a
                 href="/docs"
                 class={cn(
                   'transition-colors',
@@ -125,6 +151,19 @@
                 )}
               >
                 Docs
+              </a>
+            </li>
+            <li class="pt-1">
+              <a
+                href="/support"
+                class={cn(
+                  'transition-colors',
+                  isActive('/support')
+                    ? 'text-indigo-600 dark:text-indigo-400 font-medium'
+                    : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
+                )}
+              >
+                Support
               </a>
             </li>
           </SignedIn>
@@ -168,23 +207,6 @@
                 Docs
               </a>
             </li>
-          </SignedOut>
-          <SignedIn>
-            <li class="pt-1">
-              <a
-                href="/support"
-                class={cn(
-                  'transition-colors',
-                  isActive('/support')
-                    ? 'text-indigo-600 dark:text-indigo-400 font-medium'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400'
-                )}
-              >
-                Support
-              </a>
-            </li>
-          </SignedIn>
-          <SignedOut>
             <li class="pt-1">
               <a
                 href="/contact"
@@ -250,6 +272,30 @@
                 onclick={closeMenu}
               >
                 Dashboard
+              </a>
+              <a
+                href="/services"
+                class={cn(
+                  'block px-6 py-2 text-base font-medium rounded-md transition-colors',
+                  isActive('/services')
+                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                )}
+                onclick={closeMenu}
+              >
+                Services
+              </a>
+              <a
+                href="/pricing"
+                class={cn(
+                  'block px-6 py-2 text-base font-medium rounded-md transition-colors',
+                  isActive('/pricing')
+                    ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
+                    : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
+                )}
+                onclick={closeMenu}
+              >
+                Pricing
               </a>
             </SignedIn>
             <SignedOut>
