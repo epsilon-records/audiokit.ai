@@ -58,8 +58,7 @@
     },
     {
       name: '⭐ Record Label',
-      description:
-        "Unlock enterprise-grade tools to manage your roster, maximize revenue, and scale your label operations. Streamline release workflows, access advanced analytics, and maintain full control over your artists' careers.",
+      description: 'Unlock enterprise-grade tools to manage your roster and scale your label.',
       monthlyPrice: 79,
       annualPrice: 599,
       features: [
