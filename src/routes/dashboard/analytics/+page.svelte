@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
   import { fly } from 'svelte/transition';
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { formatNumber } from '$lib/utils/format';
