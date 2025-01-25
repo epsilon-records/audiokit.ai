@@ -1,10 +1,15 @@
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
-import { getArtistIdFromSpotify, getArtistStats } from '$lib/server/soundcharts';
+import {
+  getArtistIdFromSpotify,
+  getArtistStats,
+  getArtistTracks,
+  getTrackMetadata,
+} from '$lib/server/soundcharts';
 import { getHubspotContact } from '$lib/server/hubspot';
 import { error } from '@sveltejs/kit';
 import { eq, not, or, and } from 'drizzle-orm';
-import { debug, info, warn } from '$lib/utils/logger';
+import { debug, warn } from '$lib/utils/logger';
 
 // Extract Spotify ID from URL
 function extractSpotifyId(spotifyUrl: string): string | null {
@@ -80,20 +85,12 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       msg: 'Fetching Soundcharts stats',
     });
 
-    const soundchartsData = await getArtistStats(soundchartsId);
-
-    if (!soundchartsData) {
-      warn({
-        requestId,
-        artistId: artist.id,
-        msg: 'No Soundcharts data available',
-      });
-      return {
-        artistId: artist.id,
-        success: false,
-        error: 'No Soundcharts data available',
-      };
-    }
+    const {
+      metadata = {},
+      streaming = {},
+      followers = {},
+    } = (await getArtistStats(soundchartsId)) ?? {};
+    const tracks = (await getArtistTracks(soundchartsId)) ?? [];
 
     debug({
       requestId,
@@ -104,9 +101,10 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
     await db
       .update(artists)
       .set({
-        metadata: soundchartsData.metadata,
-        streaming: soundchartsData.streaming,
-        followers: soundchartsData.followers,
+        metadata,
+        streaming,
+        followers,
+        tracks,
         updated: new Date(),
       })
       .where(eq(artists.id, artist.id));

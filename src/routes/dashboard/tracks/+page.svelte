@@ -2,6 +2,7 @@
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { Badge } from '$lib/components/ui/badge';
   import { Button } from '$lib/components/ui/button';
+  import type { Track } from '$lib/types/track';
 
   let { data } = $props();
   let tracks = $derived(data.tracks);
@@ -31,28 +32,26 @@
   {:else}
     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {#each tracks as track}
+        {@const { uuid, name, releaseDate, metadata } = track as Track}
+        {$inspect(track)}
         <Card>
-          <a href="/dashboard/tracks/{track.uuid}" class="block">
-            <img
-              src={track.imageUrl}
-              alt={track.name}
-              class="h-48 w-full object-cover rounded-t-lg"
-            />
+          <a href="/dashboard/tracks/{uuid}" class="block">
+            <img src={metadata.imageUrl} alt={name} class="h-48 w-full object-cover rounded-t-lg" />
           </a>
           <CardContent>
-            <a href="/dashboard/tracks/{track.uuid}" class="block">
-              <h3 class="text-xl font-semibold">{track.name}</h3>
+            <a href="/dashboard/tracks/{uuid}" class="block">
+              <h3 class="text-xl font-semibold">{name}</h3>
             </a>
             <p class="mt-1 text-sm text-muted-foreground">
-              {new Date(track.releaseDate).toLocaleDateString()}
+              {new Date(releaseDate).toLocaleDateString()}
             </p>
             <div class="mt-2">
               <p class="text-sm text-muted-foreground">
-                {track.artists.map((artist) => artist.name).join(', ')}
+                {metadata.artists.map((artist: any) => artist.name).join(', ')}
               </p>
             </div>
             <div class="mt-4 flex flex-wrap gap-2">
-              {#each track.genres as genre}
+              {#each metadata.genres as genre}
                 <Badge>{genre.root}</Badge>
               {/each}
             </div>

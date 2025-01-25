@@ -4,6 +4,7 @@
   import { AlertCircle } from 'lucide-svelte';
   import { Badge } from '$lib/components/ui/badge';
   import { formatNumber } from '$lib/utils/format';
+  import type { Artist } from '$lib/types';
 
   // Use $props with the interface
   let { data } = $props();
@@ -11,8 +12,24 @@
   // Use $derived for reactive values
   let user = $derived(data.user);
   let org = $derived(data.org);
-  let stats = $derived(data.stats);
-  let tracks = $derived(data.tracks);
+  let artist: Artist = $derived(data.artist);
+  let metadata = $derived.by(() => artist.metadata as { isni?: string; ipi?: string });
+  let followers = $derived.by(
+    () =>
+      artist.followers as {
+        spotify: number;
+        instagram?: number;
+        twitter?: number;
+        facebook?: number;
+      }
+  );
+  let streaming = $derived.by(
+    () => artist.streaming as { spotify: { items: { date: string; value: number }[] } }
+  );
+  let genres = $derived.by(
+    () => (artist.metadata as { genres: { root: string; sub: string[] }[] }).genres
+  );
+  let tracks = $derived.by(() => (artist.tracks as { items: unknown[] }).items);
 </script>
 
 <div class="container mx-auto px-4 py-8">
@@ -21,7 +38,7 @@
     <p class="mt-2 text-lg text-muted-foreground">
       Get insights into your performance metrics and manage your artist profile.
     </p>
-    {#if !stats?.metadata}
+    {#if !artist?.metadata}
       <div class="mt-4" in:fly={{ y: 20, duration: 400, delay: 200 }}>
         <Badge
           variant="outline"
@@ -44,7 +61,7 @@
           Artist Information
         </h2>
       </div>
-      {#if stats?.metadata}
+      {#if artist?.metadata}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -85,14 +102,16 @@
             <CardHeader
               class="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950 dark:to-emerald-900 pb-6"
             >
-              <CardTitle>🎵 Catalog</CardTitle>
+              <CardTitle>�� Catalog</CardTitle>
             </CardHeader>
             <CardContent class="pt-6 space-y-4">
               <div>
                 <p class="text-sm text-muted-foreground">Tracks Released</p>
-                <p class="text-2xl font-bold">{formatNumber(tracks?.items.length ?? 0)}</p>
+                <p class="text-2xl font-bold">
+                  {formatNumber(tracks.length)}
+                </p>
               </div>
-              {#each stats?.metadata.genres as genre}
+              {#each genres as genre}
                 <div class="mb-4">
                   <p class="text-lg font-semibold capitalize">{genre.root}</p>
                   {#if genre.sub && genre.sub.length > 0}
@@ -121,12 +140,12 @@
             <CardContent class="pt-6 space-y-4">
               <div>
                 <p class="text-sm text-muted-foreground">ISNI</p>
-                <p class="text-lg font-mono">{stats?.metadata?.object?.isni ?? 'Unknown'}</p>
+                <p class="text-lg font-mono">{metadata?.isni ?? 'Unknown'}</p>
               </div>
 
               <div>
                 <p class="text-sm text-muted-foreground">IPI</p>
-                <p class="text-lg font-mono">{stats?.metadata?.object?.ipi ?? 'Unknown'}</p>
+                <p class="text-lg font-mono">{metadata?.ipi ?? 'Unknown'}</p>
               </div>
 
               <div>
@@ -156,7 +175,7 @@
           Social Media Performance
         </h2>
       </div>
-      {#if stats?.followers}
+      {#if artist?.followers}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -173,7 +192,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats?.followers.spotify)}
+                {formatNumber(followers.spotify)}
               </div>
               <p class="text-xs text-muted-foreground">Followers</p>
             </CardContent>
@@ -194,7 +213,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats?.followers.instagram)}
+                {formatNumber(followers.instagram)}
               </div>
               <p class="text-xs text-muted-foreground">Followers</p>
             </CardContent>
@@ -215,7 +234,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats?.followers.twitter)}
+                {formatNumber(followers.twitter)}
               </div>
               <p class="text-xs text-muted-foreground">Followers</p>
             </CardContent>
@@ -236,7 +255,7 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(stats?.followers.facebook)}
+                {formatNumber(followers.facebook)}
               </div>
               <p class="text-xs text-muted-foreground">Followers</p>
             </CardContent>
@@ -254,7 +273,7 @@
           Streaming Analytics
         </h2>
       </div>
-      {#if stats?.streaming}
+      {#if artist?.streaming}
         <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card class="transition-all duration-200 hover:shadow-lg hover:scale-[1.02]">
             <CardHeader
@@ -271,13 +290,11 @@
             </CardHeader>
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
-                {formatNumber(
-                  stats?.streaming.spotify.items[stats?.streaming.spotify.items.length - 1].value
-                )}
+                {formatNumber(streaming.spotify.items[streaming.spotify.items.length - 1].value)}
               </div>
               <p class="text-xs text-muted-foreground">
                 As of {new Date(
-                  stats?.streaming.spotify.items[stats?.streaming.spotify.items.length - 1].date
+                  streaming.spotify.items[streaming.spotify.items.length - 1].date
                 ).toLocaleDateString()}
               </p>
             </CardContent>
@@ -292,7 +309,7 @@
             <CardContent class="pt-6">
               <div class="text-2xl font-bold">
                 {formatNumber(
-                  Math.max(...stats?.streaming.spotify.items.slice(-30).map((item) => item.value))
+                  Math.max(...streaming?.spotify?.items.slice(-30).map((item: any) => item.value))
                 )}
               </div>
               <p class="text-xs text-muted-foreground">Highest in last 30 days</p>
@@ -309,9 +326,9 @@
               <div class="text-2xl font-bold">
                 {formatNumber(
                   Math.round(
-                    stats?.streaming.spotify.items
+                    streaming.spotify.items
                       .slice(-30)
-                      .reduce((acc, item) => acc + item.value, 0) / 30
+                      .reduce((acc: number, item: any) => acc + item.value, 0) / 30
                   )
                 )}
               </div>
@@ -326,11 +343,11 @@
               <CardTitle>📱 Trend</CardTitle>
             </CardHeader>
             <CardContent class="pt-6">
-              {#if stats?.streaming.spotify.items.length >= 2}
+              {#if streaming.spotify.items.length >= 2}
                 {@const lastValue =
-                  stats?.streaming.spotify.items[stats?.streaming.spotify.items.length - 1].value}
+                  streaming.spotify.items[streaming.spotify.items.length - 1].value}
                 {@const prevValue =
-                  stats?.streaming.spotify.items[stats?.streaming.spotify.items.length - 2].value}
+                  streaming.spotify.items[streaming.spotify.items.length - 2].value}
                 {@const change = ((lastValue - prevValue) / prevValue) * 100}
                 <div class="text-2xl font-bold flex items-center gap-2">
                   <span class={change >= 0 ? 'text-green-600' : 'text-red-600'}>

@@ -22,7 +22,6 @@ export const artists = pgTable('artists', {
   linkedin: text().default(''),
   mixcloud: text().default(''),
   phone: text().default(''),
-  slug: text().default(''),
   snapchat: text().default(''),
   songkick: text().default(''),
   soundcloud: text().default(''),
@@ -42,6 +41,7 @@ export const artists = pgTable('artists', {
   metadata: json('metadata').default({}),
   streaming: json('streaming').default({}),
   followers: json('followers').default({}),
+  tracks: json('tracks').default({}),
 });
 
 export const labels = pgTable('labels', {

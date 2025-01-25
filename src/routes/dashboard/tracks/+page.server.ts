@@ -1,12 +1,23 @@
 import { requireAuth } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db';
-import { artists } from '$lib/db/schema';
+import { artists, tracks } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
-import { getArtistTracks, getTrackMetadata } from '$lib/server/soundcharts';
-import { info, debug } from '$lib/utils/logger';
-import type { Track } from '$lib/types/track';
+import { getTrackMetadata } from '$lib/server/soundcharts';
+import { info } from '$lib/utils/logger';
+
+interface Artist {
+  id: string;
+  name: string;
+  tracks: Track[];
+}
+
+interface Track {
+  id: string;
+  title: string;
+  // Add other track properties as needed
+}
 
 export const load: PageServerLoad = async ({ locals }) => {
   const auth = await requireAuth(locals);
@@ -15,32 +26,21 @@ export const load: PageServerLoad = async ({ locals }) => {
   }
 
   const [artist] = await db.select().from(artists).where(eq(artists.orgId, auth.orgId));
+  info({
+    artist,
+    msg: 'Artist',
+  });
 
-  let tracks: Track[] = [];
-  if (artist?.soundchartsId) {
-    const tracksData = await getArtistTracks(artist.soundchartsId);
-    debug({
-      msg: 'Tracks data',
-      data: tracksData,
-    });
-
-    const trackPromises = (tracksData?.items || []).map(async (track) => {
-      const trackData = await getTrackMetadata(track.uuid);
-      debug({
-        msg: 'Track data',
-        data: trackData,
-      });
-      return {
-        ...track,
-        ...trackData,
-      } as Track;
-    });
-
-    tracks = await Promise.all(trackPromises);
-  }
+  const tracksWithMetadata = await Promise.all(
+    (artist?.tracks as { items: any[] })?.items?.map(async (track) => ({
+      ...track,
+      metadata: await getTrackMetadata(track.uuid),
+    })) ?? []
+  );
 
   return {
     auth,
-    tracks: tracks || [],
+    artist,
+    tracks: tracksWithMetadata,
   };
 };

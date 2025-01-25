@@ -1,11 +1,10 @@
 import { getOrg, getUser, requireAuth } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 import { error } from '@sveltejs/kit';
-import { getArtistStats, getArtistTracks } from '$lib/server/soundcharts';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { info } from '$lib/utils/logger';
+import type { Artist } from '$lib/types';
 
 export const load = (async ({ locals }) => {
   const auth = await requireAuth(locals);
@@ -25,33 +24,14 @@ export const load = (async ({ locals }) => {
 
   const [artist] = await db.select().from(artists).where(eq(artists.orgId, auth.orgId));
 
-  let stats = null;
-  if (artist?.soundchartsId) {
-    stats = await getArtistStats(artist.soundchartsId);
-  }
-
-  let tracks = null;
-  if (artist?.soundchartsId) {
-    tracks = await getArtistTracks(artist.soundchartsId);
-  }
-
-  info({
-    user: {
-      ...user,
-      emailAddresses: user.emailAddresses?.map((email) => email.emailAddress),
-      phoneNumbers: user.phoneNumbers?.map((phone) => phone.phoneNumber),
-    },
-  });
-
   return {
     auth,
     user: {
       ...user,
-      emailAddresses: user.emailAddresses?.map((email) => email.emailAddress) ?? [],
-      phoneNumbers: user.phoneNumbers?.map((phone) => phone.phoneNumber) ?? [],
+      emailAddresses: (user.emailAddresses?.map((email) => email.emailAddress) ?? []) as string[],
+      phoneNumbers: (user.phoneNumbers?.map((phone) => phone.phoneNumber) ?? []) as string[],
     },
     org,
-    stats,
-    tracks,
+    artist: artist as Artist,
   };
 }) satisfies PageServerLoad;
