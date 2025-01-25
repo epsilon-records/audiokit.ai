@@ -2,7 +2,6 @@
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { Badge } from '$lib/components/ui/badge';
   import { Button } from '$lib/components/ui/button';
-  import type { Track } from '$lib/types/track';
 
   let { data } = $props();
   let tracks = $derived(data.tracks);
@@ -32,8 +31,7 @@
   {:else}
     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       {#each tracks as track}
-        {@const { uuid, name, releaseDate, metadata } = track as Track}
-        {$inspect(track)}
+        {@const { uuid, name, releaseDate, metadata } = track}
         <Card>
           <a href="/dashboard/tracks/{uuid}" class="block">
             <img src={metadata.imageUrl} alt={name} class="h-48 w-full object-cover rounded-t-lg" />
