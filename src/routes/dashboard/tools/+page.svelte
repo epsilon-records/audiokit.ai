@@ -25,7 +25,7 @@
       title: 'AI Lyrics Generator',
       description: 'Generate creative lyrics and song ideas with AI assistance',
       icon: Mic,
-      href: '/dashboard/tools/lyrics',
+      href: '#',
       comingSoon: true,
       gradient: 'from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900',
     },
@@ -33,7 +33,7 @@
       title: 'Track Title Generator',
       description: 'Generate unique and engaging titles for your tracks and albums',
       icon: Music2,
-      href: '/dashboard/tools/titles',
+      href: '#',
       comingSoon: true,
       gradient: 'from-indigo-50 to-indigo-100 dark:from-indigo-950 dark:to-indigo-900',
     },
@@ -41,7 +41,7 @@
       title: 'AI Track Mastering',
       description: 'Professional-grade mastering powered by artificial intelligence',
       icon: Sliders,
-      href: '/dashboard/tools/mastering',
+      href: '#',
       comingSoon: true,
       gradient: 'from-cyan-50 to-cyan-100 dark:from-cyan-950 dark:to-cyan-900',
     },
@@ -65,7 +65,9 @@
     {#each tools as tool, i}
       <div in:fly={{ y: 20, duration: 400, delay: i * 100 }}>
         <Card
-          class="flex flex-col h-full transition-all duration-200 hover:shadow-lg hover:scale-[1.02]"
+          class="flex flex-col h-full transition-all duration-200 hover:shadow-lg hover:scale-[1.02] {tool.comingSoon
+            ? 'opacity-75 cursor-not-allowed'
+            : ''}"
         >
           <CardHeader class="bg-gradient-to-br {tool.gradient} pb-6">
             <div class="flex items-center justify-between">
