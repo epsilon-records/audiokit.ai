@@ -7,7 +7,6 @@ export const load = (async ({ locals }) => {
   return {
     auth,
     title: 'Get Started with AudioKit',
-    description:
-      'Choose the perfect plan for your music distribution needs with our straightforward pricing options.',
+    description: 'Choose the perfect plan for your needs with our straightforward pricing options.',
   };
 }) satisfies PageServerLoad;

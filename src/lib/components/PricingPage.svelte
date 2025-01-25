@@ -2,7 +2,7 @@
   import { goto } from '$app/navigation';
   import { SignedIn, SignedOut } from 'svelte-clerk';
   import { toast } from 'svelte-sonner';
-  import { siDiscord } from 'simple-icons';
+  import { siDiscord, siSlack } from 'simple-icons';
   import { Button } from './ui/button';
   import { fly } from 'svelte/transition';
 
@@ -22,11 +22,29 @@
 
   const pricingTiers: PricingTier[] = [
     {
+      name: '🎵 Free Forever',
+      description: 'Launch your music career with powerful free tools.',
+      monthlyPrice: 0,
+      annualPrice: 0,
+      features: [
+        { text: 'Manage one individual artist', icon: '👤' },
+        { text: 'Music distribution to all major platforms', icon: '🎧' },
+        { text: 'Keep 50% of your music royalties', icon: '💰' },
+        { text: 'Up to 5 team members', icon: '🤝' },
+        { text: '1GB media storage', icon: '💾' },
+        { text: 'Basic analytics dashboard', icon: '📊' },
+        { text: 'Release planning & scheduling', icon: '📅' },
+        { text: 'Royalty tracking & reporting', icon: '💰' },
+        { text: 'Contract templates & e-signing', icon: '📝' },
+        { text: 'Community Discord support', icon: 'discord' },
+      ],
+    },
+    {
       name: '🎵 Individual Artist',
-      description:
-        'Perfect for solo artists and creators ready to share their music with the world',
+      description: 'Designed for solo artists transitioning to professional careers.',
       monthlyPrice: 19,
       annualPrice: 99,
+      highlighted: true,
       features: [
         { text: 'Manage one individual artist', icon: '👤' },
         { text: 'Music distribution to all major platforms', icon: '🎧' },
@@ -37,28 +55,28 @@
         { text: 'Release planning & scheduling', icon: '📅' },
         { text: 'Royalty tracking & reporting', icon: '💰' },
         { text: 'Contract templates & e-signing', icon: '📝' },
-        { text: '24/7 Discord channel support', icon: 'discord' },
+        { text: '24/7 Slack private channel support', icon: 'slack' },
         { text: 'Limited API access', icon: '🔑' },
       ],
     },
     {
       name: '⭐ Record Label',
       description:
-        'Powerful tools for professional labels managing multiple artists and releases at scale',
+        "Unlock enterprise-grade tools to manage your roster, maximize revenue, and scale your label operations. Streamline release workflows, access advanced analytics, and maintain full control over your artists' careers.",
       monthlyPrice: 79,
       annualPrice: 599,
-      highlighted: true,
+
       features: [
         { text: 'Manage unlimited artists', icon: '👥' },
         { text: 'Music distribution to all major platforms', icon: '🎧' },
         { text: 'Keep 100% of your music royalties', icon: '💰' },
-        { text: 'Unlimited team members', icon: '🤝' },
-        { text: 'Unlimited storage', icon: '💾' },
+        { text: 'Up to 5 team members', icon: '🤝' },
+        { text: '100GB media storage', icon: '💾' },
         { text: 'Advanced analytics dashboard', icon: '📊' },
         { text: 'Release planning & scheduling', icon: '📅' },
         { text: 'Royalty tracking & reporting', icon: '💰' },
         { text: 'Contract templates & e-signing', icon: '📝' },
-        { text: '24/7 Discord channel support', icon: 'discord' },
+        { text: '24/7 Slack private channel support', icon: 'slack' },
         { text: 'Priority API access', icon: '🔑' },
         { text: 'Advanced integrations', icon: '🔌' },
         { text: 'Custom workflows', icon: '⚡' },
@@ -145,27 +163,27 @@
       </div>
     </div>
 
-    <div class="grid md:grid-cols-2 gap-6">
-      {#each pricingTiers as tier, i}
+    <div class="grid md:grid-cols-2 gap-4">
+      {#each pricingTiers.slice(0, 2) as tier, i}
         <div
           in:fly={{ y: 20, duration: 600, delay: i * 200 }}
-          class="relative flex flex-col rounded-xl border p-6 shadow-sm bg-white"
+          class="relative flex flex-col rounded-xl border p-4 shadow-sm bg-white"
           class:ring-2={tier.highlighted}
           class:ring-primary={tier.highlighted}
         >
           {#if tier.highlighted}
-            <div class="absolute -top-3 right-6">
+            <div class="absolute -top-3 right-4">
               <span
-                class="inline-flex items-center rounded-full bg-primary px-3 py-0.5 text-sm font-medium text-white"
+                class="inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 text-xs font-medium text-white"
               >
                 Popular
               </span>
             </div>
           {/if}
 
-          <div class="mb-4">
-            <h3 class="text-xl font-bold text-gray-900">{tier.name}</h3>
-            <p class="mt-2 text-sm text-gray-600">{tier.description}</p>
+          <div class="mb-3">
+            <h3 class="text-lg font-bold text-gray-900">{tier.name}</h3>
+            <p class="mt-1 text-xs text-gray-600">{tier.description}</p>
           </div>
 
           <div class="mb-4">
@@ -179,7 +197,7 @@
                 {isAnnual ? '/year' : '/month'}
               </span>
             </p>
-            {#if isAnnual}
+            {#if isAnnual && tier.monthlyPrice * 12 - tier.annualPrice > 0}
               <p class="mt-1 text-sm text-emerald-600 flex items-center gap-1">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path
@@ -220,6 +238,14 @@
                       >
                         <path fill="currentColor" d={siDiscord.path} />
                       </svg>
+                    {:else if feature.icon === 'slack'}
+                      <svg
+                        role="img"
+                        viewBox="0 0 24 24"
+                        class="inline-block w-4 h-4 text-[#FF0000]"
+                      >
+                        <path fill="currentColor" d={siSlack.path} />
+                      </svg>
                     {:else}
                       {feature.icon}
                     {/if}
@@ -229,6 +255,146 @@
               </li>
             {/each}
           </ul>
+
+          <SignedIn>
+            <button
+              type="button"
+              onclick={() => handleCheckout(tier)}
+              disabled={loadingTier === tier.name}
+              class="block w-full rounded-lg px-4 py-2 text-center text-sm font-semibold transition-colors {tier.highlighted
+                ? 'bg-primary text-white hover:bg-primary/90'
+                : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
+            >
+              {#if loadingTier === tier.name}
+                <span class="inline-flex items-center">
+                  <svg
+                    class="animate-spin -ml-1 mr-3 h-5 w-5"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      stroke-width="4"
+                    />
+                    <path
+                      class="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Processing...
+                </span>
+              {:else}
+                Subscribe to {tier.name}
+              {/if}
+            </button>
+          </SignedIn>
+
+          <SignedOut>
+            <a
+              href="/sign-up"
+              class="block w-full rounded-lg px-4 py-2 text-center text-sm font-semibold transition-colors {tier.highlighted
+                ? 'bg-primary text-white hover:bg-primary/90'
+                : 'bg-gray-50 text-gray-900 hover:bg-gray-100'}"
+            >
+              Subscribe to {tier.name}
+            </a>
+          </SignedOut>
+        </div>
+      {/each}
+    </div>
+
+    <div class="mt-8 max-w-4xl mx-auto">
+      {#each pricingTiers.slice(2) as tier}
+        <div
+          in:fly={{ y: 20, duration: 600, delay: 200 }}
+          class="relative flex flex-col rounded-xl border p-4 shadow-sm bg-white"
+          class:ring-2={tier.highlighted}
+          class:ring-primary={tier.highlighted}
+        >
+          <div class="grid grid-cols-2 gap-8">
+            <div>
+              <div class="mb-3">
+                <h3 class="text-lg font-bold text-gray-900">{tier.name}</h3>
+                <p class="mt-1 text-xs text-gray-600">{tier.description}</p>
+              </div>
+
+              <div class="mb-4">
+                <p class="flex items-baseline">
+                  <span
+                    class="text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-600 to-emerald-400"
+                  >
+                    ${isAnnual ? tier.annualPrice : tier.monthlyPrice}
+                  </span>
+                  <span class="ml-1 text-lg font-semibold text-gray-600">
+                    {isAnnual ? '/year' : '/month'}
+                  </span>
+                </p>
+                {#if isAnnual && tier.monthlyPrice * 12 - tier.annualPrice > 0}
+                  <p class="mt-1 text-sm text-emerald-600 flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Save ${(tier.monthlyPrice * 12 - tier.annualPrice).toFixed(2)} with annual billing
+                  </p>
+                {/if}
+              </div>
+            </div>
+
+            <ul role="list" class="mb-6 space-y-3 flex-1">
+              {#each tier.features as feature}
+                <li class="flex gap-3 items-center">
+                  <svg
+                    class="h-5 w-5 flex-none text-emerald-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="2"
+                    stroke="currentColor"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                    />
+                  </svg>
+                  <span class="text-sm text-gray-600">
+                    <span class="mr-2">
+                      {#if feature.icon === 'discord'}
+                        <svg
+                          role="img"
+                          viewBox="0 0 24 24"
+                          class="inline-block w-4 h-4 text-[#5865F2]"
+                        >
+                          <path fill="currentColor" d={siDiscord.path} />
+                        </svg>
+                      {:else if feature.icon === 'slack'}
+                        <svg
+                          role="img"
+                          viewBox="0 0 24 24"
+                          class="inline-block w-4 h-4 text-[#FF0000]"
+                        >
+                          <path fill="currentColor" d={siSlack.path} />
+                        </svg>
+                      {:else}
+                        {feature.icon}
+                      {/if}
+                    </span>
+                    {feature.text}
+                  </span>
+                </li>
+              {/each}
+            </ul>
+          </div>
 
           <SignedIn>
             <button
