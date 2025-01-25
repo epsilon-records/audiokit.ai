@@ -30,7 +30,7 @@
       >
       <PlatformLogos {ANIMATION_BASE_DELAY} />
       <TechStack {ANIMATION_BASE_DELAY} />
-      <!-- <Stats {ANIMATION_BASE_DELAY} /> -->
+      <Stats {ANIMATION_BASE_DELAY} />
     </div>
   </div>
 </div>
