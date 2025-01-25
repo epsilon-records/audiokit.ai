@@ -1,8 +1,8 @@
-import { db } from '$lib/db';
-import { artists } from '$lib/db/schema';
-import { getArtistIdFromSpotify, getArtistStats, getArtistTracks } from '$lib/server/soundcharts';
+import { db } from '../../db/index.js';
+import { artists } from '../../db/schema.js';
+import { getArtistIdFromSpotify, getArtistStats, getArtistTracks } from '../soundcharts.js';
 import { eq } from 'drizzle-orm';
-import { debug, warn } from '$lib/utils/logger';
+import { debug, warn } from '../../utils/logger.js';
 import { error } from '@sveltejs/kit';
 
 function extractSpotifyId(spotifyUrl: string): string | null {
