@@ -4,5 +4,10 @@
       "path": "/api/enrich-data",
       "schedule": "0 * * * *"
     }
-  ]
+  ],
+  "functions": {
+    "api/enrich-data": {
+      "maxDuration": 300
+    }
+  }
 }

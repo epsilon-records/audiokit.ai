@@ -189,7 +189,7 @@
           </CardContent>
         </Card>
       {:else}
-        <p class="text-muted-foreground">No services connected yet.</p>
+        <p class="text-muted-foreground">No platforms connected yet.</p>
       {/if}
     </div>
 
