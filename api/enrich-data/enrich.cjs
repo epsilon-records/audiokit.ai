@@ -56,7 +56,7 @@ async function getArtistsToUpdate() {
   };
 }
 
-export async function GET() {
+export async function enrichData() {
   const requestId = crypto.randomUUID();
 
   try {
