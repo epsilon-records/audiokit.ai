@@ -6,7 +6,7 @@
     }
   ],
   "functions": {
-    "api/enrich-data/+server.ts": {
+    "src/routes/api/enrich-data/+server.ts": {
       "maxDuration": 60
     }
   }
