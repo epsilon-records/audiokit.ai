@@ -34,6 +34,11 @@ export async function enrichWithMusicfetch(artistData: (typeof artists.$inferSel
             artist.appleMusic,
             artist.soundcloud,
             artist.youtube,
+            artist.bandcamp,
+            artist.facebook,
+            artist.instagram,
+            artist.tiktok,
+            artist.x,
           ];
 
           const linkUrl = serviceLinks.find((link) => link !== null && link !== '');
@@ -48,8 +53,34 @@ export async function enrichWithMusicfetch(artistData: (typeof artists.$inferSel
           }
 
           const services = await getMusicfetchData(linkUrl, []);
-
           await db.update(artists).set({ services }).where(eq(artists.id, artist.id));
+
+          const {
+            spotify,
+            appleMusic,
+            soundcloud,
+            youtube,
+            bandcamp,
+            facebook,
+            instagram,
+            tiktok,
+            x,
+          } = services;
+
+          await db
+            .update(artists)
+            .set({
+              spotify,
+              appleMusic,
+              soundcloud,
+              youtube,
+              bandcamp,
+              facebook,
+              instagram,
+              tiktok,
+              x,
+            })
+            .where(eq(artists.id, artist.id));
 
           debug({
             requestId,

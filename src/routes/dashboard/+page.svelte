@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { fly } from 'svelte/transition';
-  import { AlertCircle, AlertTriangle } from 'lucide-svelte';
+  import { AlertCircle } from 'lucide-svelte';
   import { Badge } from '$lib/components/ui/badge';
   import { formatNumber } from '$lib/utils/format';
   import type { Artist } from '$lib/types';
