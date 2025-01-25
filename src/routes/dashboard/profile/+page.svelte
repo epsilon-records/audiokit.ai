@@ -216,7 +216,7 @@
                 </Control>
                 <Description class="text-sm">
                   {#if !!data.form?.data?.email}
-                    Email can be changed by contacting <a
+                    Artist contact email can be changed by contacting <a
                       href="/support"
                       class="text-green-700 hover:underline">support</a
                     >.

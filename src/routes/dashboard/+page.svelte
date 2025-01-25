@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Card, CardContent, CardHeader, CardTitle } from '$lib/components/ui/card';
   import { fly } from 'svelte/transition';
-  import { AlertCircle } from 'lucide-svelte';
+  import { AlertCircle, AlertTriangle } from 'lucide-svelte';
   import { Badge } from '$lib/components/ui/badge';
   import { formatNumber } from '$lib/utils/format';
   import type { Artist } from '$lib/types';
@@ -23,8 +23,9 @@
 <div class="container mx-auto px-4 py-8">
   <div class="mb-8">
     <h1 class="text-4xl font-bold tracking-tight">Artist Overview</h1>
+
     <p class="mt-2 text-lg text-muted-foreground">
-      Get insights into your performance metrics and manage your artist profile.
+      View your artist details, connected services, and A&R representative information.
     </p>
     {#if !artist?.metadata}
       <div class="mt-4" in:fly={{ y: 20, duration: 400, delay: 200 }}>
@@ -33,7 +34,7 @@
           class="bg-yellow-50 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:border-yellow-800"
         >
           <AlertCircle class="h-4 w-4 mr-2" />
-          No statistics are available yet. Connect your platforms to start tracking your performance.
+          Complete your artist profile to unlock powerful features and analytics.
         </Badge>
       </div>
     {/if}
