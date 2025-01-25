@@ -1,8 +1,8 @@
-import { HUBSPOT_API_KEY } from '$env/static/private';
-import type { artistSchema } from '$lib/schemas/artist';
+import type { artistSchema } from '../schemas/artist.js';
 import type { z } from 'zod';
-import { debug } from '$lib/utils/logger';
-import { HUBSPOT_API_BASE, HUBSPOT_LIFECYCLE_STAGE_ARTIST } from '$env/static/private';
+import { debug } from '../utils/logger.js';
+import { HUBSPOT_API_BASE } from '$env/static/private';
+import { HUBSPOT_API_KEY } from '$env/static/private';
 
 interface HubspotContact {
   id: string;
@@ -32,26 +32,29 @@ type Artist = z.infer<typeof artistSchema>;
 export async function getHubspotContact(email: string): Promise<HubspotContact | null> {
   try {
     // First search for the contact by email
-    const searchResponse = await fetch(`${HUBSPOT_API_BASE}/crm/v3/objects/contacts/search`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${HUBSPOT_API_KEY}`,
-      },
-      body: JSON.stringify({
-        filterGroups: [
-          {
-            filters: [
-              {
-                propertyName: 'email',
-                operator: 'EQ',
-                value: email,
-              },
-            ],
-          },
-        ],
-      }),
-    });
+    const searchResponse = await fetch(
+      `${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/search`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+        },
+        body: JSON.stringify({
+          filterGroups: [
+            {
+              filters: [
+                {
+                  propertyName: 'email',
+                  operator: 'EQ',
+                  value: email,
+                },
+              ],
+            },
+          ],
+        }),
+      }
+    );
 
     if (!searchResponse.ok) {
       debug({
@@ -76,10 +79,10 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
 
     // Make a second request to get all properties
     const detailResponse = await fetch(
-      `${HUBSPOT_API_BASE}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone,city,country,website,spotify,instagram,facebook,x,tiktok,soundcloud,youtube`,
+      `${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone,city,country,website,spotify,instagram,facebook,x,tiktok,soundcloud,youtube`,
       {
         headers: {
-          Authorization: `Bearer ${HUBSPOT_API_KEY}`,
+          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
         },
       }
     );
@@ -154,7 +157,7 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
           tiktok: artist.tiktok,
           soundcloud: artist.soundcloud,
           youtube: artist.youtube,
-          lifecyclestage: HUBSPOT_LIFECYCLE_STAGE_ARTIST,
+          lifecyclestage: process.env.HUBSPOT_LIFECYCLE_STAGE_ARTIST,
         },
       },
     };

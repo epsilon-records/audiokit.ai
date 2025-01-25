@@ -1,15 +1,17 @@
-import { MUSICFETCH_TOKEN } from '$env/static/private';
 import { debug } from '$lib/utils/logger';
 
 export async function getMusicfetchData(spotifyUrl: string, services: string[]) {
   const requestId = crypto.randomUUID();
 
   try {
+    if (!process.env.MUSICFETCH_TOKEN) {
+      throw new Error('MUSICFETCH_TOKEN is not set');
+    }
     const response: Response = await fetch(
-      `https://api.musicfetch.io/url?url=${encodeURIComponent(spotifyUrl)}&services=${services.join(',')}`,
+      `${process.env.MUSICFETCH_API_BASE}/url?url=${encodeURIComponent(spotifyUrl)}&services=${services.join(',')}`,
       {
         headers: {
-          'x-musicfetch-token': MUSICFETCH_TOKEN,
+          'x-musicfetch-token': process.env.MUSICFETCH_TOKEN,
         },
       }
     );

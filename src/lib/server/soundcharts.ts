@@ -1,13 +1,13 @@
-import { SOUNDCHARTS_API_BASE, SOUNDCHARTS_API_KEY, SOUNDCHARTS_APP_ID } from '$env/static/private';
-import { debug, warn } from '$lib/utils/logger';
-import type { Track, TrackCollectionResponse } from '$lib/types/track';
+import { debug, warn } from '../utils/logger.js';
+import type { Track, TrackCollectionResponse } from '../types/track.js';
 import { error } from '@sveltejs/kit';
+import { SOUNDCHARTS_API_BASE } from '$env/static/private';
 
 /**
  * Get Soundcharts artist ID from Spotify ID
  */
 export async function getArtistIdFromSpotify(spotifyId: string): Promise<string | null> {
-  const url = `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`;
+  const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`;
   try {
     debug({
       msg: 'Fetching Soundcharts ID',
@@ -15,10 +15,14 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
       spotifyId,
     });
 
+    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
+      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
+    }
+
     const response = await fetch(url, {
       headers: {
-        'x-app-id': SOUNDCHARTS_APP_ID,
-        'x-api-key': SOUNDCHARTS_API_KEY,
+        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
         Accept: 'application/json',
       },
     });
@@ -62,7 +66,7 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
  * Get artist metadata from Soundcharts
  */
 export async function getArtistMetadata(uuid: string): Promise<any | null> {
-  const url = `${SOUNDCHARTS_API_BASE}/api/v2.9/artist/${uuid}`;
+  const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.9/artist/${uuid}`;
   try {
     debug({
       msg: 'Fetching Soundcharts artist metadata',
@@ -70,10 +74,14 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
       uuid,
     });
 
+    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
+      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
+    }
+
     const response = await fetch(url, {
       headers: {
-        'x-app-id': SOUNDCHARTS_APP_ID,
-        'x-api-key': SOUNDCHARTS_API_KEY,
+        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
         Accept: 'application/json',
       },
     });
@@ -112,7 +120,7 @@ export async function getArtistStreamingAudience(
   uuid: string,
   platform: 'spotify' | 'apple_music' | 'deezer'
 ): Promise<any | null> {
-  const url = `${SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/streaming/${platform}/listening`;
+  const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/streaming/${platform}/listening`;
   try {
     debug({
       msg: 'Fetching Soundcharts streaming audience',
@@ -121,10 +129,14 @@ export async function getArtistStreamingAudience(
       platform,
     });
 
+    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
+      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
+    }
+
     const response = await fetch(url, {
       headers: {
-        'x-app-id': SOUNDCHARTS_APP_ID,
-        'x-api-key': SOUNDCHARTS_API_KEY,
+        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
         Accept: 'application/json',
       },
     });
@@ -162,7 +174,7 @@ export async function getArtistStreamingAudience(
  * Get artist audience data from Soundcharts
  */
 async function getArtistAudience(uuid: string, platform: string): Promise<any | null> {
-  const url = `${SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/audience/${platform}`;
+  const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/audience/${platform}`;
   try {
     debug({
       msg: 'Fetching artist audience data',
@@ -171,10 +183,14 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
       platform,
     });
 
+    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
+      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
+    }
+
     const response = await fetch(url, {
       headers: {
-        'x-app-id': SOUNDCHARTS_APP_ID,
-        'x-api-key': SOUNDCHARTS_API_KEY,
+        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
         Accept: 'application/json',
       },
     });
@@ -319,10 +335,14 @@ export async function getArtistTracks(
       params: params.toString(),
     });
 
+    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
+      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
+    }
+
     const response = await fetch(`${url}?${params}`, {
       headers: {
-        'x-app-id': SOUNDCHARTS_APP_ID,
-        'x-api-key': SOUNDCHARTS_API_KEY,
+        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
         Accept: 'application/json',
       },
     });
@@ -375,10 +395,14 @@ export async function getTrackMetadata(uuid: string): Promise<Track | null> {
       uuid,
     });
 
+    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
+      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
+    }
+
     const response = await fetch(url, {
       headers: {
-        'x-app-id': SOUNDCHARTS_APP_ID,
-        'x-api-key': SOUNDCHARTS_API_KEY,
+        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
         Accept: 'application/json',
       },
     });
