@@ -158,7 +158,7 @@ async function requireSubscription(locals: App.Locals): Promise<Auth> {
   ).data;
 
   if (!subscription) {
-    throw redirect(307, '/join');
+    throw redirect(307, '/upgrade');
   }
 
   return { ...auth, hasActiveSubscription: true };

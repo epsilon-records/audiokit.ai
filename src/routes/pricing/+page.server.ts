@@ -2,7 +2,7 @@ import type { PageServerLoad } from './$types';
 import { redirectAuthenticated } from '$lib/server/auth';
 
 export const load = (async ({ locals }) => {
-  redirectAuthenticated(locals, 303, '/join');
+  redirectAuthenticated(locals, 303, '/upgrade');
 
   return {
     title: 'Simple, Transparent Pricing',

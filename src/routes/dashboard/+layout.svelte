@@ -177,10 +177,10 @@
           </span>
         {:else}
           <a
-            href="/join"
+            href="/upgrade"
             class={cn(
               'text-sm transition-colors group',
-              isActive('/join')
+              isActive('/upgrade')
                 ? 'text-indigo-600 dark:text-indigo-400 font-medium'
                 : 'text-gray-500 dark:text-gray-400'
             )}
@@ -262,10 +262,10 @@
             </span>
           {:else}
             <a
-              href="/join"
+              href="/upgrade"
               class={cn(
                 'text-sm transition-colors group',
-                isActive('/join')
+                isActive('/upgrade')
                   ? 'text-indigo-600 dark:text-indigo-400 font-medium'
                   : 'text-gray-500 dark:text-gray-400'
               )}
@@ -402,10 +402,10 @@
         </a>
         {#if !page.data.hasActiveSubscription}
           <a
-            href="/join"
+            href="/upgrade"
             class={cn(
               'block px-3 py-2 text-base font-medium rounded-md transition-colors',
-              isActive('/join')
+              isActive('/upgrade')
                 ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/50 dark:text-indigo-400'
                 : 'text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800'
             )}

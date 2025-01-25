@@ -36,7 +36,7 @@
               <Badge variant="destructive">
                 You need an active subscription to create releases.
                 <a
-                  href="/join"
+                  href="/upgrade"
                   class="ml-2 inline-flex items-center rounded-md bg-indigo-600 px-2.5 py-1 text-xs font-medium text-white hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 transition-colors"
                 >
                   Enable Services

@@ -131,7 +131,7 @@
           <p class="text-muted-foreground">Our support team is here to help you succeed.</p>
         </div>
         <div class="flex items-center justify-center gap-4">
-          <Button href="/join" variant="default" class="text-lg secondary hover:opacity-90">
+          <Button href="/upgrade" variant="default" class="text-lg secondary hover:opacity-90">
             Get Started Now
           </Button>
           <Button href="mailto:support@audiokit.ai" variant="outline" class="text-lg gap-2">
