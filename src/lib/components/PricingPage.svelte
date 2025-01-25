@@ -6,7 +6,7 @@
   import { Button } from './ui/button';
   import { fly } from 'svelte/transition';
 
-  let { email, title, description } = $props();
+  let { auth, title, description } = $props();
 
   let isAnnual = $state(true);
   let loadingTier = $state<string | null>(null);
@@ -87,14 +87,14 @@
     pro: Math.round((pricingTiers[1].monthlyPrice * 12 - pricingTiers[1].annualPrice) / 12),
   });
 
-  async function handleCheckout(tier: PricingTier) {
+  async function handleCheckout(tier: PricingTier, email: string) {
     loadingTier = tier.name;
-    if (email) {
+    if (auth) {
       try {
         const payload = {
           tier: tier.name,
           isAnnual,
-          email: email,
+          email: auth.primaryEmailAddress?.emailAddress,
         };
 
         const response = await fetch('/api/create-checkout-session', {
