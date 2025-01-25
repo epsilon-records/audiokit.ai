@@ -69,7 +69,8 @@ export async function enrichWithMusicfetch(artistData: (typeof artists.$inferSel
           } = {};
 
           for (const service in services) {
-            if (services[service]?.link) {
+            const serviceLink = services[service]?.link;
+            if (serviceLink && typeof serviceLink === 'string' && serviceLink.trim() !== '') {
               if (
                 service === 'spotify' ||
                 service === 'appleMusic' ||
@@ -81,7 +82,7 @@ export async function enrichWithMusicfetch(artistData: (typeof artists.$inferSel
                 service === 'tiktok' ||
                 service === 'x'
               ) {
-                updateFields[service] = sanitizeUrl(services[service].link);
+                updateFields[service] = sanitizeUrl(serviceLink);
               }
             }
           }
