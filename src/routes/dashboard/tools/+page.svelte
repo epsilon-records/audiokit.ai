@@ -18,7 +18,7 @@
       title: 'AI Cover Art Generator',
       description: 'Create unique album artwork using advanced AI image generation',
       icon: ImagePlus,
-      href: '/dashboard/tools/cover-art',
+      href: 'https://visuals.audiokit.ai',
       gradient: 'from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900',
     },
     {
@@ -26,6 +26,7 @@
       description: 'Generate creative lyrics and song ideas with AI assistance',
       icon: Mic,
       href: '/dashboard/tools/lyrics',
+      comingSoon: true,
       gradient: 'from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900',
     },
     {
@@ -33,6 +34,7 @@
       description: 'Generate unique and engaging titles for your tracks and albums',
       icon: Music2,
       href: '/dashboard/tools/titles',
+      comingSoon: true,
       gradient: 'from-indigo-50 to-indigo-100 dark:from-indigo-950 dark:to-indigo-900',
     },
     {
