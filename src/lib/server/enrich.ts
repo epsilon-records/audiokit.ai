@@ -1,7 +1,7 @@
-import { db } from '../../src/lib/db/index.js';
-import { artists } from '../../src/lib/db/schema.js';
+import { db } from '../db/index.js';
+import { artists } from '../db/schema.js';
 import { eq, not, or, and } from 'drizzle-orm';
-import { debug } from '../../src/lib/utils/logger.js';
+import { debug } from '../utils/logger.js';
 import { enrichWithSoundcharts } from './enrichers/soundcharts.js';
 import { enrichWithHubspot } from './enrichers/hubspot.js';
 import { enrichWithMusicfetch } from './enrichers/musicfetch.js';
