@@ -53,7 +53,7 @@
               target="_blank"
               rel="noopener noreferrer"
             >
-              System Status
+              System Statu
             </a>
           </li>
           <li>
