@@ -48,6 +48,16 @@
           <li><a href="/terms-of-service" class="hover:underline">Terms of Service</a></li>
           <li>
             <a
+              href="https://status.audiokit.ai"
+              class="hover:underline"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              System Status
+            </a>
+          </li>
+          <li>
+            <a
               href="https://feedback.audiokit.ai"
               class="hover:underline"
               target="_blank"
