@@ -44,6 +44,8 @@
           <li><a href="/releases" class="hover:underline">Releases</a></li>
           <li><a href="/docs" class="hover:underline">Docs</a></li>
           <li><a href="/faq" class="hover:underline">FAQ</a></li>
+          <li><a href="/privacy-policy" class="hover:underline">Privacy Policy</a></li>
+          <li><a href="/terms-of-service" class="hover:underline">Terms of Service</a></li>
         </ul>
       </div>
 
