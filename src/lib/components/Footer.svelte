@@ -40,8 +40,6 @@
       <div>
         <h3 class="font-bold mb-4">Quick Links</h3>
         <ul class="space-y-2 text-sm">
-          <li><a href="/artists" class="hover:underline">Artists</a></li>
-          <li><a href="/releases" class="hover:underline">Releases</a></li>
           <li><a href="/docs" class="hover:underline">Docs</a></li>
           <li><a href="/faq" class="hover:underline">FAQ</a></li>
           <li><a href="/privacy-policy" class="hover:underline">Privacy Policy</a></li>
