@@ -1,1 +1,1 @@
-bunx devmoji -e
+bun x lint-staged
