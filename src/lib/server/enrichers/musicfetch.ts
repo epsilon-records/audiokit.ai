@@ -1,6 +1,6 @@
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
-import { getMusicfetchData } from '../musicfetch.js';
+import { getMusicfetchData } from '../integrations/musicfetch.js';
 import { eq } from 'drizzle-orm';
 import logger from '../../utils/logger.js';
 import { sanitizeUrl } from '../../utils/sanitize.js';

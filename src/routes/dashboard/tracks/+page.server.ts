@@ -4,7 +4,7 @@ import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
-import { getTrackMetadata } from '$lib/server/soundcharts-api';
+import { getTrackMetadata } from '$lib/server/integrations/soundcharts';
 import logger from '$lib/utils/logger';
 
 interface Artist {

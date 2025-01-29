@@ -1,6 +1,10 @@
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
-import { getArtistIdFromSpotify, getArtistStats, getArtistTracks } from '../soundcharts.js';
+import {
+  getArtistIdFromSpotify,
+  getArtistStats,
+  getArtistTracks,
+} from '../integrations/soundcharts.js';
 import { eq } from 'drizzle-orm';
 import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';

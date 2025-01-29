@@ -1,7 +1,7 @@
 import { db } from '../db/index.js';
 import { artists } from '../db/schema.js';
 import { eq, not, or, and } from 'drizzle-orm';
-import { debug, info } from '../utils/logger.js';
+import logger from '../utils/logger.js';
 import { enrichWithSoundcharts } from './enrichers/soundcharts.js';
 import { enrichWithHubspot } from './enrichers/hubspot.js';
 import { enrichWithMusicfetch } from './enrichers/musicfetch.js';
@@ -57,7 +57,7 @@ async function getArtistsToUpdate() {
 
 export async function enrichData() {
   const requestId = crypto.randomUUID();
-  info({
+  logger.info({
     requestId,
     msg: 'Starting data enrichment process',
   });
@@ -78,7 +78,7 @@ export async function enrichData() {
       { headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err) {
-    info({
+    logger.info({
       requestId,
       error: err instanceof Error ? err.message : 'Unknown error',
       msg: 'Error in data enrichment',

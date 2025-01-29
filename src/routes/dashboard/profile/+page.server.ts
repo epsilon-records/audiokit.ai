@@ -8,7 +8,7 @@ import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { sql } from 'drizzle-orm';
 import logger from '$lib/utils/logger';
-import { syncToHubspot } from '$lib/server/hubspot-api';
+import { syncToHubspot } from '$lib/server/integrations/hubspot';
 
 // Add this helper function at the top of the file
 function sanitizeUrl(url: string | null | undefined): string | null {
