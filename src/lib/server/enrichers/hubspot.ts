@@ -2,8 +2,10 @@ import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
 import { getHubspotContact } from '../hubspot.js';
 import { eq } from 'drizzle-orm';
-import { debug, warn } from '../../utils/logger.js';
+import logger from '../../utils/logger.js';
 import { error } from '@sveltejs/kit';
+import { serializeError } from 'serialize-error';
+import { inspect } from 'util';
 
 interface HubspotUpdateFields {
   city?: string;
@@ -15,19 +17,15 @@ interface HubspotUpdateFields {
   appleMusic?: string;
   soundcloud?: string;
   bandcamp?: string;
-  facebook?: string;
   instagram?: string;
-  mixcloud?: string;
-  tiktok?: string;
-  twitch?: string;
 }
 
 function validateArtistEmail(artist: typeof artists.$inferSelect, requestId: string) {
   if (!artist.email) {
-    debug({
+    logger.error(`❌ No email found for artist`, {
       requestId,
       artistId: artist.id,
-      msg: 'No email found for artist',
+      error: 'MISSING_EMAIL',
     });
     return {
       artistId: artist.id,
@@ -41,7 +39,8 @@ function validateArtistEmail(artist: typeof artists.$inferSelect, requestId: str
 
 function buildUpdateFields(
   artist: typeof artists.$inferSelect,
-  hubspotData: { properties: Record<string, string | null> }
+  hubspotData: { properties: Record<string, string | null> },
+  requestId: string
 ): HubspotUpdateFields {
   const updates: HubspotUpdateFields = {};
   const { properties } = hubspotData;
@@ -55,11 +54,7 @@ function buildUpdateFields(
     ['appleMusic', 'apple_music'],
     ['soundcloud', 'soundcloud'],
     ['bandcamp', 'bandcamp'],
-    ['facebook', 'facebook'],
     ['instagram', 'instagram'],
-    ['mixcloud', 'mixcloud'],
-    ['tiktok', 'tiktok'],
-    ['twitch', 'twitch'],
   ];
 
   fieldsToUpdate.forEach(([artistField, hubspotField]) => {
@@ -69,13 +64,15 @@ function buildUpdateFields(
   });
 
   const { firstname, lastname } = properties;
-  debug({
+  logger.info(`🔄 Building updates for artist`, {
+    requestId,
     artistId: artist.id,
     artistLegalName: artist.legalName,
     firstname,
     lastname,
-    msg: 'Building updates',
+    fieldsToUpdate: Object.keys(updates),
   });
+
   if (!artist.legalName && firstname && lastname) {
     updates.legalName = `${firstname} ${lastname}`;
   }
@@ -88,48 +85,62 @@ async function applyUpdates(
   updates: HubspotUpdateFields,
   requestId: string
 ) {
-  debug({
+  const startTime = Date.now();
+  logger.info(`🔄 Applying updates to artist`, {
     requestId,
-    email: artist.email,
     artistId: artist.id,
-    updates,
-    msg: 'Applying updates to artist',
+    email: artist.email,
+    updateFields: Object.keys(updates),
   });
 
-  await db.update(artists).set(updates).where(eq(artists.id, artist.id));
+  try {
+    await db.update(artists).set(updates).where(eq(artists.id, artist.id));
 
-  debug({
-    requestId,
-    email: artist.email,
-    artistId: artist.id,
-    updates,
-    msg: 'Merged Hubspot data',
-  });
+    logger.info(`✅ Successfully merged Hubspot data`, {
+      requestId,
+      artistId: artist.id,
+      email: artist.email,
+      updateFields: Object.keys(updates),
+      duration: Date.now() - startTime,
+    });
+  } catch (err) {
+    const serializedError = serializeError(err);
+    logger.error(`❌ Failed to apply updates`, {
+      requestId,
+      artistId: artist.id,
+      email: artist.email,
+      error: {
+        message: serializedError.message,
+        stack: serializedError.stack,
+        type: serializedError.name,
+        code: serializedError.code,
+        additionalInfo: inspect(serializedError, { depth: null }),
+      },
+      duration: Date.now() - startTime,
+    });
+    throw err;
+  }
 }
 
 async function updateHubspotArtist(artist: typeof artists.$inferSelect) {
   const requestId = crypto.randomUUID();
+  const startTime = Date.now();
+  const artistContext = {
+    requestId,
+    artistId: artist.id,
+    email: artist.email,
+  };
+
+  logger.info(`🎬 Starting Hubspot artist update`, artistContext);
 
   try {
-    debug({
-      requestId,
-      email: artist.email,
-      artistId: artist.id,
-      msg: 'Starting Hubspot artist update',
-    });
-
     const emailValidationError = validateArtistEmail(artist, requestId);
     if (emailValidationError) return emailValidationError;
 
     const hubspotData = await getHubspotContact(artist.email!);
 
     if (!hubspotData) {
-      warn({
-        requestId,
-        email: artist.email,
-        artistId: artist.id,
-        msg: 'No Hubspot data available',
-      });
+      logger.warn(`⚠️ No Hubspot data available`, artistContext);
       return {
         artistId: artist.id,
         email: artist.email,
@@ -138,49 +149,61 @@ async function updateHubspotArtist(artist: typeof artists.$inferSelect) {
       };
     }
 
-    debug({
-      requestId,
-      email: artist.email,
-      artistId: artist.id,
-      hubspotData,
-      msg: 'Retrieved Hubspot contact data',
+    logger.info(`📥 Retrieved Hubspot contact data`, {
+      ...artistContext,
+      hubspotId: hubspotData.id,
+      availableFields: Object.keys(hubspotData.properties),
     });
 
-    const updates = buildUpdateFields(artist, hubspotData);
+    const updates = buildUpdateFields(artist, hubspotData, requestId);
     await applyUpdates(artist, updates, requestId);
 
+    logger.info(`🎉 Successfully updated artist with Hubspot data`, {
+      ...artistContext,
+      duration: Date.now() - startTime,
+      updateFields: Object.keys(updates),
+    });
+
     return { artistId: artist.id, email: artist.email, success: true, updates };
-  } catch (error) {
-    debug({
-      requestId,
-      email: artist.email,
-      artistId: artist.id,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      msg: 'Error during Hubspot artist update',
+  } catch (err) {
+    const serializedError = serializeError(err);
+    logger.error(`💥 Error during Hubspot artist update`, {
+      ...artistContext,
+      error: {
+        message: serializedError.message,
+        stack: serializedError.stack,
+        type: serializedError.name,
+        code: serializedError.code,
+        additionalInfo: inspect(serializedError, { depth: null }),
+      },
+      duration: Date.now() - startTime,
     });
     return {
       artistId: artist.id,
       email: artist.email,
       success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: serializedError.message,
     };
   }
 }
 
 export async function enrichWithHubspot(artistData: (typeof artists.$inferSelect)[]) {
   const requestId = crypto.randomUUID();
+  const startTime = Date.now();
+
+  logger.info(`🎬 Starting Hubspot enrichment process`, {
+    requestId,
+    artistCount: artistData.length,
+    metadata: {
+      environment: process.env.NODE_ENV,
+      hubspotApiKey: process.env.HUBSPOT_API_KEY ? '✅ Configured' : '❌ Missing',
+      hubspotApiBase: process.env.HUBSPOT_API_BASE ? '✅ Configured' : '❌ Missing',
+    },
+  });
 
   try {
-    debug({
-      requestId,
-      msg: 'Starting Hubspot enrichment process',
-    });
-
     if (!artistData.length) {
-      debug({
-        requestId,
-        msg: 'No artists found to update with Hubspot',
-      });
+      logger.warn(`🛑 No artists found to update with Hubspot`, { requestId });
       return {
         success: true,
         message: 'No artists found to update',
@@ -194,20 +217,57 @@ export async function enrichWithHubspot(artistData: (typeof artists.$inferSelect
         .map((artist) => updateHubspotArtist(artist))
     );
 
-    debug({
-      requestId,
-      updateCount: updates.length,
-      successCount: updates.filter((u) => u.success).length,
-      msg: 'Completed Hubspot enrichment process',
-    });
+    const successCount = updates.filter((u) => u.success).length;
+    const failureCount = updates.length - successCount;
 
-    return { success: true, updates };
+    logger[successCount === updates.length ? 'info' : 'warn'](
+      `🏁 Completed Hubspot enrichment process`,
+      {
+        requestId,
+        duration: Date.now() - startTime,
+        totalArtists: updates.length,
+        successCount,
+        failureCount,
+        successRate: `${((successCount / updates.length) * 100).toFixed(2)}%`,
+        failures: updates
+          .filter((u) => !u.success)
+          .map((u) => ({
+            artistId: u.artistId,
+            error: u.error,
+          })),
+      }
+    );
+
+    return {
+      success: successCount > 0,
+      updates,
+      message:
+        successCount === updates.length
+          ? 'All artists updated successfully'
+          : `Updated ${successCount} of ${updates.length} artists`,
+    };
   } catch (err) {
-    debug({
+    const serializedError = serializeError(err);
+    logger.error(`💥 Critical error in Hubspot enrichment process`, {
       requestId,
-      error: err instanceof Error ? err.message : 'Unknown error',
-      msg: 'Error in Hubspot enrichment',
+      duration: Date.now() - startTime,
+      error: {
+        message: serializedError.message,
+        stack: serializedError.stack,
+        type: serializedError.name,
+        code: serializedError.code,
+        additionalInfo: inspect(serializedError, { depth: null }),
+      },
+      input: {
+        artistCount: artistData.length,
+        sampleArtist: artistData[0]
+          ? {
+              id: artistData[0].id,
+              email: artistData[0].email,
+            }
+          : null,
+      },
     });
-    throw error(500, err instanceof Error ? err.message : 'Unknown error');
+    throw error(500, serializedError.message);
   }
 }

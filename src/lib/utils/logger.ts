@@ -40,5 +40,76 @@ const logger = pino({
       : undefined,
 });
 
+// New enricher logging functions
+export const logStart = (requestId: string, msg: string, artistId?: string, context?: any) => {
+  logger.info({
+    requestId,
+    artistId,
+    msg: `🚀 ${msg}`,
+    context,
+    timestamp: new Date().toISOString(),
+  });
+};
+
+export const logDataRetrieval = (requestId: string, msg: string, artistId: string, data?: any) => {
+  logger.info({
+    requestId,
+    artistId,
+    msg: `📥 ${msg}`,
+    data,
+    timestamp: new Date().toISOString(),
+  });
+};
+
+export const logProcessing = (requestId: string, msg: string, artistId: string, details?: any) => {
+  logger.info({
+    requestId,
+    artistId,
+    msg: `🔄 ${msg}`,
+    details,
+    timestamp: new Date().toISOString(),
+  });
+};
+
+export const logSuccess = (requestId: string, msg: string, artistId: string, result?: any) => {
+  logger.info({
+    requestId,
+    artistId,
+    msg: `✅ ${msg}`,
+    result,
+    timestamp: new Date().toISOString(),
+  });
+};
+
+export const logWarning = (requestId: string, msg: string, artistId: string, warning?: any) => {
+  logger.warn({
+    requestId,
+    artistId,
+    msg: `⚠️ ${msg}`,
+    warning,
+    timestamp: new Date().toISOString(),
+  });
+};
+
+export const logError = (requestId: string, msg: string, artistId: string, error: Error) => {
+  logger.error({
+    requestId,
+    artistId,
+    msg: `❌ ${msg}`,
+    error: error.message,
+    stack: error.stack,
+    timestamp: new Date().toISOString(),
+  });
+};
+
+export const logCompletion = (requestId: string, msg: string, stats: any) => {
+  logger.info({
+    requestId,
+    msg: `🎉 ${msg}`,
+    stats,
+    timestamp: new Date().toISOString(),
+  });
+};
+
 // Export the configured logger instance
 export default logger;

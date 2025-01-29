@@ -80,6 +80,7 @@
     "chart.js": "^4.4.7",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.38.4",
+    "error-serializer": "^8.0.0",
     "formsnap": "^2.0.0",
     "lint-staged": "^15.4.3",
     "lucide-svelte": "^0.473.0",
