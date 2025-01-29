@@ -16,7 +16,8 @@
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "test-browserstack": "bun browserstack-node-sdk playwright test"
+    "test-browserstack": "bun browserstack-node-sdk playwright test",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@babel/preset-typescript": "^7.26.0",
@@ -42,6 +43,7 @@
     "daisyui": "^4.12.23",
     "dotenv": "^16.4.7",
     "drizzle-kit": "^0.30.2",
+    "husky": "^9.1.7",
     "prettier-plugin-svelte": "^3.3.3",
     "rollup-plugin-visualizer": "^5.14.0",
     "storybook": "^8.5.1",
