@@ -7,8 +7,8 @@ import { artistSchema, type Artist } from '$lib/schemas/artist';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
 import { sql } from 'drizzle-orm';
-import { warn } from '$lib/utils/logger';
-import { syncToHubspot } from '$lib/server/hubspot';
+import logger from '$lib/utils/logger';
+import { syncToHubspot } from '$lib/server/hubspot-api';
 
 // Add this helper function at the top of the file
 function sanitizeUrl(url: string | null | undefined): string | null {
@@ -79,7 +79,7 @@ export const actions = {
 
     const form = await superValidate(request, zod(artistSchema));
     if (!form.valid) {
-      warn('Profile form validation failed', {
+      logger.warn('Profile form validation failed', {
         errors: form.errors,
         orgId: auth.orgId,
       });
