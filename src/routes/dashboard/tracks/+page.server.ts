@@ -1,11 +1,11 @@
 import { requireAuth } from '$lib/server/auth';
 import type { PageServerLoad } from './$types';
 import { db } from '$lib/db';
-import { artists, tracks } from '$lib/db/schema';
+import { artists } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
-import { getTrackMetadata } from '$lib/server/soundcharts';
-import { info } from '$lib/utils/logger';
+import { getTrackMetadata } from '$lib/server/soundcharts-api';
+import logger from '$lib/utils/logger';
 
 interface Artist {
   id: string;
@@ -26,7 +26,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   }
 
   const [artist] = await db.select().from(artists).where(eq(artists.orgId, auth.orgId));
-  info({
+  logger.info({
     artist,
     msg: 'Artist',
   });

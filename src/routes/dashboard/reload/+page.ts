@@ -1,9 +1,9 @@
 import { redirect } from '@sveltejs/kit';
 import { invalidateAll } from '$app/navigation';
-import { debug } from '$lib/utils/logger';
+import logger from '$lib/utils/logger';
 
 export const load = async () => {
-  debug({
+  logger.debug({
     msg: 'Reloading dashboard',
   });
   await invalidateAll();
