@@ -1,8 +1,30 @@
 import pino from 'pino';
 
-// Configure pino logger
+// Create a Pino logger instance
 const logger = pino({
-  level: process.env.NODE_ENV === 'development' ? 'info' : 'info',
+  // Basic configuration
+  level: process.env.LOG_LEVEL || 'info',
+
+  // Timestamp configuration
+  timestamp: () => `,"time":"${new Date().toISOString()}"`,
+
+  // Message formatting
+  messageKey: 'msg',
+
+  // Custom serializers
+  serializers: {
+    error: pino.stdSerializers.err,
+    request: (req) => ({
+      method: req.method,
+      url: req.url,
+      headers: req.headers,
+    }),
+    response: (res) => ({
+      statusCode: res.statusCode,
+    }),
+  },
+
+  // Pretty printing in development
   transport:
     process.env.NODE_ENV === 'development'
       ? {
@@ -11,6 +33,8 @@ const logger = pino({
             colorize: true,
             translateTime: 'SYS:standard',
             ignore: 'pid,hostname',
+            messageFormat: '{msg}',
+            singleLine: true,
           },
         }
       : undefined,
@@ -18,10 +42,3 @@ const logger = pino({
 
 // Export the configured logger instance
 export default logger;
-
-// Export common logging methods for convenience
-export const info = logger.info.bind(logger);
-export const error = logger.error.bind(logger);
-export const warn = logger.warn.bind(logger);
-export const debug = logger.debug.bind(logger);
-export const trace = logger.trace.bind(logger);
