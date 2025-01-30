@@ -104,6 +104,17 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       );
       throw new Error('Failed to fetch Soundcharts data');
     }
+
+    return {
+      success: true,
+      artistId: artist.id,
+      details: {
+        stats,
+        tracks,
+        context,
+        duration: Date.now() - startTime,
+      },
+    };
   } catch (err) {
     const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Error during Soundcharts artist update', serializedError, {
