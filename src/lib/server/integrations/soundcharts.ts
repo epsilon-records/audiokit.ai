@@ -1,7 +1,7 @@
-import type { Track, TrackCollectionResponse } from '../../types/track.js';
 import { error } from '@sveltejs/kit';
-import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
+import type { Track, TrackCollectionResponse } from '../../types/track.js';
+import logger from '../../utils/logger.js';
 
 /**
  * Get Soundcharts artist ID from Spotify ID
@@ -31,21 +31,24 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
       throw new Error('Soundcharts API configuration missing');
     }
 
-    const response = await fetch(
-      `${process.env.SOUNDCHARTS_API_BASE}/artists/spotify/${spotifyId}`,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.SOUNDCHARTS_API_KEY}`,
-        },
-      }
-    );
+    const url = `${process.env.SOUNDCHARTS_API_BASE}/artists/spotify/${spotifyId}`;
+    const response = await fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `bearer ${process.env.SOUNDCHARTS_API_KEY}`,
+      },
+    });
 
     if (!response.ok) {
       logger.error(
         requestId,
         'Soundcharts API error',
-        new Error(`API Error: ${response.status} ${response.statusText}`)
+        new Error(`API Error: ${response.status} ${response.statusText}`),
+        {
+          url,
+          status: response.status,
+          statusText: response.statusText,
+        }
       );
       return null;
     }
@@ -108,6 +111,7 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
     if (!response.ok) {
       const warningContext = {
         ...context,
+        url,
         status: response.status,
         statusText: response.statusText,
         duration: Date.now() - startTime,
@@ -180,6 +184,7 @@ export async function getArtistStreamingAudience(
     if (!response.ok) {
       const warningContext = {
         ...context,
+        url,
         status: response.status,
         statusText: response.statusText,
         duration: Date.now() - startTime,
@@ -254,6 +259,7 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
     if (!response.ok) {
       const warningContext = {
         ...context,
+        url,
         status: response.status,
         statusText: response.statusText,
         duration: Date.now() - startTime,
@@ -311,10 +317,11 @@ export async function getArtistStats(uuid: string): Promise<{
   logger.start(requestId, 'Fetching Soundcharts artist stats', context);
 
   try {
-    const response = await fetch(`${process.env.SOUNDCHARTS_API_BASE}/artists/${uuid}/stats`, {
+    const url = `${process.env.SOUNDCHARTS_API_BASE}/artists/${uuid}/stats`;
+    const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.SOUNDCHARTS_API_KEY}`,
+        Authorization: `bearer ${process.env.SOUNDCHARTS_API_KEY}`,
       },
     });
 
@@ -324,6 +331,7 @@ export async function getArtistStats(uuid: string): Promise<{
         'Soundcharts API error',
         new Error(`API Error: ${response.status} ${response.statusText}`),
         {
+          url,
           status: response.status,
           statusText: response.statusText,
           ...context,
@@ -403,7 +411,8 @@ export async function getArtistTracks(
     if (sortBy !== undefined) params.set('sortBy', sortBy);
     if (sortOrder !== undefined) params.set('sortOrder', sortOrder);
 
-    const response = await fetch(`${url}?${params}`, {
+    const fullUrl = `${url}?${params}`;
+    const response = await fetch(fullUrl, {
       headers: {
         'x-app-id': process.env.SOUNDCHARTS_APP_ID,
         'x-api-key': process.env.SOUNDCHARTS_API_KEY,
@@ -431,6 +440,7 @@ export async function getArtistTracks(
     if (!response.ok) {
       const apiError = new Error(`API Error: ${response.status} ${response.statusText}`);
       const errorContext = {
+        url: fullUrl,
         duration: Date.now() - startTime,
         details: {
           status: response.status,
@@ -473,16 +483,18 @@ export async function getTrackMetadata(uuid: string): Promise<Track | null> {
   logger.start(requestId, 'Fetching Soundcharts track metadata', context);
 
   try {
-    const response = await fetch(`${process.env.SOUNDCHARTS_API_BASE}/tracks/${uuid}`, {
+    const url = `${process.env.SOUNDCHARTS_API_BASE}/tracks/${uuid}`;
+    const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.SOUNDCHARTS_API_KEY}`,
+        Authorization: `bearer ${process.env.SOUNDCHARTS_API_KEY}`,
       },
     });
 
     if (!response.ok) {
       const apiError = new Error(`API Error: ${response.status} ${response.statusText}`);
       logger.error(requestId, 'Soundcharts API error', apiError, {
+        url,
         duration: Date.now() - startTime,
       });
       return null;
