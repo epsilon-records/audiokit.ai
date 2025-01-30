@@ -19,6 +19,17 @@ interface EnrichmentResult {
   }>;
 }
 
+interface MusicfetchLink {
+  link?: string;
+  [key: string]: unknown;
+}
+
+type ValidatedLink = {
+  url: string;
+} & MusicfetchLink;
+
+type ServiceLinks = Record<string, ValidatedLink | null>;
+
 export async function enrichWithMusicfetch(
   artistData: (typeof artists.$inferSelect)[]
 ): Promise<EnrichmentResult> {
@@ -130,27 +141,36 @@ export async function enrichWithMusicfetch(
           }
 
           // Process and validate links
-          const validatedLinks = Object.entries(links as Record<string, { link?: string }>).reduce(
-            (acc, [key, value]) => {
-              if (!value?.link) return { ...acc, [key]: null };
+          const validatedLinks = Object.entries(
+            links as Record<string, MusicfetchLink>
+          ).reduce<ServiceLinks>((acc, [service, value]) => {
+            // Skip if link is missing or empty
+            if (!value?.link?.trim()) {
+              return { ...acc, [service]: null };
+            }
 
-              const sanitizedUrl = sanitizeUrl(value.link);
-              if (!sanitizedUrl) {
-                logger.warning(
-                  requestId,
-                  `Invalid URL format for ${key}`,
-                  {
-                    originalUrl: value.link,
-                  },
-                  artistContext
-                );
-                return { ...acc, [key]: null };
-              }
+            const sanitizedUrl = sanitizeUrl(value.link);
+            if (!sanitizedUrl) {
+              logger.warning(
+                requestId,
+                `Invalid URL format for ${service}`,
+                {
+                  originalUrl: value.link,
+                },
+                artistContext
+              );
+              return { ...acc, [service]: null };
+            }
 
-              return { ...acc, [key]: { ...value, url: sanitizedUrl } };
-            },
-            {}
-          );
+            // Preserve original link data while adding sanitized URL
+            return {
+              ...acc,
+              [service]: {
+                ...value,
+                url: sanitizedUrl,
+              },
+            };
+          }, {});
 
           logger.process(
             requestId,
