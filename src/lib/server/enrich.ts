@@ -5,6 +5,7 @@ import { logger } from '../utils/logger.js';
 import { enrichWithSoundcharts } from './enrichers/soundcharts.js';
 import { enrichWithHubspot } from './enrichers/hubspot.js';
 import { enrichWithMusicfetch } from './enrichers/musicfetch.js';
+import { serializeError } from 'serialize-error';
 
 async function getArtistsToUpdate() {
   const soundchartsArtists = await db

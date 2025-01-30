@@ -144,7 +144,7 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       details: context,
     };
   } catch (err) {
-    const serializedError = serializeError(err);
+    const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Error during Soundcharts artist update', serializedError, {
       ...context,
       duration: Date.now() - startTime,
@@ -218,7 +218,7 @@ export async function enrichWithSoundcharts(
 
           return result;
         } catch (err) {
-          const serializedError = serializeError(err);
+          const serializedError = serializeError(err) as Error;
           logger.error(requestId, 'Error processing artist', serializedError, {
             ...artistContext,
             duration: Date.now() - artistStartTime,
@@ -268,7 +268,7 @@ export async function enrichWithSoundcharts(
           : `Updated ${successCount} of ${updates.length} artists`,
     };
   } catch (err) {
-    const serializedError = serializeError(err);
+    const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Critical error in Soundcharts enrichment process', serializedError, {
       duration: Date.now() - startTime,
       input: {

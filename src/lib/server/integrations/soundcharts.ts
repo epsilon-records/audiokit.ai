@@ -77,25 +77,23 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
   };
 
   try {
-    logger.process(requestId, 'Fetching Soundcharts artist metadata', {
-      ...context,
-      metadata: {
-        environment: process.env.NODE_ENV,
-        soundchartsApiBase: process.env.SOUNDCHARTS_API_BASE ? '✅ Configured' : '❌ Missing',
-        soundchartsAppId: process.env.SOUNDCHARTS_APP_ID ? '✅ Configured' : '❌ Missing',
-        soundchartsApiKey: process.env.SOUNDCHARTS_API_KEY ? '✅ Configured' : '❌ Missing',
+    logger.process(
+      requestId,
+      'Fetching Soundcharts artist metadata',
+      {
+        metadata: {
+          environment: process.env.NODE_ENV,
+          soundchartsApiBase: process.env.SOUNDCHARTS_API_BASE ? '✅ Configured' : '❌ Missing',
+          soundchartsAppId: process.env.SOUNDCHARTS_APP_ID ? '✅ Configured' : '❌ Missing',
+          soundchartsApiKey: process.env.SOUNDCHARTS_API_KEY ? '✅ Configured' : '❌ Missing',
+        },
       },
-    });
+      context
+    );
 
     if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
-      logger.error(
-        requestId,
-        'Soundcharts credentials not configured',
-        new Error('Configuration Error'),
-        {
-          context,
-        }
-      );
+      const configError = new Error('Configuration Error');
+      logger.error(requestId, 'Soundcharts credentials not configured', configError, context);
       throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
     }
 
@@ -109,18 +107,18 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
     });
 
     if (!response.ok) {
-      logger.warning(requestId, '⚠️ Failed to fetch artist metadata', null, {
+      const warningContext = {
         ...context,
         status: response.status,
         statusText: response.statusText,
         duration: Date.now() - startTime,
-      });
+      };
+      logger.warning(requestId, '⚠️ Failed to fetch artist metadata', null, warningContext);
       return null;
     }
 
     const data = await response.json();
     logger.success(requestId, 'Successfully retrieved artist metadata', {
-      ...context,
       availableFields: Object.keys(data.object || {}),
       duration: Date.now() - startTime,
     });
@@ -129,10 +127,7 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
   } catch (err) {
     const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Error fetching artist metadata', serializedError, {
-      context: {
-        ...context,
-        duration: Date.now() - startTime,
-      },
+      duration: Date.now() - startTime,
     });
     return null;
   }
@@ -154,21 +149,23 @@ export async function getArtistStreamingAudience(
   };
 
   try {
-    logger.process(requestId, 'Fetching Soundcharts streaming audience', {
-      ...context,
-      metadata: {
-        environment: process.env.NODE_ENV,
-        soundchartsApiBase: process.env.SOUNDCHARTS_API_BASE ? '✅ Configured' : '❌ Missing',
-        soundchartsAppId: process.env.SOUNDCHARTS_APP_ID ? '✅ Configured' : '❌ Missing',
-        soundchartsApiKey: process.env.SOUNDCHARTS_API_KEY ? '✅ Configured' : '❌ Missing',
+    logger.process(
+      requestId,
+      'Fetching Soundcharts streaming audience',
+      {
+        metadata: {
+          environment: process.env.NODE_ENV,
+          soundchartsApiBase: process.env.SOUNDCHARTS_API_BASE ? '✅ Configured' : '❌ Missing',
+          soundchartsAppId: process.env.SOUNDCHARTS_APP_ID ? '✅ Configured' : '❌ Missing',
+          soundchartsApiKey: process.env.SOUNDCHARTS_API_KEY ? '✅ Configured' : '❌ Missing',
+        },
       },
-    });
+      context
+    );
 
     if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
-      logger.error(requestId, 'Soundcharts credentials not configured', {
-        error: new Error('Configuration Error'),
-        context,
-      });
+      const configError = new Error('Configuration Error');
+      logger.error(requestId, 'Soundcharts credentials not configured', configError, context);
       throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
     }
 
@@ -182,19 +179,20 @@ export async function getArtistStreamingAudience(
     });
 
     if (!response.ok) {
-      logger.warning(requestId, '⚠️ Failed to fetch streaming audience', null, {
+      const warningContext = {
         ...context,
         status: response.status,
         statusText: response.statusText,
         duration: Date.now() - startTime,
-      });
+      };
+      logger.warning(requestId, '⚠️ Failed to fetch streaming audience', null, warningContext);
       return null;
     }
 
     const data = await response.json();
     logger.process(
       requestId,
-      `✅ Successfully retrieved streaming audience`,
+      '✅ Successfully retrieved streaming audience',
       {
         dataPoints: data.items?.length || 0,
         duration: Date.now() - startTime,
@@ -204,12 +202,9 @@ export async function getArtistStreamingAudience(
 
     return data;
   } catch (err) {
-    const serializedError = serializeError(err);
-    logger.error(requestId, 'Error fetching streaming audience', serializedError as Error, {
-      context: {
-        ...context,
-        duration: Date.now() - startTime,
-      },
+    const serializedError = serializeError(err) as Error;
+    logger.error(requestId, 'Error fetching streaming audience', serializedError, {
+      duration: Date.now() - startTime,
     });
     return null;
   }
@@ -230,7 +225,7 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
   try {
     logger.process(
       requestId,
-      `🔍 Fetching artist audience data`,
+      '🔍 Fetching artist audience data',
       {
         metadata: {
           environment: process.env.NODE_ENV,
@@ -243,14 +238,8 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
     );
 
     if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
-      logger.error(
-        requestId,
-        'Soundcharts credentials not configured',
-        new Error('Configuration Error'),
-        {
-          context,
-        }
-      );
+      const configError = new Error('Configuration Error');
+      logger.error(requestId, 'Soundcharts credentials not configured', configError, context);
       throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
     }
 
@@ -264,19 +253,20 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
     });
 
     if (!response.ok) {
-      logger.warning(requestId, '⚠️ Failed to fetch audience data', null, {
+      const warningContext = {
         ...context,
         status: response.status,
         statusText: response.statusText,
         duration: Date.now() - startTime,
-      });
+      };
+      logger.warning(requestId, '⚠️ Failed to fetch audience data', null, warningContext);
       return null;
     }
 
     const data = await response.json();
     logger.process(
       requestId,
-      `✅ Successfully retrieved audience data`,
+      '✅ Successfully retrieved audience data',
       {
         dataPoints: data.items?.length || 0,
         duration: Date.now() - startTime,
@@ -286,12 +276,9 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
 
     return data;
   } catch (err) {
-    const serializedError = serializeError(err);
-    logger.error(requestId, 'Error fetching audience data', serializedError as Error, {
-      context: {
-        ...context,
-        duration: Date.now() - startTime,
-      },
+    const serializedError = serializeError(err) as Error;
+    logger.error(requestId, 'Error fetching audience data', serializedError, {
+      duration: Date.now() - startTime,
     });
     return null;
   }
@@ -333,13 +320,16 @@ export async function getArtistStats(uuid: string): Promise<{
     });
 
     if (!response.ok) {
-      logger.error(requestId, 'Soundcharts API error', new Error('API Error'), {
-        context: {
-          ...context,
+      logger.error(
+        requestId,
+        'Soundcharts API error',
+        new Error(`API Error: ${response.status} ${response.statusText}`),
+        {
           status: response.status,
           statusText: response.statusText,
-        },
-      });
+          ...context,
+        }
+      );
       return null;
     }
 
@@ -352,10 +342,8 @@ export async function getArtistStats(uuid: string): Promise<{
   } catch (err) {
     const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Error fetching Soundcharts artist stats', serializedError, {
-      context: {
-        ...context,
-        duration: Date.now() - startTime,
-      },
+      ...context,
+      duration: Date.now() - startTime,
     });
     return null;
   }
@@ -403,14 +391,8 @@ export async function getArtistTracks(
     );
 
     if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
-      logger.error(
-        requestId,
-        'Soundcharts credentials not configured',
-        new Error('Configuration Error'),
-        {
-          context,
-        }
-      );
+      const configError = new Error('Configuration Error');
+      logger.error(requestId, 'Soundcharts credentials not configured', configError, context);
       throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
     }
 
@@ -431,12 +413,14 @@ export async function getArtistTracks(
     });
 
     if (response.status === 401) {
-      logger.error(requestId, '❌ Unauthorized: Not logged in', new Error('Unauthorized'), context);
+      const authError = new Error('Unauthorized: Not logged in');
+      logger.error(requestId, '❌ Unauthorized: Not logged in', authError, context);
       throw error(401, 'Unauthorized: You are not logged in');
     }
 
     if (response.status === 403) {
-      logger.error(requestId, '❌ Forbidden: Not authorized', new Error('Forbidden'), context);
+      const forbiddenError = new Error('Forbidden: Not authorized');
+      logger.error(requestId, '❌ Forbidden: Not authorized', forbiddenError, context);
       throw error(403, 'Forbidden: You are not authorized to perform this operation');
     }
 
@@ -446,13 +430,15 @@ export async function getArtistTracks(
     }
 
     if (!response.ok) {
-      logger.error(requestId, 'Failed to fetch artist tracks', new Error('API Error'), {
-        context: {
-          ...context,
+      const apiError = new Error(`API Error: ${response.status} ${response.statusText}`);
+      const errorContext = {
+        duration: Date.now() - startTime,
+        details: {
           status: response.status,
           statusText: response.statusText,
         },
-      });
+      };
+      logger.error(requestId, 'Failed to fetch artist tracks', apiError, errorContext);
       throw error(response.status, 'Failed to fetch artist tracks');
     }
 
@@ -469,12 +455,9 @@ export async function getArtistTracks(
 
     return data as TrackCollectionResponse;
   } catch (err) {
-    const serializedError = serializeError(err);
-    logger.error(requestId, 'Error fetching artist tracks', serializedError as Error, {
-      context: {
-        ...context,
-        duration: Date.now() - startTime,
-      },
+    const serializedError = serializeError(err) as Error;
+    logger.error(requestId, 'Error fetching artist tracks', serializedError, {
+      duration: Date.now() - startTime,
     });
     throw err;
   }
@@ -499,12 +482,9 @@ export async function getTrackMetadata(uuid: string): Promise<Track | null> {
     });
 
     if (!response.ok) {
-      logger.error(requestId, 'Soundcharts API error', new Error('API Error'), {
-        context: {
-          ...context,
-          status: response.status,
-          statusText: response.statusText,
-        },
+      const apiError = new Error(`API Error: ${response.status} ${response.statusText}`);
+      logger.error(requestId, 'Soundcharts API error', apiError, {
+        duration: Date.now() - startTime,
       });
       return null;
     }
@@ -518,10 +498,7 @@ export async function getTrackMetadata(uuid: string): Promise<Track | null> {
   } catch (err) {
     const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Error fetching Soundcharts track metadata', serializedError, {
-      context: {
-        ...context,
-        duration: Date.now() - startTime,
-      },
+      duration: Date.now() - startTime,
     });
     return null;
   }

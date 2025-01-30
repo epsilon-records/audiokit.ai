@@ -11,7 +11,7 @@ export async function getMusicfetchData(spotifyUrl: string, services: string[]) 
   };
 
   try {
-    logger.start(requestId, 'Starting Musicfetch API request', undefined, {
+    logger.start(requestId, 'Starting Musicfetch API request', {
       metadata: {
         environment: process.env.NODE_ENV,
         musicfetchToken: process.env.MUSICFETCH_TOKEN ? '✅ Configured' : '❌ Missing',
@@ -23,7 +23,6 @@ export async function getMusicfetchData(spotifyUrl: string, services: string[]) 
       logger.error(
         requestId,
         'Musicfetch token not configured',
-        undefined,
         new Error('MUSICFETCH_TOKEN is not set')
       );
       throw new Error('MUSICFETCH_TOKEN is not set');
@@ -42,7 +41,6 @@ export async function getMusicfetchData(spotifyUrl: string, services: string[]) 
       logger.error(
         requestId,
         'Musicfetch API error',
-        undefined,
         new Error(`Musicfetch request failed with status ${response.status}`),
         {
           status: response.status,
@@ -61,9 +59,10 @@ export async function getMusicfetchData(spotifyUrl: string, services: string[]) 
 
     return data.result.services;
   } catch (err) {
-    logger.error(requestId, 'Error fetching Musicfetch data', undefined, err, {
+    const error = err instanceof Error ? err : new Error(String(err));
+    logger.error(requestId, 'Error fetching Musicfetch data', error, {
       duration: Date.now() - startTime,
     });
-    throw err;
+    throw error;
   }
 }

@@ -44,7 +44,7 @@ const pinoLogger = pino({
 });
 
 // Updated logging functions
-export const logStart = (requestId: string, msg: string, context?: any) => {
+const logStart = (requestId: string, msg: string, context?: any) => {
   pinoLogger.info({
     requestId,
     msg: `🚀 ${msg}`,
@@ -53,7 +53,7 @@ export const logStart = (requestId: string, msg: string, context?: any) => {
   });
 };
 
-export const logDataRetrieval = (requestId: string, msg: string, data?: any, context?: any) => {
+const logDataRetrieval = (requestId: string, msg: string, data?: any, context?: any) => {
   pinoLogger.info({
     requestId,
     msg: `📥 ${msg}`,
@@ -62,7 +62,7 @@ export const logDataRetrieval = (requestId: string, msg: string, data?: any, con
   });
 };
 
-export const logProcessing = (requestId: string, msg: string, details?: any, context?: any) => {
+const logProcessing = (requestId: string, msg: string, details?: any, context?: any) => {
   pinoLogger.info({
     requestId,
     msg: `🔄 ${msg}`,
@@ -72,7 +72,7 @@ export const logProcessing = (requestId: string, msg: string, details?: any, con
   });
 };
 
-export const logSuccess = (requestId: string, msg: string, result?: any, context?: any) => {
+const logSuccess = (requestId: string, msg: string, result?: any, context?: any) => {
   pinoLogger.info({
     requestId,
     msg: `✅ ${msg}`,
@@ -82,7 +82,7 @@ export const logSuccess = (requestId: string, msg: string, result?: any, context
   });
 };
 
-export const logWarning = (requestId: string, msg: string, warning?: any, context?: any) => {
+const logWarning = (requestId: string, msg: string, warning?: any, context?: any) => {
   pinoLogger.warn({
     requestId,
     msg: `⚠️ ${msg}`,
@@ -92,7 +92,7 @@ export const logWarning = (requestId: string, msg: string, warning?: any, contex
   });
 };
 
-export const logError = (requestId: string, msg: string, error: Error, context?: any) => {
+const logError = (requestId: string, msg: string, error: Error, context?: any) => {
   pinoLogger.error({
     requestId,
     msg: `❌ ${msg}`,
@@ -104,7 +104,7 @@ export const logError = (requestId: string, msg: string, error: Error, context?:
   });
 };
 
-export const logCompletion = (requestId: string, msg: string, stats: any, context?: any) => {
+const logCompletion = (requestId: string, msg: string, stats: any, context?: any) => {
   pinoLogger.info({
     requestId,
     msg: `🎉 ${msg}`,
