@@ -105,6 +105,26 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       throw new Error('Failed to fetch Soundcharts data');
     }
 
+    await db
+      .update(artists)
+      .set({
+        metadata: stats.metadata || {},
+        streaming: stats.streaming || {},
+        followers: stats.followers || {},
+        tracks: tracks,
+        updated: new Date(),
+      })
+      .where(eq(artists.id, artist.id));
+
+    logger.success(
+      requestId,
+      'Successfully updated artist with Soundcharts data',
+      {
+        duration: Date.now() - startTime,
+      },
+      context
+    );
+
     return {
       success: true,
       artistId: artist.id,
