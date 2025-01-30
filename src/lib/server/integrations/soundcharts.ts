@@ -2,7 +2,6 @@ import type { Track, TrackCollectionResponse } from '../../types/track.js';
 import { error } from '@sveltejs/kit';
 import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
-import { inspect } from 'util';
 
 /**
  * Get Soundcharts artist ID from Spotify ID

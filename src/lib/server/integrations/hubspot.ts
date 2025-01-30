@@ -2,7 +2,6 @@ import type { artistSchema } from '../../schemas/artist.js';
 import type { z } from 'zod';
 import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
-import { inspect } from 'util';
 
 interface HubspotContact {
   id: string;

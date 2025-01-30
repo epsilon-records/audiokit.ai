@@ -7,9 +7,9 @@ const config = {
   // for more information about preprocessors
   preprocess: [vitePreprocess()],
 
-  compilerOptions: {
-    runes: false, // Which could also be false if you want to force the Svelte 4 compiler/syntax
-  },
+  // compilerOptions: {
+  //   runes: true, // Which could also be false if you want to force the Svelte 4 compiler/syntax
+  // },
 
   kit: {
     // adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
