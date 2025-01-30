@@ -3,46 +3,55 @@ import pino from 'pino';
 export const logger = pino({
   level: process.env.LOG_LEVEL || 'info',
   formatters: {
-    level: (label) => ({ 'metadata.level': label }),
+    level: (label) => ({ level: label }),
     bindings: (bindings) => ({
-      'metadata.environment': process.env.NODE_ENV,
-      'metadata.executionRegion': process.env.AWS_REGION || 'local',
-      'metadata.host': bindings.hostname,
+      vercel: {
+        deploymentId: process.env.VERCEL_GIT_COMMIT_SHA,
+        deploymentURL: process.env.VERCEL_URL,
+        environment: process.env.VERCEL_ENV,
+        projectId: process.env.VERCEL_PROJECT_ID,
+        projectName: process.env.VERCEL_PROJECT_NAME,
+        region: process.env.VERCEL_REGION,
+        route: process.env.VERCEL_ROUTE,
+        source: process.env.VERCEL_SOURCE,
+      },
     }),
   },
   timestamp: () => `,"timestamp":"${new Date().toISOString()}"`,
-  messageKey: 'event_message',
-  nestedKey: 'metadata',
+  messageKey: 'message',
   serializers: {
     err: (err) => ({
       ...pino.stdSerializers.err(err),
-      'metadata.parsedLambdaMessage': {
-        path: err.path,
-        method: err.method,
-        status: err.statusCode,
-        request_id: err.requestId,
+      report: {
+        durationMs: err.duration,
+        maxMemoryUsedMb: err.memory,
       },
     }),
     req: (req) => ({
-      'metadata.proxy': {
-        clientIp: req.ip,
+      request: {
         host: req.hostname,
+        id: req.id,
+        ip: req.ip,
         method: req.method,
         path: req.url,
-        timestamp: Date.now(),
+        scheme: req.protocol,
+        statusCode: req.statusCode,
         userAgent: req.headers['user-agent'],
+        vercelCache: req.headers['x-vercel-cache'],
       },
-    }),
-    res: (res) => ({
-      'metadata.statusCode': res.statusCode,
-      'metadata.proxy.statusCode': res.statusCode,
     }),
   },
   base: {
-    id: crypto.randomUUID(),
-    'metadata.projectId': process.env.PROJECT_ID,
-    'metadata.projectName': process.env.PROJECT_NAME,
-    'metadata.branch': process.env.GIT_BRANCH,
+    vercel: {
+      deploymentId: process.env.VERCEL_GIT_COMMIT_SHA,
+      deploymentURL: process.env.VERCEL_URL,
+      environment: process.env.VERCEL_ENV,
+      projectId: process.env.VERCEL_PROJECT_ID,
+      projectName: process.env.VERCEL_PROJECT_NAME,
+      region: process.env.VERCEL_REGION,
+      route: process.env.VERCEL_ROUTE,
+      source: process.env.VERCEL_SOURCE,
+    },
   },
   transport:
     process.env.NODE_ENV === 'development'
@@ -51,7 +60,6 @@ export const logger = pino({
           options: {
             colorize: true,
             translateTime: true,
-            messageKey: 'event_message',
             ignore: 'pid,hostname',
           },
         }
@@ -61,7 +69,6 @@ export const logger = pino({
             destination: 1,
             colorize: true,
             translateTime: true,
-            messageKey: 'event_message',
             ignore: 'pid,hostname',
           },
         },
@@ -69,12 +76,19 @@ export const logger = pino({
 
 // Example usage:
 // logger.info({
-//   metadata: {
+//   report: {
+//     durationMs: 120,
+//     maxMemoryUsedMb: 512
+//   },
+//   request: {
+//     host: 'example.com',
+//     id: 'abc123',
+//     ip: '192.168.1.1',
+//     method: 'GET',
 //     path: '/api/endpoint',
-//     requestId: 'abc123',
-//     parsedLambdaMessage: {
-//       duration_ms: 120,
-//       memory_size_mb: 512
-//     }
+//     scheme: 'https',
+//     statusCode: 200,
+//     userAgent: 'Mozilla/5.0',
+//     vercelCache: 'HIT'
 //   }
 // }, 'Processing request');
