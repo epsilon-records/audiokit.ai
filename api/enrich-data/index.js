@@ -14,7 +14,6 @@ export async function GET() {
       response: {
         status: response.status,
         statusText: response.statusText,
-        data: await response.data,
       },
     });
 
