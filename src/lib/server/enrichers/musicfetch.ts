@@ -31,7 +31,7 @@ export async function enrichWithMusicfetch(
     artistCount: artistData.length,
     metadata: {
       environment: process.env.NODE_ENV,
-      musicfetchUrl: process.env.MUSICFETCH_BASE_URL ? '✅ Configured' : '❌ Missing',
+      musicfetchUrl: process.env.MUSICFETCH_API_BASE ? '✅ Configured' : '❌ Missing',
       musicfetchToken: process.env.MUSICFETCH_TOKEN ? '✅ Configured' : '❌ Missing',
     },
   });
@@ -93,7 +93,7 @@ export async function enrichWithMusicfetch(
             };
           }
 
-          const musicfetchBaseUrl = process.env.MUSICFETCH_BASE_URL;
+          const musicfetchBaseUrl = process.env.MUSICFETCH_API_BASE;
           if (!musicfetchBaseUrl) {
             logger.error(`❌ Musicfetch base URL not configured`, artistContext);
             return {
