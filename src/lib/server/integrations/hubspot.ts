@@ -15,7 +15,6 @@ type Artist = z.infer<typeof artistSchema>;
 
 const HUBSPOT_RATE_LIMIT = 100; // 100 requests per 10 seconds (Free Plan)
 const HUBSPOT_WINDOW = 10 * 1000; // 10 seconds in milliseconds
-const DAILY_LIMIT = 250_000; // 250,000 requests per day (Free Plan)
 
 const hubspotLimiter = new Bottleneck({
   minTime: HUBSPOT_WINDOW / HUBSPOT_RATE_LIMIT, // 100ms between requests
@@ -27,26 +26,6 @@ const hubspotLimiter = new Bottleneck({
   // Track daily limits
   trackDoneStatus: true,
 });
-
-// Track daily usage
-let dailyCount = 0;
-
-hubspotLimiter.on('done', () => {
-  dailyCount++;
-  if (dailyCount >= DAILY_LIMIT) {
-    logger.error('HubSpot daily limit reached', { dailyCount });
-    throw new Error('HubSpot daily API limit reached');
-  }
-});
-
-// Reset daily count at midnight
-setInterval(
-  () => {
-    dailyCount = 0;
-    logger.info('HubSpot daily API counter reset');
-  },
-  24 * 60 * 60 * 1000
-);
 
 /**
  * Fetches a contact from HubSpot by email
@@ -277,7 +256,10 @@ export const syncToHubspot = hubspotLimiter.wrap(
   }
 );
 
-export async function getHubspotData(email: string): Promise<Record<string, any>> {
+export async function getHubspotData(email: string): Promise<{
+  id: string;
+  properties: Record<string, string | null>;
+}> {
   const response = await fetch(`${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/search`, {
     method: 'POST',
     headers: {
@@ -324,18 +306,7 @@ export async function getHubspotData(email: string): Promise<Record<string, any>
   }
 
   return {
-    email: data.results[0].properties.email,
-    firstName: data.results[0].properties.firstname,
-    lastName: data.results[0].properties.lastname,
-    website: data.results[0].properties.website,
-    spotify: data.results[0].properties.spotify,
-    appleMusic: data.results[0].properties.apple_music,
-    soundcloud: data.results[0].properties.soundcloud,
-    bandcamp: data.results[0].properties.bandcamp,
-    instagram: data.results[0].properties.instagram,
-    phone: data.results[0].properties.phone,
-    city: data.results[0].properties.city,
-    country: data.results[0].properties.country,
-    biography: data.results[0].properties.biography,
+    id: data.results[0].id,
+    properties: data.results[0].properties,
   };
 }
