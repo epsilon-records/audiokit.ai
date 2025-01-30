@@ -28,7 +28,7 @@ export async function getMusicfetchData(spotifyUrl: string, services: string[]) 
       throw new Error('MUSICFETCH_TOKEN is not set');
     }
 
-    const response: Response = await fetch(
+    const response = await fetch(
       `${process.env.MUSICFETCH_API_BASE}/url?url=${encodeURIComponent(spotifyUrl)}&services=${services.join(',')}`,
       {
         headers: {
@@ -38,17 +38,19 @@ export async function getMusicfetchData(spotifyUrl: string, services: string[]) 
     );
 
     if (!response.ok) {
+      const errorText = await response.text();
       logger.error(
         requestId,
         'Musicfetch API error',
-        new Error(`Musicfetch request failed with status ${response.status}`),
+        new Error(`Musicfetch request failed with status ${response.status}: ${errorText}`),
         {
           status: response.status,
           statusText: response.statusText,
+          errorText,
           duration: Date.now() - startTime,
         }
       );
-      throw new Error(`Musicfetch request failed with status ${response.status}`);
+      throw new Error(`Musicfetch request failed with status ${response.status}: ${errorText}`);
     }
 
     const data = await response.json();
