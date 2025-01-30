@@ -1,7 +1,7 @@
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
 import { eq } from 'drizzle-orm';
-import { logger } from '../../utils/logger.js';
+import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
 import { getMusicfetchData } from '../integrations/musicfetch.js';
 

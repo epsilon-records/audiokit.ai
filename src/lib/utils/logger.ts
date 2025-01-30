@@ -115,7 +115,7 @@ const logCompletion = (requestId: string, msg: string, stats: any, context?: any
 };
 
 // Export the logging functions as the primary interface
-export const logger = {
+const logger = {
   start: logStart,
   data: logDataRetrieval,
   process: logProcessing,
@@ -126,4 +126,4 @@ export const logger = {
 };
 
 // Deprecate direct logger export
-// export default logger;
+export default logger;

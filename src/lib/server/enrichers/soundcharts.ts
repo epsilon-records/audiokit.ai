@@ -6,7 +6,7 @@ import {
   getArtistTracks,
 } from '../integrations/soundcharts.js';
 import { eq } from 'drizzle-orm';
-import { logger } from '../../utils/logger.js';
+import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
 
 interface EnrichmentResult {
