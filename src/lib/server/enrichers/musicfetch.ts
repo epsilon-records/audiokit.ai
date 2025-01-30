@@ -3,6 +3,7 @@ import { serializeError } from 'serialize-error';
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
 import logger from '../../utils/logger.js';
+import { sanitizeUrl } from '../../utils/sanitize.js';
 import { getMusicfetchData } from '../integrations/musicfetch.js';
 
 interface EnrichmentResult {
@@ -128,20 +129,27 @@ export async function enrichWithMusicfetch(
             };
           }
 
-          // Add validation for link values
-          const validatedLinks = Object.fromEntries(
-            Object.entries(links).map(([key, value]) => {
-              if (typeof value !== 'string') {
+          // Process and validate links
+          const validatedLinks = Object.entries(links as Record<string, { link?: string }>).reduce(
+            (acc, [key, value]) => {
+              if (!value?.link) return { ...acc, [key]: null };
+
+              const sanitizedUrl = sanitizeUrl(value.link);
+              if (!sanitizedUrl) {
                 logger.warning(
                   requestId,
-                  `Invalid link format for ${key}`,
-                  { value },
+                  `Invalid URL format for ${key}`,
+                  {
+                    originalUrl: value.link,
+                  },
                   artistContext
                 );
-                return [key, null]; // Set to null if invalid
+                return { ...acc, [key]: null };
               }
-              return [key, value];
-            })
+
+              return { ...acc, [key]: { ...value, url: sanitizedUrl } };
+            },
+            {}
           );
 
           logger.process(
