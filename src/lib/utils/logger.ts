@@ -32,7 +32,7 @@ const pinoLogger = pino({
   },
 
   transport: {
-    target: process.env.NODE_ENV === 'development' ? 'pino-pretty' : 'pino-file',
+    target: process.env.NODE_ENV === 'development' ? 'pino-pretty' : 'pino/file',
     options: {
       colorize: true,
       translateTime: 'SYS:standard',
