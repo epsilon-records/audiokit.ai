@@ -329,9 +329,10 @@ export async function getArtistStats(uuid: string): Promise<{
     const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/current/stats`;
     const response = await fetch(url, {
       headers: {
-        'Content-Type': 'application/json',
         'x-app-id': process.env.SOUNDCHARTS_APP_ID,
         'x-api-key': process.env.SOUNDCHARTS_API_KEY,
+        Accept: 'application/json',
+        'Content-Type': 'application/json',
       },
     });
 
