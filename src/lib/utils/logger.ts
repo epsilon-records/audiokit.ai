@@ -9,26 +9,47 @@ const pinoLogger = pino({
   timestamp: () => `,"time":"${new Date().toISOString()}"`,
 
   // Message formatting
-  messageKey: 'msg',
+  messageKey: 'message',
 
   formatters: {
     level: (label) => ({ level: label }),
-    bindings: () => ({}), // Disable default bindings
+    bindings: (bindings) => ({
+      vercel: {
+        deploymentId: process.env.VERCEL_GIT_COMMIT_SHA,
+        deploymentURL: process.env.VERCEL_URL,
+        environment: process.env.VERCEL_ENV,
+        projectId: process.env.VERCEL_PROJECT_ID,
+        projectName: process.env.VERCEL_PROJECT_NAME,
+        region: process.env.VERCEL_REGION,
+        route: process.env.VERCEL_ROUTE,
+        source: process.env.VERCEL_GIT_REPO_SLUG,
+      },
+    }),
   },
 
   // Custom serializers
   serializers: {
     error: pino.stdSerializers.err,
     request: (req) => ({
+      id: req.id,
+      host: req.headers['host'],
+      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
       method: req.method,
-      url: req.url,
-      headers: req.headers,
+      path: req.url,
+      scheme: req.protocol,
+      statusCode: req.statusCode,
+      userAgent: req.headers['user-agent'],
+      vercelCache: req.headers['x-vercel-cache'],
     }),
     response: (res) => ({
       statusCode: res.statusCode,
     }),
     data: (data) => data, // Add data serializer
     context: (context) => context, // Add context serializer
+    report: (report) => ({
+      durationMs: report?.durationMs,
+      maxMemoryUsedMb: report?.maxMemoryUsedMb,
+    }),
   },
 
   transport: {
@@ -37,7 +58,7 @@ const pinoLogger = pino({
       colorize: true,
       translateTime: 'SYS:standard',
       ignore: 'pid,hostname',
-      messageFormat: '{msg} {context}',
+      messageFormat: '{message}',
       singleLine: true,
       destination: 1,
     },
@@ -45,19 +66,18 @@ const pinoLogger = pino({
 });
 
 // Updated logging functions
-const logStart = (requestId: string, msg: string, context?: any) => {
+const logStart = (requestId: string, message: string, context?: any) => {
   pinoLogger.info({
-    requestId,
-    msg: `🚀 ${msg}`,
+    request: { id: requestId },
+    message: `🚀 ${message}`,
     ...context,
-    timestamp: new Date().toISOString(),
   });
 };
 
 const logDataRetrieval = (requestId: string, msg: string, data?: any, context?: any) => {
   pinoLogger.info({
-    requestId,
-    msg: `📥 ${msg}`,
+    request: { id: requestId },
+    message: `📥 ${msg}`,
     data,
     ...context,
   });
@@ -65,38 +85,42 @@ const logDataRetrieval = (requestId: string, msg: string, data?: any, context?: 
 
 const logProcessing = (requestId: string, msg: string, details?: any, context?: any) => {
   pinoLogger.info({
-    requestId,
-    msg: `🔄 ${msg}`,
+    request: { id: requestId },
+    message: `🔄 ${msg}`,
     details,
     ...context,
-    timestamp: new Date().toISOString(),
   });
 };
 
-const logSuccess = (requestId: string, msg: string, result?: any, context?: any) => {
+const logSuccess = (
+  requestId: string,
+  message: string,
+  result?: any,
+  report?: any,
+  context?: any
+) => {
   pinoLogger.info({
-    requestId,
-    msg: `✅ ${msg}`,
+    request: { id: requestId },
+    message: `✅ ${message}`,
     result,
+    report,
     ...context,
-    timestamp: new Date().toISOString(),
   });
 };
 
 const logWarning = (requestId: string, msg: string, warning?: any, context?: any) => {
   pinoLogger.warn({
-    requestId,
-    msg: `⚠️ ${msg}`,
+    request: { id: requestId },
+    message: `⚠️ ${msg}`,
     warning,
     ...context,
-    timestamp: new Date().toISOString(),
   });
 };
 
 const logError = (requestId: string, msg: string, error: Error, context?: any) => {
   pinoLogger.error({
-    requestId,
-    msg: `❌ ${msg}`,
+    request: { id: requestId },
+    message: `❌ ${msg}`,
     error: {
       message: error.message,
       stack: error.stack,
@@ -107,11 +131,10 @@ const logError = (requestId: string, msg: string, error: Error, context?: any) =
 
 const logCompletion = (requestId: string, msg: string, stats: any, context?: any) => {
   pinoLogger.info({
-    requestId,
-    event_message: `🎉 ${msg}`,
+    request: { id: requestId },
+    message: `🎉 ${msg}`,
     stats,
     ...context,
-    timestamp: new Date().toISOString(),
   });
 };
 
