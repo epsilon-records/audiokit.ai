@@ -1,6 +1,4 @@
 import logger from '../../utils/logger.js';
-import { serializeError } from 'serialize-error';
-import { inspect } from 'util';
 
 export async function getMusicfetchData(spotifyUrl: string, services: string[]) {
   const requestId = crypto.randomUUID();

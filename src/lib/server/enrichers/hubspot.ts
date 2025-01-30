@@ -5,7 +5,6 @@ import { eq } from 'drizzle-orm';
 import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
 import { inspect } from 'util';
-import { sanitizeUrl } from '../../utils/sanitize';
 
 interface SerializedErrorWithCode extends Error {
   code?: string | number;
