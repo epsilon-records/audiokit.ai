@@ -1,16 +1,21 @@
 <script lang="ts">
-	import type { HTMLAttributes } from "svelte/elements";
-	import { cn } from "$lib/utils.js";
+  import type { HTMLAttributes } from 'svelte/elements';
+  import { cn } from '$lib/utils.js';
 
-	type $$Props = HTMLAttributes<HTMLDivElement>;
+  type $$Props = HTMLAttributes<HTMLDivElement>;
 
-	let className: $$Props["class"] = undefined;
-	export { className as class };
+  interface Props {
+    class?: $$Props['class'];
+    children?: import('svelte').Snippet;
+    [key: string]: any;
+  }
+
+  let { class: className = undefined, children, ...rest }: Props = $props();
 </script>
 
 <div
-	class={cn("mt-4 flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0", className)}
-	{...$$restProps}
+  class={cn('mt-4 flex flex-col space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0', className)}
+  {...rest}
 >
-	<slot />
+  {@render children?.()}
 </div>

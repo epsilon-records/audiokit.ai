@@ -72,7 +72,7 @@
           <CardHeader class="bg-gradient-to-br {tool.gradient} pb-6">
             <div class="flex items-center justify-between">
               <CardTitle class="flex items-center gap-2">
-                <svelte:component this={tool.icon} class="h-5 w-5" />
+                <tool.icon class="h-5 w-5" />
                 {tool.title}
               </CardTitle>
               {#if tool.comingSoon}

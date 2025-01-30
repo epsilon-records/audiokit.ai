@@ -1,19 +1,24 @@
 <script lang="ts">
-	import { Calendar as CalendarPrimitive } from "bits-ui";
-	import { cn } from "$lib/utils.js";
+  import { Calendar as CalendarPrimitive } from 'bits-ui';
+  import { cn } from '$lib/utils.js';
 
-	type $$Props = CalendarPrimitive.HeadingProps;
+  type $$Props = CalendarPrimitive.HeadingProps;
 
-	let className: $$Props["class"] = undefined;
-	export { className as class };
+  interface Props {
+    class?: $$Props['class'];
+    children?: import('svelte').Snippet<[any]>;
+    [key: string]: any;
+  }
+
+  let { class: className = undefined, children, ...rest }: Props = $props();
+
+  const children_render = $derived(children);
 </script>
 
-<CalendarPrimitive.Heading
-	let:headingValue
-	class={cn("text-sm font-medium", className)}
-	{...$$restProps}
->
-	<slot {headingValue}>
-		{headingValue}
-	</slot>
+<CalendarPrimitive.Heading class={cn('text-sm font-medium', className)} {...rest}>
+  {#snippet children({ headingValue })}
+    {#if children_render}{@render children_render({ headingValue })}{:else}
+      {headingValue}
+    {/if}
+  {/snippet}
 </CalendarPrimitive.Heading>
