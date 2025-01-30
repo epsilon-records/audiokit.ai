@@ -407,10 +407,16 @@ export async function getArtistTracks(
       context
     );
 
-    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
+    if (
+      !process.env.SOUNDCHARTS_API_BASE ||
+      !process.env.SOUNDCHARTS_APP_ID ||
+      !process.env.SOUNDCHARTS_API_KEY
+    ) {
       const configError = new Error('Configuration Error');
       logger.error(requestId, 'Soundcharts credentials not configured', configError, context);
-      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
+      throw new Error(
+        'SOUNDCHARTS_API_BASE, SOUNDCHARTS_APP_ID, or SOUNDCHARTS_API_KEY is not set'
+      );
     }
 
     const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.21/artist/${uuid}/songs`;
