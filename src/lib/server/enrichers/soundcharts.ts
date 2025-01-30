@@ -91,7 +91,7 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       getArtistTracks(soundchartsId),
     ]);
 
-    if (!stats && !tracks) {
+    if (!stats || !tracks) {
       logger.error(
         requestId,
         'Failed to fetch Soundcharts data',
