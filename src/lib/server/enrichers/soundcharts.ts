@@ -1,13 +1,13 @@
+import { eq } from 'drizzle-orm';
+import { serializeError } from 'serialize-error';
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
+import logger from '../../utils/logger.js';
 import {
   getArtistIdFromSpotify,
   getArtistStats,
   getArtistTracks,
 } from '../integrations/soundcharts.js';
-import { eq } from 'drizzle-orm';
-import logger from '../../utils/logger.js';
-import { serializeError } from 'serialize-error';
 
 interface EnrichmentResult {
   success: boolean;
@@ -91,7 +91,7 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       getArtistTracks(soundchartsId),
     ]);
 
-    if (!stats || !tracks) {
+    if (!(stats && tracks)) {
       logger.error(
         requestId,
         'Failed to fetch Soundcharts data',
