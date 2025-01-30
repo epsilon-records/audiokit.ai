@@ -91,7 +91,7 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       getArtistTracks(soundchartsId),
     ]);
 
-    if (!(stats && tracks)) {
+    if (!stats && !tracks) {
       logger.error(
         requestId,
         'Failed to fetch Soundcharts data',
@@ -104,45 +104,6 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       );
       throw new Error('Failed to fetch Soundcharts data');
     }
-
-    logger.process(
-      requestId,
-      'Updating artist with Soundcharts data',
-      {
-        metadataKeys: Object.keys(stats.metadata || {}).length,
-        streamingMetrics: Object.keys(stats.streaming || {}).length,
-        followerMetrics: Object.keys(stats.followers || {}).length,
-        trackCount: tracks.items.length,
-      },
-      context
-    );
-
-    await db
-      .update(artists)
-      .set({
-        metadata: stats.metadata || {},
-        streaming: stats.streaming || {},
-        followers: stats.followers || {},
-        tracks: tracks || [],
-        updated: new Date(),
-      })
-      .where(eq(artists.id, artist.id));
-
-    logger.success(
-      requestId,
-      'Successfully updated artist with Soundcharts data',
-      {
-        duration: Date.now() - startTime,
-        updateTypes: ['metadata', 'streaming', 'followers', 'tracks'],
-      },
-      context
-    );
-
-    return {
-      success: true,
-      artistId: artist.id,
-      details: context,
-    };
   } catch (err) {
     const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Error during Soundcharts artist update', serializedError, {
