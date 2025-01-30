@@ -31,15 +31,15 @@ const pinoLogger = pino({
   serializers: {
     error: pino.stdSerializers.err,
     request: (req) => ({
-      id: req?.id || 'unknown',
-      host: req?.headers?.['host'] || 'unknown',
-      ip: req?.headers?.['x-forwarded-for'] || req?.socket?.remoteAddress || 'unknown',
-      method: req?.method || 'unknown',
-      path: req?.url || 'unknown',
-      scheme: req?.protocol || 'unknown',
-      statusCode: req?.statusCode || 0,
-      userAgent: req?.headers?.['user-agent'] || 'unknown',
-      vercelCache: req?.headers?.['x-vercel-cache'] || 'unknown',
+      id: req.id,
+      host: req.headers['host'],
+      ip: req.headers['x-forwarded-for'] || req.socket.remoteAddress,
+      method: req.method,
+      path: req.url,
+      scheme: req.protocol,
+      statusCode: req.statusCode,
+      userAgent: req.headers['user-agent'],
+      vercelCache: req.headers['x-vercel-cache'],
     }),
     response: (res) => ({
       statusCode: res.statusCode,
@@ -65,9 +65,19 @@ const pinoLogger = pino({
   },
 });
 
+// Create a production logger that uses console.log
+const productionLogger = {
+  info: (data: any) => console.log(JSON.stringify(data, null, 2)),
+  warn: (data: any) => console.warn(JSON.stringify(data, null, 2)),
+  error: (data: any) => console.error(JSON.stringify(data, null, 2)),
+};
+
+// Choose logger based on environment
+const activeLogger = process.env.NODE_ENV === 'development' ? pinoLogger : productionLogger;
+
 // Updated logging functions
 const logStart = (requestId: string, message: string, context?: any) => {
-  pinoLogger.info({
+  activeLogger.info({
     request: { id: requestId },
     message: `🚀 ${message}`,
     ...context,
@@ -75,7 +85,7 @@ const logStart = (requestId: string, message: string, context?: any) => {
 };
 
 const logDataRetrieval = (requestId: string, msg: string, data?: any, context?: any) => {
-  pinoLogger.info({
+  activeLogger.info({
     request: { id: requestId },
     message: `📥 ${msg}`,
     data,
@@ -84,7 +94,7 @@ const logDataRetrieval = (requestId: string, msg: string, data?: any, context?: 
 };
 
 const logProcessing = (requestId: string, msg: string, details?: any, context?: any) => {
-  pinoLogger.info({
+  activeLogger.info({
     request: { id: requestId },
     message: `🔄 ${msg}`,
     details,
@@ -99,7 +109,7 @@ const logSuccess = (
   report?: any,
   context?: any
 ) => {
-  pinoLogger.info({
+  activeLogger.info({
     request: { id: requestId },
     message: `✅ ${message}`,
     result,
@@ -109,7 +119,7 @@ const logSuccess = (
 };
 
 const logWarning = (requestId: string, msg: string, warning?: any, context?: any) => {
-  pinoLogger.warn({
+  activeLogger.warn({
     request: { id: requestId },
     message: `⚠️ ${msg}`,
     warning,
@@ -118,7 +128,7 @@ const logWarning = (requestId: string, msg: string, warning?: any, context?: any
 };
 
 const logError = (requestId: string, msg: string, error: Error, context?: any) => {
-  pinoLogger.error({
+  activeLogger.error({
     request: { id: requestId },
     message: `❌ ${msg}`,
     error: {
@@ -130,7 +140,7 @@ const logError = (requestId: string, msg: string, error: Error, context?: any) =
 };
 
 const logCompletion = (requestId: string, msg: string, stats: any, context?: any) => {
-  pinoLogger.info({
+  activeLogger.info({
     request: { id: requestId },
     message: `🎉 ${msg}`,
     stats,
