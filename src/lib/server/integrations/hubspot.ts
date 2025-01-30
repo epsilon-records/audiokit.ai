@@ -1,17 +1,12 @@
-import type { artistSchema } from '../../schemas/artist.js';
-import type { z } from 'zod';
-import logger from '../../utils/logger.js';
-import { serializeError } from 'serialize-error';
-import { sanitizeUrl } from '../../utils/sanitize.js';
 import Bottleneck from 'bottleneck';
+import { serializeError } from 'serialize-error';
+import logger from '../../utils/logger.js';
+import { sanitizeUrl } from '../../utils/sanitize.js';
 
 interface HubspotContact {
   id: string;
   properties: Record<string, string>;
 }
-
-// Define the type from the Zod schema
-type Artist = z.infer<typeof artistSchema>;
 
 const HUBSPOT_RATE_LIMIT = 100; // 100 requests per 10 seconds (Free Plan)
 const HUBSPOT_WINDOW = 10 * 1000; // 10 seconds in milliseconds
