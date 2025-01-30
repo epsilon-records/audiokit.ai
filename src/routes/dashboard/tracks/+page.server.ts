@@ -26,10 +26,7 @@ export const load: PageServerLoad = async ({ locals }) => {
   }
 
   const [artist] = await db.select().from(artists).where(eq(artists.orgId, auth.orgId));
-  logger.info({
-    artist,
-    msg: 'Artist',
-  });
+  logger.data(crypto.randomUUID(), 'Retrieved artist', artist);
 
   const tracksWithMetadata = await Promise.all(
     (artist?.tracks as { items: any[] })?.items?.map(async (track) => ({
