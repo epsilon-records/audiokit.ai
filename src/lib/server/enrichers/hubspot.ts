@@ -104,6 +104,8 @@ async function applyUpdates(
 
     urlFields.forEach((field) => {
       const value = artist[field as keyof typeof artist];
+      console.log(field);
+      console.log(value);
       logger.warning(requestId, 'Sanitizing URL field', { field, value });
       if (value && typeof value === 'string') {
         hubspotUpdates[field] = sanitizeUrl(value);
