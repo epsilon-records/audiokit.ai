@@ -2,6 +2,15 @@ export function sanitizeUrl(url: string | null | undefined): string {
   // Early return for invalid inputs
   if (!url || typeof url !== 'string') return '';
 
+  // Validate URL format before sanitizing
+  try {
+    // Test if URL is valid
+    new URL(url);
+  } catch (error) {
+    console.warn('Invalid URL format:', url);
+    return '';
+  }
+
   let sanitized = url.trim();
 
   // Remove any query parameters and fragments
