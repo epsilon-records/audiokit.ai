@@ -55,7 +55,16 @@ export const logger = pino({
             ignore: 'pid,hostname',
           },
         }
-      : undefined,
+      : {
+          target: 'pino/file',
+          options: {
+            destination: 1,
+            colorize: true,
+            translateTime: true,
+            messageKey: 'event_message',
+            ignore: 'pid,hostname',
+          },
+        },
 });
 
 // Example usage:
