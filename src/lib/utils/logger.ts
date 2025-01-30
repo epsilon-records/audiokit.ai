@@ -31,20 +31,16 @@ const pinoLogger = pino({
     context: (context) => context, // Add context serializer
   },
 
-  // Pretty printing in development
-  transport:
-    process.env.NODE_ENV === 'development'
-      ? {
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-            translateTime: 'SYS:standard',
-            ignore: 'pid,hostname',
-            messageFormat: '{msg}',
-            singleLine: true,
-          },
-        }
-      : undefined,
+  transport: {
+    target: 'pino-pretty',
+    options: {
+      colorize: true,
+      translateTime: 'SYS:standard',
+      ignore: 'pid,hostname',
+      messageFormat: '{msg} {context}',
+      singleLine: true,
+    },
+  },
 });
 
 // Updated logging functions
