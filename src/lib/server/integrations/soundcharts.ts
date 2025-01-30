@@ -27,7 +27,11 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
       },
     });
 
-    if (!process.env.SOUNDCHARTS_API_BASE || !process.env.SOUNDCHARTS_API_KEY) {
+    if (
+      !process.env.SOUNDCHARTS_API_BASE ||
+      !process.env.SOUNDCHARTS_APP_ID ||
+      !process.env.SOUNDCHARTS_API_KEY
+    ) {
       throw new Error('Soundcharts API configuration missing');
     }
 
@@ -35,7 +39,8 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `bearer ${process.env.SOUNDCHARTS_API_KEY}`,
+        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
       },
     });
 
@@ -317,11 +322,16 @@ export async function getArtistStats(uuid: string): Promise<{
   logger.start(requestId, 'Fetching Soundcharts artist stats', context);
 
   try {
+    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
+      throw new Error('Soundcharts API configuration missing');
+    }
+
     const url = `${process.env.SOUNDCHARTS_API_BASE}/artists/${uuid}/stats`;
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `bearer ${process.env.SOUNDCHARTS_API_KEY}`,
+        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
       },
     });
 
