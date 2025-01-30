@@ -326,7 +326,7 @@ export async function getArtistStats(uuid: string): Promise<{
       throw new Error('Soundcharts API configuration missing');
     }
 
-    const url = `${process.env.SOUNDCHARTS_API_BASE}/artists/${uuid}/stats`;
+    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/current/stats`;
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -493,7 +493,7 @@ export async function getTrackMetadata(uuid: string): Promise<Track | null> {
   logger.start(requestId, 'Fetching Soundcharts track metadata', context);
 
   try {
-    const url = `${process.env.SOUNDCHARTS_API_BASE}/tracks/${uuid}`;
+    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2/tracks/${uuid}`;
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
