@@ -1,8 +1,8 @@
+import { eq } from 'drizzle-orm';
+import { serializeError } from 'serialize-error';
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
-import { eq } from 'drizzle-orm';
 import logger from '../../utils/logger.js';
-import { serializeError } from 'serialize-error';
 import { getMusicfetchData } from '../integrations/musicfetch.js';
 
 interface EnrichmentResult {
@@ -128,11 +128,27 @@ export async function enrichWithMusicfetch(
             };
           }
 
+          // Add validation for link values
+          const validatedLinks = Object.fromEntries(
+            Object.entries(links).map(([key, value]) => {
+              if (typeof value !== 'string') {
+                logger.warning(
+                  requestId,
+                  `Invalid link format for ${key}`,
+                  { value },
+                  artistContext
+                );
+                return [key, null]; // Set to null if invalid
+              }
+              return [key, value];
+            })
+          );
+
           logger.process(
             requestId,
             'Updating artist with Musicfetch data',
             {
-              linksFound: Object.keys(links).length,
+              linksFound: Object.keys(validatedLinks).length,
             },
             artistContext
           );
@@ -140,7 +156,7 @@ export async function enrichWithMusicfetch(
           await db
             .update(artists)
             .set({
-              ...links,
+              ...validatedLinks,
               updated: new Date(),
             })
             .where(eq(artists.id, artist.id));
@@ -150,7 +166,7 @@ export async function enrichWithMusicfetch(
             'Successfully updated artist with Musicfetch data',
             {
               duration: Date.now() - artistStartTime,
-              linksUpdated: Object.keys(links),
+              linksUpdated: Object.keys(validatedLinks),
             },
             artistContext
           );
