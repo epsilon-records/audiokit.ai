@@ -1,10 +1,11 @@
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
-import { getHubspotContact } from '../integrations/hubspot.js';
+import { getHubspotContact, syncToHubspot } from '../integrations/hubspot.js';
 import { eq } from 'drizzle-orm';
 import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
 import { inspect } from 'util';
+import { sanitizeUrl } from '../../utils/sanitize';
 
 interface SerializedErrorWithCode extends Error {
   code?: string | number;
@@ -94,7 +95,37 @@ async function applyUpdates(
   });
 
   try {
+    // First update our database
     await db.update(artists).set(updates).where(eq(artists.id, artist.id));
+
+    // Check if we need to update Hubspot with sanitized URLs
+    const urlFields = ['website', 'spotify', 'appleMusic', 'soundcloud', 'bandcamp', 'instagram'];
+    const hubspotUpdates: Record<string, string> = {};
+
+    urlFields.forEach((field) => {
+      if (updates[field as keyof HubspotUpdateFields]) {
+        hubspotUpdates[field] = updates[field as keyof HubspotUpdateFields]!;
+      }
+    });
+
+    if (artist.email && Object.keys(hubspotUpdates).length > 0) {
+      logger.process(requestId, 'Updating Hubspot with sanitized URLs', {
+        artistId: artist.id,
+        updates: hubspotUpdates,
+      });
+      await syncToHubspot(artist.email, hubspotUpdates);
+    } else if (!artist.email) {
+      logger.warning(requestId, 'No email found for artist', {
+        artistId: artist.id,
+      });
+      return;
+    } else {
+      logger.warning(requestId, 'No Hubspot updates to apply', {
+        artistId: artist.id,
+        email: artist.email,
+      });
+      return;
+    }
 
     logger.success(requestId, 'Successfully merged Hubspot data', {
       artistId: artist.id,
