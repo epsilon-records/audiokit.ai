@@ -1,10 +1,11 @@
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
-import { getHubspotContact, syncToHubspot } from '../integrations/hubspot.js';
+import { getHubspotData, syncToHubspot } from '../integrations/hubspot.js';
 import { eq } from 'drizzle-orm';
 import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
 import { inspect } from 'util';
+import { sanitizeUrl } from '../../utils/sanitize.js';
 
 interface SerializedErrorWithCode extends Error {
   code?: string | number;
@@ -102,8 +103,9 @@ async function applyUpdates(
     const hubspotUpdates: Record<string, string> = {};
 
     urlFields.forEach((field) => {
-      if (updates[field as keyof HubspotUpdateFields]) {
-        hubspotUpdates[field] = updates[field as keyof HubspotUpdateFields]!;
+      const value = artist[field as keyof typeof artist];
+      if (value) {
+        hubspotUpdates[field] = sanitizeUrl(value.toString());
       }
     });
 
@@ -123,7 +125,6 @@ async function applyUpdates(
         artistId: artist.id,
         email: artist.email,
       });
-      return;
     }
 
     logger.success(requestId, 'Successfully merged Hubspot data', {
@@ -178,7 +179,7 @@ async function updateHubspotArtist(artist: typeof artists.$inferSelect & { email
     const emailValidationError = validateArtistEmail(artist, requestId);
     if (emailValidationError) return emailValidationError;
 
-    const hubspotData = await getHubspotContact(artist.email!);
+    const hubspotData = await getHubspotData(artist.email);
 
     if (!hubspotData) {
       logger.warning(requestId, 'No Hubspot data available', undefined, context);

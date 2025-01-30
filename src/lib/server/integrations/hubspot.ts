@@ -276,3 +276,66 @@ export const syncToHubspot = hubspotLimiter.wrap(
     }
   }
 );
+
+export async function getHubspotData(email: string): Promise<Record<string, any>> {
+  const response = await fetch(`${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/search`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+    },
+    body: JSON.stringify({
+      filterGroups: [
+        {
+          filters: [
+            {
+              propertyName: 'email',
+              operator: 'EQ',
+              value: email,
+            },
+          ],
+        },
+      ],
+      properties: [
+        'email',
+        'firstname',
+        'lastname',
+        'website',
+        'spotify',
+        'apple_music',
+        'soundcloud',
+        'bandcamp',
+        'instagram',
+        'phone',
+        'city',
+        'country',
+        'biography',
+      ],
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Hubspot API error: ${response.statusText}`);
+  }
+
+  const data = await response.json();
+  if (data.results.length === 0) {
+    throw new Error('Artist not found in Hubspot');
+  }
+
+  return {
+    email: data.results[0].properties.email,
+    firstName: data.results[0].properties.firstname,
+    lastName: data.results[0].properties.lastname,
+    website: data.results[0].properties.website,
+    spotify: data.results[0].properties.spotify,
+    appleMusic: data.results[0].properties.apple_music,
+    soundcloud: data.results[0].properties.soundcloud,
+    bandcamp: data.results[0].properties.bandcamp,
+    instagram: data.results[0].properties.instagram,
+    phone: data.results[0].properties.phone,
+    city: data.results[0].properties.city,
+    country: data.results[0].properties.country,
+    biography: data.results[0].properties.biography,
+  };
+}
