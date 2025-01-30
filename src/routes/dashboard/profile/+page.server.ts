@@ -9,17 +9,7 @@ import { artists } from '$lib/db/schema';
 import { sql } from 'drizzle-orm';
 import logger from '$lib/utils/logger';
 import { syncToHubspot } from '$lib/server/integrations/hubspot';
-
-// Add this helper function at the top of the file
-function sanitizeUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    const urlObj = new URL(url);
-    return urlObj.origin + urlObj.pathname;
-  } catch {
-    return url;
-  }
-}
+import { sanitizeUrl } from '$lib/utils/sanitize';
 
 export const load = (async ({ locals }) => {
   const auth = await requireOrg(locals);
