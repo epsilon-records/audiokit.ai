@@ -1,11 +1,11 @@
-import { db } from '../../db/index.js';
-import { artists } from '../../db/schema.js';
-import { getHubspotData, syncToHubspot } from '../integrations/hubspot.js';
 import { eq } from 'drizzle-orm';
-import logger from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
 import { inspect } from 'util';
+import { db } from '../../db/index.js';
+import { artists } from '../../db/schema.js';
+import logger from '../../utils/logger.js';
 import { sanitizeUrl } from '../../utils/sanitize.js';
+import { getHubspotData, syncToHubspot } from '../integrations/hubspot.js';
 
 interface SerializedErrorWithCode extends Error {
   code?: string | number;
@@ -104,8 +104,8 @@ async function applyUpdates(
 
     urlFields.forEach((field) => {
       const value = artist[field as keyof typeof artist];
-      if (value) {
-        hubspotUpdates[field] = sanitizeUrl(value.toString());
+      if (value && typeof value === 'string') {
+        hubspotUpdates[field] = sanitizeUrl(value);
       }
     });
 
@@ -180,8 +180,7 @@ async function updateHubspotArtist(artist: typeof artists.$inferSelect & { email
     if (emailValidationError) return emailValidationError;
 
     const hubspotData = await getHubspotData(artist.email);
-
-    if (!hubspotData) {
+    if (!hubspotData || !hubspotData.properties) {
       logger.warning(requestId, 'No Hubspot data available', undefined, context);
       return {
         artistId: artist.id,
@@ -196,7 +195,7 @@ async function updateHubspotArtist(artist: typeof artists.$inferSelect & { email
       availableFields: Object.keys(hubspotData.properties),
     });
 
-    const updates = buildUpdateFields(artist, hubspotData, requestId);
+    const updates = buildUpdateFields(artist, { properties: hubspotData.properties }, requestId);
     await applyUpdates(artist, updates, requestId);
 
     logger.success(
