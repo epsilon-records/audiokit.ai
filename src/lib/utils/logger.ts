@@ -108,7 +108,7 @@ const logError = (requestId: string, msg: string, error: Error, context?: any) =
 const logCompletion = (requestId: string, msg: string, stats: any, context?: any) => {
   pinoLogger.info({
     requestId,
-    msg: `🎉 ${msg}`,
+    event_message: `🎉 ${msg}`,
     stats,
     ...context,
     timestamp: new Date().toISOString(),
