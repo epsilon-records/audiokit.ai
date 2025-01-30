@@ -1,7 +1,7 @@
 import { db } from '../db/index.js';
 import { artists } from '../db/schema.js';
 import { eq, not, or, and } from 'drizzle-orm';
-import logger from '../utils/logger.js';
+import { logger } from '../utils/logger.js';
 import { enrichWithSoundcharts } from './enrichers/soundcharts.js';
 import { enrichWithHubspot } from './enrichers/hubspot.js';
 import { enrichWithMusicfetch } from './enrichers/musicfetch.js';
@@ -57,17 +57,38 @@ async function getArtistsToUpdate() {
 
 export async function enrichData() {
   const requestId = crypto.randomUUID();
-  logger.info({
-    requestId,
-    msg: 'Starting data enrichment process',
+  const startTime = Date.now();
+
+  logger.start(requestId, 'Starting data enrichment process', {
+    metadata: {
+      environment: process.env.NODE_ENV,
+    },
   });
+
   try {
     const { soundchartsArtists, musicfetchArtists, hubspotArtists } = await getArtistsToUpdate();
+
+    logger.process(requestId, 'Retrieved artists to update', {
+      soundchartsCount: soundchartsArtists.length,
+      musicfetchCount: musicfetchArtists.length,
+      hubspotCount: hubspotArtists.length,
+    });
+
     const [soundchartsResults, musicfetchResults, hubspotResults] = await Promise.all([
       enrichWithSoundcharts(soundchartsArtists),
       enrichWithMusicfetch(musicfetchArtists),
       enrichWithHubspot(hubspotArtists),
     ]);
+
+    logger.success(requestId, 'Completed data enrichment process', {
+      duration: Date.now() - startTime,
+      results: {
+        soundcharts: soundchartsResults.success,
+        musicfetch: musicfetchResults.success,
+        hubspot: hubspotResults.success,
+      },
+    });
+
     return new Response(
       JSON.stringify({
         success: true,
@@ -78,10 +99,20 @@ export async function enrichData() {
       { headers: { 'Content-Type': 'application/json' } }
     );
   } catch (err) {
-    logger.info({
-      requestId,
-      error: err instanceof Error ? err.message : 'Unknown error',
-      msg: 'Error in data enrichment',
+    const serializedError = serializeError(err) as Error;
+    logger.error(requestId, 'Error in data enrichment process', serializedError, {
+      duration: Date.now() - startTime,
     });
+
+    return new Response(
+      JSON.stringify({
+        success: false,
+        error: serializedError.message,
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 }

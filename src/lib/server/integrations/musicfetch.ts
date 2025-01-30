@@ -1,4 +1,4 @@
-import logger from '../../utils/logger.js';
+import { logger } from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
 import { inspect } from 'util';
 
@@ -6,14 +6,12 @@ export async function getMusicfetchData(spotifyUrl: string, services: string[]) 
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
   const context = {
-    requestId,
     spotifyUrl,
     requestedServices: services,
   };
 
   try {
-    logger.info(`🔍 Starting Musicfetch API request`, {
-      ...context,
+    logger.start(requestId, 'Starting Musicfetch API request', undefined, {
       metadata: {
         environment: process.env.NODE_ENV,
         musicfetchToken: process.env.MUSICFETCH_TOKEN ? '✅ Configured' : '❌ Missing',
@@ -22,7 +20,12 @@ export async function getMusicfetchData(spotifyUrl: string, services: string[]) 
     });
 
     if (!process.env.MUSICFETCH_TOKEN) {
-      logger.error(`❌ Musicfetch token not configured`, context);
+      logger.error(
+        requestId,
+        'Musicfetch token not configured',
+        undefined,
+        new Error('MUSICFETCH_TOKEN is not set')
+      );
       throw new Error('MUSICFETCH_TOKEN is not set');
     }
 
@@ -36,34 +39,29 @@ export async function getMusicfetchData(spotifyUrl: string, services: string[]) 
     );
 
     if (!response.ok) {
-      logger.error(`❌ Musicfetch API error`, {
-        ...context,
-        status: response.status,
-        statusText: response.statusText,
-        duration: Date.now() - startTime,
-      });
+      logger.error(
+        requestId,
+        'Musicfetch API error',
+        undefined,
+        new Error(`Musicfetch request failed with status ${response.status}`),
+        {
+          status: response.status,
+          statusText: response.statusText,
+          duration: Date.now() - startTime,
+        }
+      );
       throw new Error(`Musicfetch request failed with status ${response.status}`);
     }
 
     const data = await response.json();
-    logger.info(`✅ Successfully retrieved Musicfetch data`, {
-      ...context,
+    logger.success(requestId, 'Successfully retrieved Musicfetch data', undefined, {
       availableServices: Object.keys(data.result.services),
       duration: Date.now() - startTime,
     });
 
     return data.result.services;
   } catch (err) {
-    const serializedError = serializeError(err);
-    logger.error(`💥 Error fetching Musicfetch data`, {
-      ...context,
-      error: {
-        message: serializedError.message,
-        stack: serializedError.stack,
-        type: serializedError.name,
-        code: serializedError.code,
-        additionalInfo: inspect(serializedError, { depth: null }),
-      },
+    logger.error(requestId, 'Error fetching Musicfetch data', undefined, err, {
       duration: Date.now() - startTime,
     });
     throw err;

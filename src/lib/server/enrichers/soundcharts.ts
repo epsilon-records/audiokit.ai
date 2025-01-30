@@ -6,9 +6,8 @@ import {
   getArtistTracks,
 } from '../integrations/soundcharts.js';
 import { eq } from 'drizzle-orm';
-import logger from '../../utils/logger.js';
+import { logger } from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
-import { inspect } from 'util';
 
 interface EnrichmentResult {
   success: boolean;
@@ -35,54 +34,57 @@ function extractSpotifyId(spotifyUrl: string): string | null {
 async function updateArtist(artist: typeof artists.$inferSelect) {
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
-  const artistContext = {
-    requestId,
+  const context = {
     artistId: artist.id,
     artistName: artist.stageName,
     existingSoundchartsId: artist.soundchartsId ? '✅ Present' : '❌ Missing',
     spotifyUrl: artist.spotify ? '✅ Present' : '❌ Missing',
   };
 
-  logger.info(`🎬 Starting Soundcharts artist update`, artistContext);
+  logger.start(requestId, 'Starting Soundcharts artist update', context);
 
   try {
     let soundchartsId = artist.soundchartsId;
 
     if (!soundchartsId && artist.spotify) {
-      logger.info(`🔍 Attempting to get Soundcharts ID from Spotify URL`, artistContext);
+      logger.process(requestId, 'Attempting to get Soundcharts ID from Spotify URL', context);
 
       const spotifyId = extractSpotifyId(artist.spotify);
       if (!spotifyId) {
-        logger.warn(`⚠️ Could not extract Spotify ID from URL`, artistContext);
+        logger.warning(requestId, 'Could not extract Spotify ID from URL', undefined, context);
         throw new Error('Invalid Spotify URL format');
       }
 
       soundchartsId = await getArtistIdFromSpotify(spotifyId);
       if (soundchartsId) {
-        logger.info(`✅ Successfully retrieved Soundcharts ID`, {
-          ...artistContext,
-          newSoundchartsId: '✅ Retrieved',
-        });
+        logger.success(
+          requestId,
+          'Successfully retrieved Soundcharts ID',
+          { newSoundchartsId: '✅ Retrieved' },
+          context
+        );
         await db.update(artists).set({ soundchartsId }).where(eq(artists.id, artist.id));
       } else {
-        logger.warn(`⚠️ No Soundcharts ID found for Spotify ID`, artistContext);
+        logger.warning(requestId, 'No Soundcharts ID found for Spotify ID', undefined, context);
       }
     }
 
     if (!soundchartsId) {
-      logger.error(`❌ No Soundcharts ID available`, artistContext);
+      logger.error(
+        requestId,
+        'No Soundcharts ID available',
+        new Error('No Soundcharts ID available'),
+        context
+      );
       return {
         success: false,
         artistId: artist.id,
         error: 'No Soundcharts ID available',
-        details: artistContext,
+        details: context,
       };
     }
 
-    logger.info(`📊 Fetching Soundcharts stats`, {
-      ...artistContext,
-      soundchartsId: '✅ Present', // Don't log actual ID
-    });
+    logger.data(requestId, 'Fetching Soundcharts stats', { soundchartsId: '✅ Present' }, context);
 
     const [stats, tracks] = await Promise.all([
       getArtistStats(soundchartsId),
@@ -90,21 +92,30 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
     ]);
 
     if (!stats || !tracks) {
-      logger.error(`❌ Failed to fetch Soundcharts data`, {
-        ...artistContext,
-        statsAvailable: !!stats,
-        tracksAvailable: !!tracks,
-      });
+      logger.error(
+        requestId,
+        'Failed to fetch Soundcharts data',
+        new Error('Failed to fetch Soundcharts data'),
+        {
+          ...context,
+          statsAvailable: !!stats,
+          tracksAvailable: !!tracks,
+        }
+      );
       throw new Error('Failed to fetch Soundcharts data');
     }
 
-    logger.info(`🔄 Updating artist with Soundcharts data`, {
-      ...artistContext,
-      metadataKeys: Object.keys(stats.metadata || {}).length,
-      streamingMetrics: Object.keys(stats.streaming || {}).length,
-      followerMetrics: Object.keys(stats.followers || {}).length,
-      trackCount: tracks.items.length,
-    });
+    logger.process(
+      requestId,
+      'Updating artist with Soundcharts data',
+      {
+        metadataKeys: Object.keys(stats.metadata || {}).length,
+        streamingMetrics: Object.keys(stats.streaming || {}).length,
+        followerMetrics: Object.keys(stats.followers || {}).length,
+        trackCount: tracks.items.length,
+      },
+      context
+    );
 
     await db
       .update(artists)
@@ -117,28 +128,25 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       })
       .where(eq(artists.id, artist.id));
 
-    logger.info(`✅ Successfully updated artist with Soundcharts data`, {
-      ...artistContext,
-      duration: Date.now() - startTime,
-      updateTypes: ['metadata', 'streaming', 'followers', 'tracks'],
-    });
+    logger.success(
+      requestId,
+      'Successfully updated artist with Soundcharts data',
+      {
+        duration: Date.now() - startTime,
+        updateTypes: ['metadata', 'streaming', 'followers', 'tracks'],
+      },
+      context
+    );
 
     return {
       success: true,
       artistId: artist.id,
-      details: artistContext,
+      details: context,
     };
   } catch (err) {
     const serializedError = serializeError(err);
-    logger.error(`❌ Error during Soundcharts artist update`, {
-      ...artistContext,
-      error: {
-        message: serializedError.message,
-        stack: serializedError.stack,
-        type: serializedError.name,
-        code: serializedError.code,
-        additionalInfo: inspect(serializedError, { depth: null }),
-      },
+    logger.error(requestId, 'Error during Soundcharts artist update', serializedError, {
+      ...context,
       duration: Date.now() - startTime,
     });
 
@@ -148,7 +156,7 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       error: serializedError.message,
       details: {
         error: serializedError,
-        context: artistContext,
+        context: context,
       },
     };
   }
@@ -160,8 +168,7 @@ export async function enrichWithSoundcharts(
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
 
-  logger.info(`🎬 Starting Soundcharts enrichment process`, {
-    requestId,
+  logger.start(requestId, 'Starting Soundcharts enrichment process', {
     artistCount: artistData.length,
     metadata: {
       environment: process.env.NODE_ENV,
@@ -173,7 +180,9 @@ export async function enrichWithSoundcharts(
 
   try {
     if (!artistData.length) {
-      logger.warn(`🛑 No artists found to update with Soundcharts`, { requestId });
+      logger.warning(requestId, 'No artists found to update with Soundcharts', undefined, {
+        requestId,
+      });
       return {
         success: true,
         message: 'No artists found to update',
@@ -193,28 +202,25 @@ export async function enrichWithSoundcharts(
         };
 
         try {
-          logger.info(`🎬 Starting artist update`, artistContext);
+          logger.start(requestId, 'Starting artist update', artistContext);
 
           const result = await updateArtist(artist);
 
-          logger.info(`✅ Successfully processed artist`, {
-            ...artistContext,
-            duration: Date.now() - artistStartTime,
-            success: result.success,
-          });
+          logger.success(
+            requestId,
+            'Successfully processed artist',
+            {
+              duration: Date.now() - artistStartTime,
+              success: result.success,
+            },
+            artistContext
+          );
 
           return result;
         } catch (err) {
           const serializedError = serializeError(err);
-          logger.error(`❌ Error processing artist`, {
+          logger.error(requestId, 'Error processing artist', serializedError, {
             ...artistContext,
-            error: {
-              message: serializedError.message,
-              stack: serializedError.stack,
-              type: serializedError.name,
-              code: serializedError.code,
-              additionalInfo: inspect(serializedError, { depth: null }),
-            },
             duration: Date.now() - artistStartTime,
           });
 
@@ -234,10 +240,10 @@ export async function enrichWithSoundcharts(
     const successCount = updates.filter((u) => u.success).length;
     const failureCount = updates.length - successCount;
 
-    logger[successCount === updates.length ? 'info' : 'warn'](
-      `🏁 Completed Soundcharts enrichment process`,
+    logger[successCount === updates.length ? 'success' : 'warning'](
+      requestId,
+      'Completed Soundcharts enrichment process',
       {
-        requestId,
         duration: Date.now() - startTime,
         totalArtists: updates.length,
         successCount,
@@ -263,16 +269,8 @@ export async function enrichWithSoundcharts(
     };
   } catch (err) {
     const serializedError = serializeError(err);
-    logger.error(`💥 Critical error in Soundcharts enrichment process`, {
-      requestId,
+    logger.error(requestId, 'Critical error in Soundcharts enrichment process', serializedError, {
       duration: Date.now() - startTime,
-      error: {
-        message: serializedError.message,
-        stack: serializedError.stack,
-        type: serializedError.name,
-        code: serializedError.code,
-        additionalInfo: inspect(serializedError, { depth: null }),
-      },
       input: {
         artistCount: artistData.length,
         sampleArtist: artistData[0]

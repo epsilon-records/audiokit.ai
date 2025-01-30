@@ -1,11 +1,9 @@
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
-import { getMusicfetchData } from '../integrations/musicfetch.js';
 import { eq } from 'drizzle-orm';
-import logger from '../../utils/logger.js';
-import { sanitizeUrl } from '../../utils/sanitize.js';
+import { logger } from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
-import { inspect } from 'node:util';
+import { getMusicfetchData } from '../integrations/musicfetch.js';
 
 interface EnrichmentResult {
   success: boolean;
@@ -26,19 +24,20 @@ export async function enrichWithMusicfetch(
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
 
-  logger.info(`🎬 Starting Musicfetch enrichment process`, {
-    requestId,
+  logger.start(requestId, 'Starting Musicfetch enrichment process', {
     artistCount: artistData.length,
     metadata: {
       environment: process.env.NODE_ENV,
       musicfetchUrl: process.env.MUSICFETCH_API_BASE ? '✅ Configured' : '❌ Missing',
-      musicfetchToken: process.env.MUSICFETCH_TOKEN ? '✅ Configured' : '❌ Missing',
+      musicfetchApiKey: process.env.MUSICFETCH_API_KEY ? '✅ Configured' : '❌ Missing',
     },
   });
 
   try {
     if (!artistData.length) {
-      logger.warn(`🛑 No artists found to update with Musicfetch`, { requestId });
+      logger.warning(requestId, 'No artists found to update with Musicfetch', undefined, {
+        requestId,
+      });
       return {
         success: true,
         message: 'No artists found to update',
@@ -67,7 +66,7 @@ export async function enrichWithMusicfetch(
         };
 
         try {
-          logger.info(`🎬 Starting artist update`, artistContext);
+          logger.start(requestId, 'Starting artist update', artistContext);
 
           const serviceLinks = [
             artist.spotify,
@@ -84,95 +83,93 @@ export async function enrichWithMusicfetch(
           const linkUrl = serviceLinks.find((link) => link !== null && link !== '');
 
           if (!linkUrl) {
-            logger.warn(`⚠️ No valid service link found for artist`, artistContext);
+            logger.warning(
+              requestId,
+              'No valid service links found for artist',
+              undefined,
+              artistContext
+            );
             return {
-              artistId: artist.id,
               success: false,
-              error: 'No valid service link found',
+              artistId: artist.id,
+              error: 'No valid service links found',
               details: artistContext,
             };
           }
 
-          const musicfetchBaseUrl = process.env.MUSICFETCH_API_BASE;
-          if (!musicfetchBaseUrl) {
-            logger.error(`❌ Musicfetch base URL not configured`, artistContext);
+          logger.process(
+            requestId,
+            'Fetching artist links from Musicfetch',
+            {
+              sourceLink: linkUrl,
+            },
+            artistContext
+          );
+
+          const links = await getMusicfetchData(linkUrl, [
+            'spotify',
+            'appleMusic',
+            'soundcloud',
+            'youtube',
+            'bandcamp',
+            'facebook',
+            'instagram',
+            'tiktok',
+            'x',
+          ]);
+
+          if (!links) {
+            logger.warning(requestId, 'No links found from Musicfetch', undefined, artistContext);
             return {
-              artistId: artist.id,
               success: false,
-              error: 'Musicfetch service not configured',
+              artistId: artist.id,
+              error: 'No links found from Musicfetch',
               details: artistContext,
             };
           }
 
-          logger.info(`🔍 Fetching Musicfetch data`, {
-            ...artistContext,
-            sourceUrl: linkUrl,
-          });
+          logger.process(
+            requestId,
+            'Updating artist with Musicfetch data',
+            {
+              linksFound: Object.keys(links).length,
+            },
+            artistContext
+          );
 
-          const services = await getMusicfetchData(linkUrl, []);
-          await db.update(artists).set({ services }).where(eq(artists.id, artist.id));
+          await db
+            .update(artists)
+            .set({
+              ...links,
+              updated: new Date(),
+            })
+            .where(eq(artists.id, artist.id));
 
-          const updateFields: Record<string, string> = {};
-
-          for (const service in services) {
-            const serviceLink = services[service]?.link;
-            if (serviceLink && typeof serviceLink === 'string' && serviceLink.trim() !== '') {
-              if (
-                service === 'spotify' ||
-                service === 'appleMusic' ||
-                service === 'soundcloud' ||
-                service === 'youtube' ||
-                service === 'bandcamp' ||
-                service === 'facebook' ||
-                service === 'instagram' ||
-                service === 'tiktok' ||
-                service === 'x'
-              ) {
-                updateFields[service] = sanitizeUrl(serviceLink);
-              }
-            }
-          }
-
-          logger.info(`🔄 Updating artist with Musicfetch data`, {
-            ...artistContext,
-            updateFields: Object.keys(updateFields),
-            serviceCount: Object.keys(services).length,
-          });
-
-          await db.update(artists).set(updateFields).where(eq(artists.id, artist.id));
-
-          logger.info(`✅ Successfully updated artist with Musicfetch data`, {
-            ...artistContext,
-            duration: Date.now() - artistStartTime,
-            updatedFields: Object.keys(updateFields),
-            serviceCount: Object.keys(services).length,
-          });
+          logger.success(
+            requestId,
+            'Successfully updated artist with Musicfetch data',
+            {
+              duration: Date.now() - artistStartTime,
+              linksUpdated: Object.keys(links),
+            },
+            artistContext
+          );
 
           return {
-            artistId: artist.id,
             success: true,
-            details: {
-              updatedFields: Object.keys(updateFields),
-              serviceCount: Object.keys(services).length,
-            },
+            artistId: artist.id,
+            details: artistContext,
           };
         } catch (err) {
-          const serializedError = serializeError(err);
-          logger.error(`❌ Error updating artist with Musicfetch`, {
+          const serializedError = serializeError(err) as Error;
+          logger.error(requestId, 'Error processing artist', serializedError, {
             ...artistContext,
-            error: {
-              message: serializedError.message,
-              stack: serializedError.stack,
-              type: serializedError.name,
-              code: serializedError.code,
-              additionalInfo: inspect(serializedError, { depth: null }),
-            },
             duration: Date.now() - artistStartTime,
           });
 
           return {
-            artistId: artist.id,
             success: false,
+            artistId: artist.id,
             error: serializedError.message,
             details: {
               error: serializedError,
@@ -186,10 +183,10 @@ export async function enrichWithMusicfetch(
     const successCount = updates.filter((u) => u.success).length;
     const failureCount = updates.length - successCount;
 
-    logger[successCount === updates.length ? 'info' : 'warn'](
-      `🏁 Completed Musicfetch enrichment process`,
+    logger[successCount === updates.length ? 'success' : 'warning'](
+      requestId,
+      'Completed Musicfetch enrichment process',
       {
-        requestId,
         duration: Date.now() - startTime,
         totalArtists: updates.length,
         successCount,
@@ -214,17 +211,9 @@ export async function enrichWithMusicfetch(
           : `Updated ${successCount} of ${updates.length} artists`,
     };
   } catch (err) {
-    const serializedError = serializeError(err);
-    logger.error(`💥 Critical error in Musicfetch enrichment process`, {
-      requestId,
+    const serializedError = serializeError(err) as Error;
+    logger.error(requestId, 'Critical error in Musicfetch enrichment process', serializedError, {
       duration: Date.now() - startTime,
-      error: {
-        message: serializedError.message,
-        stack: serializedError.stack,
-        type: serializedError.name,
-        code: serializedError.code,
-        additionalInfo: inspect(serializedError, { depth: null }),
-      },
       input: {
         artistCount: artistData.length,
         sampleArtist: artistData[0]

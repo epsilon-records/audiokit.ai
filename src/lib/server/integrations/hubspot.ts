@@ -1,6 +1,6 @@
 import type { artistSchema } from '../../schemas/artist.js';
 import type { z } from 'zod';
-import logger from '../../utils/logger.js';
+import { logger } from '../../utils/logger.js';
 import { serializeError } from 'serialize-error';
 import { inspect } from 'util';
 
@@ -8,17 +8,17 @@ interface HubspotContact {
   id: string;
   properties: {
     email: string;
+    firstname?: string;
+    lastname?: string;
     phone?: string;
     city?: string;
     country?: string;
+    biography?: string;
     website?: string;
     spotify?: string;
     instagram?: string;
-    facebook?: string;
-    x?: string;
-    tiktok?: string;
+    twitterhandle?: string;
     soundcloud?: string;
-    youtube?: string;
     lifecyclestage?: string;
   };
 }
@@ -33,19 +33,25 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
   const context = {
-    requestId,
     email,
+    requestId,
   };
 
+  logger.start(requestId, 'Fetching Hubspot contact', context);
+
   try {
-    logger.info(`🔍 Searching for Hubspot contact`, {
-      ...context,
-      metadata: {
-        environment: process.env.NODE_ENV,
-        hubspotApiKey: process.env.HUBSPOT_API_KEY ? '✅ Configured' : '❌ Missing',
-        hubspotApiBase: process.env.HUBSPOT_API_BASE ? '✅ Configured' : '❌ Missing',
+    logger.process(
+      requestId,
+      'Searching for Hubspot contact',
+      {
+        metadata: {
+          environment: process.env.NODE_ENV,
+          hubspotApiKey: process.env.HUBSPOT_API_KEY ? '✅ Configured' : '❌ Missing',
+          hubspotApiBase: process.env.HUBSPOT_API_BASE ? '✅ Configured' : '❌ Missing',
+        },
       },
-    });
+      context
+    );
 
     // First search for the contact by email
     const searchResponse = await fetch(
@@ -73,7 +79,7 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
     );
 
     if (!searchResponse.ok) {
-      logger.error(`❌ Hubspot search API error`, {
+      logger.error(requestId, 'Hubspot search API error', new Error('API Error'), {
         ...context,
         status: searchResponse.status,
         statusText: searchResponse.statusText,
@@ -83,21 +89,18 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
     }
 
     const searchData = await searchResponse.json();
-    logger.info(`📥 Retrieved Hubspot search results`, {
-      ...context,
+    logger.data(requestId, 'Retrieved Hubspot search results', {
       resultsCount: searchData.results?.length || 0,
       duration: Date.now() - startTime,
     });
 
     if (!searchData.results?.length) {
-      logger.info(`ℹ️ No Hubspot contact found`, context);
+      logger.warning(requestId, 'No Hubspot contact found', undefined, context);
       return null;
     }
 
-    // Get the contact ID from the search results
     const contactId = searchData.results[0].id;
 
-    // Make a second request to get all properties
     const detailResponse = await fetch(
       `${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone,city,country,biography,website,spotify,apple_music,twitterhandle,instagram,soundcloud`,
       {
@@ -108,7 +111,7 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
     );
 
     if (!detailResponse.ok) {
-      logger.error(`❌ Hubspot detail API error`, {
+      logger.error(requestId, 'Hubspot detail API error', new Error('API Error'), {
         ...context,
         contactId,
         status: detailResponse.status,
@@ -118,29 +121,18 @@ export async function getHubspotContact(email: string): Promise<HubspotContact |
       return null;
     }
 
-    const detailData = await detailResponse.json();
-    logger.info(`✅ Successfully retrieved Hubspot contact details`, {
-      ...context,
+    const contactData = await detailResponse.json();
+    logger.success(requestId, 'Successfully retrieved Hubspot contact', {
       contactId,
-      availableFields: Object.keys(detailData.properties),
+      availableFields: Object.keys(contactData.properties),
       duration: Date.now() - startTime,
     });
 
-    return {
-      id: contactId,
-      properties: detailData.properties,
-    };
+    return contactData;
   } catch (err) {
-    const serializedError = serializeError(err);
-    logger.error(`💥 Error fetching Hubspot contact`, {
+    const serializedError = serializeError(err) as Error;
+    logger.error(requestId, 'Error fetching Hubspot contact', serializedError, {
       ...context,
-      error: {
-        message: serializedError.message,
-        stack: serializedError.stack,
-        type: serializedError.name,
-        code: serializedError.code,
-        additionalInfo: inspect(serializedError, { depth: null }),
-      },
       duration: Date.now() - startTime,
     });
     return null;
@@ -163,21 +155,18 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
     email: artist.email,
   };
 
+  logger.start(requestId, 'Starting Hubspot sync', {
+    ...context,
+    metadata: {
+      environment: process.env.NODE_ENV,
+      hubspotApiKey: process.env.HUBSPOT_API_KEY ? '✅ Configured' : '❌ Missing',
+      hubspotApiBase: process.env.HUBSPOT_API_BASE ? '✅ Configured' : '❌ Missing',
+    },
+  });
+
   try {
-    logger.info(`🔄 Starting Hubspot sync`, {
-      ...context,
-      metadata: {
-        environment: process.env.NODE_ENV,
-        hubspotApiKey: process.env.HUBSPOT_API_KEY ? '✅ Configured' : '❌ Missing',
-        hubspotApiBase: process.env.HUBSPOT_API_BASE ? '✅ Configured' : '❌ Missing',
-      },
-    });
-
-    // First try to find existing contact
     const existingContact = await getHubspotContact(artist.email);
-
-    logger.info(`📥 Retrieved existing Hubspot contact status`, {
-      ...context,
+    logger.process(requestId, 'Retrieved existing Hubspot contact status', {
       contactExists: !!existingContact,
       contactId: existingContact?.id,
     });
@@ -210,8 +199,7 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
       },
     };
 
-    logger.info(`🔄 Syncing artist data to Hubspot`, {
-      ...context,
+    logger.process(requestId, 'Syncing artist data to Hubspot', {
       operation: existingContact ? 'UPDATE' : 'CREATE',
       updateFields: Object.keys(payload.body.properties).filter(
         (key) => payload.body.properties[key as keyof typeof payload.body.properties] !== undefined
@@ -226,7 +214,7 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
 
     if (!response.ok) {
       const errorText = await response.text();
-      logger.error(`❌ Hubspot sync API error`, {
+      logger.error(requestId, 'Hubspot sync API error', new Error('API Error'), {
         ...context,
         status: response.status,
         statusText: response.statusText,
@@ -237,24 +225,15 @@ export async function syncToHubspot(artist: Artist): Promise<void> {
     }
 
     const responseData = await response.json();
-    logger.info(`✅ Successfully synced artist to Hubspot`, {
-      ...context,
+    logger.success(requestId, 'Successfully synced artist to Hubspot', {
       contactId: responseData.id,
       duration: Date.now() - startTime,
     });
   } catch (err) {
-    const serializedError = serializeError(err);
-    logger.error(`💥 Error syncing to Hubspot`, {
+    const serializedError = serializeError(err) as Error;
+    logger.error(requestId, 'Error syncing to Hubspot', serializedError, {
       ...context,
-      error: {
-        message: serializedError.message,
-        stack: serializedError.stack,
-        type: serializedError.name,
-        code: serializedError.code,
-        additionalInfo: inspect(serializedError, { depth: null }),
-      },
       duration: Date.now() - startTime,
     });
-    // Don't throw the error - we don't want to break the main flow if HubSpot sync fails
   }
 }

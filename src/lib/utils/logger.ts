@@ -1,7 +1,7 @@
 import pino from 'pino';
 
-// Create a Pino logger instance
-const logger = pino({
+// Rename the Pino instance to avoid conflict
+const pinoLogger = pino({
   // Basic configuration
   level: process.env.LOG_LEVEL || 'info',
 
@@ -10,6 +10,11 @@ const logger = pino({
 
   // Message formatting
   messageKey: 'msg',
+
+  formatters: {
+    level: (label) => ({ level: label }),
+    bindings: () => ({}), // Disable default bindings
+  },
 
   // Custom serializers
   serializers: {
@@ -22,6 +27,8 @@ const logger = pino({
     response: (res) => ({
       statusCode: res.statusCode,
     }),
+    data: (data) => data, // Add data serializer
+    context: (context) => context, // Add context serializer
   },
 
   // Pretty printing in development
@@ -40,76 +47,87 @@ const logger = pino({
       : undefined,
 });
 
-// New enricher logging functions
-export const logStart = (requestId: string, msg: string, artistId?: string, context?: any) => {
-  logger.info({
+// Updated logging functions
+export const logStart = (requestId: string, msg: string, context?: any) => {
+  pinoLogger.info({
     requestId,
-    artistId,
     msg: `🚀 ${msg}`,
-    context,
+    ...context,
     timestamp: new Date().toISOString(),
   });
 };
 
-export const logDataRetrieval = (requestId: string, msg: string, artistId: string, data?: any) => {
-  logger.info({
+export const logDataRetrieval = (requestId: string, msg: string, data?: any, context?: any) => {
+  pinoLogger.info({
     requestId,
-    artistId,
     msg: `📥 ${msg}`,
     data,
-    timestamp: new Date().toISOString(),
+    ...context,
   });
 };
 
-export const logProcessing = (requestId: string, msg: string, artistId: string, details?: any) => {
-  logger.info({
+export const logProcessing = (requestId: string, msg: string, details?: any, context?: any) => {
+  pinoLogger.info({
     requestId,
-    artistId,
     msg: `🔄 ${msg}`,
     details,
+    ...context,
     timestamp: new Date().toISOString(),
   });
 };
 
-export const logSuccess = (requestId: string, msg: string, artistId: string, result?: any) => {
-  logger.info({
+export const logSuccess = (requestId: string, msg: string, result?: any, context?: any) => {
+  pinoLogger.info({
     requestId,
-    artistId,
     msg: `✅ ${msg}`,
     result,
+    ...context,
     timestamp: new Date().toISOString(),
   });
 };
 
-export const logWarning = (requestId: string, msg: string, artistId: string, warning?: any) => {
-  logger.warn({
+export const logWarning = (requestId: string, msg: string, warning?: any, context?: any) => {
+  pinoLogger.warn({
     requestId,
-    artistId,
     msg: `⚠️ ${msg}`,
     warning,
+    ...context,
     timestamp: new Date().toISOString(),
   });
 };
 
-export const logError = (requestId: string, msg: string, artistId: string, error: Error) => {
-  logger.error({
+export const logError = (requestId: string, msg: string, error: Error, context?: any) => {
+  pinoLogger.error({
     requestId,
-    artistId,
     msg: `❌ ${msg}`,
-    error: error.message,
-    stack: error.stack,
-    timestamp: new Date().toISOString(),
+    error: {
+      message: error.message,
+      stack: error.stack,
+    },
+    ...context,
   });
 };
 
-export const logCompletion = (requestId: string, msg: string, stats: any) => {
-  logger.info({
+export const logCompletion = (requestId: string, msg: string, stats: any, context?: any) => {
+  pinoLogger.info({
     requestId,
     msg: `🎉 ${msg}`,
     stats,
+    ...context,
     timestamp: new Date().toISOString(),
   });
 };
 
-// Export the configured logger instance
-export default logger;
+// Export the logging functions as the primary interface
+export const logger = {
+  start: logStart,
+  data: logDataRetrieval,
+  process: logProcessing,
+  success: logSuccess,
+  warning: logWarning,
+  error: logError,
+  complete: logCompletion,
+};
+
+// Deprecate direct logger export
+// export default logger;
