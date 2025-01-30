@@ -1,5 +1,5 @@
 import { enrichData } from '../../src/lib/server/enrich.js';
-import { logger } from '../../src/lib/utils/logger.js';
+import logger from '../../src/lib/utils/logger.js';
 
 export async function GET() {
   const response = await enrichData();
