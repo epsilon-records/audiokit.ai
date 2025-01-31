@@ -1,6 +1,6 @@
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
-import { artistSchema, type Artist } from '$lib/schemas/artist';
+import { artistSchema } from '$lib/schemas/artist';
 import { getOrg, requireAuth, requireOrg } from '$lib/server/auth';
 import { syncToHubspot } from '$lib/server/integrations/hubspot';
 import logger from '$lib/utils/logger';
@@ -112,7 +112,25 @@ export const actions = {
     }
 
     // Sync the updated artist data to HubSpot
-    await syncToHubspot(updatedArtist as Artist);
+    if (updatedArtist.email) {
+      const hubspotData = {
+        email: updatedArtist.email,
+        phone: updatedArtist.phone || null,
+        city: updatedArtist.city || null,
+        country: updatedArtist.country || null,
+        biography: updatedArtist.biography || null,
+        website: updatedArtist.website || null,
+        spotify: updatedArtist.spotify || null,
+        instagram: updatedArtist.instagram || null,
+        twitterhandle: updatedArtist.x || null,
+        soundcloud: updatedArtist.soundcloud || null,
+      };
+      await syncToHubspot(updatedArtist.email, hubspotData);
+    } else {
+      logger.warning(crypto.randomUUID(), 'Cannot sync to HubSpot - missing email', {
+        orgId: locals.auth.orgId,
+      });
+    }
 
     return message(form, 'Profile updated successfully!');
   },
