@@ -68,6 +68,26 @@ function getSoundchartsConfig() {
   };
 }
 
+// Create a reusable error handler for 404 responses
+async function handle404Response(response: Response, context: any, logger: any, requestId: string) {
+  if (response.status === 404) {
+    const data = await response.json();
+    if (data.errors?.some((error: any) => error.code === 404)) {
+      logger.process(
+        requestId,
+        'No account found for artist on platform',
+        {
+          platform: context.platform,
+          duration: Date.now() - context.startTime,
+        },
+        context
+      );
+      return true; // Indicates a 404 was handled
+    }
+  }
+  return false;
+}
+
 /**
  * Get Soundcharts artist ID from Spotify ID
  */
@@ -180,6 +200,7 @@ export async function getArtistStreamingAudience(
     requestId,
     uuid,
     platform,
+    startTime,
   };
 
   // Replace the supportedStreamingPlatforms array with this:
@@ -206,21 +227,9 @@ export async function getArtistStreamingAudience(
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
-      // Handle expected 404s for missing streaming accounts
-      if (response.status === 404) {
-        const data = await response.json();
-        if (data.errors?.some((error: any) => error.code === 404)) {
-          logger.process(
-            requestId,
-            'No streaming account found for artist on platform',
-            {
-              platform,
-              duration: Date.now() - startTime,
-            },
-            context
-          );
-          return null;
-        }
+      // Use the shared 404 handler
+      if (await handle404Response(response, context, logger, requestId)) {
+        return null;
       }
 
       const warningContext = {
@@ -268,6 +277,7 @@ async function getArtistSocialAudience(
     requestId,
     uuid,
     platform,
+    startTime,
   };
 
   // Replace the supportedSocialPlatforms array with this:
@@ -294,6 +304,11 @@ async function getArtistSocialAudience(
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
+      // Handle 404 errors consistently
+      if (await handle404Response(response, context, logger, requestId)) {
+        return null;
+      }
+
       const warningContext = {
         ...context,
         url,
