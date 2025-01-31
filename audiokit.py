@@ -11,6 +11,7 @@ import psycopg2
 from psycopg2.extras import RealDictCursor
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
+from datetime import date
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -460,8 +461,13 @@ def get_artist_data_from_db(artist_id: str) -> Dict:
             if not result:
                 raise ValueError(f"Artist with ID {artist_id} not found")
 
-            # Convert to dictionary and write to JSON file
+            # Convert to dictionary and handle date serialization
             artist_data = dict(result)
+            for key, value in artist_data.items():
+                if isinstance(value, date):
+                    artist_data[key] = value.isoformat()
+
+            # Write to JSON file
             artist_name_slug = artist_data["stage_name"].replace(" ", "_")
             with open(f"{artist_name_slug}_json.txt", "w") as json_file:
                 json.dump(artist_data, json_file, indent=2)

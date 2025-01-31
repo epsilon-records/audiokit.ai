@@ -1,0 +1,7 @@
+{
+  "apple_music": "https://music.apple.com/us/artist/vozz-rich/1675984686",
+  "artist_photos": [],
+  "bandcamp": "",
+  "bandsintown": "",
+  "biography": "",
+  "birthdate": 
