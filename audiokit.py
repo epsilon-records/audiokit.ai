@@ -129,7 +129,8 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Add this near other configuration constants
 AI_MODELS = [
-    "deepseek/deepseek-r1",
+    "deepseek/deepseek-chat",
+    # "deepseek/deepseek-r1",
     # "anthropic/claude-3.5-sonnet",
     # "openai/gpt-4o-2024-11-20",
     # "mistralai/mistral-large-2411",
@@ -347,16 +348,34 @@ async def generate_reports(artist_data: dict):
 async def select_best_strategy(reports: dict) -> dict:
     """Select and integrate the best strategy from multiple reports"""
     try:
+        # If there's only one report for each type, return them directly
+        if len(reports["EPK"]) == 1 and len(reports["Internal Report"]) == 1:
+            single_epk_model = next(iter(reports["EPK"]))
+            single_internal_model = next(iter(reports["Internal Report"]))
+            return {
+                "selected_models": {
+                    "EPK": single_epk_model,
+                    "Internal Report": single_internal_model,
+                },
+                "best_epk": reports["EPK"][single_epk_model],
+                "best_internal_report": reports["Internal Report"][
+                    single_internal_model
+                ],
+                "budget_allocation": {},
+            }
+
         # Convert reports to JSON string for the prompt
         reports_json = json.dumps(reports)
 
         system_prompt = (
-            "You are an expert music marketing strategist. You have received marketing reports "
-            "from multiple AI models. Your task is to:\n"
-            "1. Identify the best marketing strategy from these reports.\n"
-            "2. Integrate the strongest insights from all reports into a single, optimized plan.\n"
-            "3. Ensure the strategy is detailed, realistic, and well-budgeted.\n"
-            "Respond in JSON format with keys: 'selected_model' (string), 'integrated_report' (string), and 'budget_allocation' (object of string:float)."
+            "You are an expert music marketing strategist. You will receive multiple marketing reports (EPKs and Internal Reports) from AI models. Your task is to:\n"
+            "1. Select the Best Report: For each report type (EPK and Internal Report), choose the most comprehensive and high-quality version.\n"
+            "2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version.\n"
+            "3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness.\n"
+            "4. Finalize for Publication: Replace any placeholders, refine the language, and ensure the report is well-structured and publication-ready.\n\n"
+            "Output Instructions:\n"
+            "• Return only the final, polished report.\n"
+            "• Do not include JSON formatting, metadata, or selection reasoning—just the finalized text."
         )
 
         response = requests.post(
@@ -380,7 +399,9 @@ async def select_best_strategy(reports: dict) -> dict:
     except Exception as e:
         Logger.warning(f"Failed to select best strategy: {str(e)}")
         return {
-            "selected_model": "None",
+            "selected_models": {"EPK": "None", "Internal Report": "None"},
+            "best_epk": f"EPK selection failed: {str(e)}",
+            "best_internal_report": f"Internal Report selection failed: {str(e)}",
             "integrated_report": f"Strategy selection failed: {str(e)}",
             "budget_allocation": {},
         }
