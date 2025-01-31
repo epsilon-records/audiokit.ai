@@ -2,7 +2,7 @@ import json
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from typing import Dict, List, Optional
+from typing import Dict, List
 from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import os
@@ -131,35 +131,9 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 AI_MODELS = [
     "deepseek/deepseek-r1",
     "anthropic/claude-3-opus",
-    "openai/o1",
-    "mistral/mistral-large",
+    "openai/gpt-4-turbo-preview",
+    "mistralai/mistral-large-2411",
 ]
-
-
-class ArtistData(BaseModel):
-    name: str = Field("Unknown Artist", description="Artist name")
-    genre: str = Field("Unknown Genre", description="Primary genre")
-    monthly_streams: int = Field(0, description="Monthly streaming count")
-    social_media_followers: Dict[str, int] = Field(
-        default_factory=dict, description="Social media followers by platform"
-    )
-    top_countries: List[str] = Field(
-        default_factory=list, description="Top countries by listenership"
-    )
-    recent_releases: List[str] = Field(
-        default_factory=list, description="Recent release titles"
-    )
-    collaboration_artists: List[str] = Field(
-        default_factory=list, description="List of collaborating artists"
-    )
-    marketing_budget: float = Field(0.0, description="Marketing budget in USD")
-    biography: Optional[str] = Field(None, description="Artist biography")
-    image_url: Optional[str] = Field(None, description="URL to artist image")
-    genres: Optional[List[Dict[str, List[str]]]] = Field(
-        None, description="Detailed genre information"
-    )
-    country_code: Optional[str] = Field(None, description="ISO country code")
-    # Add any other fields that are commonly used
 
 
 class MarketingReport(BaseModel):
@@ -255,7 +229,7 @@ def handle_report_error(
         "error": str(e),
         "traceback": traceback.format_exc(),
         "model": model_name,
-        "artist_data": artist_data.get("name", "Unknown Artist"),
+        "artist_data": artist_data.get("stage_name", "Unknown Artist"),
         "report_type": report_type,
     }
     Logger.warning(
@@ -328,7 +302,7 @@ async def generate_reports(artist_data: dict):
     current_step = 0
 
     Logger.info(
-        f"Starting report generation for {artist_data.get('name', 'Unknown Artist')}"
+        f"Starting report generation for {artist_data.get('stage_name', 'Unknown Artist')}"
     )
     Logger.info(f"Total models to process: {total_models}")
     Logger.info(f"Total steps to complete: {total_steps}")
@@ -361,7 +335,7 @@ async def generate_reports(artist_data: dict):
         Logger.success(f"Internal report from {model_name} completed successfully")
 
     Logger.success(
-        f"All report generation completed for {artist_data.get('name', 'Unknown Artist')}"
+        f"All report generation completed for {artist_data.get('stage_name', 'Unknown Artist')}"
     )
     return reports
 
