@@ -322,18 +322,47 @@ async def generate_reports(artist_data: dict):
     """Generate all reports using available models"""
     reports = {"EPK": {}, "Internal Report": {}}
     total_models = len(AI_MODELS)
+    total_steps = (
+        len(reports) * total_models
+    )  # Calculate based on number of report types and models
+    current_step = 0
 
-    for current_model, model_name in enumerate(AI_MODELS, 1):
-        Logger.progress(current_model, total_models, f"Processing model {model_name}")
+    Logger.info(
+        f"Starting report generation for {artist_data.get('name', 'Unknown Artist')}"
+    )
+    Logger.info(f"Total models to process: {total_models}")
+    Logger.info(f"Total steps to complete: {total_steps}")
 
-        # Generate reports
+    for model_name in AI_MODELS:
+        current_step += 1
+        Logger.info(f"Processing model {model_name} ({current_step}/{total_steps})")
+
+        # Generate EPK
+        Logger.info(f"Starting EPK generation with {model_name}")
+        epk_start = Logger.start_task(f"EPK generation with {model_name}")
         epk_report = await generate_epk(artist_data, model_name)
-        internal_report = await generate_internal_report(artist_data, model_name)
-
+        Logger.end_task(epk_start, f"Completed EPK generation with {model_name}")
         reports["EPK"][model_name] = epk_report
-        reports["Internal Report"][model_name] = internal_report
+        Logger.success(f"EPK from {model_name} completed successfully")
 
-    Logger.success("All report attempts completed")
+        # Generate Internal Report
+        current_step += 1
+        Logger.info(
+            f"Starting internal report generation with {model_name} ({current_step}/{total_steps})"
+        )
+        internal_start = Logger.start_task(
+            f"Internal report generation with {model_name}"
+        )
+        internal_report = await generate_internal_report(artist_data, model_name)
+        Logger.end_task(
+            internal_start, f"Completed internal report generation with {model_name}"
+        )
+        reports["Internal Report"][model_name] = internal_report
+        Logger.success(f"Internal report from {model_name} completed successfully")
+
+    Logger.success(
+        f"All report generation completed for {artist_data.get('name', 'Unknown Artist')}"
+    )
     return reports
 
 
@@ -383,42 +412,68 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
     """Run the full marketing pipeline"""
     pipeline_start = Logger.start_task("Starting full marketing pipeline")
     try:
+        Logger.info(f"Starting pipeline for artist ID: {artist_id}")
+
+        # Fetch artist data
         Logger.info("Fetching artist data from database")
+        fetch_start = Logger.start_task("Fetching artist data")
         artist_data = get_artist_data_from_db(artist_id)
+        Logger.end_task(fetch_start, "Artist data fetched successfully")
+        Logger.info(
+            f"Artist data retrieved for: {artist_data.get('stage_name', 'Unknown Artist')}"
+        )
 
-        Logger.info("Generating reports")
+        # Generate reports
+        Logger.info("Starting report generation process")
+        report_start = Logger.start_task("Report generation")
         all_reports = await generate_reports(artist_data)
-        Logger.success("Report generation completed")
+        Logger.end_task(report_start, "Report generation completed")
+        Logger.success(
+            f"Generated {len(all_reports['EPK'])} EPKs and {len(all_reports['Internal Report'])} internal reports"
+        )
 
-        Logger.info("Selecting best strategy")
+        # Select best strategy
+        Logger.info("Starting strategy selection process")
+        strategy_start = Logger.start_task("Strategy selection")
         best_strategy = await select_best_strategy(all_reports)
-        Logger.success("Strategy selection completed")
+        Logger.end_task(strategy_start, "Strategy selection completed")
+        Logger.success("Best strategy selected and integrated")
 
-        # Save all reports and strategy
+        # Save reports
+        Logger.info("Starting report saving process")
+        save_start = Logger.start_task("Saving reports")
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
 
         # Save individual reports
+        total_reports = sum(len(models) for models in all_reports.values())
+        saved_reports = 0
         for report_type, models in all_reports.items():
             for model_name, content in models.items():
+                saved_reports += 1
                 filename = f"{artist_name_slug}_{report_type}_{model_name.replace('/', '_')}.md"
+                Logger.info(
+                    f"Saving {report_type} from {model_name} ({saved_reports}/{total_reports})"
+                )
                 with open(filename, "w") as f:
                     f.write(content)
-                Logger.success(f"Saved {report_type} from {model_name} to {filename}")
+                Logger.success(f"Saved {filename} successfully")
 
         # Save integrated strategy
         strategy_filename = f"{artist_name_slug}_integrated_strategy.json"
+        Logger.info(f"Saving integrated strategy to {strategy_filename}")
         with open(strategy_filename, "w") as f:
             json.dump(best_strategy, f, indent=2)
+        Logger.end_task(save_start, "All reports saved successfully")
         Logger.success(f"Integrated strategy saved to {strategy_filename}")
 
+        # Display dashboard
         Logger.info("Displaying artist dashboard")
+        display_start = Logger.start_task("Displaying dashboard")
         display_artist_dashboard(artist_data)
-        Logger.success("Dashboard displayed successfully")
+        Logger.end_task(display_start, "Dashboard displayed successfully")
 
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
-        Logger.success(
-            f"✅ Reports and strategy generated and saved for {artist_data['stage_name']}"
-        )
+        Logger.success(f"✅ All tasks completed for {artist_data['stage_name']}")
 
     except Exception as e:
         Logger.error(f"Error in marketing pipeline: {str(e)}")
@@ -430,7 +485,9 @@ def get_artist_data_from_db(artist_id: str) -> dict:
     connection = None
     try:
         Logger.info("Connecting to database")
+        connect_start = Logger.start_task("Database connection")
         connection = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        Logger.end_task(connect_start, "Database connected successfully")
 
         with connection.cursor() as cursor:
             Logger.info("Executing database query")
