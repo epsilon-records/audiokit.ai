@@ -1,9 +1,4 @@
 import json
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-from typing import Dict, List
-from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import os
 import psycopg2
@@ -133,36 +128,6 @@ AI_MODELS = [
     "openai/gpt-4o-2024-11-20",
     "mistralai/mistral-large-2411",
 ]
-
-
-class MarketingReport(BaseModel):
-    artist_name: str = Field(..., description="Artist name")
-    report: str = Field(..., description="Generated report content")
-    budget_allocation: Dict[str, float] = Field(
-        default_factory=dict, description="Budget allocation by category"
-    )
-    recommendations: List[str] = Field(
-        default_factory=list, description="Strategic recommendations"
-    )
-    metrics: Dict[str, float] = Field(
-        default_factory=dict, description="Key performance metrics"
-    )
-
-
-def display_artist_dashboard(artist_data: Dict):
-    social_data = artist_data.get("current_stats", {}).get("social", {})  # ✅ FIXED
-    social_df = pd.DataFrame(
-        list(social_data.items()), columns=["Platform", "Followers"]
-    )
-
-    plt.figure(figsize=(10, 6))
-    sns.barplot(data=social_df, x="Platform", y="Followers", palette="Blues_d")
-    plt.title("Artist Social Media Presence", fontsize=16)
-    plt.xlabel("Social Media Platform", fontsize=12)
-    plt.ylabel("Followers", fontsize=12)
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.show()
 
 
 class Logger:
@@ -462,12 +427,6 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
             json.dump(best_strategy, f, indent=2)
         Logger.end_task(save_start, "All reports saved successfully")
         Logger.success(f"Integrated strategy saved to {strategy_filename}")
-
-        # Display dashboard
-        Logger.info("Displaying artist dashboard")
-        display_start = Logger.start_task("Displaying dashboard")
-        display_artist_dashboard(artist_data)
-        Logger.end_task(display_start, "Dashboard displayed successfully")
 
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
         Logger.success(f"✅ All tasks completed for {artist_data['stage_name']}")
