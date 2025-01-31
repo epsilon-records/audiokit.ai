@@ -8,17 +8,15 @@ interface HubspotContact {
   properties: Record<string, string>;
 }
 
-const HUBSPOT_RATE_LIMIT = 100; // 100 requests per 10 seconds (Free Plan)
+const HUBSPOT_RATE_LIMIT = 50; // 50 requests per 10 seconds (more conservative)
 const HUBSPOT_WINDOW = 10 * 1000; // 10 seconds in milliseconds
 
 const hubspotLimiter = new Bottleneck({
-  minTime: HUBSPOT_WINDOW / HUBSPOT_RATE_LIMIT, // 100ms between requests
-  maxConcurrent: 1, // Only one request at a time
-  reservoir: HUBSPOT_RATE_LIMIT, // Initial number of requests allowed
-  reservoirRefreshInterval: HUBSPOT_WINDOW, // Refresh interval in milliseconds
-  reservoirRefreshAmount: HUBSPOT_RATE_LIMIT, // Number of requests to add to reservoir
-
-  // Track daily limits
+  minTime: HUBSPOT_WINDOW / HUBSPOT_RATE_LIMIT, // 200ms between requests
+  maxConcurrent: 1,
+  reservoir: HUBSPOT_RATE_LIMIT,
+  reservoirRefreshInterval: HUBSPOT_WINDOW,
+  reservoirRefreshAmount: HUBSPOT_RATE_LIMIT,
   trackDoneStatus: true,
 });
 
