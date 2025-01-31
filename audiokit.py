@@ -23,9 +23,7 @@ CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
 
 # EPK System Prompt
 EPK_SYSTEM_PROMPT = """
-You are an expert in electronic music industry marketing. Your task is to create a visually stunning and professional Electronic Press Kit (EPK) from the provided JSON data.
-
-The EPK should be tailored to attract booking agencies and event promoters and must be formatted in rich text for maximum visual impact.
+You are an expert in electronic music industry marketing. Using the provided JSON data, generate a comprehensive and visually appealing Electronic Press Kit (EPK) in json format.
 
 Report Requirements:
 	1.	Professional Formatting: Use clear section headings, subheadings, and bullet points for readability
@@ -34,8 +32,6 @@ Report Requirements:
 	4.	Visual Enhancements: Use emojis sparingly to enhance key points (1-2 per section max)
 
 Output Instructions:
-	• Return ONLY the content itself - do not wrap it in any code blocks or markdown syntax
-	• Ensure the document is engaging, professional, and well-structured
 	• Maintain a professional tone while being approachable
 	• Do not include any backticks, code block markers, or other syntax wrappers
 	• Output must be plain text with the formatted content only
@@ -70,7 +66,7 @@ EPK Structure:
 
 # Internal Report System Prompt
 INTERNAL_REPORT_PROMPT = """
-You are a music industry analytics expert. Using the provided JSON data, generate a comprehensive and visually appealing internal artist report in rich text format.
+You are a music industry analytics expert. Using the provided JSON data, generate a comprehensive and visually appealing internal artist report in json format.
 
 Report Requirements:
 	1.	Professional Formatting: Use clear section headings, subheadings, and bullet points for readability
@@ -79,8 +75,6 @@ Report Requirements:
 	4.	Visual Enhancements: Use emojis sparingly to enhance key points (1-2 per section max)
 
 Output Instructions:
-	• Return ONLY the content itself - do not wrap it in any code blocks or markdown syntax
-	• Ensure the report is structured for clarity, professionalism, and maximum readability
 	• Maintain a professional tone while being approachable
 	• Do not include any backticks, code block markers, or other syntax wrappers
 	• Output must be plain text with the formatted content only
