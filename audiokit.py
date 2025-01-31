@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from pydantic_ai import Agent, RunContext
+from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from datetime import date
 import httpx
@@ -178,13 +178,6 @@ AI_MODELS = [
     "openai/o1",
     "mistral/mistral-large",
 ]
-
-
-# Example tool to fetch additional artist data
-@epk_agent.tool
-async def fetch_additional_data(ctx: RunContext, artist_id: str) -> dict:
-    # Implement the logic to fetch additional data based on artist_id
-    return {"additional_info": "Sample data"}
 
 
 class ArtistData(BaseModel):
