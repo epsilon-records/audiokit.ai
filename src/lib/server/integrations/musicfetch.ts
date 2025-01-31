@@ -36,10 +36,6 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
   async (spotifyUrl: string, services: string[]) => {
     const requestId = crypto.randomUUID();
     const startTime = Date.now();
-    const context = {
-      spotifyUrl,
-      requestedServices: services,
-    };
 
     try {
       logger.start(requestId, 'Starting Musicfetch API request', {
@@ -90,18 +86,31 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
 
       if (!response.ok) {
         const errorText = await response.text();
-        logger.error(
-          requestId,
-          'Musicfetch API error',
-          new Error(`Musicfetch request failed with status ${response.status}: ${errorText}`),
-          {
+        const isRateLimitError = response.status === 429;
+
+        if (isRateLimitError) {
+          logger.warning(requestId, 'Musicfetch API rate limit exceeded', {
             status: response.status,
             statusText: response.statusText,
             errorText,
             duration: Date.now() - startTime,
-          }
-        );
-        return;
+          });
+          // Continue processing by throwing the error
+          throw new Error(`Rate limit exceeded: ${errorText}`);
+        } else {
+          logger.error(
+            requestId,
+            'Musicfetch API error',
+            new Error(`Musicfetch request failed with status ${response.status}: ${errorText}`),
+            {
+              status: response.status,
+              statusText: response.statusText,
+              errorText,
+              duration: Date.now() - startTime,
+            }
+          );
+          return;
+        }
       }
 
       const data = await response.json();

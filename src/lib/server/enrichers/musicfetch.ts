@@ -149,7 +149,6 @@ export async function enrichWithMusicfetch(
           ]);
 
           if (!links) {
-            logger.warning(requestId, 'No links found from Musicfetch', artistContext);
             return {
               success: false,
               artistId: artist.id,
@@ -232,24 +231,20 @@ export async function enrichWithMusicfetch(
     const successCount = updates.filter((u) => u.success).length;
     const failureCount = updates.length - successCount;
 
-    logger[successCount === updates.length ? 'success' : 'warning'](
-      requestId,
-      'Completed Musicfetch enrichment process',
-      {
-        duration: Date.now() - startTime,
-        totalArtists: updates.length,
-        successCount,
-        failureCount,
-        successRate: `${((successCount / updates.length) * 100).toFixed(2)}%`,
-        failures: updates
-          .filter((u) => !u.success)
-          .map((u) => ({
-            artistId: u.artistId,
-            error: u.error,
-            details: u.details,
-          })),
-      }
-    );
+    logger.complete(requestId, 'Completed Musicfetch enrichment process', {
+      duration: Date.now() - startTime,
+      totalArtists: updates.length,
+      successCount,
+      failureCount,
+      successRate: `${((successCount / updates.length) * 100).toFixed(2)}%`,
+      failures: updates
+        .filter((u) => !u.success)
+        .map((u) => ({
+          artistId: u.artistId,
+          error: u.error,
+          details: u.details,
+        })),
+    });
 
     return {
       success: successCount > 0,
