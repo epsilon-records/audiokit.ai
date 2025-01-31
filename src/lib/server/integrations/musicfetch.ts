@@ -40,14 +40,37 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
         throw new Error('MUSICFETCH_TOKEN is not set');
       }
 
-      const response = await fetch(
-        `${process.env.MUSICFETCH_API_BASE}/url?url=${encodeURIComponent(spotifyUrl)}&services=${services.join(',')}`,
-        {
-          headers: {
-            'x-musicfetch-token': process.env.MUSICFETCH_TOKEN,
-          },
-        }
-      );
+      // Validate Spotify URL format
+      const spotifyUrlPattern =
+        /^https:\/\/open\.spotify\.com\/(track|album|artist)\/[a-zA-Z0-9]+(\?.*)?$/;
+      if (!spotifyUrlPattern.test(spotifyUrl)) {
+        logger.error(
+          requestId,
+          'Invalid Spotify URL format',
+          new Error(`Invalid Spotify URL: ${spotifyUrl}`)
+        );
+        throw new Error('Invalid Spotify URL format');
+      }
+
+      // Validate services array
+      if (!Array.isArray(services) || services.length === 0) {
+        logger.error(
+          requestId,
+          'Invalid services array',
+          new Error('Services must be a non-empty array')
+        );
+        throw new Error('Invalid services array');
+      }
+
+      const apiUrl = new URL(`${process.env.MUSICFETCH_API_BASE}/url`);
+      apiUrl.searchParams.set('url', spotifyUrl);
+      apiUrl.searchParams.set('services', services.join(','));
+
+      const response = await fetch(apiUrl.toString(), {
+        headers: {
+          'x-musicfetch-token': process.env.MUSICFETCH_TOKEN,
+        },
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
