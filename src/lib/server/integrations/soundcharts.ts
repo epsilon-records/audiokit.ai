@@ -195,7 +195,7 @@ export async function getArtistStreamingAudience(
         statusText: response.statusText,
         duration: Date.now() - startTime,
       };
-      logger.warning(requestId, 'Failed to fetch streaming audience', warningContext);
+      logger.warning(requestId, 'Failed to fetch artist streaming audience', warningContext);
       return null;
     }
 
@@ -223,7 +223,10 @@ export async function getArtistStreamingAudience(
 /**
  * Get artist audience data from Soundcharts
  */
-async function getArtistAudience(uuid: string, platform: SocialPlatform): Promise<any | null> {
+async function getArtistSocialAudience(
+  uuid: string,
+  platform: SocialPlatform
+): Promise<any | null> {
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
   const context = {
@@ -245,7 +248,7 @@ async function getArtistAudience(uuid: string, platform: SocialPlatform): Promis
         statusText: response.statusText,
         duration: Date.now() - startTime,
       };
-      logger.warning(requestId, 'Failed to fetch audience data', warningContext);
+      logger.warning(requestId, 'Failed to fetch artist social audience', warningContext);
       return null;
     }
 
@@ -326,7 +329,7 @@ export const getArtistStats = soundchartsLimiter.wrap(
 
       // Get audience data for social platforms
       const audiencePromises = SOCIAL_PLATFORMS.map((platform) =>
-        getArtistAudience(uuid, platform)
+        getArtistSocialAudience(uuid, platform)
       );
 
       const audienceResults = await Promise.allSettled(audiencePromises);
