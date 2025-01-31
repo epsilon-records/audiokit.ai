@@ -136,6 +136,89 @@ AI_MODELS = [
     "mistralai/mistral-large-2411",
 ]
 
+# Constants for report integration
+EPK_INTEGRATION_MODEL = "deepseek/deepseek-chat"
+
+EPK_INTEGRATION_PROMPT = """
+You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models and the original artist_data. Your task is to generate a professionally formatted, publication-ready rich text document by following these steps:
+
+Data Verification:
+• Cross-check all facts and figures against the original artist_data
+• Verify all statistics match the source data exactly
+• Confirm all dates, names, and titles are accurate
+• Double-check numerical values against the original data
+• Ensure all conclusions are supported by the artist_data
+
+Processing Steps:
+1. Verify Data Accuracy: Cross-check all facts and figures against the original artist data
+2. Select the Best Report: Choose the most comprehensive and high-quality version
+3. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
+4. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
+5. Finalize for Publication: Replace any placeholders, refine the language, and structure the document to be visually appealing and professionally formatted in rich text
+
+Output Requirements:
+• Return only the final rich text document, fully formatted and ready for display
+• Do not wrap the content in any code blocks or markdown syntax
+• Ensure the EPK is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and lists
+• Where applicable, include emojis sparingly to enhance key points (1-2 per section max)
+• All data must be verified against the original artist data
+
+EPK Structure Requirements:
+# 🎤 Artist Overview
+- Craft a compelling one-paragraph pitch
+- Highlight unique selling points and artistic vision
+- Include genre focus and key achievements
+
+# 📊 Performance & Draw
+- Current streaming numbers and growth trends
+- Social media engagement metrics
+- Geographic popularity insights
+
+# 🎧 Recent Releases & Press
+- Featured tracks from the past 12 months
+- Remix work and collaborations
+- Notable playlist inclusions or features
+
+# 🎪 Stage Experience & Technical
+- Performance style and format
+- Technical rider highlights (if available)
+- Past notable venues/events (if available)
+
+# 📞 Contact & Booking
+- Management/booking contact details
+- Social media and streaming links
+- Website and press materials
+
+The final EPK should be comprehensive, professional, and designed to attract booking agencies and event promoters.
+"""
+
+INTERNAL_REPORT_INTEGRATION_PROMPT = """
+You are an expert music industry analyst. You will receive multiple Internal Reports from AI models and the original artist_data. Your task is to generate a professionally formatted, publication-ready rich text document by following these steps:
+
+Data Verification:
+• Cross-check all facts and figures against the original artist_data
+• Verify all statistics match the source data exactly
+• Confirm all dates, names, and titles are accurate
+• Double-check numerical values against the original data
+• Ensure all conclusions are supported by the artist_data
+
+Processing Steps:
+1. Verify Data Accuracy: Cross-check all facts and figures against the original artist data
+2. Select the Best Report: Choose the most comprehensive and high-quality version
+3. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
+4. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
+5. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in rich text
+
+Output Requirements:
+• Return only the final rich text document, fully formatted and ready for display
+• Do not wrap the content in any code blocks or markdown syntax
+• Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and lists
+• Where applicable, include emojis sparingly to enhance key points
+• All data must be verified against the original artist data
+
+The final report should be comprehensive, professional, and designed for internal decision-making.
+"""
+
 
 class Logger:
     @staticmethod
@@ -349,7 +432,7 @@ async def generate_reports(artist_data: dict):
     return reports
 
 
-async def integrate_reports(reports: dict) -> dict:
+async def integrate_reports(reports: dict, artist_data: dict) -> dict:
     """Integrate multiple reports into optimized versions"""
     try:
         # If there's only one report for each type, return them directly
@@ -368,57 +451,7 @@ async def integrate_reports(reports: dict) -> dict:
                 "budget_allocation": {},
             }
 
-        # Process EPKs separately
-        epk_system_prompt = (
-            "You are an expert music marketing strategist and professional document designer. Create a complete LaTeX document that will compile into a polished PDF EPK. Follow these guidelines:\n\n"
-            "Document Style Requirements:\n"
-            "• Compact and dense layout - maximize content per page\n"
-            "• Professional music industry aesthetic - not academic\n"
-            "• Use modern, fun fonts that reflect the artist's brand\n"
-            "• Minimal whitespace - content should flow efficiently\n"
-            "• Two-column layout for optimal space utilization\n\n"
-            "Document Structure:\n"
-            "\\section*{Artist Overview}\n"
-            "- Craft a compelling one-paragraph pitch\n"
-            "- Highlight unique selling points and artistic vision\n"
-            "- Include genre focus and key achievements\n\n"
-            "\\section*{Performance Metrics}\n"
-            "- Present streaming numbers and growth trends\n"
-            "- Social media engagement highlights\n"
-            "- Geographic popularity insights\n\n"
-            "\\section*{Recent Releases}\n"
-            "- Showcase featured tracks from past 12 months\n"
-            "- Highlight notable remixes and collaborations\n"
-            "- Mention significant playlist inclusions\n\n"
-            "\\section*{Stage Presence}\n"
-            "- Describe performance style and format\n"
-            "- Include technical rider highlights\n"
-            "- Mention past notable venues/events\n\n"
-            "\\section*{Contact Information}\n"
-            "- Provide management/booking contacts\n"
-            "- Include social media and streaming links\n"
-            "- Add website and press material links\n\n"
-            "Formatting Requirements:\n"
-            "1. Begin with \\documentclass[twocolumn]{article}\n"
-            "2. Use \\usepackage{geometry} with narrow margins\n"
-            "3. Include \\usepackage{graphicx} for images\n"
-            "4. Use modern fonts: \\usepackage{fontspec} with 'Fira Sans' or similar\n"
-            "5. Apply consistent section formatting with \\usepackage{titlesec}\n"
-            "6. Use compact lists with \\usepackage{enumitem}\n"
-            "7. Include proper LaTeX document structure\n\n"
-            "Output Instructions:\n"
-            "• Return ONLY the complete LaTeX document\n"
-            "• Do not wrap the content in any code blocks or markdown syntax\n"
-            "• Use a two-column layout for compact presentation\n"
-            "• Include all necessary packages and preamble\n"
-            "• Ensure proper document structure\n"
-            "• Make it ready for direct PDF compilation\n"
-            "• Do not include any explanatory text or comments\n"
-            "• Do not add any section about the document itself\n"
-            "• The output must be a complete, standalone LaTeX file\n"
-            "• Keep the document to 1-2 pages maximum"
-        )
-
+        # Process EPKs with artist data
         epk_response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -427,10 +460,15 @@ async def integrate_reports(reports: dict) -> dict:
                 "X-Title": "AudioKit",
             },
             json={
-                "model": "deepseek/deepseek-chat",
+                "model": EPK_INTEGRATION_MODEL,
                 "messages": [
-                    {"role": "system", "content": epk_system_prompt},
-                    {"role": "user", "content": json.dumps({"EPKs": reports["EPK"]})},
+                    {"role": "system", "content": EPK_INTEGRATION_PROMPT},
+                    {
+                        "role": "user",
+                        "content": json.dumps(
+                            {"EPKs": reports["EPK"], "artist_data": artist_data}
+                        ),
+                    },
                 ],
                 "response_format": {"type": "json_object"},
             },
@@ -438,22 +476,7 @@ async def integrate_reports(reports: dict) -> dict:
         epk_response.raise_for_status()
         integrated_epk = epk_response.json()["choices"][0]["message"]["content"]
 
-        # Process Internal Reports separately
-        internal_system_prompt = (
-            "You are an expert music industry analyst. You will receive multiple Internal Reports from AI models. Your task is to generate a professionally formatted, publication-ready rich text document by following these steps:\n\n"
-            "Processing Steps:\n"
-            "1. Select the Best Report: Choose the most comprehensive and high-quality version.\n"
-            "2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version.\n"
-            "3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness.\n"
-            "4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in rich text.\n\n"
-            "Output Requirements:\n"
-            "• Return only the final rich text document, fully formatted and ready for display.\n"
-            "• Do not wrap the content in any code blocks or markdown syntax\n"
-            "• Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and lists.\n"
-            "• Where applicable, include emojis sparingly to enhance key points.\n\n"
-            "The final report should be comprehensive, professional, and designed for internal decision-making."
-        )
-
+        # Process Internal Reports with artist data
         internal_response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -462,13 +485,16 @@ async def integrate_reports(reports: dict) -> dict:
                 "X-Title": "AudioKit",
             },
             json={
-                "model": "deepseek/deepseek-chat",
+                "model": EPK_INTEGRATION_MODEL,
                 "messages": [
-                    {"role": "system", "content": internal_system_prompt},
+                    {"role": "system", "content": INTERNAL_REPORT_INTEGRATION_PROMPT},
                     {
                         "role": "user",
                         "content": json.dumps(
-                            {"Internal Reports": reports["Internal Report"]}
+                            {
+                                "Internal Reports": reports["Internal Report"],
+                                "artist_data": artist_data,
+                            }
                         ),
                     },
                 ],
@@ -528,7 +554,7 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         # Integrate and optimize reports
         Logger.info("Starting report integration process")
         strategy_start = Logger.start_task("Report integration")
-        integrated_reports = await integrate_reports(all_reports)
+        integrated_reports = await integrate_reports(all_reports, artist_data)
         Logger.end_task(strategy_start, "Report integration completed")
         Logger.success("Reports integrated and optimized")
 
