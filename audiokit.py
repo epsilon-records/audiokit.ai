@@ -12,6 +12,7 @@ import requests
 from datetime import date
 import time
 from datetime import datetime
+import traceback
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -246,6 +247,23 @@ def sanitize_artist_data(artist_data):
     return artist_data
 
 
+def handle_report_error(
+    e: Exception, model_name: str, artist_data: dict, report_type: str
+) -> str:
+    """Shared error handler for report generation functions"""
+    error_details = {
+        "error": str(e),
+        "traceback": traceback.format_exc(),
+        "model": model_name,
+        "artist_data": artist_data.get("name", "Unknown Artist"),
+        "report_type": report_type,
+    }
+    Logger.warning(
+        f"Failed to generate {report_type}: {json.dumps(error_details, indent=2)}"
+    )
+    return f"{report_type} generation failed: {str(e)}"
+
+
 async def generate_epk(artist_data: dict, model_name: str) -> str:
     """Generate EPK using the specified model"""
     try:
@@ -263,12 +281,18 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
                     {"role": "user", "content": json.dumps(artist_data)},
                 ],
             },
+            timeout=30,  # Add timeout
         )
         response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"]
+        print(response.json())
+        response_data = response.json()
+        if not response_data.get("choices") or not response_data["choices"][0].get(
+            "message"
+        ):
+            raise ValueError("Invalid response structure from OpenRouter API")
+        return response_data["choices"][0]["message"]["content"]
     except Exception as e:
-        Logger.warning(f"Failed to generate EPK with {model_name}: {str(e)}")
-        return f"EPK generation failed: {str(e)}"
+        return handle_report_error(e, model_name, artist_data, "EPK")
 
 
 async def generate_internal_report(artist_data: dict, model_name: str) -> str:
@@ -292,10 +316,7 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
         response.raise_for_status()
         return response.json()["choices"][0]["message"]["content"]
     except Exception as e:
-        Logger.warning(
-            f"Failed to generate internal report with {model_name}: {str(e)}"
-        )
-        return f"Internal report generation failed: {str(e)}"
+        return handle_report_error(e, model_name, artist_data, "Internal Report")
 
 
 async def generate_reports(artist_data: dict):
