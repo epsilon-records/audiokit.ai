@@ -255,7 +255,6 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
                     {"role": "user", "content": json.dumps(artist_data)},
                 ],
             },
-            timeout=30,  # Add timeout
         )
         response.raise_for_status()
         response_data = response.json()
