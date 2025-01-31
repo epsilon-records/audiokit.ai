@@ -298,7 +298,7 @@ class Logger:
         )
 
 
-def generate_reports(json_data: dict):
+def generate_reports(data: str):
     reports = {"EPK": {}, "Internal Report": {}, "Market Analysis": {}}
     total_models = len(AI_MODELS)
     current_model = 0
@@ -309,9 +309,9 @@ def generate_reports(json_data: dict):
 
         # Generate EPK Report
         epk_start = Logger.start_task(f"Generating EPK with {model_name}")
-        epk_agent.model = model_id
         try:
-            epk_result = epk_agent.run_sync(json.dumps(json_data, indent=2))
+            epk_agent.model = model_id
+            epk_result = epk_agent.run_sync(data)
             reports["EPK"][model_name] = epk_result.data
             Logger.success(f"EPK generated successfully with {model_name}")
         except Exception as e:
@@ -326,9 +326,7 @@ def generate_reports(json_data: dict):
         )
         internal_report_agent.model = model_id
         try:
-            internal_report_result = internal_report_agent.run_sync(
-                json.dumps(json_data, indent=2)
-            )
+            internal_report_result = internal_report_agent.run_sync(data)
             reports["Internal Report"][model_name] = internal_report_result.data
             Logger.success(f"Internal Report generated successfully with {model_name}")
         except Exception as e:
@@ -349,9 +347,7 @@ def generate_reports(json_data: dict):
         )
         market_analysis_agent.model = model_id
         try:
-            market_analysis_result = market_analysis_agent.run_sync(
-                json.dumps(json_data, indent=2)
-            )
+            market_analysis_result = market_analysis_agent.run_sync(data)
             reports["Market Analysis"][model_name] = market_analysis_result.data
             Logger.success(f"Market Analysis generated successfully with {model_name}")
         except Exception as e:
@@ -374,14 +370,14 @@ def run_full_ai_marketing_pipeline(artist_id: str):
     pipeline_start = Logger.start_task("Starting full marketing pipeline")
     try:
         Logger.info("Fetching artist data from database")
-        json_data = get_artist_data_from_db(artist_id)
+        data = get_artist_data_from_db(artist_id)
 
         Logger.info("Validating artist data")
-        artist_info = ArtistData(**json_data)
+        artist_info = ArtistData.model_validate_json(data)
         Logger.success("Artist data validated successfully")
 
         Logger.info("Generating reports")
-        all_reports = generate_reports(json_data)
+        all_reports = generate_reports(data)
         Logger.success("Report generation completed")
 
         Logger.info("Running strategy selection")
