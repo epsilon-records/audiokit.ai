@@ -8,8 +8,7 @@ from dotenv import load_dotenv
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from pydantic_ai import Agent
-from pydantic_ai.models.openai import OpenAIModel
+import requests
 from datetime import date
 import time
 from datetime import datetime
@@ -25,13 +24,6 @@ YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 
 # Define custom headers
 CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
-
-# Initialize single DeepSeek model
-ai_model = OpenAIModel(
-    model_name="deepseek/deepseek-r1",
-    api_key=OPENROUTER_API_KEY,
-    base_url="https://openrouter.ai/api/v1",
-)
 
 # EPK System Prompt
 EPK_SYSTEM_PROMPT = """
@@ -133,38 +125,6 @@ As a music industry analytics expert, create a comprehensive internal artist rep
 
 # Remove individual DB environment variables
 DATABASE_URL = os.getenv("DATABASE_URL")
-
-# Update the agents to use the single model
-epk_agent = Agent(
-    model=ai_model,
-    system_prompt=EPK_SYSTEM_PROMPT,
-    result_type=str,
-)
-
-internal_report_agent = Agent(
-    model=ai_model,
-    system_prompt=INTERNAL_REPORT_PROMPT,
-    result_type=str,
-)
-
-market_analysis_agent = Agent(
-    model=ai_model,
-    system_prompt="You are a strategic music marketing expert...",
-    result_type=str,
-)
-
-strategy_selection_agent = Agent(
-    model=ai_model,
-    system_prompt=(
-        "You are an expert music marketing strategist. You have received marketing reports "
-        "from multiple AI models. Your task is to:\n"
-        "1. Identify the best marketing strategy from these reports.\n"
-        "2. Integrate the strongest insights from all reports into a single, optimized plan.\n"
-        "3. Ensure the strategy is detailed, realistic, and well-budgeted.\n"
-        "Respond in JSON format with keys: 'selected_model' (string), 'integrated_report' (string), and budget_allocation' (object of string:float)."
-    ),
-    result_type=dict,
-)
 
 # Add this near other configuration constants
 AI_MODELS = [
@@ -286,51 +246,121 @@ def sanitize_artist_data(artist_data):
     return artist_data
 
 
-async def generate_report_with_agent(
-    agent, artist_data: dict, report_type: str, model_name: str, reports: dict
-):
-    start_time = Logger.start_task(f"Generating {report_type} with {model_name}")
+async def generate_epk(artist_data: dict, model_name: str) -> str:
+    """Generate EPK using the specified model"""
     try:
-        agent.model.model_name = model_name  # Update just the model name
-        artist_data = sanitize_artist_data(artist_data)
-        result = await agent.run(json.dumps(artist_data))
-
-        if result is None or result.data is None:
-            raise ValueError(f"{report_type} generation returned None for {model_name}")
-
-        reports[report_type][model_name] = result.data
-        Logger.success(f"{report_type} generated successfully with {model_name}")
-
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "HTTP-Referer": "https://audiokit.ai",
+                "X-Title": "AudioKit",
+            },
+            json={
+                "model": model_name,
+                "messages": [
+                    {"role": "system", "content": EPK_SYSTEM_PROMPT},
+                    {"role": "user", "content": json.dumps(artist_data)},
+                ],
+            },
+        )
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"]
     except Exception as e:
-        Logger.warning(f"Failed to generate {report_type} with {model_name}: {str(e)}")
-        reports[report_type][model_name] = f"{report_type} generation failed: {str(e)}"
-    finally:
-        Logger.end_task(start_time, f"Completed {report_type} with {model_name}")
+        Logger.warning(f"Failed to generate EPK with {model_name}: {str(e)}")
+        return f"EPK generation failed: {str(e)}"
+
+
+async def generate_internal_report(artist_data: dict, model_name: str) -> str:
+    """Generate internal report using the specified model"""
+    try:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "HTTP-Referer": "https://audiokit.ai",
+                "X-Title": "AudioKit",
+            },
+            json={
+                "model": model_name,
+                "messages": [
+                    {"role": "system", "content": INTERNAL_REPORT_PROMPT},
+                    {"role": "user", "content": json.dumps(artist_data)},
+                ],
+            },
+        )
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        Logger.warning(
+            f"Failed to generate internal report with {model_name}: {str(e)}"
+        )
+        return f"Internal report generation failed: {str(e)}"
 
 
 async def generate_reports(artist_data: dict):
-    reports = {"EPK": {}, "Internal Report": {}, "Market Analysis": {}}
+    """Generate all reports using available models"""
+    reports = {"EPK": {}, "Internal Report": {}}
     total_models = len(AI_MODELS)
 
     for current_model, model_name in enumerate(AI_MODELS, 1):
         Logger.progress(current_model, total_models, f"Processing model {model_name}")
 
-        # Generate reports using helper function
-        await generate_report_with_agent(
-            epk_agent, artist_data, "EPK", model_name, reports
-        )
-        await generate_report_with_agent(
-            internal_report_agent, artist_data, "Internal Report", model_name, reports
-        )
-        await generate_report_with_agent(
-            market_analysis_agent, artist_data, "Market Analysis", model_name, reports
-        )
+        # Generate reports
+        epk_report = await generate_epk(artist_data, model_name)
+        internal_report = await generate_internal_report(artist_data, model_name)
+
+        reports["EPK"][model_name] = epk_report
+        reports["Internal Report"][model_name] = internal_report
 
     Logger.success("All report attempts completed")
     return reports
 
 
+async def select_best_strategy(reports: dict) -> dict:
+    """Select and integrate the best strategy from multiple reports"""
+    try:
+        # Convert reports to JSON string for the prompt
+        reports_json = json.dumps(reports)
+
+        system_prompt = (
+            "You are an expert music marketing strategist. You have received marketing reports "
+            "from multiple AI models. Your task is to:\n"
+            "1. Identify the best marketing strategy from these reports.\n"
+            "2. Integrate the strongest insights from all reports into a single, optimized plan.\n"
+            "3. Ensure the strategy is detailed, realistic, and well-budgeted.\n"
+            "Respond in JSON format with keys: 'selected_model' (string), 'integrated_report' (string), and 'budget_allocation' (object of string:float)."
+        )
+
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "HTTP-Referer": "https://audiokit.ai",
+                "X-Title": "AudioKit",
+            },
+            json={
+                "model": "deepseek/deepseek-r1",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": reports_json},
+                ],
+                "response_format": {"type": "json_object"},
+            },
+        )
+        response.raise_for_status()
+        return response.json()["choices"][0]["message"]["content"]
+    except Exception as e:
+        Logger.warning(f"Failed to select best strategy: {str(e)}")
+        return {
+            "selected_model": "None",
+            "integrated_report": f"Strategy selection failed: {str(e)}",
+            "budget_allocation": {},
+        }
+
+
 async def run_full_ai_marketing_pipeline(artist_id: str):
+    """Run the full marketing pipeline"""
     pipeline_start = Logger.start_task("Starting full marketing pipeline")
     try:
         Logger.info("Fetching artist data from database")
@@ -340,71 +370,26 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         all_reports = await generate_reports(artist_data)
         Logger.success("Report generation completed")
 
-        Logger.info("Running strategy selection")
-        strategy_start = Logger.start_task("Running strategy selection agent")
-        try:
-            strategy_result = strategy_selection_agent.run_sync(
-                json.dumps(all_reports, indent=2)
-            )
-            integrated_strategy = strategy_result.data
-            Logger.success("Strategy selection completed")
-        except Exception as e:
-            Logger.warning(f"Strategy selection failed: {str(e)}")
-            # Fallback to selecting the first successful report from each category
-            integrated_strategy = {
-                "EPK": next(
-                    (
-                        report
-                        for report in all_reports["EPK"].values()
-                        if "failed" not in str(report)
-                    ),
-                    "No successful EPK generated",
-                ),
-                "Internal Report": next(
-                    (
-                        report
-                        for report in all_reports["Internal Report"].values()
-                        if "failed" not in str(report)
-                    ),
-                    "No successful Internal Report generated",
-                ),
-                "Market Analysis": next(
-                    (
-                        report
-                        for report in all_reports["Market Analysis"].values()
-                        if "failed" not in str(report)
-                    ),
-                    "No successful Market Analysis generated",
-                ),
-            }
-        finally:
-            Logger.end_task(strategy_start, "Strategy selection process completed")
+        Logger.info("Selecting best strategy")
+        best_strategy = await select_best_strategy(all_reports)
+        Logger.success("Strategy selection completed")
 
-        Logger.info("Extracting best reports")
-        best_epk_report = integrated_strategy.get("EPK", "No EPK generated.")
-        best_internal_report = integrated_strategy.get(
-            "Internal Report", "No Internal Report generated."
-        )
-        best_market_analysis = integrated_strategy.get(
-            "Market Analysis", "No Market Analysis generated."
-        )
-
-        Logger.info("Saving reports to files")
+        # Save all reports and strategy
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
 
-        with open(f"{artist_name_slug}_epk.md", "w") as epk_file:
-            epk_file.write(best_epk_report)
-        Logger.success(f"EPK saved to {artist_name_slug}_epk.md")
+        # Save individual reports
+        for report_type, models in all_reports.items():
+            for model_name, content in models.items():
+                filename = f"{artist_name_slug}_{report_type}_{model_name.replace('/', '_')}.md"
+                with open(filename, "w") as f:
+                    f.write(content)
+                Logger.success(f"Saved {report_type} from {model_name} to {filename}")
 
-        with open(f"{artist_name_slug}_internal.md", "w") as internal_file:
-            internal_file.write(best_internal_report)
-        Logger.success(f"Internal report saved to {artist_name_slug}_internal.md")
-
-        with open(f"{artist_name_slug}_market_analysis.md", "w") as market_file:
-            market_file.write(best_market_analysis)
-        Logger.success(
-            f"Market analysis saved to {artist_name_slug}_market_analysis.md"
-        )
+        # Save integrated strategy
+        strategy_filename = f"{artist_name_slug}_integrated_strategy.json"
+        with open(strategy_filename, "w") as f:
+            json.dump(best_strategy, f, indent=2)
+        Logger.success(f"Integrated strategy saved to {strategy_filename}")
 
         Logger.info("Displaying artist dashboard")
         display_artist_dashboard(artist_data)
@@ -412,7 +397,7 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
 
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
         Logger.success(
-            f"✅ Reports generated and saved for {artist_data['stage_name']}"
+            f"✅ Reports and strategy generated and saved for {artist_data['stage_name']}"
         )
 
     except Exception as e:
