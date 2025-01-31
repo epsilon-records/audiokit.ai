@@ -126,6 +126,7 @@ async function applyUpdates(
         artistId: artist.id,
         email: artist.email,
       });
+      return;
     }
 
     logger.success(requestId, 'Successfully merged Hubspot data', {

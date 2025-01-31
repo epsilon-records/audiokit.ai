@@ -52,7 +52,12 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
       const spotifyId = extractSpotifyId(artist.spotify);
       if (!spotifyId) {
         logger.warning(requestId, 'Could not extract Spotify ID from URL', undefined, context);
-        throw new Error('Invalid Spotify URL format');
+        return {
+          success: false,
+          artistId: artist.id,
+          error: 'Invalid Spotify URL format',
+          details: context,
+        };
       }
 
       soundchartsId = await getArtistIdFromSpotify(spotifyId);
@@ -102,7 +107,16 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
           tracksAvailable: !!tracks,
         }
       );
-      throw new Error('Failed to fetch Soundcharts data');
+      return {
+        success: false,
+        artistId: artist.id,
+        error: 'Failed to fetch Soundcharts data',
+        details: {
+          statsAvailable: !!stats,
+          tracksAvailable: !!tracks,
+          context,
+        },
+      };
     }
 
     await db
