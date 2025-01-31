@@ -286,14 +286,14 @@ def sanitize_artist_data(artist_data):
     return artist_data
 
 
-def generate_report_with_agent(
+async def generate_report_with_agent(
     agent, artist_data: dict, report_type: str, model_name: str, reports: dict
 ):
     start_time = Logger.start_task(f"Generating {report_type} with {model_name}")
     try:
         agent.model.model_name = model_name  # Update just the model name
         artist_data = sanitize_artist_data(artist_data)
-        result = agent.run(json.dumps(artist_data))
+        result = await agent.run(json.dumps(artist_data))
 
         if result is None or result.data is None:
             raise ValueError(f"{report_type} generation returned None for {model_name}")
@@ -308,7 +308,7 @@ def generate_report_with_agent(
         Logger.end_task(start_time, f"Completed {report_type} with {model_name}")
 
 
-def generate_reports(artist_data: dict):
+async def generate_reports(artist_data: dict):
     reports = {"EPK": {}, "Internal Report": {}, "Market Analysis": {}}
     total_models = len(AI_MODELS)
 
@@ -316,11 +316,13 @@ def generate_reports(artist_data: dict):
         Logger.progress(current_model, total_models, f"Processing model {model_name}")
 
         # Generate reports using helper function
-        generate_report_with_agent(epk_agent, artist_data, "EPK", model_name, reports)
-        generate_report_with_agent(
+        await generate_report_with_agent(
+            epk_agent, artist_data, "EPK", model_name, reports
+        )
+        await generate_report_with_agent(
             internal_report_agent, artist_data, "Internal Report", model_name, reports
         )
-        generate_report_with_agent(
+        await generate_report_with_agent(
             market_analysis_agent, artist_data, "Market Analysis", model_name, reports
         )
 
@@ -328,20 +330,20 @@ def generate_reports(artist_data: dict):
     return reports
 
 
-def run_full_ai_marketing_pipeline(artist_id: str):
+async def run_full_ai_marketing_pipeline(artist_id: str):
     pipeline_start = Logger.start_task("Starting full marketing pipeline")
     try:
         Logger.info("Fetching artist data from database")
         artist_data = get_artist_data_from_db(artist_id)
 
         Logger.info("Generating reports")
-        all_reports = generate_reports(artist_data)
+        all_reports = await generate_reports(artist_data)
         Logger.success("Report generation completed")
 
         Logger.info("Running strategy selection")
         strategy_start = Logger.start_task("Running strategy selection agent")
         try:
-            strategy_result = await strategy_selection_agent.run_sync(
+            strategy_result = strategy_selection_agent.run_sync(
                 json.dumps(all_reports, indent=2)
             )
             integrated_strategy = strategy_result.data
@@ -461,5 +463,7 @@ def get_artist_data_from_db(artist_id: str) -> dict:
 
 
 if __name__ == "__main__":
+    import asyncio
+
     artist_id = "fdf3afd2-a3d8-462c-b2dc-7e0805573d03"
-    run_full_ai_marketing_pipeline(artist_id)
+    asyncio.run(run_full_ai_marketing_pipeline(artist_id))
