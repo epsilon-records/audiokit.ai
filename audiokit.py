@@ -298,69 +298,37 @@ class Logger:
         )
 
 
-def generate_reports(data: str):
+def generate_report_with_agent(
+    agent, artist_data: dict, report_type: str, model_name: str, reports: dict
+):
+    start_time = Logger.start_task(f"Generating {report_type} with {model_name}")
+    agent.model = AI_MODELS[model_name]
+    try:
+        result = agent.run_sync(json.dumps(artist_data))
+        reports[report_type][model_name] = result.data
+        Logger.success(f"{report_type} generated successfully with {model_name}")
+    except Exception as e:
+        Logger.warning(f"Failed to generate {report_type} with {model_name}: {str(e)}")
+        reports[report_type][model_name] = f"{report_type} generation failed: {str(e)}"
+    finally:
+        Logger.end_task(start_time, f"Completed {report_type} with {model_name}")
+
+
+def generate_reports(artist_data: dict):
     reports = {"EPK": {}, "Internal Report": {}, "Market Analysis": {}}
     total_models = len(AI_MODELS)
-    current_model = 0
 
-    for model_name, model_id in AI_MODELS.items():
-        current_model += 1
+    for current_model, model_name in enumerate(AI_MODELS, 1):
         Logger.progress(current_model, total_models, f"Processing model {model_name}")
 
-        # Generate EPK Report
-        epk_start = Logger.start_task(f"Generating EPK with {model_name}")
-        try:
-            epk_agent.model = model_id
-            epk_result = epk_agent.run_sync(data)
-            reports["EPK"][model_name] = epk_result.data
-            Logger.success(f"EPK generated successfully with {model_name}")
-        except Exception as e:
-            Logger.warning(f"Failed to generate EPK with {model_name}: {str(e)}")
-            reports["EPK"][model_name] = f"EPK generation failed: {str(e)}"
-        finally:
-            Logger.end_task(epk_start, f"Completed EPK with {model_name}")
-
-        # Generate Internal Report
-        internal_start = Logger.start_task(
-            f"Generating Internal Report with {model_name}"
+        # Generate reports using helper function
+        generate_report_with_agent(epk_agent, artist_data, "EPK", model_name, reports)
+        generate_report_with_agent(
+            internal_report_agent, artist_data, "Internal Report", model_name, reports
         )
-        internal_report_agent.model = model_id
-        try:
-            internal_report_result = internal_report_agent.run_sync(data)
-            reports["Internal Report"][model_name] = internal_report_result.data
-            Logger.success(f"Internal Report generated successfully with {model_name}")
-        except Exception as e:
-            Logger.warning(
-                f"Failed to generate Internal Report with {model_name}: {str(e)}"
-            )
-            reports["Internal Report"][model_name] = (
-                f"Internal Report generation failed: {str(e)}"
-            )
-        finally:
-            Logger.end_task(
-                internal_start, f"Completed Internal Report with {model_name}"
-            )
-
-        # Generate Market Analysis Report
-        market_start = Logger.start_task(
-            f"Generating Market Analysis with {model_name}"
+        generate_report_with_agent(
+            market_analysis_agent, artist_data, "Market Analysis", model_name, reports
         )
-        market_analysis_agent.model = model_id
-        try:
-            market_analysis_result = market_analysis_agent.run_sync(data)
-            reports["Market Analysis"][model_name] = market_analysis_result.data
-            Logger.success(f"Market Analysis generated successfully with {model_name}")
-        except Exception as e:
-            Logger.warning(
-                f"Failed to generate Market Analysis with {model_name}: {str(e)}"
-            )
-            reports["Market Analysis"][model_name] = (
-                f"Market Analysis generation failed: {str(e)}"
-            )
-        finally:
-            Logger.end_task(
-                market_start, f"Completed Market Analysis with {model_name}"
-            )
 
     Logger.success("All report attempts completed")
     return reports
@@ -370,14 +338,14 @@ def run_full_ai_marketing_pipeline(artist_id: str):
     pipeline_start = Logger.start_task("Starting full marketing pipeline")
     try:
         Logger.info("Fetching artist data from database")
-        data = get_artist_data_from_db(artist_id)
+        artist_data = get_artist_data_from_db(artist_id)
 
         Logger.info("Validating artist data")
-        artist_info = ArtistData.model_validate_json(data)
+        artist_info = ArtistData.model_validate_json(artist_data)
         Logger.success("Artist data validated successfully")
 
         Logger.info("Generating reports")
-        all_reports = generate_reports(data)
+        all_reports = generate_reports(artist_data)
         Logger.success("Report generation completed")
 
         Logger.info("Running strategy selection")
@@ -458,7 +426,7 @@ def run_full_ai_marketing_pipeline(artist_id: str):
         raise
 
 
-def get_artist_data_from_db(artist_id: str) -> str:
+def get_artist_data_from_db(artist_id: str) -> dict:
     db_start = Logger.start_task(f"Fetching artist data for ID {artist_id}")
     connection = None
     try:
@@ -481,17 +449,14 @@ def get_artist_data_from_db(artist_id: str) -> str:
                 if isinstance(value, date):
                     artist_data[key] = value.isoformat()
 
-            Logger.info("Converting data to JSON")
-            json_data = json.dumps(artist_data, indent=2)
-
             Logger.info("Saving artist data to JSON file")
             artist_name_slug = artist_data["stage_name"].replace(" ", "_")
             with open(f"{artist_name_slug}_json.txt", "w") as json_file:
-                json_file.write(json_data)
+                json.dump(artist_data, json_file, indent=2)
             Logger.success(f"Artist data saved to {artist_name_slug}_json.txt")
 
             Logger.end_task(db_start, "Database operation completed")
-            return json_data
+            return artist_data
 
     except Exception as e:
         Logger.error(f"Database error: {str(e)}")
