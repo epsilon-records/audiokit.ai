@@ -307,8 +307,8 @@ async def generate_reports(artist_data: dict):
     return reports
 
 
-async def select_best_strategy(reports: dict) -> dict:
-    """Select and integrate the best strategy from multiple reports"""
+async def integrate_reports(reports: dict) -> dict:
+    """Integrate multiple reports into optimized versions"""
     try:
         # If there's only one report for each type, return them directly
         if len(reports["EPK"]) == 1 and len(reports["Internal Report"]) == 1:
@@ -319,31 +319,29 @@ async def select_best_strategy(reports: dict) -> dict:
                     "EPK": single_epk_model,
                     "Internal Report": single_internal_model,
                 },
-                "best_epk": reports["EPK"][single_epk_model],
-                "best_internal_report": reports["Internal Report"][
+                "final_epk_report": reports["EPK"][single_epk_model],
+                "final_internal_analysis": reports["Internal Report"][
                     single_internal_model
                 ],
                 "budget_allocation": {},
             }
 
-        # Convert reports to JSON string for the prompt
-        reports_json = json.dumps(reports)
-
-        system_prompt = (
-            "You are an expert music marketing strategist. You will receive multiple marketing reports (Electronic Press Kits (EPKs) and Internal Reports) from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:\n\n"
+        # Process EPKs separately
+        epk_system_prompt = (
+            "You are an expert music marketing strategist. You will receive multiple Electronic Press Kits (EPKs) from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:\n\n"
             "Processing Steps:\n"
-            "1. Select the Best Report: Choose the most comprehensive and high-quality version of each report type (EPK and Internal Report).\n"
-            "2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version.\n"
+            "1. Select the Best EPK: Choose the most comprehensive and high-quality version.\n"
+            "2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other EPKs to enhance the final version.\n"
             "3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness.\n"
-            "4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in LaTeX.\n\n"
+            "4. Finalize for Publication: Replace any placeholders, refine the language, and structure the EPK to be visually appealing and professionally formatted in LaTeX.\n\n"
             "Output Requirements:\n"
             "• Return only the final LaTeX document, fully formatted and ready for compilation.\n"
-            "• Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and tables.\n"
+            "• Ensure the EPK is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and tables.\n"
             "• Where applicable, include charts, graphs, or images using LaTeX packages (e.g., graphicx, pgfplots, tikz) to enhance visual presentation.\n\n"
-            "The final document should be engaging, professional, and designed to impress industry stakeholders."
+            "The final EPK should be engaging, professional, and designed to impress industry stakeholders."
         )
 
-        response = requests.post(
+        epk_response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -353,21 +351,73 @@ async def select_best_strategy(reports: dict) -> dict:
             json={
                 "model": "deepseek/deepseek-r1",
                 "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": reports_json},
+                    {"role": "system", "content": epk_system_prompt},
+                    {"role": "user", "content": json.dumps({"EPKs": reports["EPK"]})},
                 ],
                 "response_format": {"type": "json_object"},
             },
         )
-        response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"]
+        epk_response.raise_for_status()
+        integrated_epk = epk_response.json()["choices"][0]["message"]["content"]
+
+        # Process Internal Reports separately
+        internal_system_prompt = (
+            "You are an expert music industry analyst. You will receive multiple Internal Reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:\n\n"
+            "Processing Steps:\n"
+            "1. Select the Best Report: Choose the most comprehensive and high-quality version.\n"
+            "2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version.\n"
+            "3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness.\n"
+            "4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in LaTeX.\n\n"
+            "Output Requirements:\n"
+            "• Return only the final LaTeX document, fully formatted and ready for compilation.\n"
+            "• Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and tables.\n"
+            "• Where applicable, include charts, graphs, or images using LaTeX packages (e.g., graphicx, pgfplots, tikz) to enhance visual presentation.\n\n"
+            "The final report should be comprehensive, professional, and designed for internal decision-making."
+        )
+
+        internal_response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "HTTP-Referer": "https://audiokit.ai",
+                "X-Title": "AudioKit",
+            },
+            json={
+                "model": "deepseek/deepseek-r1",
+                "messages": [
+                    {"role": "system", "content": internal_system_prompt},
+                    {
+                        "role": "user",
+                        "content": json.dumps(
+                            {"Internal Reports": reports["Internal Report"]}
+                        ),
+                    },
+                ],
+                "response_format": {"type": "json_object"},
+            },
+        )
+        internal_response.raise_for_status()
+        integrated_internal = internal_response.json()["choices"][0]["message"][
+            "content"
+        ]
+
+        return {
+            "selected_models": {
+                "EPK": "Integrated Version",
+                "Internal Report": "Integrated Version",
+            },
+            "final_epk_report": integrated_epk,
+            "final_internal_analysis": integrated_internal,
+            "budget_allocation": {},
+        }
+
     except Exception as e:
-        Logger.warning(f"Failed to select best strategy: {str(e)}")
+        Logger.warning(f"Failed to integrate reports: {str(e)}")
         return {
             "selected_models": {"EPK": "None", "Internal Report": "None"},
-            "best_epk": f"EPK selection failed: {str(e)}",
-            "best_internal_report": f"Internal Report selection failed: {str(e)}",
-            "integrated_report": f"Strategy selection failed: {str(e)}",
+            "final_epk_report": f"EPK integration failed: {str(e)}",
+            "final_internal_analysis": f"Internal Report integration failed: {str(e)}",
+            "integrated_report": f"Report integration failed: {str(e)}",
             "budget_allocation": {},
         }
 
@@ -396,12 +446,12 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
             f"Generated {len(all_reports['EPK'])} EPKs and {len(all_reports['Internal Report'])} internal reports"
         )
 
-        # Select best strategy
-        Logger.info("Starting strategy selection process")
-        strategy_start = Logger.start_task("Strategy selection")
-        best_strategy = await select_best_strategy(all_reports)
-        Logger.end_task(strategy_start, "Strategy selection completed")
-        Logger.success("Best strategy selected and integrated")
+        # Integrate and optimize reports
+        Logger.info("Starting report integration process")
+        strategy_start = Logger.start_task("Report integration")
+        integrated_reports = await integrate_reports(all_reports)
+        Logger.end_task(strategy_start, "Report integration completed")
+        Logger.success("Reports integrated and optimized")
 
         # Save reports
         Logger.info("Starting report saving process")
@@ -424,21 +474,19 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
 
         # Save integrated reports as LaTeX files
         Logger.info("Saving integrated reports as LaTeX files")
-        if "best_epk" in best_strategy:
+        if "final_epk_report" in integrated_reports:
             epk_filename = f"{artist_name_slug}_integrated_epk.tex"
             with open(epk_filename, "w") as f:
-                f.write(best_strategy["best_epk"])
+                f.write(integrated_reports["final_epk_report"])
             Logger.success(f"Saved integrated EPK to {epk_filename}")
 
-        if "best_internal_report" in best_strategy:
+        if "final_internal_analysis" in integrated_reports:
             internal_filename = f"{artist_name_slug}_integrated_internal_report.tex"
             with open(internal_filename, "w") as f:
-                f.write(best_strategy["best_internal_report"])
+                f.write(integrated_reports["final_internal_analysis"])
             Logger.success(f"Saved integrated internal report to {internal_filename}")
 
         Logger.end_task(save_start, "All reports saved successfully")
-        Logger.success(f"Integrated strategy saved to {strategy_filename}")
-
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
         Logger.success(f"✅ All tasks completed for {artist_data['stage_name']}")
 
