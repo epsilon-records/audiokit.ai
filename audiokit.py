@@ -34,10 +34,12 @@ Report Requirements:
 	4.	Visual Enhancements: Use emojis sparingly to enhance key points (1-2 per section max)
 
 Output Instructions:
-	•	Return the complete rich text document, ready for display
-	•	Ensure the document is engaging, professional, and well-structured
-	•	Use markdown-like formatting for headings (#, ##, ###) and lists
-	•	Maintain a professional tone while being approachable
+	• Return ONLY the content itself - do not wrap it in any code blocks or markdown syntax
+	• Ensure the document is engaging, professional, and well-structured
+	• Use markdown-like formatting for headings (#, ##, ###) and lists
+	• Maintain a professional tone while being approachable
+	• Do not include any backticks, code block markers, or other syntax wrappers
+	• Output must be plain text with the formatted content only
 
 EPK Structure:
 
@@ -78,10 +80,12 @@ Report Requirements:
 	4.	Visual Enhancements: Use emojis sparingly to enhance key points (1-2 per section max)
 
 Output Instructions:
-	•	Return the full rich text document, ready for display
-	•	Ensure the document is structured for clarity, professionalism, and maximum readability
-	•	Use markdown-like formatting for headings (#, ##, ###) and lists
-	•	Maintain a professional tone while being approachable
+	• Return ONLY the content itself - do not wrap it in any code blocks or markdown syntax
+	• Ensure the report is structured for clarity, professionalism, and maximum readability
+	• Use markdown-like formatting for headings (#, ##, ###) and lists
+	• Maintain a professional tone while being approachable
+	• Do not include any backticks, code block markers, or other syntax wrappers
+	• Output must be plain text with the formatted content only
 
 Report Structure:
 
@@ -404,6 +408,7 @@ async def integrate_reports(reports: dict) -> dict:
             "7. Include proper LaTeX document structure\n\n"
             "Output Instructions:\n"
             "• Return ONLY the complete LaTeX document\n"
+            "• Do not wrap the content in any code blocks or markdown syntax\n"
             "• Use a two-column layout for compact presentation\n"
             "• Include all necessary packages and preamble\n"
             "• Ensure proper document structure\n"
@@ -443,6 +448,7 @@ async def integrate_reports(reports: dict) -> dict:
             "4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in rich text.\n\n"
             "Output Requirements:\n"
             "• Return only the final rich text document, fully formatted and ready for display.\n"
+            "• Do not wrap the content in any code blocks or markdown syntax\n"
             "• Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and lists.\n"
             "• Where applicable, include emojis sparingly to enhance key points.\n\n"
             "The final report should be comprehensive, professional, and designed for internal decision-making."
