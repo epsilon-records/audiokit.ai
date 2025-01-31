@@ -131,27 +131,27 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Define the EPK Agent
 epk_agent = Agent(
-    model="openai:gpt-4-turbo",
+    model="deepseek/deepseek-r1",
     system_prompt=EPK_SYSTEM_PROMPT,
     result_type=str,  # Assuming the result is a Markdown string
 )
 
 # Define the Internal Report Agent
 internal_report_agent = Agent(
-    model="openai:gpt-4-turbo",
+    model="deepseek/deepseek-r1",
     system_prompt=INTERNAL_REPORT_PROMPT,
     result_type=str,  # Assuming the result is a Markdown string
 )
 
 market_analysis_agent = Agent(
-    model="",  # Will be set dynamically
+    model="deepseek/deepseek-r1",  # Will be set dynamically
     system_prompt="You are a strategic music marketing expert. Generate a market analysis report...",
     result_type=str,
 )
 
 # Define the Strategy Selection Agent
 strategy_selection_agent = Agent(
-    model="openai/gpt-4-turbo",
+    model="deepseek/deepseek-r1",
     system_prompt=(
         "You are an expert music marketing strategist. You have received marketing reports "
         "from multiple AI models. Your task is to:\n"
