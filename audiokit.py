@@ -129,7 +129,6 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Add this near other configuration constants
 AI_MODELS = [
-    "deepseek/deepseek-chat",
     "anthropic/claude-3.5-sonnet",
     "openai/gpt-4o-2024-11-20",
     "mistralai/mistral-large-2411",
