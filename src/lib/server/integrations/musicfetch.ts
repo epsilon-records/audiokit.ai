@@ -118,9 +118,11 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
             statusText: response.statusText,
             errorText,
             duration: Date.now() - startTime,
+            spotifyUrl,
+            services,
           });
           // Continue processing by throwing the error
-          throw new RateLimitError(`Rate limit exceeded: ${errorText}`);
+          throw new RateLimitError(`Rate limit exceeded for ${spotifyUrl}: ${errorText}`);
         } else {
           logger.error(
             requestId,
