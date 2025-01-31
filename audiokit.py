@@ -341,7 +341,7 @@ def run_full_ai_marketing_pipeline(artist_id: str):
         Logger.info("Running strategy selection")
         strategy_start = Logger.start_task("Running strategy selection agent")
         try:
-            strategy_result = strategy_selection_agent.run_sync(
+            strategy_result = await strategy_selection_agent.run_sync(
                 json.dumps(all_reports, indent=2)
             )
             integrated_strategy = strategy_result.data
