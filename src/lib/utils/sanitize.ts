@@ -7,7 +7,6 @@ export function sanitizeUrl(url: string | null | undefined): string {
     // Test if URL is valid
     new URL(url);
   } catch (error) {
-    console.warn('Invalid URL format:', url);
     return '';
   }
 
@@ -33,7 +32,6 @@ export function sanitizeUrl(url: string | null | undefined): string {
     const urlObj = new URL(sanitized);
     return urlObj.origin + urlObj.pathname;
   } catch (error) {
-    console.warn('Failed to parse URL:', url, error);
     return '';
   }
 }

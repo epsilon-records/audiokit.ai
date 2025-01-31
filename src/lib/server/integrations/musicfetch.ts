@@ -13,6 +13,24 @@ const musicfetchLimiter = new Bottleneck({
   trackDoneStatus: true,
 });
 
+function getMusicfetchConfig() {
+  const apiBase = process.env.MUSICFETCH_API_BASE;
+  const token = process.env.MUSICFETCH_TOKEN;
+
+  if (!apiBase || !token) {
+    throw new Error('Musicfetch API configuration missing');
+  }
+
+  return {
+    apiBase,
+    headers: {
+      'x-musicfetch-token': token,
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
+  };
+}
+
 export const getMusicfetchData = musicfetchLimiter.wrap(
   async (spotifyUrl: string, services: string[]) => {
     const requestId = crypto.randomUUID();
@@ -62,15 +80,12 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
         throw new Error('Invalid services array');
       }
 
-      const apiUrl = new URL(`${process.env.MUSICFETCH_API_BASE}/url`);
+      const { apiBase, headers } = getMusicfetchConfig();
+      const apiUrl = new URL(`${apiBase}/url`);
       apiUrl.searchParams.set('url', spotifyUrl);
       apiUrl.searchParams.set('services', services.join(','));
 
-      const response = await fetch(apiUrl.toString(), {
-        headers: {
-          'x-musicfetch-token': process.env.MUSICFETCH_TOKEN,
-        },
-      });
+      const response = await fetch(apiUrl.toString(), { headers });
 
       if (!response.ok) {
         const errorText = await response.text();

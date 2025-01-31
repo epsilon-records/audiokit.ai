@@ -16,6 +16,58 @@ const soundchartsLimiter = new Bottleneck({
   trackDoneStatus: true,
 });
 
+// Add these at the top of the file
+type StreamingPlatform =
+  | 'audiomack'
+  | 'jiosaavn'
+  | 'lastfm'
+  | 'pandora'
+  | 'spotify'
+  | 'tidal'
+  | 'yandex'
+  | 'youtube-artist';
+
+type SocialPlatform = 'spotify' | 'instagram' | 'twitter' | 'facebook' | 'youtube';
+
+const STREAMING_PLATFORMS: StreamingPlatform[] = [
+  'audiomack',
+  'jiosaavn',
+  'lastfm',
+  'pandora',
+  'spotify',
+  'tidal',
+  'yandex',
+  'youtube-artist',
+];
+
+const SOCIAL_PLATFORMS: SocialPlatform[] = [
+  'spotify',
+  'instagram',
+  'twitter',
+  'facebook',
+  'youtube',
+];
+
+function getSoundchartsConfig() {
+  const apiBase = process.env.SOUNDCHARTS_API_BASE;
+  const appId = process.env.SOUNDCHARTS_APP_ID;
+  const apiKey = process.env.SOUNDCHARTS_API_KEY;
+
+  if (!apiBase || !appId || !apiKey) {
+    throw new Error('Soundcharts API configuration missing');
+  }
+
+  return {
+    apiBase,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-app-id': appId,
+      'x-api-key': apiKey,
+      Accept: 'application/json',
+    },
+  };
+}
+
 /**
  * Get Soundcharts artist ID from Spotify ID
  */
@@ -31,32 +83,16 @@ export const getArtistIdFromSpotify = soundchartsLimiter.wrap(
     logger.start(requestId, 'Fetching Soundcharts artist ID from Spotify ID', context);
 
     try {
+      const { apiBase, headers } = getSoundchartsConfig();
       logger.process(requestId, 'Looking up Soundcharts ID from Spotify', {
         ...context,
         metadata: {
           environment: process.env.NODE_ENV,
-          soundchartsApiBase: process.env.SOUNDCHARTS_API_BASE ? '✅ Configured' : '❌ Missing',
-          soundchartsAppId: process.env.SOUNDCHARTS_APP_ID ? '✅ Configured' : '❌ Missing',
-          soundchartsApiKey: process.env.SOUNDCHARTS_API_KEY ? '✅ Configured' : '❌ Missing',
         },
       });
 
-      if (
-        !process.env.SOUNDCHARTS_API_BASE ||
-        !process.env.SOUNDCHARTS_APP_ID ||
-        !process.env.SOUNDCHARTS_API_KEY
-      ) {
-        throw new Error('Soundcharts API configuration missing');
-      }
-
-      const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`;
-      const response = await fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          'x-app-id': process.env.SOUNDCHARTS_APP_ID,
-          'x-api-key': process.env.SOUNDCHARTS_API_KEY,
-        },
-      });
+      const url = `${apiBase}/api/v2.9/artist/by-platform/spotify/${spotifyId}`;
+      const response = await fetch(url, { headers });
 
       if (!response.ok) {
         logger.error(
@@ -99,34 +135,9 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
   };
 
   try {
-    logger.process(
-      requestId,
-      'Fetching Soundcharts artist metadata',
-      {
-        metadata: {
-          environment: process.env.NODE_ENV,
-          soundchartsApiBase: process.env.SOUNDCHARTS_API_BASE ? '✅ Configured' : '❌ Missing',
-          soundchartsAppId: process.env.SOUNDCHARTS_APP_ID ? '✅ Configured' : '❌ Missing',
-          soundchartsApiKey: process.env.SOUNDCHARTS_API_KEY ? '✅ Configured' : '❌ Missing',
-        },
-      },
-      context
-    );
-
-    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
-      const configError = new Error('Configuration Error');
-      logger.error(requestId, 'Soundcharts credentials not configured', configError, context);
-      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
-    }
-
-    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.9/artist/${uuid}`;
-    const response = await fetch(url, {
-      headers: {
-        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
-        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
-        Accept: 'application/json',
-      },
-    });
+    const { apiBase, headers } = getSoundchartsConfig();
+    const url = `${apiBase}/api/v2.9/artist/${uuid}`;
+    const response = await fetch(url, { headers });
 
     if (!response.ok) {
       const warningContext = {
@@ -136,7 +147,7 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
         statusText: response.statusText,
         duration: Date.now() - startTime,
       };
-      logger.warning(requestId, '⚠️ Failed to fetch artist metadata', null, warningContext);
+      logger.warning(requestId, 'Failed to fetch artist metadata', null, warningContext);
       return null;
     }
 
@@ -161,7 +172,7 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
  */
 export async function getArtistStreamingAudience(
   uuid: string,
-  platform: 'spotify' | 'apple_music' | 'deezer'
+  platform: StreamingPlatform
 ): Promise<any | null> {
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
@@ -172,34 +183,9 @@ export async function getArtistStreamingAudience(
   };
 
   try {
-    logger.process(
-      requestId,
-      'Fetching Soundcharts streaming audience',
-      {
-        metadata: {
-          environment: process.env.NODE_ENV,
-          soundchartsApiBase: process.env.SOUNDCHARTS_API_BASE ? '✅ Configured' : '❌ Missing',
-          soundchartsAppId: process.env.SOUNDCHARTS_APP_ID ? '✅ Configured' : '❌ Missing',
-          soundchartsApiKey: process.env.SOUNDCHARTS_API_KEY ? '✅ Configured' : '❌ Missing',
-        },
-      },
-      context
-    );
-
-    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
-      const configError = new Error('Configuration Error');
-      logger.error(requestId, 'Soundcharts credentials not configured', configError, context);
-      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
-    }
-
-    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/streaming/${platform}/listening`;
-    const response = await fetch(url, {
-      headers: {
-        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
-        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
-        Accept: 'application/json',
-      },
-    });
+    const { apiBase, headers } = getSoundchartsConfig();
+    const url = `${apiBase}/api/v2/artist/${uuid}/streaming/${platform}/listening`;
+    const response = await fetch(url, { headers });
 
     if (!response.ok) {
       const warningContext = {
@@ -209,7 +195,7 @@ export async function getArtistStreamingAudience(
         statusText: response.statusText,
         duration: Date.now() - startTime,
       };
-      logger.warning(requestId, '⚠️ Failed to fetch streaming audience', null, warningContext);
+      logger.warning(requestId, 'Failed to fetch streaming audience', null, warningContext);
       return null;
     }
 
@@ -237,7 +223,7 @@ export async function getArtistStreamingAudience(
 /**
  * Get artist audience data from Soundcharts
  */
-async function getArtistAudience(uuid: string, platform: string): Promise<any | null> {
+async function getArtistAudience(uuid: string, platform: SocialPlatform): Promise<any | null> {
   const requestId = crypto.randomUUID();
   const startTime = Date.now();
   const context = {
@@ -247,34 +233,9 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
   };
 
   try {
-    logger.process(
-      requestId,
-      'Fetching artist audience data',
-      {
-        metadata: {
-          environment: process.env.NODE_ENV,
-          soundchartsApiBase: process.env.SOUNDCHARTS_API_BASE ? '✅ Configured' : '❌ Missing',
-          soundchartsAppId: process.env.SOUNDCHARTS_APP_ID ? '✅ Configured' : '❌ Missing',
-          soundchartsApiKey: process.env.SOUNDCHARTS_API_KEY ? '✅ Configured' : '❌ Missing',
-        },
-      },
-      context
-    );
-
-    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
-      const configError = new Error('Configuration Error');
-      logger.error(requestId, 'Soundcharts credentials not configured', configError, context);
-      throw new Error('SOUNDCHARTS_APP_ID or SOUNDCHARTS_API_KEY is not set');
-    }
-
-    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/audience/${platform}`;
-    const response = await fetch(url, {
-      headers: {
-        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
-        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
-        Accept: 'application/json',
-      },
-    });
+    const { apiBase, headers } = getSoundchartsConfig();
+    const url = `${apiBase}/api/v2/artist/${uuid}/audience/${platform}`;
+    const response = await fetch(url, { headers });
 
     if (!response.ok) {
       const warningContext = {
@@ -284,7 +245,7 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
         statusText: response.statusText,
         duration: Date.now() - startTime,
       };
-      logger.warning(requestId, '⚠️ Failed to fetch audience data', null, warningContext);
+      logger.warning(requestId, 'Failed to fetch audience data', null, warningContext);
       return null;
     }
 
@@ -348,8 +309,7 @@ export const getArtistStats = soundchartsLimiter.wrap(
       }
 
       // Get streaming data for different platforms
-      const platforms = ['spotify', 'apple_music', 'deezer'] as const;
-      const streamingPromises = platforms.map((platform) =>
+      const streamingPromises = STREAMING_PLATFORMS.map((platform) =>
         getArtistStreamingAudience(uuid, platform)
       );
 
@@ -357,7 +317,7 @@ export const getArtistStats = soundchartsLimiter.wrap(
       const streaming = streamingResults.reduce(
         (acc, result, index) => {
           if (result.status === 'fulfilled' && result.value) {
-            acc[platforms[index]] = result.value;
+            acc[STREAMING_PLATFORMS[index]] = result.value;
           }
           return acc;
         },
@@ -365,13 +325,14 @@ export const getArtistStats = soundchartsLimiter.wrap(
       );
 
       // Get audience data for social platforms
-      const socialPlatforms = ['spotify', 'instagram', 'twitter', 'facebook', 'youtube'] as const;
-      const audiencePromises = socialPlatforms.map((platform) => getArtistAudience(uuid, platform));
+      const audiencePromises = SOCIAL_PLATFORMS.map((platform) =>
+        getArtistAudience(uuid, platform)
+      );
 
       const audienceResults = await Promise.allSettled(audiencePromises);
       const followers = audienceResults.reduce(
         (acc, result, index) => {
-          const platform = socialPlatforms[index];
+          const platform = SOCIAL_PLATFORMS[index];
 
           if (result.status === 'fulfilled' && result.value?.items) {
             const items = result.value.items;
@@ -439,33 +400,8 @@ export const getArtistTracks = soundchartsLimiter.wrap(
     };
 
     try {
-      logger.process(
-        requestId,
-        'Fetching artist tracks',
-        {
-          metadata: {
-            environment: process.env.NODE_ENV,
-            soundchartsApiBase: process.env.SOUNDCHARTS_API_BASE ? '✅ Configured' : '❌ Missing',
-            soundchartsAppId: process.env.SOUNDCHARTS_APP_ID ? '✅ Configured' : '❌ Missing',
-            soundchartsApiKey: process.env.SOUNDCHARTS_API_KEY ? '✅ Configured' : '❌ Missing',
-          },
-        },
-        context
-      );
-
-      if (
-        !process.env.SOUNDCHARTS_API_BASE ||
-        !process.env.SOUNDCHARTS_APP_ID ||
-        !process.env.SOUNDCHARTS_API_KEY
-      ) {
-        const configError = new Error('Configuration Error');
-        logger.error(requestId, 'Soundcharts credentials not configured', configError, context);
-        throw new Error(
-          'SOUNDCHARTS_API_BASE, SOUNDCHARTS_APP_ID, or SOUNDCHARTS_API_KEY is not set'
-        );
-      }
-
-      const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.21/artist/${uuid}/songs`;
+      const { apiBase, headers } = getSoundchartsConfig();
+      const url = `${apiBase}/api/v2.21/artist/${uuid}/songs`;
       const params = new URLSearchParams();
 
       if (offset !== undefined) params.set('offset', String(offset));
@@ -474,13 +410,7 @@ export const getArtistTracks = soundchartsLimiter.wrap(
       if (sortOrder !== undefined) params.set('sortOrder', sortOrder);
 
       const fullUrl = `${url}?${params}`;
-      const response = await fetch(fullUrl, {
-        headers: {
-          'x-app-id': process.env.SOUNDCHARTS_APP_ID,
-          'x-api-key': process.env.SOUNDCHARTS_API_KEY,
-          Accept: 'application/json',
-        },
-      });
+      const response = await fetch(fullUrl, { headers });
 
       if (response.status === 401) {
         const authError = new Error('Unauthorized: Not logged in');
@@ -546,14 +476,9 @@ export async function getTrackMetadata(uuid: string): Promise<Track | null> {
   logger.start(requestId, 'Fetching Soundcharts track metadata', context);
 
   try {
-    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.25/song/${uuid}`;
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
-        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
-      },
-    });
+    const { apiBase, headers } = getSoundchartsConfig();
+    const url = `${apiBase}/api/v2.25/song/${uuid}`;
+    const response = await fetch(url, { headers });
 
     if (!response.ok) {
       const apiError = new Error(`API Error: ${response.status} ${response.statusText}`);
