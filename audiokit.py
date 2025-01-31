@@ -30,34 +30,13 @@ CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
 # Create async client with custom headers
 async_client = httpx.AsyncClient(headers=CUSTOM_HEADERS)
 
-# Initialize models using OpenRouter
-AI_MODELS = {
-    "Claude 3 Opus": OpenAIModel(
-        model_name="anthropic/claude-3-opus",
-        api_key=OPENROUTER_API_KEY,
-        base_url="https://openrouter.ai/api/v1",
-        http_client=async_client,
-    ),
-    "Mistral Large 2411": OpenAIModel(
-        model_name="mistralai/mistral-large-2411",
-        api_key=OPENROUTER_API_KEY,
-        base_url="https://openrouter.ai/api/v1",
-        http_client=async_client,
-    ),
-    "DeepSeek-R1": OpenAIModel(
-        model_name="deepseek/deepseek-r1",
-        api_key=OPENROUTER_API_KEY,
-        base_url="https://openrouter.ai/api/v1",
-        http_client=async_client,
-    ),
-    "OpenAI O1": OpenAIModel(
-        model_name="openai/o1",
-        api_key=OPENROUTER_API_KEY,
-        base_url="https://openrouter.ai/api/v1",
-        http_client=async_client,
-    ),
-}
-
+# Initialize single DeepSeek model
+ai_model = OpenAIModel(
+    model_name="deepseek/deepseek-r1",
+    api_key=OPENROUTER_API_KEY,
+    base_url="https://openrouter.ai/api/v1",
+    http_client=async_client,
+)
 
 # EPK System Prompt
 EPK_SYSTEM_PROMPT = """
@@ -160,22 +139,13 @@ As a music industry analytics expert, create a comprehensive internal artist rep
 # Remove individual DB environment variables
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-# Initialize single DeepSeek model
-ai_model = OpenAIModel(
-    model_name="deepseek/deepseek-r1",
-    api_key=OPENROUTER_API_KEY,
-    base_url="https://openrouter.ai/api/v1",
-    http_client=async_client,
-)
-
-# Define the EPK Agent
+# Update the agents to use the single model
 epk_agent = Agent(
     model=ai_model,
     system_prompt=EPK_SYSTEM_PROMPT,
     result_type=str,
 )
 
-# Define the Internal Report Agent
 internal_report_agent = Agent(
     model=ai_model,
     system_prompt=INTERNAL_REPORT_PROMPT,
@@ -188,7 +158,6 @@ market_analysis_agent = Agent(
     result_type=str,
 )
 
-# Define the Strategy Selection Agent
 strategy_selection_agent = Agent(
     model=ai_model,
     system_prompt=(
@@ -201,6 +170,14 @@ strategy_selection_agent = Agent(
     ),
     result_type=dict,
 )
+
+# Add this near other configuration constants
+AI_MODELS = [
+    "deepseek/deepseek-r1",
+    "anthropic/claude-3-opus",
+    "openai/o1",
+    "mistral/mistral-large",
+]
 
 
 # Example tool to fetch additional artist data
@@ -402,7 +379,7 @@ def run_full_ai_marketing_pipeline(artist_id: str):
         )
 
         Logger.info("Saving reports to files")
-        artist_name_slug = artist_info.name.replace(" ", "_")
+        artist_name_slug = artist_data["stage_name"].replace(" ", "_")
 
         with open(f"{artist_name_slug}_epk.md", "w") as epk_file:
             epk_file.write(best_epk_report)
@@ -419,11 +396,13 @@ def run_full_ai_marketing_pipeline(artist_id: str):
         )
 
         Logger.info("Displaying artist dashboard")
-        display_artist_dashboard(artist_info.dict())
+        display_artist_dashboard(artist_data)
         Logger.success("Dashboard displayed successfully")
 
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
-        Logger.success(f"✅ Reports generated and saved for {artist_info.name}")
+        Logger.success(
+            f"✅ Reports generated and saved for {artist_data['stage_name']}"
+        )
 
     except Exception as e:
         Logger.error(f"Error in marketing pipeline: {str(e)}")
