@@ -370,9 +370,12 @@ def generate_reports(json_data: dict):
     return reports
 
 
-def run_full_ai_marketing_pipeline(json_data: Dict):
+def run_full_ai_marketing_pipeline(artist_id: str):
     pipeline_start = Logger.start_task("Starting full marketing pipeline")
     try:
+        Logger.info("Fetching artist data from database")
+        json_data = get_artist_data_from_db(artist_id)
+
         Logger.info("Validating artist data")
         artist_info = ArtistData(**json_data)
         Logger.success("Artist data validated successfully")
@@ -459,7 +462,7 @@ def run_full_ai_marketing_pipeline(json_data: Dict):
         raise
 
 
-def get_artist_data_from_db(artist_id: str) -> Dict:
+def get_artist_data_from_db(artist_id: str) -> str:
     db_start = Logger.start_task(f"Fetching artist data for ID {artist_id}")
     connection = None
     try:
@@ -482,14 +485,17 @@ def get_artist_data_from_db(artist_id: str) -> Dict:
                 if isinstance(value, date):
                     artist_data[key] = value.isoformat()
 
+            Logger.info("Converting data to JSON")
+            json_data = json.dumps(artist_data, indent=2)
+
             Logger.info("Saving artist data to JSON file")
             artist_name_slug = artist_data["stage_name"].replace(" ", "_")
             with open(f"{artist_name_slug}_json.txt", "w") as json_file:
-                json.dump(artist_data, json_file, indent=2)
+                json_file.write(json_data)
             Logger.success(f"Artist data saved to {artist_name_slug}_json.txt")
 
             Logger.end_task(db_start, "Database operation completed")
-            return artist_data
+            return json_data
 
     except Exception as e:
         Logger.error(f"Database error: {str(e)}")
@@ -501,7 +507,6 @@ def get_artist_data_from_db(artist_id: str) -> Dict:
             Logger.success("Database connection closed")
 
 
-# Updated example usage:
+# Update the example usage to only pass the artist_id
 artist_id = "fdf3afd2-a3d8-462c-b2dc-7e0805573d03"  # This should come from your application logic
-json_data = get_artist_data_from_db(artist_id)
-run_full_ai_marketing_pipeline(json_data)
+run_full_ai_marketing_pipeline(artist_id)
