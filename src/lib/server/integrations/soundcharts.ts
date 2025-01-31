@@ -147,7 +147,7 @@ export async function getArtistMetadata(uuid: string): Promise<any | null> {
         statusText: response.statusText,
         duration: Date.now() - startTime,
       };
-      logger.warning(requestId, 'Failed to fetch artist metadata', null, warningContext);
+      logger.warning(requestId, 'Failed to fetch artist metadata', warningContext);
       return null;
     }
 
@@ -195,14 +195,14 @@ export async function getArtistStreamingAudience(
         statusText: response.statusText,
         duration: Date.now() - startTime,
       };
-      logger.warning(requestId, 'Failed to fetch streaming audience', null, warningContext);
+      logger.warning(requestId, 'Failed to fetch streaming audience', warningContext);
       return null;
     }
 
     const data = await response.json();
     logger.process(
       requestId,
-      '✅ Successfully retrieved streaming audience',
+      'Successfully retrieved streaming audience',
       {
         dataPoints: data.items?.length || 0,
         duration: Date.now() - startTime,
@@ -245,14 +245,14 @@ async function getArtistAudience(uuid: string, platform: SocialPlatform): Promis
         statusText: response.statusText,
         duration: Date.now() - startTime,
       };
-      logger.warning(requestId, 'Failed to fetch audience data', null, warningContext);
+      logger.warning(requestId, 'Failed to fetch audience data', warningContext);
       return null;
     }
 
     const data = await response.json();
     logger.process(
       requestId,
-      '✅ Successfully retrieved audience data',
+      'Successfully retrieved audience data',
       {
         dataPoints: data.items?.length || 0,
         duration: Date.now() - startTime,
@@ -304,7 +304,7 @@ export const getArtistStats = soundchartsLimiter.wrap(
       // Get artist metadata
       const metadata = await getArtistMetadata(uuid);
       if (!metadata) {
-        logger.warning(requestId, 'No metadata found for artist', null, context);
+        logger.warning(requestId, 'No metadata found for artist', context);
         return null;
       }
 
@@ -414,18 +414,18 @@ export const getArtistTracks = soundchartsLimiter.wrap(
 
       if (response.status === 401) {
         const authError = new Error('Unauthorized: Not logged in');
-        logger.error(requestId, '❌ Unauthorized: Not logged in', authError, context);
+        logger.error(requestId, 'Unauthorized: Not logged in', authError, context);
         throw error(401, 'Unauthorized: You are not logged in');
       }
 
       if (response.status === 403) {
         const forbiddenError = new Error('Forbidden: Not authorized');
-        logger.error(requestId, '❌ Forbidden: Not authorized', forbiddenError, context);
+        logger.error(requestId, 'Forbidden: Not authorized', forbiddenError, context);
         throw error(403, 'Forbidden: You are not authorized to perform this operation');
       }
 
       if (response.status === 404) {
-        logger.warning(requestId, '⚠️ Artist not found', null, context);
+        logger.warning(requestId, 'Artist not found', context);
         return null;
       }
 
@@ -446,7 +446,7 @@ export const getArtistTracks = soundchartsLimiter.wrap(
       const data = await response.json();
       logger.process(
         requestId,
-        '✅ Successfully retrieved artist tracks',
+        'Successfully retrieved artist tracks',
         {
           trackCount: data.items?.length || 0,
           duration: Date.now() - startTime,

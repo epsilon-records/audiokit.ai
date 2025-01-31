@@ -1,15 +1,15 @@
-import { requireAuth, requireOrg, getOrg } from '$lib/server/auth';
-import { message, superValidate } from 'sveltekit-superforms/server';
-import { zod } from 'sveltekit-superforms/adapters';
-import { error, fail } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
-import { artistSchema, type Artist } from '$lib/schemas/artist';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
-import { sql } from 'drizzle-orm';
-import logger from '$lib/utils/logger';
+import { artistSchema, type Artist } from '$lib/schemas/artist';
+import { getOrg, requireAuth, requireOrg } from '$lib/server/auth';
 import { syncToHubspot } from '$lib/server/integrations/hubspot';
+import logger from '$lib/utils/logger';
 import { sanitizeUrl } from '$lib/utils/sanitize';
+import { error, fail } from '@sveltejs/kit';
+import { sql } from 'drizzle-orm';
+import { zod } from 'sveltekit-superforms/adapters';
+import { message, superValidate } from 'sveltekit-superforms/server';
+import type { PageServerLoad } from './$types';
 
 export const load = (async ({ locals }) => {
   const auth = await requireOrg(locals);
