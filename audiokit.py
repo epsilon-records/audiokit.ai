@@ -11,10 +11,7 @@ from psycopg2.extras import RealDictCursor
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from datetime import date
-import httpx
-import time
-from datetime import datetime
-import asyncio
+import requests
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -28,15 +25,16 @@ YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 # Define custom headers
 CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
 
-# Create async client with custom headers
-async_client = httpx.AsyncClient(headers=CUSTOM_HEADERS)
+# Create sync client with custom headers
+sync_client = requests.Session()
+sync_client.headers.update(CUSTOM_HEADERS)
 
-# Initialize single DeepSeek model
+# Update the AI model initialization to use sync client
 ai_model = OpenAIModel(
     model_name="deepseek/deepseek-r1",
     api_key=OPENROUTER_API_KEY,
     base_url="https://openrouter.ai/api/v1",
-    http_client=async_client,
+    http_client=sync_client,
 )
 
 # EPK System Prompt
@@ -292,14 +290,14 @@ def sanitize_artist_data(artist_data):
     return artist_data
 
 
-async def generate_report_with_agent(
+def generate_report_with_agent(
     agent, artist_data: dict, report_type: str, model_name: str, reports: dict
 ):
     start_time = Logger.start_task(f"Generating {report_type} with {model_name}")
     try:
-        agent.model.model_name = model_name  # Update just the model name
+        agent.model.model_name = model_name
         artist_data = sanitize_artist_data(artist_data)
-        result = await agent.run(json.dumps(artist_data))
+        result = agent.run_sync(json.dumps(artist_data))
 
         if result is None or result.data is None:
             raise ValueError(f"{report_type} generation returned None for {model_name}")
@@ -321,14 +319,12 @@ def generate_reports(artist_data: dict):
     for current_model, model_name in enumerate(AI_MODELS, 1):
         Logger.progress(current_model, total_models, f"Processing model {model_name}")
 
-        # Generate reports using helper function
-        await generate_report_with_agent(
-            epk_agent, artist_data, "EPK", model_name, reports
-        )
-        await generate_report_with_agent(
+        # Generate reports synchronously
+        generate_report_with_agent(epk_agent, artist_data, "EPK", model_name, reports)
+        generate_report_with_agent(
             internal_report_agent, artist_data, "Internal Report", model_name, reports
         )
-        await generate_report_with_agent(
+        generate_report_with_agent(
             market_analysis_agent, artist_data, "Market Analysis", model_name, reports
         )
 
@@ -343,7 +339,7 @@ def run_full_ai_marketing_pipeline(artist_id: str):
         artist_data = get_artist_data_from_db(artist_id)
 
         Logger.info("Generating reports")
-        all_reports = await generate_reports(artist_data)
+        all_reports = generate_reports(artist_data)
         Logger.success("Report generation completed")
 
         Logger.info("Running strategy selection")
@@ -356,7 +352,6 @@ def run_full_ai_marketing_pipeline(artist_id: str):
             Logger.success("Strategy selection completed")
         except Exception as e:
             Logger.warning(f"Strategy selection failed: {str(e)}")
-            # Fallback to selecting the first successful report from each category
             integrated_strategy = {
                 "EPK": next(
                     (
@@ -468,10 +463,10 @@ def get_artist_data_from_db(artist_id: str) -> dict:
             Logger.success("Database connection closed")
 
 
-async def main():
+def main():
     artist_id = "fdf3afd2-a3d8-462c-b2dc-7e0805573d03"
-    await run_full_ai_marketing_pipeline(artist_id)
+    run_full_ai_marketing_pipeline(artist_id)
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
