@@ -1,12 +1,12 @@
 import Bottleneck from 'bottleneck';
 import logger from '../../utils/logger.js';
 
-const MUSICFETCH_RATE_LIMIT = 3; // Reduced from 5 to 3 requests per second
-const MUSICFETCH_WINDOW = 1000; // 1 second in milliseconds
-const MUSICFETCH_MAX_CONCURRENT = 1; // Only 1 concurrent request
+const MUSICFETCH_RATE_LIMIT = 1; // Reduced to 1 request per second
+const MUSICFETCH_WINDOW = 1000; // 1 second window
+const MUSICFETCH_MAX_CONCURRENT = 1; // Keep at 1 concurrent request
 
 const musicfetchLimiter = new Bottleneck({
-  minTime: MUSICFETCH_WINDOW / MUSICFETCH_RATE_LIMIT, // ~333ms between requests
+  minTime: 1000, // Exactly 1 second between requests
   maxConcurrent: MUSICFETCH_MAX_CONCURRENT,
   reservoir: MUSICFETCH_RATE_LIMIT,
   reservoirRefreshInterval: MUSICFETCH_WINDOW,
