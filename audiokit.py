@@ -284,7 +284,6 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
             timeout=30,  # Add timeout
         )
         response.raise_for_status()
-        print(response.json())
         response_data = response.json()
         if not response_data.get("choices") or not response_data["choices"][0].get(
             "message"
