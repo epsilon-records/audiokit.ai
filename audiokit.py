@@ -1,10 +1,9 @@
-import requests
 import json
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from typing import Dict, List, Optional, Type
-from pydantic import BaseModel, Field, create_model
+from typing import Dict, List, Optional
+from pydantic import BaseModel, Field
 from dotenv import load_dotenv
 import os
 import psycopg2
@@ -12,6 +11,7 @@ from psycopg2.extras import RealDictCursor
 from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
 from datetime import date
+import httpx
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -22,18 +22,38 @@ SOUNDCHARTS_API_KEY = os.getenv("SOUNDCHARTS_API_KEY")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 
-# Initialize the model with the API key and base URL
-deepseek_model = OpenAIModel(
-    model_name="deepseek/deepseek-r1",  # Specify the DeepSeek R1 model
-    api_key=OPENROUTER_API_KEY,  # Your OpenRouter API key
-)
+# Define custom headers
+CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
 
-# AI Models
+# Create async client with custom headers
+async_client = httpx.AsyncClient(headers=CUSTOM_HEADERS)
+
+# Initialize models using OpenRouter
 AI_MODELS = {
-    "GPT-4 Turbo": "openai/gpt-4-turbo",
-    "Claude 3 Opus": "anthropic/claude-3-opus",
-    "Mistral Large": "mistralai/mistral-large-latest",
-    "DeepSeek-R1": deepseek_model,  # ✅ Added DeepSeek-R1
+    "Claude 3 Opus": OpenAIModel(
+        model_name="anthropic/claude-3-opus",
+        api_key=OPENROUTER_API_KEY,
+        base_url="https://openrouter.ai/api/v1",
+        http_client=async_client,
+    ),
+    "Mistral Large 2411": OpenAIModel(
+        model_name="mistralai/mistral-large-2411",
+        api_key=OPENROUTER_API_KEY,
+        base_url="https://openrouter.ai/api/v1",
+        http_client=async_client,
+    ),
+    "DeepSeek-R1": OpenAIModel(
+        model_name="deepseek/deepseek-r1",
+        api_key=OPENROUTER_API_KEY,
+        base_url="https://openrouter.ai/api/v1",
+        http_client=async_client,
+    ),
+    "OpenAI O1": OpenAIModel(
+        model_name="openai/o1",
+        api_key=OPENROUTER_API_KEY,
+        base_url="https://openrouter.ai/api/v1",
+        http_client=async_client,
+    ),
 }
 
 
@@ -140,27 +160,27 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Define the EPK Agent
 epk_agent = Agent(
-    model=deepseek_model,
+    model=AI_MODELS["DeepSeek-R1"],
     system_prompt=EPK_SYSTEM_PROMPT,
     result_type=str,  # Assuming the result is a Markdown string
 )
 
 # Define the Internal Report Agent
 internal_report_agent = Agent(
-    model=deepseek_model,
+    model=AI_MODELS["DeepSeek-R1"],
     system_prompt=INTERNAL_REPORT_PROMPT,
     result_type=str,  # Assuming the result is a Markdown string
 )
 
 market_analysis_agent = Agent(
-    model=deepseek_model,  # Will be set dynamically
+    model=AI_MODELS["DeepSeek-R1"],  # Will be set dynamically
     system_prompt="You are a strategic music marketing expert. Generate a market analysis report...",
     result_type=str,
 )
 
 # Define the Strategy Selection Agent
 strategy_selection_agent = Agent(
-    model=deepseek_model,
+    model=AI_MODELS["DeepSeek-R1"],
     system_prompt=(
         "You are an expert music marketing strategist. You have received marketing reports "
         "from multiple AI models. Your task is to:\n"
@@ -180,187 +200,43 @@ async def fetch_additional_data(ctx: RunContext, artist_id: str) -> dict:
     return {"additional_info": "Sample data"}
 
 
-def create_dynamic_artist_model(data: Dict) -> Type[BaseModel]:
-    """Dynamically creates an ArtistData model based on the input data structure"""
-    fields = {
-        "name": (str, Field(..., description="Artist name")),
-        "genre": (str, Field(..., description="Primary genre")),
-        "monthly_streams": (int, Field(0, description="Monthly streaming count")),
-        "social_media_followers": (
-            Dict[str, int],
-            Field(
-                default_factory=dict, description="Social media followers by platform"
-            ),
-        ),
-        "top_countries": (
-            List[str],
-            Field(default_factory=list, description="Top countries by listenership"),
-        ),
-        "recent_releases": (
-            List[str],
-            Field(default_factory=list, description="Recent release titles"),
-        ),
-        "collaboration_artists": (
-            List[str],
-            Field(default_factory=list, description="List of collaborating artists"),
-        ),
-        "marketing_budget": (float, Field(0.0, description="Marketing budget in USD")),
-    }
-
-    # Add optional fields based on data presence
-    if "biography" in data:
-        fields["biography"] = (
-            Optional[str],
-            Field(None, description="Artist biography"),
-        )
-    if "image_url" in data:
-        fields["image_url"] = (
-            Optional[str],
-            Field(None, description="URL to artist image"),
-        )
-    if "genres" in data:
-        fields["genres"] = (
-            Optional[List[Dict[str, List[str]]]],
-            Field(None, description="Detailed genre information"),
-        )
-    if "country_code" in data:
-        fields["country_code"] = (
-            Optional[str],
-            Field(None, description="ISO country code"),
-        )
-
-    return create_model("DynamicArtistData", **fields)
-
-
-def create_dynamic_report_model(data: Dict) -> Type[BaseModel]:
-    """Dynamically creates a MarketingReport model based on the input data structure"""
-    fields = {
-        "artist_name": (str, Field(..., description="Artist name")),
-        "report": (str, Field(..., description="Generated report content")),
-        "budget_allocation": (
-            Dict[str, float],
-            Field(default_factory=dict, description="Budget allocation by category"),
-        ),
-    }
-
-    # Add additional fields if present in data
-    if "recommendations" in data:
-        fields["recommendations"] = (
-            List[str],
-            Field(default_factory=list, description="Strategic recommendations"),
-        )
-    if "metrics" in data:
-        fields["metrics"] = (
-            Dict[str, float],
-            Field(default_factory=dict, description="Key performance metrics"),
-        )
-
-    return create_model("DynamicMarketingReport", **fields)
-
-
-# def generate_internal_report(artist_data: Dict, model_name: str) -> Type[BaseModel]:
-#     try:
-#         response = requests.post(
-#             "https://openrouter.ai/api/v1/chat/completions",
-#             headers={
-#                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-#                 "Content-Type": "application/json",
-#             },
-#             json={
-#                 "model": AI_MODELS[model_name],
-#                 "messages": [
-#                     {"role": "system", "content": INTERNAL_REPORT_PROMPT},
-#                     {"role": "user", "content": json.dumps(artist_data, indent=2)},
-#                 ],
-#                 "response_format": {"type": "json_object"},
-#             },
-#         )
-#         response.raise_for_status()
-#         response_data = response.json()
-#     except requests.exceptions.RequestException as e:
-#         raise Exception(f"API request failed: {str(e)}")
-#     try:
-#         report_content = json.loads(response_data["choices"][0]["message"]["content"])
-#         ReportModel = create_dynamic_report_model(report_content)
-#         return ReportModel(
-#             artist_name=artist_data["name"],
-#             report=report_content.get("report", "No detailed report generated"),
-#             budget_allocation=report_content.get("budget_allocation", {}),
-#         )
-#     except (json.JSONDecodeError, KeyError, ValidationError) as e:
-#         raise Exception(f"Failed to parse or validate report: {str(e)}")
-
-
-# EPK Report Generation
-# def generate_epk_report(artist_data: Dict, model_name: str) -> Type[BaseModel]:
-#     response = requests.post(
-#         "https://openrouter.ai/api/v1/chat/completions",
-#         headers={
-#             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-#             "Content-Type": "application/json",
-#         },
-#         json={
-#             "model": AI_MODELS[model_name],
-#             "messages": [
-#                 {"role": "system", "content": EPK_SYSTEM_PROMPT},
-#                 {"role": "user", "content": json.dumps(artist_data, indent=2)},
-#             ],
-#             "response_format": {"type": "json_object"},
-#         },
-#     ).json()
-#     try:
-#         report_content = json.loads(response["choices"][0]["message"]["content"])
-#         ReportModel = create_dynamic_report_model(report_content)
-#         return ReportModel(
-#             artist_name=artist_data["name"],
-#             report=report_content.get("report", "No detailed report generated"),
-#             budget_allocation=report_content.get("budget_allocation", {}),
-#         )
-#     except (json.JSONDecodeError, KeyError, ValidationError) as e:
-#         raise Exception(f"Failed to parse or validate report: {str(e)}")
-
-
-# AI Decision Making (Select Best Strategy & Merge Insights)
-def select_best_strategy(reports: Dict[str, BaseModel]) -> BaseModel:
-    evaluation_prompt = (
-        "You are an expert music marketing strategist. You have received marketing reports "
-        "from multiple AI models. Your task is to:\n"
-        "1. Identify the best marketing strategy from these reports.\n"
-        "2. Integrate the strongest insights from all reports into a single, optimized plan.\n"
-        "3. Ensure the strategy is detailed, realistic, and well-budgeted.\n"
-        "Respond in JSON format with keys: 'selected_model' (string), 'integrated_report' (string), and 'budget_allocation' (object of string:float)."
+class ArtistData(BaseModel):
+    name: str = Field("Unknown Artist", description="Artist name")
+    genre: str = Field("Unknown Genre", description="Primary genre")
+    monthly_streams: int = Field(0, description="Monthly streaming count")
+    social_media_followers: Dict[str, int] = Field(
+        default_factory=dict, description="Social media followers by platform"
     )
+    top_countries: List[str] = Field(
+        default_factory=list, description="Top countries by listenership"
+    )
+    recent_releases: List[str] = Field(
+        default_factory=list, description="Recent release titles"
+    )
+    collaboration_artists: List[str] = Field(
+        default_factory=list, description="List of collaborating artists"
+    )
+    marketing_budget: float = Field(0.0, description="Marketing budget in USD")
+    biography: Optional[str] = Field(None, description="Artist biography")
+    image_url: Optional[str] = Field(None, description="URL to artist image")
+    genres: Optional[List[Dict[str, List[str]]]] = Field(
+        None, description="Detailed genre information"
+    )
+    country_code: Optional[str] = Field(None, description="ISO country code")
+    # Add any other fields that are commonly used
 
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": AI_MODELS["GPT-4 Turbo"],
-            "messages": [
-                {"role": "system", "content": evaluation_prompt},
-                {
-                    "role": "user",
-                    "content": json.dumps(
-                        {model: report.dict() for model, report in reports.items()},
-                        indent=2,
-                    ),
-                },
-            ],
-            "response_format": {"type": "json_object"},
-        },
-    ).json()
 
-    response_data = json.loads(response["choices"][0]["message"]["content"])
-    ReportModel = create_dynamic_report_model(response_data)
-    return ReportModel(
-        artist_name=response_data.get("artist_name", "Unknown Artist"),
-        report=response_data.get(
-            "integrated_report", "No integrated strategy generated."
-        ),
-        budget_allocation=response_data.get("budget_allocation", {}),
+class MarketingReport(BaseModel):
+    artist_name: str = Field(..., description="Artist name")
+    report: str = Field(..., description="Generated report content")
+    budget_allocation: Dict[str, float] = Field(
+        default_factory=dict, description="Budget allocation by category"
+    )
+    recommendations: List[str] = Field(
+        default_factory=list, description="Strategic recommendations"
+    )
+    metrics: Dict[str, float] = Field(
+        default_factory=dict, description="Key performance metrics"
     )
 
 
@@ -409,43 +285,48 @@ def generate_reports(json_data: dict):
 
 
 def run_full_ai_marketing_pipeline(json_data: Dict):
-    ArtistModel = create_dynamic_artist_model(json_data)
-    artist_info = ArtistModel(**json_data)
+    try:
+        # Use the static model instead of creating a dynamic one
+        artist_info = ArtistData(**json_data)
 
-    # Generate all reports using multiple AI models
-    all_reports = generate_reports(json_data)
+        # Generate all reports using multiple AI models
+        all_reports = generate_reports(json_data)
 
-    # Run the Strategy Selection Agent
-    strategy_result = strategy_selection_agent.run_sync(
-        json.dumps(all_reports, indent=2)
-    )
-    integrated_strategy = strategy_result.data
+        # Run the Strategy Selection Agent
+        strategy_result = strategy_selection_agent.run_sync(
+            json.dumps(all_reports, indent=2)
+        )
+        integrated_strategy = strategy_result.data
 
-    # Extract best reports (SAFELY)
-    best_epk_report = integrated_strategy.get("EPK", "No EPK generated.")
-    best_internal_report = integrated_strategy.get(
-        "Internal Report", "No Internal Report generated."
-    )
-    best_market_analysis = integrated_strategy.get(
-        "Market Analysis", "No Market Analysis generated."
-    )
+        # Extract best reports (SAFELY)
+        best_epk_report = integrated_strategy.get("EPK", "No EPK generated.")
+        best_internal_report = integrated_strategy.get(
+            "Internal Report", "No Internal Report generated."
+        )
+        best_market_analysis = integrated_strategy.get(
+            "Market Analysis", "No Market Analysis generated."
+        )
 
-    # Write reports to files
-    artist_name_slug = artist_info.stage_name.replace(" ", "_")
+        # Write reports to files
+        artist_name_slug = artist_info.name.replace(" ", "_")
 
-    with open(f"{artist_name_slug}_epk.md", "w") as epk_file:
-        epk_file.write(best_epk_report)  # ✅ FIXED
+        with open(f"{artist_name_slug}_epk.md", "w") as epk_file:
+            epk_file.write(best_epk_report)
 
-    with open(f"{artist_name_slug}_internal.md", "w") as internal_file:
-        internal_file.write(best_internal_report)  # ✅ FIXED
+        with open(f"{artist_name_slug}_internal.md", "w") as internal_file:
+            internal_file.write(best_internal_report)
 
-    with open(f"{artist_name_slug}_market_analysis.md", "w") as market_file:
-        market_file.write(best_market_analysis)  # ✅ FIXED
+        with open(f"{artist_name_slug}_market_analysis.md", "w") as market_file:
+            market_file.write(best_market_analysis)
 
-    # Display the artist dashboard
-    display_artist_dashboard(artist_info.dict())
+        # Display the artist dashboard
+        display_artist_dashboard(artist_info.dict())
 
-    print(f"✅ Reports generated and saved for {artist_info.stage_name}")
+        print(f"✅ Reports generated and saved for {artist_info.name}")
+
+    except Exception as e:
+        print(f"❌ Error in marketing pipeline: {str(e)}")
+        raise
 
 
 def get_artist_data_from_db(artist_id: str) -> Dict:

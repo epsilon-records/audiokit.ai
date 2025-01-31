@@ -16,6 +16,7 @@ python-dotenv = "^1.0.1"
 pandas = "^2.2.3"
 pydantic-ai = "^0.0.21"
 psycopg2-binary = "^2.9.10"
+aiohttp = "^3.11.11"
 
 
 [build-system]
