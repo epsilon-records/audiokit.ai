@@ -206,6 +206,23 @@ export async function getArtistStreamingAudience(
     const response = await fetch(url, { headers });
 
     if (!response.ok) {
+      // Handle expected 404s for missing streaming accounts
+      if (response.status === 404) {
+        const data = await response.json();
+        if (data.errors?.some((error: any) => error.code === 404)) {
+          logger.process(
+            requestId,
+            'No streaming account found for artist on platform',
+            {
+              platform,
+              duration: Date.now() - startTime,
+            },
+            context
+          );
+          return null;
+        }
+      }
+
       const warningContext = {
         ...context,
         url,
