@@ -14,6 +14,7 @@ from datetime import date
 import httpx
 import time
 from datetime import datetime
+import asyncio
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -276,15 +277,36 @@ class Logger:
         )
 
 
-def generate_report_with_agent(
+def sanitize_artist_data(artist_data):
+    """Ensure artist data has no None values to prevent processing errors."""
+    for key, value in artist_data.items():
+        if value is None:
+            if isinstance(value, int):
+                artist_data[key] = 0
+            elif isinstance(value, str):
+                artist_data[key] = "N/A"
+            elif isinstance(value, list):
+                artist_data[key] = []
+            elif isinstance(value, dict):
+                artist_data[key] = {}
+    return artist_data
+
+
+async def generate_report_with_agent(
     agent, artist_data: dict, report_type: str, model_name: str, reports: dict
 ):
     start_time = Logger.start_task(f"Generating {report_type} with {model_name}")
     try:
         agent.model.model_name = model_name  # Update just the model name
-        result = agent.run_sync(json.dumps(artist_data))
+        artist_data = sanitize_artist_data(artist_data)
+        result = await agent.run(json.dumps(artist_data))
+
+        if result is None or result.data is None:
+            raise ValueError(f"{report_type} generation returned None for {model_name}")
+
         reports[report_type][model_name] = result.data
         Logger.success(f"{report_type} generated successfully with {model_name}")
+
     except Exception as e:
         Logger.warning(f"Failed to generate {report_type} with {model_name}: {str(e)}")
         reports[report_type][model_name] = f"{report_type} generation failed: {str(e)}"
@@ -300,11 +322,13 @@ def generate_reports(artist_data: dict):
         Logger.progress(current_model, total_models, f"Processing model {model_name}")
 
         # Generate reports using helper function
-        generate_report_with_agent(epk_agent, artist_data, "EPK", model_name, reports)
-        generate_report_with_agent(
+        await generate_report_with_agent(
+            epk_agent, artist_data, "EPK", model_name, reports
+        )
+        await generate_report_with_agent(
             internal_report_agent, artist_data, "Internal Report", model_name, reports
         )
-        generate_report_with_agent(
+        await generate_report_with_agent(
             market_analysis_agent, artist_data, "Market Analysis", model_name, reports
         )
 
@@ -319,7 +343,7 @@ def run_full_ai_marketing_pipeline(artist_id: str):
         artist_data = get_artist_data_from_db(artist_id)
 
         Logger.info("Generating reports")
-        all_reports = generate_reports(artist_data)
+        all_reports = await generate_reports(artist_data)
         Logger.success("Report generation completed")
 
         Logger.info("Running strategy selection")
@@ -444,6 +468,10 @@ def get_artist_data_from_db(artist_id: str) -> dict:
             Logger.success("Database connection closed")
 
 
-# Update the example usage to only pass the artist_id
-artist_id = "fdf3afd2-a3d8-462c-b2dc-7e0805573d03"  # This should come from your application logic
-run_full_ai_marketing_pipeline(artist_id)
+async def main():
+    artist_id = "fdf3afd2-a3d8-462c-b2dc-7e0805573d03"
+    await run_full_ai_marketing_pipeline(artist_id)
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
