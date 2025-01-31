@@ -127,7 +127,7 @@ export const actions = {
       };
       await syncToHubspot(updatedArtist.email, hubspotData);
     } else {
-      logger.warning(crypto.randomUUID(), 'Cannot sync to HubSpot - missing email', {
+      logger.warning(crypto.randomUUID(), 'Unable to sync to HubSpot due to missing email', {
         orgId: locals.auth.orgId,
       });
     }
