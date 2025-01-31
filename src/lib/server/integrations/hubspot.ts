@@ -103,7 +103,7 @@ export const getHubspotContact = hubspotLimiter.wrap(
       });
 
       if (!searchData.results?.length) {
-        logger.warning(requestId, 'No Hubspot contact found', undefined, context);
+        logger.warning(requestId, 'No Hubspot contact found', context);
         return null;
       }
 

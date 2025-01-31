@@ -183,7 +183,7 @@ async function updateHubspotArtist(artist: typeof artists.$inferSelect & { email
 
     const hubspotData = await getHubspotData(artist.email);
     if (!hubspotData || !hubspotData.properties) {
-      logger.warning(requestId, 'No Hubspot data available', undefined, context);
+      logger.warning(requestId, 'No Hubspot data available', context);
       return {
         artistId: artist.id,
         email: artist.email,
@@ -250,7 +250,7 @@ export async function enrichWithHubspot(
 
   try {
     if (!artistData.length) {
-      logger.warning(requestId, 'No artists found to update with Hubspot', undefined, {
+      logger.warning(requestId, 'No artists found to update with Hubspot', {
         requestId,
       });
       return {

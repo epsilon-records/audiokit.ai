@@ -51,7 +51,7 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
 
       const spotifyId = extractSpotifyId(artist.spotify);
       if (!spotifyId) {
-        logger.warning(requestId, 'Could not extract Spotify ID from URL', undefined, context);
+        logger.warning(requestId, 'Could not extract Spotify ID from URL', context);
         return {
           success: false,
           artistId: artist.id,
@@ -70,7 +70,7 @@ async function updateArtist(artist: typeof artists.$inferSelect) {
         );
         await db.update(artists).set({ soundchartsId }).where(eq(artists.id, artist.id));
       } else {
-        logger.warning(requestId, 'No Soundcharts ID found for Spotify ID', undefined, context);
+        logger.warning(requestId, 'No Soundcharts ID found for Spotify ID', context);
       }
     }
 
@@ -186,7 +186,7 @@ export async function enrichWithSoundcharts(
 
   try {
     if (!artistData.length) {
-      logger.warning(requestId, 'No artists found to update with Soundcharts', undefined, {
+      logger.warning(requestId, 'No artists found to update with Soundcharts', {
         requestId,
       });
       return {

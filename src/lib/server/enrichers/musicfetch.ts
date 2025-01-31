@@ -47,7 +47,7 @@ export async function enrichWithMusicfetch(
 
   try {
     if (!artistData.length) {
-      logger.warning(requestId, 'No artists found to update with Musicfetch', undefined, {
+      logger.warning(requestId, 'No artists found to update with Musicfetch', {
         requestId,
       });
       return {
@@ -95,12 +95,7 @@ export async function enrichWithMusicfetch(
           const linkUrl = serviceLinks.find((link) => link !== null && link !== '');
 
           if (!linkUrl) {
-            logger.warning(
-              requestId,
-              'No valid service links found for artist',
-              undefined,
-              artistContext
-            );
+            logger.warning(requestId, 'No valid service links found for artist', artistContext);
             return {
               success: false,
               artistId: artist.id,
@@ -131,7 +126,7 @@ export async function enrichWithMusicfetch(
           ]);
 
           if (!links) {
-            logger.warning(requestId, 'No links found from Musicfetch', undefined, artistContext);
+            logger.warning(requestId, 'No links found from Musicfetch', artistContext);
             return {
               success: false,
               artistId: artist.id,
@@ -153,10 +148,7 @@ export async function enrichWithMusicfetch(
             if (!sanitizedUrl) {
               logger.warning(
                 requestId,
-                `Invalid URL format for ${service}`,
-                {
-                  originalUrl: value.link,
-                },
+                `Invalid URL format for ${service}: ${value.link}`,
                 artistContext
               );
               return { ...acc, [service]: null };
