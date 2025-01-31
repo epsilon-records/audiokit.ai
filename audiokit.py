@@ -10,28 +10,15 @@ import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from pydantic_ai import Agent, RunContext
-import asyncio
 
 load_dotenv()  # Load environment variables from .env file
 
 # API Configuration - Using os.getenv() with defaults where appropriate
 SOUNDCHARTS_API_BASE = os.getenv("SOUNDCHARTS_API_BASE", "https://api.soundcharts.com")
-
 SOUNDCHARTS_APP_ID = os.getenv("SOUNDCHARTS_APP_ID")
-if not SOUNDCHARTS_APP_ID:
-    raise ValueError("SOUNDCHARTS_APP_ID environment variable is required")
-
 SOUNDCHARTS_API_KEY = os.getenv("SOUNDCHARTS_API_KEY")
-if not SOUNDCHARTS_API_KEY:
-    raise ValueError("SOUNDCHARTS_API_KEY environment variable is required")
-
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-if not OPENROUTER_API_KEY:
-    raise ValueError("OPENROUTER_API_KEY environment variable is required")
-
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
-if not YOUTUBE_API_KEY:
-    raise ValueError("YOUTUBE_API_KEY environment variable is required")
 
 # AI Models
 AI_MODELS = {
@@ -41,7 +28,7 @@ AI_MODELS = {
     "DeepSeek-R1": "deepseek/deepseek-r1",  # ✅ Added DeepSeek-R1
 }
 
-# EPK System Prompt for AI
+# EPK System Prompt
 EPK_SYSTEM_PROMPT = """
 You are an expert in electronic music industry marketing. Your task is to create a compelling Electronic Press Kit (EPK) from the provided JSON data. 
 
@@ -384,11 +371,32 @@ def display_artist_dashboard(artist_data: Dict):
     plt.show()
 
 
-async def generate_reports_async(json_data: dict):
-    tasks = []
+def generate_reports(json_data: dict):
+    reports = {"EPK": {}, "Internal Report": {}, "Market Analysis": {}}
+
     for model_name, model_id in AI_MODELS.items():
-        tasks.append(generate_single_report(model_id, json_data))
-    return await asyncio.gather(*tasks)
+        print(f"Generating reports with {model_name}...")
+
+        # Generate EPK Report
+        epk_agent.model = model_id
+        epk_result = epk_agent.run_sync(json.dumps(json_data, indent=2))
+        reports["EPK"][model_name] = epk_result.data
+
+        # Generate Internal Report
+        internal_report_agent.model = model_id
+        internal_report_result = internal_report_agent.run_sync(
+            json.dumps(json_data, indent=2)
+        )
+        reports["Internal Report"][model_name] = internal_report_result.data
+
+        # Generate Market Analysis Report
+        market_analysis_agent.model = model_id  # ✅ FIXED
+        market_analysis_result = market_analysis_agent.run_sync(
+            json.dumps(json_data, indent=2)
+        )
+        reports["Market Analysis"][model_name] = market_analysis_result.data
+
+    return reports
 
 
 def run_full_ai_marketing_pipeline(json_data: Dict):
