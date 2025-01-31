@@ -427,7 +427,7 @@ async def integrate_reports(reports: dict) -> dict:
                 "X-Title": "AudioKit",
             },
             json={
-                "model": "deepseek/deepseek-r1",
+                "model": "deepseek/deepseek-chat",
                 "messages": [
                     {"role": "system", "content": epk_system_prompt},
                     {"role": "user", "content": json.dumps({"EPKs": reports["EPK"]})},
@@ -462,7 +462,7 @@ async def integrate_reports(reports: dict) -> dict:
                 "X-Title": "AudioKit",
             },
             json={
-                "model": "deepseek/deepseek-r1",
+                "model": "deepseek/deepseek-chat",
                 "messages": [
                     {"role": "system", "content": internal_system_prompt},
                     {
