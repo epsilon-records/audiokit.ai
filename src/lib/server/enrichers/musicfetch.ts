@@ -2,7 +2,7 @@ import { eq } from 'drizzle-orm';
 import { serializeError } from 'serialize-error';
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
-import { isValidLink } from '../../utils';
+import { isValidLink } from '../../utils.js';
 import logger from '../../utils/logger.js';
 import { sanitizeUrl } from '../../utils/sanitize.js';
 import { getMusicfetchData } from '../integrations/musicfetch.js';
