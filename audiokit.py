@@ -286,7 +286,12 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
             },
         )
         response.raise_for_status()
-        return response.json()["choices"][0]["message"]["content"]
+        response_data = response.json()
+        if not response_data.get("choices") or not response_data["choices"][0].get(
+            "message"
+        ):
+            raise ValueError("Invalid response structure from OpenRouter API")
+        return response_data["choices"][0]["message"]["content"]
     except Exception as e:
         return handle_report_error(e, model_name, artist_data, "Internal Report")
 
