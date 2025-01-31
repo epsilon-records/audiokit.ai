@@ -249,7 +249,7 @@ async function getArtistAudience(uuid: string, platform: string): Promise<any | 
   try {
     logger.process(
       requestId,
-      '🔍 Fetching artist audience data',
+      'Fetching artist audience data',
       {
         metadata: {
           environment: process.env.NODE_ENV,
@@ -441,7 +441,7 @@ export const getArtistTracks = soundchartsLimiter.wrap(
     try {
       logger.process(
         requestId,
-        '🔍 Fetching artist tracks',
+        'Fetching artist tracks',
         {
           metadata: {
             environment: process.env.NODE_ENV,
