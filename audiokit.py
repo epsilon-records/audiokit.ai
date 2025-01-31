@@ -433,97 +433,119 @@ async def generate_reports(artist_data: dict):
 
 
 async def integrate_reports(reports: dict, artist_data: dict) -> dict:
-    """Integrate multiple reports into optimized versions"""
+    """Integrate multiple reports into optimized versions and return as dictionary"""
     try:
-        # If there's only one report for each type, return them directly
-        if len(reports["EPK"]) == 1 and len(reports["Internal Report"]) == 1:
+        final_reports = {"EPK": None, "Internal Report": None}
+
+        # Handle EPK reports
+        if len(reports["EPK"]) == 1:
             single_epk_model = next(iter(reports["EPK"]))
-            single_internal_model = next(iter(reports["Internal Report"]))
-            return {
-                "selected_models": {
-                    "EPK": single_epk_model,
-                    "Internal Report": single_internal_model,
+            final_reports["EPK"] = reports["EPK"][single_epk_model]
+        else:
+            # Process EPKs with artist data
+            epk_response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "HTTP-Referer": "https://audiokit.ai",
+                    "X-Title": "AudioKit",
                 },
-                "final_epk_report": reports["EPK"][single_epk_model],
-                "final_internal_analysis": reports["Internal Report"][
-                    single_internal_model
-                ],
-                "budget_allocation": {},
-            }
+                json={
+                    "model": EPK_INTEGRATION_MODEL,
+                    "messages": [
+                        {"role": "system", "content": EPK_INTEGRATION_PROMPT},
+                        {
+                            "role": "user",
+                            "content": json.dumps(
+                                {"EPKs": reports["EPK"], "artist_data": artist_data}
+                            ),
+                        },
+                    ],
+                    "response_format": {"type": "json_object"},
+                },
+            )
+            epk_response.raise_for_status()
 
-        # Process EPKs with artist data
-        epk_response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "HTTP-Referer": "https://audiokit.ai",
-                "X-Title": "AudioKit",
-            },
-            json={
-                "model": EPK_INTEGRATION_MODEL,
-                "messages": [
-                    {"role": "system", "content": EPK_INTEGRATION_PROMPT},
-                    {
-                        "role": "user",
-                        "content": json.dumps(
-                            {"EPKs": reports["EPK"], "artist_data": artist_data}
-                        ),
-                    },
-                ],
-                "response_format": {"type": "json_object"},
-            },
-        )
-        epk_response.raise_for_status()
-        integrated_epk = epk_response.json()["choices"][0]["message"]["content"]
+            # Validate response structure
+            try:
+                response_data = epk_response.json()
+                if not response_data.get("choices") or not response_data["choices"][
+                    0
+                ].get("message"):
+                    raise ValueError("Invalid response structure from OpenRouter API")
+                final_reports["EPK"] = response_data["choices"][0]["message"]["content"]
+            except (json.JSONDecodeError, KeyError) as e:
+                Logger.error(f"Failed to parse EPK response: {str(e)}")
+                final_reports["EPK"] = (
+                    "EPK integration failed: Invalid API response format"
+                )
 
-        # Process Internal Reports with artist data
-        internal_response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "HTTP-Referer": "https://audiokit.ai",
-                "X-Title": "AudioKit",
-            },
-            json={
-                "model": EPK_INTEGRATION_MODEL,
-                "messages": [
-                    {"role": "system", "content": INTERNAL_REPORT_INTEGRATION_PROMPT},
-                    {
-                        "role": "user",
-                        "content": json.dumps(
-                            {
-                                "Internal Reports": reports["Internal Report"],
-                                "artist_data": artist_data,
-                            }
-                        ),
-                    },
-                ],
-                "response_format": {"type": "json_object"},
-            },
-        )
-        internal_response.raise_for_status()
-        integrated_internal = internal_response.json()["choices"][0]["message"][
-            "content"
-        ]
+        # Handle Internal Reports
+        if len(reports["Internal Report"]) == 1:
+            single_internal_model = next(iter(reports["Internal Report"]))
+            final_reports["Internal Report"] = reports["Internal Report"][
+                single_internal_model
+            ]
+        else:
+            # Process Internal Reports with artist data
+            internal_response = requests.post(
+                "https://openrouter.ai/api/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                    "HTTP-Referer": "https://audiokit.ai",
+                    "X-Title": "AudioKit",
+                },
+                json={
+                    "model": EPK_INTEGRATION_MODEL,
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": INTERNAL_REPORT_INTEGRATION_PROMPT,
+                        },
+                        {
+                            "role": "user",
+                            "content": json.dumps(
+                                {
+                                    "Internal Reports": reports["Internal Report"],
+                                    "artist_data": artist_data,
+                                }
+                            ),
+                        },
+                    ],
+                    "response_format": {"type": "json_object"},
+                },
+            )
+            internal_response.raise_for_status()
 
+            # Validate response structure
+            try:
+                response_data = internal_response.json()
+                if not response_data.get("choices") or not response_data["choices"][
+                    0
+                ].get("message"):
+                    raise ValueError("Invalid response structure from OpenRouter API")
+                final_reports["Internal Report"] = response_data["choices"][0][
+                    "message"
+                ]["content"]
+            except (json.JSONDecodeError, KeyError) as e:
+                Logger.error(f"Failed to parse internal report response: {str(e)}")
+                final_reports["Internal Report"] = (
+                    "Internal Report integration failed: Invalid API response format"
+                )
+
+        return final_reports
+
+    except requests.exceptions.RequestException as e:
+        Logger.error(f"API request failed: {str(e)}")
         return {
-            "selected_models": {
-                "EPK": "Integrated Version",
-                "Internal Report": "Integrated Version",
-            },
-            "final_epk_report": integrated_epk,
-            "final_internal_analysis": integrated_internal,
-            "budget_allocation": {},
+            "EPK": "EPK integration failed: API request error",
+            "Internal Report": "Internal Report integration failed: API request error",
         }
-
     except Exception as e:
-        Logger.warning(f"Failed to integrate reports: {str(e)}")
+        Logger.error(f"Unexpected error during report integration: {str(e)}")
         return {
-            "selected_models": {"EPK": "None", "Internal Report": "None"},
-            "final_epk_report": f"EPK integration failed: {str(e)}",
-            "final_internal_analysis": f"Internal Report integration failed: {str(e)}",
-            "integrated_report": f"Report integration failed: {str(e)}",
-            "budget_allocation": {},
+            "EPK": "EPK integration failed: Unexpected error",
+            "Internal Report": "Internal Report integration failed: Unexpected error",
         }
 
 
@@ -565,17 +587,17 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
 
         # Save integrated reports as rich text files
         Logger.info("Saving integrated reports as rich text files")
-        if "final_epk_report" in integrated_reports:
+        if integrated_reports["EPK"]:
             epk_filename = f"{artist_name_slug}_integrated_epk.tex"
             with open(epk_filename, "w") as f:
-                f.write(integrated_reports["final_epk_report"])
+                f.write(integrated_reports["EPK"])
             Logger.success(f"Saved integrated EPK to {epk_filename}")
 
-        if "final_internal_analysis" in integrated_reports:
+        if integrated_reports["Internal Report"]:
             internal_filename = f"{artist_name_slug}_integrated_internal_report.tex"
             with open(internal_filename, "w") as f:
-                f.write(integrated_reports["final_internal_analysis"])
-            Logger.success(f"Saved integrated internal report to {internal_filename}")
+                f.write(integrated_reports["Internal Report"])
+            Logger.success(f"Saved internal report to {internal_filename}")
 
         Logger.end_task(save_start, "Reports saved successfully")
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
