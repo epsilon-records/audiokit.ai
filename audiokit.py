@@ -25,41 +25,43 @@ CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
 EPK_SYSTEM_PROMPT = """
 You are an expert in electronic music industry marketing. Your task is to create a visually stunning and professional Electronic Press Kit (EPK) from the provided JSON data.
 
-The EPK should be tailored to attract booking agencies and event promoters and must be formatted in LaTeX for maximum visual impact.
+The EPK should be tailored to attract booking agencies and event promoters and must be formatted in rich text for maximum visual impact.
 
 Report Requirements:
-	1.	Professional LaTeX Formatting: Use well-structured section headings, subheadings, bullet points, and tables for clarity.
-	2.	Aesthetic Design: Ensure a polished and visually appealing layout, incorporating appropriate typography, spacing, and alignment.
-	3.	Compelling Content: Highlight key selling points, artist branding, and achievements to captivate promoters.
-	4.	Visual Enhancements: Where applicable, integrate images, logos, and graphs using LaTeX packages (e.g., graphicx, pgfplots, tikz).
+	1.	Professional Formatting: Use clear section headings, subheadings, and bullet points for readability
+	2.	Aesthetic Design: Create a polished and visually appealing layout with proper spacing and alignment
+	3.	Compelling Content: Highlight key selling points, artist branding, and achievements to captivate promoters
+	4.	Visual Enhancements: Use emojis sparingly to enhance key points (1-2 per section max)
 
 Output Instructions:
-	•	Return the complete LaTeX document, fully formatted and ready for compilation.
-	•	Ensure the document is engaging, professional, and well-structured to make a strong impression on industry professionals.
+	•	Return the complete rich text document, ready for display
+	•	Ensure the document is engaging, professional, and well-structured
+	•	Use markdown-like formatting for headings (#, ##, ###) and lists
+	•	Maintain a professional tone while being approachable
 
 EPK Structure:
 
-1. Artist Overview
+# 🎤 Artist Overview
 - Craft a compelling one-paragraph pitch highlighting the artist's unique appeal
 - Include genre focus, key achievements, and artistic direction
 - Mention notable collaborations and remixes
 
-2. Performance & Draw
+# 📊 Performance & Draw
 - Current streaming numbers and growth trends
 - Social media engagement metrics
 - Geographic popularity insights
 
-3. Recent Releases & Press
+# 🎧 Recent Releases & Press
 - Featured tracks from the past 12 months
 - Remix work and collaborations
 - Notable playlist inclusions or features
 
-4. Stage Experience & Technical
+# 🎪 Stage Experience & Technical
 - Performance style and format
 - Technical rider highlights (if available)
 - Past notable venues/events (if available)
 
-5. Contact & Booking
+# 📞 Contact & Booking
 - Management/booking contact details
 - Social media and streaming links
 - Website and press materials
@@ -67,51 +69,53 @@ EPK Structure:
 
 # Internal Report System Prompt
 INTERNAL_REPORT_PROMPT = """
-You are a music industry analytics expert. Using the provided JSON data, generate a comprehensive and visually appealing internal artist report in LaTeX format.
+You are a music industry analytics expert. Using the provided JSON data, generate a comprehensive and visually appealing internal artist report in rich text format.
 
 Report Requirements:
-	1.	Professional LaTeX Formatting: Use well-structured section headings, subheadings, bullet points, and tables for clarity.
-	2.	Aesthetic Design: Ensure a polished and visually appealing layout, incorporating appropriate typography, spacing, and alignment.
-	3.	Compelling Content: Highlight key selling points, artist branding, and achievements to captivate promoters.
-	4.	Visual Enhancements: Where applicable, integrate images, logos, and graphs using LaTeX packages (e.g., graphicx, pgfplots, tikz).
+	1.	Professional Formatting: Use clear section headings, subheadings, and bullet points for readability
+	2.	Aesthetic Design: Create a polished and visually appealing layout with proper spacing and alignment
+	3.	Compelling Content: Highlight key selling points, artist branding, and achievements
+	4.	Visual Enhancements: Use emojis sparingly to enhance key points (1-2 per section max)
 
 Output Instructions:
-	•	Return the full LaTeX document, ready for compilation.
-	•	Ensure the document is structured for clarity, professionalism, and maximum readability.
+	•	Return the full rich text document, ready for display
+	•	Ensure the document is structured for clarity, professionalism, and maximum readability
+	•	Use markdown-like formatting for headings (#, ##, ###) and lists
+	•	Maintain a professional tone while being approachable
 
 Report Structure:
 
-1. Performance Analytics
+# 📈 Performance Analytics
 - Detailed streaming metrics analysis across all platforms
 - Month-over-month growth trends with percentage changes
 - Platform-specific performance insights (e.g., Spotify, Apple Music, YouTube, TikTok)
 - Comparative analysis against previous periods
 
-2. Audience Development
+# 🌍 Audience Development
 - Follower growth rates across major platforms
 - Engagement metrics and patterns (likes, comments, shares)
 - Geographic distribution of listeners (top countries/cities)
 - Platform-specific audience behavior (e.g., active hours, retention rates)
 
-3. Release Impact Analysis
+# 🎵 Release Impact Analysis
 - Performance metrics for recent releases (stream counts, saves, playlist additions)
 - Comparison of original tracks vs. remixes in terms of engagement and reach
 - Collaboration impact on streaming numbers and audience crossover
 - Effectiveness of release timing (day of the week, seasonal trends)
 
-4. Distribution & Platform Strategy
+# 📱 Distribution & Platform Strategy
 - Platform-by-platform presence analysis (gaps, strengths)
 - Identification of gaps in digital distribution
 - Optimization opportunities for each streaming/social platform
 - Content strategy recommendations based on past performance
 
-5. Market Position Assessment
+# 🏆 Market Position Assessment
 - Genre positioning (comparisons with similar artists)
 - Competitive landscape (benchmarking against industry peers)
 - Growth opportunities (new platforms, untapped audiences)
 - Risk factors (declining metrics, audience shifts)
 
-6. Action Items & Recommendations
+# 🚀 Action Items & Recommendations
 - Short-term optimization steps (quick wins for immediate impact)
 - Long-term strategic initiatives (sustained growth strategies)
 - Platform-specific recommendations (e.g., ad spend allocation, content tweaks)
@@ -328,17 +332,52 @@ async def integrate_reports(reports: dict) -> dict:
 
         # Process EPKs separately
         epk_system_prompt = (
-            "You are an expert music marketing strategist. You will receive multiple Electronic Press Kits (EPKs) from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:\n\n"
-            "Processing Steps:\n"
-            "1. Select the Best EPK: Choose the most comprehensive and high-quality version.\n"
-            "2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other EPKs to enhance the final version.\n"
-            "3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness.\n"
-            "4. Finalize for Publication: Replace any placeholders, refine the language, and structure the EPK to be visually appealing and professionally formatted in LaTeX.\n\n"
-            "Output Requirements:\n"
-            "• Return only the final LaTeX document, fully formatted and ready for compilation.\n"
-            "• Ensure the EPK is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and tables.\n"
-            "• Where applicable, include charts, graphs, or images using LaTeX packages (e.g., graphicx, pgfplots, tikz) to enhance visual presentation.\n\n"
-            "The final EPK should be engaging, professional, and designed to impress industry stakeholders."
+            "You are an expert music marketing strategist and professional document designer. Create a complete LaTeX document that will compile into a polished PDF EPK. Follow these guidelines:\n\n"
+            "Document Style Requirements:\n"
+            "• Compact and dense layout - maximize content per page\n"
+            "• Professional music industry aesthetic - not academic\n"
+            "• Use modern, fun fonts that reflect the artist's brand\n"
+            "• Minimal whitespace - content should flow efficiently\n"
+            "• Two-column layout for optimal space utilization\n\n"
+            "Document Structure:\n"
+            "\\section*{Artist Overview}\n"
+            "- Craft a compelling one-paragraph pitch\n"
+            "- Highlight unique selling points and artistic vision\n"
+            "- Include genre focus and key achievements\n\n"
+            "\\section*{Performance Metrics}\n"
+            "- Present streaming numbers and growth trends\n"
+            "- Social media engagement highlights\n"
+            "- Geographic popularity insights\n\n"
+            "\\section*{Recent Releases}\n"
+            "- Showcase featured tracks from past 12 months\n"
+            "- Highlight notable remixes and collaborations\n"
+            "- Mention significant playlist inclusions\n\n"
+            "\\section*{Stage Presence}\n"
+            "- Describe performance style and format\n"
+            "- Include technical rider highlights\n"
+            "- Mention past notable venues/events\n\n"
+            "\\section*{Contact Information}\n"
+            "- Provide management/booking contacts\n"
+            "- Include social media and streaming links\n"
+            "- Add website and press material links\n\n"
+            "Formatting Requirements:\n"
+            "1. Begin with \\documentclass[twocolumn]{article}\n"
+            "2. Use \\usepackage{geometry} with narrow margins\n"
+            "3. Include \\usepackage{graphicx} for images\n"
+            "4. Use modern fonts: \\usepackage{fontspec} with 'Fira Sans' or similar\n"
+            "5. Apply consistent section formatting with \\usepackage{titlesec}\n"
+            "6. Use compact lists with \\usepackage{enumitem}\n"
+            "7. Include proper LaTeX document structure\n\n"
+            "Output Instructions:\n"
+            "• Return ONLY the complete LaTeX document\n"
+            "• Use a two-column layout for compact presentation\n"
+            "• Include all necessary packages and preamble\n"
+            "• Ensure proper document structure\n"
+            "• Make it ready for direct PDF compilation\n"
+            "• Do not include any explanatory text or comments\n"
+            "• Do not add any section about the document itself\n"
+            "• The output must be a complete, standalone LaTeX file\n"
+            "• Keep the document to 1-2 pages maximum"
         )
 
         epk_response = requests.post(
@@ -362,16 +401,16 @@ async def integrate_reports(reports: dict) -> dict:
 
         # Process Internal Reports separately
         internal_system_prompt = (
-            "You are an expert music industry analyst. You will receive multiple Internal Reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:\n\n"
+            "You are an expert music industry analyst. You will receive multiple Internal Reports from AI models. Your task is to generate a professionally formatted, publication-ready rich text document by following these steps:\n\n"
             "Processing Steps:\n"
             "1. Select the Best Report: Choose the most comprehensive and high-quality version.\n"
             "2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version.\n"
             "3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness.\n"
-            "4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in LaTeX.\n\n"
+            "4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in rich text.\n\n"
             "Output Requirements:\n"
-            "• Return only the final LaTeX document, fully formatted and ready for compilation.\n"
-            "• Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and tables.\n"
-            "• Where applicable, include charts, graphs, or images using LaTeX packages (e.g., graphicx, pgfplots, tikz) to enhance visual presentation.\n\n"
+            "• Return only the final rich text document, fully formatted and ready for display.\n"
+            "• Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and lists.\n"
+            "• Where applicable, include emojis sparingly to enhance key points.\n\n"
             "The final report should be comprehensive, professional, and designed for internal decision-making."
         )
 
@@ -464,7 +503,7 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         for report_type, models in all_reports.items():
             for model_name, content in models.items():
                 saved_reports += 1
-                filename = f"{artist_name_slug}_{report_type}_{model_name.replace('/', '_')}.md"
+                filename = f"{artist_name_slug}_{report_type}_{model_name.replace('/', '_')}.txt"
                 Logger.info(
                     f"Saving {report_type} from {model_name} ({saved_reports}/{total_reports})"
                 )
@@ -472,16 +511,16 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
                     f.write(content)
                 Logger.success(f"Saved {filename} successfully")
 
-        # Save integrated reports as LaTeX files
-        Logger.info("Saving integrated reports as LaTeX files")
+        # Save integrated reports as rich text files
+        Logger.info("Saving integrated reports as rich text files")
         if "final_epk_report" in integrated_reports:
-            epk_filename = f"{artist_name_slug}_integrated_epk.tex"
+            epk_filename = f"{artist_name_slug}_integrated_epk.txt"
             with open(epk_filename, "w") as f:
                 f.write(integrated_reports["final_epk_report"])
             Logger.success(f"Saved integrated EPK to {epk_filename}")
 
         if "final_internal_analysis" in integrated_reports:
-            internal_filename = f"{artist_name_slug}_integrated_internal_report.tex"
+            internal_filename = f"{artist_name_slug}_integrated_internal_report.txt"
             with open(internal_filename, "w") as f:
                 f.write(integrated_reports["final_internal_analysis"])
             Logger.success(f"Saved integrated internal report to {internal_filename}")
