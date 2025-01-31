@@ -19,19 +19,19 @@
 \rule{\textwidth}{1pt}
 \end{center}
 
-\section*{Artist Overview}
+\section\*{Artist Overview}
 Vozz Rich is an emerging force in the electronic music scene, blending influences from Detroit house, underground raves, salsa, techno, and big room sounds. Based in the US with roots in Mexico and California, his unique fusion of cultural elements creates an instantly recognizable signature sound. With consistent growth across streaming platforms and a rapidly expanding catalogue of releases, Vozz Rich represents the new wave of electronic music producers pushing genre boundaries.
 
-\section*{Performance \& Draw}
+\section\*{Performance \& Draw}
 
-\subsection*{Streaming Performance}
+\subsection\*{Streaming Performance}
 \begin{itemize}
 \item \textbf{Spotify Monthly Listeners:} 24,910+
 \item \textbf{Total Spotify Followers:} 4,103
 \item \textbf{Instagram Followers:} 4,862
 \end{itemize}
 
-\section*{Recent Releases \& Collaborations}
+\section\*{Recent Releases \& Collaborations}
 
 \textbf{Notable Recent Tracks:}
 \begin{itemize}
@@ -41,7 +41,7 @@ Vozz Rich is an emerging force in the electronic music scene, blending influence
 \item "Dance All Night - Vozz Rich Remix" (July 2024)
 \end{itemize}
 
-\section*{Genre Focus}
+\section\*{Genre Focus}
 \begin{itemize}
 \item Electronic Dance Music
 \item House
@@ -50,7 +50,7 @@ Vozz Rich is an emerging force in the electronic music scene, blending influence
 \item Latin-influenced Electronic
 \end{itemize}
 
-\section*{Technical Requirements}
+\section\*{Technical Requirements}
 \begin{itemize}
 \item Pioneer CDJ-3000 or equivalent
 \item Pioneer DJM-900NXS2 mixer
@@ -58,14 +58,14 @@ Vozz Rich is an emerging force in the electronic music scene, blending influence
 \item Appropriate audio connections
 \end{itemize}
 
-\section*{Contact Information}
+\section\*{Contact Information}
 \begin{tabular}{ll}
 \textbf{Management/Booking:} & vozzrich@gmail.com\\
 \textbf{Phone:} & +1 (310) 989-8178\\
 \textbf{Website:} & \url{https://vozzrich.com}
 \end{tabular}
 
-\section*{Social Media \& Streaming}
+\section\*{Social Media \& Streaming}
 \begin{itemize}
 \item Spotify: \url{https://open.spotify.com/artist/27sSKrytmUXukDnMGPXNHQ}
 \item Instagram: \url{https://instagram.com/vozzrich}

@@ -208,6 +208,17 @@ def handle_report_error(
 async def generate_epk(artist_data: dict, model_name: str) -> str:
     """Generate EPK using the specified model"""
     try:
+        # Create cache key and filename
+        artist_name_slug = artist_data["stage_name"].replace(" ", "_")
+        cache_key = f"{artist_name_slug}_epk_{model_name.replace('/', '_')}.md"
+
+        # Check cache
+        if os.path.exists(cache_key):
+            Logger.info(f"Using cached EPK from {cache_key}")
+            with open(cache_key, "r") as f:
+                return f.read()
+
+        # Proceed with API call if not cached
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -229,6 +240,11 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
             "message"
         ):
             raise ValueError("Invalid response structure from OpenRouter API")
+
+        # Cache the result
+        with open(cache_key, "w") as f:
+            f.write(response_data["choices"][0]["message"]["content"])
+
         return response_data["choices"][0]["message"]["content"]
     except Exception as e:
         return handle_report_error(e, model_name, artist_data, "EPK")
@@ -237,6 +253,19 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
 async def generate_internal_report(artist_data: dict, model_name: str) -> str:
     """Generate internal report using the specified model"""
     try:
+        # Create cache key and filename
+        artist_name_slug = artist_data["stage_name"].replace(" ", "_")
+        cache_key = (
+            f"{artist_name_slug}_internal_report_{model_name.replace('/', '_')}.md"
+        )
+
+        # Check cache
+        if os.path.exists(cache_key):
+            Logger.info(f"Using cached internal report from {cache_key}")
+            with open(cache_key, "r") as f:
+                return f.read()
+
+        # Proceed with API call if not cached
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -258,6 +287,11 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
             "message"
         ):
             raise ValueError("Invalid response structure from OpenRouter API")
+
+        # Cache the result
+        with open(cache_key, "w") as f:
+            f.write(response_data["choices"][0]["message"]["content"])
+
         return response_data["choices"][0]["message"]["content"]
     except Exception as e:
         return handle_report_error(e, model_name, artist_data, "Internal Report")
@@ -497,35 +531,21 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         save_start = Logger.start_task("Saving reports")
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
 
-        # Save individual reports
-        total_reports = sum(len(models) for models in all_reports.values())
-        saved_reports = 0
-        for report_type, models in all_reports.items():
-            for model_name, content in models.items():
-                saved_reports += 1
-                filename = f"{artist_name_slug}_{report_type}_{model_name.replace('/', '_')}.txt"
-                Logger.info(
-                    f"Saving {report_type} from {model_name} ({saved_reports}/{total_reports})"
-                )
-                with open(filename, "w") as f:
-                    f.write(content)
-                Logger.success(f"Saved {filename} successfully")
-
         # Save integrated reports as rich text files
         Logger.info("Saving integrated reports as rich text files")
         if "final_epk_report" in integrated_reports:
-            epk_filename = f"{artist_name_slug}_integrated_epk.txt"
+            epk_filename = f"{artist_name_slug}_integrated_epk.tex"
             with open(epk_filename, "w") as f:
                 f.write(integrated_reports["final_epk_report"])
             Logger.success(f"Saved integrated EPK to {epk_filename}")
 
         if "final_internal_analysis" in integrated_reports:
-            internal_filename = f"{artist_name_slug}_integrated_internal_report.txt"
+            internal_filename = f"{artist_name_slug}_integrated_internal_report.tex"
             with open(internal_filename, "w") as f:
                 f.write(integrated_reports["final_internal_analysis"])
             Logger.success(f"Saved integrated internal report to {internal_filename}")
 
-        Logger.end_task(save_start, "All reports saved successfully")
+        Logger.end_task(save_start, "Reports saved successfully")
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
         Logger.success(f"✅ All tasks completed for {artist_data['stage_name']}")
 

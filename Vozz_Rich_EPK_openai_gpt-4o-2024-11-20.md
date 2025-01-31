@@ -41,7 +41,7 @@ Below is a LaTeX document for Vozz Rich's Electronic Press Kit (EPK). This docum
 \vspace{0.5cm}
 
 \section*{1. Artist Overview}
-\textbf{Vozz Rich} is a California-based DJ and electronic music producer with Mexican roots. Vozz Rich brings a captivating blend of Detroit house, underground rave, salsa, techno, and big-room sounds to the electronic music scene. His unique fusion of influences and high-energy performances resonate globally, appealing to both niche underground fans and mainstream audiences alike. 
+\textbf{Vozz Rich} is a California-based DJ and electronic music producer with Mexican roots. Vozz Rich brings a captivating blend of Detroit house, underground rave, salsa, techno, and big-room sounds to the electronic music scene. His unique fusion of influences and high-energy performances resonate globally, appealing to both niche underground fans and mainstream audiences alike.
 
 Over the years, Vozz Rich has amassed recognition through his collaborations and remixes with high-caliber artists such as Artsychoke, Kelly Reverb, and L25. Notable releases include “Don’t Want It to End” (Kicevski Remix) and “Butterflies” (Vozz Rich Remix), which have garnered significant online traction.
 
@@ -121,9 +121,10 @@ High-resolution images and logos can be found at \url{https://vozzrich.com/press
 ```
 
 ### LaTeX Notes:
+
 1. **Replace Placeholder Images:** The `\includegraphics{vozz_rich_placeholder_image.jpg}` is reserved for an artist image, and `vozz_rich_chart_placeholder.png` is for additional visual performance graphs.
 2. **Hyperlinked Content:** All social media and streaming platform links are clickable and appropriately hyperlinked using the `hyperref` package.
 3. **Polished Layout:** Structured headings/subheadings ensure clarity and professionalism for industry audiences.
-4. **Preparing for Compilation:** Ensure you save the placeholders (images/graphics) and LaTeX file in the same working directory for proper rendering. 
+4. **Preparing for Compilation:** Ensure you save the placeholders (images/graphics) and LaTeX file in the same working directory for proper rendering.
 
 Feel free to make minor modifications based on additional assets or changes in requirements!

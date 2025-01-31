@@ -160,6 +160,7 @@
 ```
 
 In this LaTeX document:
+
 - The `geometry` package is used to set the page layout.
 - The `graphicx` package is employed to include images.
 - The `hyperref` package is used for hyperlinks.
