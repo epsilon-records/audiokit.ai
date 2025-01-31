@@ -4,12 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import Dict, List, Optional, Type
-from pydantic import BaseModel, Field, create_model, ValidationError
+from pydantic import BaseModel, Field, create_model
 from dotenv import load_dotenv
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from pydantic_ai import Agent, RunContext
+from pydantic_ai.models.openai import OpenAIModel
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -20,13 +21,20 @@ SOUNDCHARTS_API_KEY = os.getenv("SOUNDCHARTS_API_KEY")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 
+# Initialize the model with the API key and base URL
+deepseek_model = OpenAIModel(
+    model_name="deepseek/deepseek-r1",  # Specify the DeepSeek R1 model
+    api_key=OPENROUTER_API_KEY,  # Your OpenRouter API key
+)
+
 # AI Models
 AI_MODELS = {
     "GPT-4 Turbo": "openai/gpt-4-turbo",
     "Claude 3 Opus": "anthropic/claude-3-opus",
     "Mistral Large": "mistralai/mistral-large-latest",
-    "DeepSeek-R1": "deepseek/deepseek-r1",  # ✅ Added DeepSeek-R1
+    "DeepSeek-R1": deepseek_model,  # ✅ Added DeepSeek-R1
 }
+
 
 # EPK System Prompt
 EPK_SYSTEM_PROMPT = """
@@ -131,27 +139,27 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Define the EPK Agent
 epk_agent = Agent(
-    model="deepseek/deepseek-r1",
+    model=deepseek_model,
     system_prompt=EPK_SYSTEM_PROMPT,
     result_type=str,  # Assuming the result is a Markdown string
 )
 
 # Define the Internal Report Agent
 internal_report_agent = Agent(
-    model="deepseek/deepseek-r1",
+    model=deepseek_model,
     system_prompt=INTERNAL_REPORT_PROMPT,
     result_type=str,  # Assuming the result is a Markdown string
 )
 
 market_analysis_agent = Agent(
-    model="deepseek/deepseek-r1",  # Will be set dynamically
+    model=deepseek_model,  # Will be set dynamically
     system_prompt="You are a strategic music marketing expert. Generate a market analysis report...",
     result_type=str,
 )
 
 # Define the Strategy Selection Agent
 strategy_selection_agent = Agent(
-    model="deepseek/deepseek-r1",
+    model=deepseek_model,
     system_prompt=(
         "You are an expert music marketing strategist. You have received marketing reports "
         "from multiple AI models. Your task is to:\n"
@@ -249,66 +257,66 @@ def create_dynamic_report_model(data: Dict) -> Type[BaseModel]:
     return create_model("DynamicMarketingReport", **fields)
 
 
-def generate_internal_report(artist_data: Dict, model_name: str) -> Type[BaseModel]:
-    try:
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": AI_MODELS[model_name],
-                "messages": [
-                    {"role": "system", "content": INTERNAL_REPORT_PROMPT},
-                    {"role": "user", "content": json.dumps(artist_data, indent=2)},
-                ],
-                "response_format": {"type": "json_object"},
-            },
-        )
-        response.raise_for_status()
-        response_data = response.json()
-    except requests.exceptions.RequestException as e:
-        raise Exception(f"API request failed: {str(e)}")
-    try:
-        report_content = json.loads(response_data["choices"][0]["message"]["content"])
-        ReportModel = create_dynamic_report_model(report_content)
-        return ReportModel(
-            artist_name=artist_data["name"],
-            report=report_content.get("report", "No detailed report generated"),
-            budget_allocation=report_content.get("budget_allocation", {}),
-        )
-    except (json.JSONDecodeError, KeyError, ValidationError) as e:
-        raise Exception(f"Failed to parse or validate report: {str(e)}")
+# def generate_internal_report(artist_data: Dict, model_name: str) -> Type[BaseModel]:
+#     try:
+#         response = requests.post(
+#             "https://openrouter.ai/api/v1/chat/completions",
+#             headers={
+#                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+#                 "Content-Type": "application/json",
+#             },
+#             json={
+#                 "model": AI_MODELS[model_name],
+#                 "messages": [
+#                     {"role": "system", "content": INTERNAL_REPORT_PROMPT},
+#                     {"role": "user", "content": json.dumps(artist_data, indent=2)},
+#                 ],
+#                 "response_format": {"type": "json_object"},
+#             },
+#         )
+#         response.raise_for_status()
+#         response_data = response.json()
+#     except requests.exceptions.RequestException as e:
+#         raise Exception(f"API request failed: {str(e)}")
+#     try:
+#         report_content = json.loads(response_data["choices"][0]["message"]["content"])
+#         ReportModel = create_dynamic_report_model(report_content)
+#         return ReportModel(
+#             artist_name=artist_data["name"],
+#             report=report_content.get("report", "No detailed report generated"),
+#             budget_allocation=report_content.get("budget_allocation", {}),
+#         )
+#     except (json.JSONDecodeError, KeyError, ValidationError) as e:
+#         raise Exception(f"Failed to parse or validate report: {str(e)}")
 
 
 # EPK Report Generation
-def generate_epk_report(artist_data: Dict, model_name: str) -> Type[BaseModel]:
-    response = requests.post(
-        "https://openrouter.ai/api/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-        },
-        json={
-            "model": AI_MODELS[model_name],
-            "messages": [
-                {"role": "system", "content": EPK_SYSTEM_PROMPT},
-                {"role": "user", "content": json.dumps(artist_data, indent=2)},
-            ],
-            "response_format": {"type": "json_object"},
-        },
-    ).json()
-    try:
-        report_content = json.loads(response["choices"][0]["message"]["content"])
-        ReportModel = create_dynamic_report_model(report_content)
-        return ReportModel(
-            artist_name=artist_data["name"],
-            report=report_content.get("report", "No detailed report generated"),
-            budget_allocation=report_content.get("budget_allocation", {}),
-        )
-    except (json.JSONDecodeError, KeyError, ValidationError) as e:
-        raise Exception(f"Failed to parse or validate report: {str(e)}")
+# def generate_epk_report(artist_data: Dict, model_name: str) -> Type[BaseModel]:
+#     response = requests.post(
+#         "https://openrouter.ai/api/v1/chat/completions",
+#         headers={
+#             "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+#             "Content-Type": "application/json",
+#         },
+#         json={
+#             "model": AI_MODELS[model_name],
+#             "messages": [
+#                 {"role": "system", "content": EPK_SYSTEM_PROMPT},
+#                 {"role": "user", "content": json.dumps(artist_data, indent=2)},
+#             ],
+#             "response_format": {"type": "json_object"},
+#         },
+#     ).json()
+#     try:
+#         report_content = json.loads(response["choices"][0]["message"]["content"])
+#         ReportModel = create_dynamic_report_model(report_content)
+#         return ReportModel(
+#             artist_name=artist_data["name"],
+#             report=report_content.get("report", "No detailed report generated"),
+#             budget_allocation=report_content.get("budget_allocation", {}),
+#         )
+#     except (json.JSONDecodeError, KeyError, ValidationError) as e:
+#         raise Exception(f"Failed to parse or validate report: {str(e)}")
 
 
 # AI Decision Making (Select Best Strategy & Merge Insights)
@@ -422,7 +430,7 @@ def run_full_ai_marketing_pipeline(json_data: Dict):
     )
 
     # Write reports to files
-    artist_name_slug = artist_info.name.replace(" ", "_")
+    artist_name_slug = artist_info.stage_name.replace(" ", "_")
 
     with open(f"{artist_name_slug}_epk.md", "w") as epk_file:
         epk_file.write(best_epk_report)  # ✅ FIXED
@@ -436,7 +444,7 @@ def run_full_ai_marketing_pipeline(json_data: Dict):
     # Display the artist dashboard
     display_artist_dashboard(artist_info.dict())
 
-    print(f"✅ Reports generated and saved for {artist_info.name}")
+    print(f"✅ Reports generated and saved for {artist_info.stage_name}")
 
 
 def get_artist_data_from_db(artist_id: str) -> Dict:
@@ -454,7 +462,7 @@ def get_artist_data_from_db(artist_id: str) -> Dict:
 
             # Convert to dictionary and write to JSON file
             artist_data = dict(result)
-            artist_name_slug = artist_data["name"].replace(" ", "_")
+            artist_name_slug = artist_data["stage_name"].replace(" ", "_")
             with open(f"{artist_name_slug}_json.txt", "w") as json_file:
                 json.dump(artist_data, json_file, indent=2)
 
