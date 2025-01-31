@@ -56,7 +56,7 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
           'Musicfetch token not configured',
           new Error('MUSICFETCH_TOKEN is not set')
         );
-        throw new Error('MUSICFETCH_TOKEN is not set');
+        return;
       }
 
       // Validate Spotify URL format
@@ -68,7 +68,7 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
           'Invalid Spotify URL format',
           new Error(`Invalid Spotify URL: ${spotifyUrl}`)
         );
-        throw new Error('Invalid Spotify URL format');
+        return;
       }
 
       // Validate services array
@@ -78,7 +78,7 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
           'Invalid services array',
           new Error('Services must be a non-empty array')
         );
-        throw new Error('Invalid services array');
+        return;
       }
 
       const { apiBase, headers } = getMusicfetchConfig();
@@ -101,7 +101,7 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
             duration: Date.now() - startTime,
           }
         );
-        throw new Error(`Musicfetch request failed with status ${response.status}: ${errorText}`);
+        return;
       }
 
       const data = await response.json();
@@ -116,7 +116,7 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
       logger.error(requestId, 'Error fetching Musicfetch data', error, {
         duration: Date.now() - startTime,
       });
-      throw error;
+      return;
     }
   }
 );
