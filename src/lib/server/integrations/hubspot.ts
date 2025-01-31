@@ -173,7 +173,7 @@ export const syncToHubspot = hubspotLimiter.wrap(
               key
             )
           ) {
-            return [key, value ? sanitizeUrl(value) : null];
+            return [key, value ? sanitizeUrl(value) : ''];
           }
           return [key, value];
         })

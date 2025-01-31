@@ -1,14 +1,8 @@
+import { isValidLink } from './utils';
+
 export function sanitizeUrl(url: string | null | undefined): string {
   // Early return for invalid inputs
-  if (!url || typeof url !== 'string') return '';
-
-  // Validate URL format before sanitizing
-  try {
-    // Test if URL is valid
-    new URL(url);
-  } catch (error) {
-    return '';
-  }
+  if (!url || typeof url !== 'string' || !isValidLink(url)) return '';
 
   let sanitized = url.trim();
 

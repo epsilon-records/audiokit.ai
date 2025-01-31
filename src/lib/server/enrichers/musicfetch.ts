@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm';
 import { serializeError } from 'serialize-error';
 import { db } from '../../db/index.js';
 import { artists } from '../../db/schema.js';
+import { isValidLink } from '../../utils';
 import logger from '../../utils/logger.js';
 import { sanitizeUrl } from '../../utils/sanitize.js';
 import { getMusicfetchData } from '../integrations/musicfetch.js';
@@ -29,6 +30,28 @@ type ValidatedLink = {
 } & MusicfetchLink;
 
 type ServiceLinks = Record<string, ValidatedLink | null>;
+
+function processLink(
+  service: string,
+  value: MusicfetchLink,
+  requestId: string,
+  artistContext: Record<string, unknown>
+): ValidatedLink | null {
+  if (!isValidLink(value.link)) {
+    return null;
+  }
+
+  const sanitizedUrl = sanitizeUrl(value.link);
+  if (!sanitizedUrl) {
+    logger.warning(requestId, `Invalid URL format for ${service}: ${value.link}`, artistContext);
+    return null;
+  }
+
+  return {
+    ...value,
+    url: sanitizedUrl,
+  };
+}
 
 export async function enrichWithMusicfetch(
   artistData: (typeof artists.$inferSelect)[]
@@ -139,28 +162,10 @@ export async function enrichWithMusicfetch(
           const validatedLinks = Object.entries(
             links as Record<string, MusicfetchLink>
           ).reduce<ServiceLinks>((acc, [service, value]) => {
-            // Skip if link is missing or empty
-            if (!value?.link?.trim()) {
-              return { ...acc, [service]: null };
-            }
-
-            const sanitizedUrl = sanitizeUrl(value.link);
-            if (!sanitizedUrl) {
-              logger.warning(
-                requestId,
-                `Invalid URL format for ${service}: ${value.link}`,
-                artistContext
-              );
-              return { ...acc, [service]: null };
-            }
-
-            // Preserve original link data while adding sanitized URL
+            const processedLink = processLink(service, value, requestId, artistContext);
             return {
               ...acc,
-              [service]: {
-                ...value,
-                url: sanitizedUrl,
-              },
+              [service]: processedLink,
             };
           }, {});
 
@@ -176,7 +181,15 @@ export async function enrichWithMusicfetch(
           await db
             .update(artists)
             .set({
-              ...validatedLinks,
+              spotify: validatedLinks.spotify?.url ?? '',
+              appleMusic: validatedLinks.appleMusic?.url ?? '',
+              soundcloud: validatedLinks.soundcloud?.url ?? '',
+              youtube: validatedLinks.youtube?.url ?? '',
+              bandcamp: validatedLinks.bandcamp?.url ?? '',
+              facebook: validatedLinks.facebook?.url ?? '',
+              instagram: validatedLinks.instagram?.url ?? '',
+              tiktok: validatedLinks.tiktok?.url ?? '',
+              x: validatedLinks.x?.url ?? '',
               updated: new Date(),
             })
             .where(eq(artists.id, artist.id));
