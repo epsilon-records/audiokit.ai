@@ -182,6 +182,24 @@ export async function getArtistStreamingAudience(
     platform,
   };
 
+  // Replace the supportedStreamingPlatforms array with this:
+  const supportedStreamingPlatforms = STREAMING_PLATFORMS.map((code) => ({
+    name: code
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' '),
+    code,
+  }));
+
+  // Validate platform
+  if (!supportedStreamingPlatforms.some((p) => p.code === platform)) {
+    logger.error(requestId, 'Unsupported streaming platform', new Error('Unsupported platform'), {
+      platform,
+      supportedPlatforms: supportedStreamingPlatforms.map((p) => p.code),
+    });
+    return null;
+  }
+
   try {
     const { apiBase, headers } = getSoundchartsConfig();
     const url = `${apiBase}/api/v2/artist/${uuid}/streaming/${platform}/listening`;
@@ -234,6 +252,24 @@ async function getArtistSocialAudience(
     uuid,
     platform,
   };
+
+  // Replace the supportedSocialPlatforms array with this:
+  const supportedSocialPlatforms = SOCIAL_PLATFORMS.map((code) => ({
+    name: code
+      .split('-')
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' '),
+    code,
+  }));
+
+  // Validate platform
+  if (!supportedSocialPlatforms.some((p) => p.code === platform)) {
+    logger.error(requestId, 'Unsupported social platform', new Error('Unsupported platform'), {
+      platform,
+      supportedPlatforms: supportedSocialPlatforms.map((p) => p.code),
+    });
+    return null;
+  }
 
   try {
     const { apiBase, headers } = getSoundchartsConfig();
