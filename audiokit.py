@@ -422,11 +422,20 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
                     f.write(content)
                 Logger.success(f"Saved {filename} successfully")
 
-        # Save integrated strategy
-        strategy_filename = f"{artist_name_slug}_integrated_strategy.json"
-        Logger.info(f"Saving integrated strategy to {strategy_filename}")
-        with open(strategy_filename, "w") as f:
-            json.dump(best_strategy, f, indent=2)
+        # Save integrated reports as LaTeX files
+        Logger.info("Saving integrated reports as LaTeX files")
+        if "best_epk" in best_strategy:
+            epk_filename = f"{artist_name_slug}_integrated_epk.tex"
+            with open(epk_filename, "w") as f:
+                f.write(best_strategy["best_epk"])
+            Logger.success(f"Saved integrated EPK to {epk_filename}")
+
+        if "best_internal_report" in best_strategy:
+            internal_filename = f"{artist_name_slug}_integrated_internal_report.tex"
+            with open(internal_filename, "w") as f:
+                f.write(best_strategy["best_internal_report"])
+            Logger.success(f"Saved integrated internal report to {internal_filename}")
+
         Logger.end_task(save_start, "All reports saved successfully")
         Logger.success(f"Integrated strategy saved to {strategy_filename}")
 
