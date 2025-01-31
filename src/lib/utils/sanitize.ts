@@ -1,4 +1,4 @@
-import { isValidLink } from '../utils';
+import { isValidLink } from '../utils.js';
 
 export function sanitizeUrl(url: string | null | undefined): string {
   // Early return for invalid inputs
