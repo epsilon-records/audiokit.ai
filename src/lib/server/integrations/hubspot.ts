@@ -23,115 +23,117 @@ const hubspotLimiter = new Bottleneck({
 /**
  * Fetches a contact from HubSpot by email
  */
-export async function getHubspotContact(email: string): Promise<HubspotContact | null> {
-  const requestId = crypto.randomUUID();
-  const startTime = Date.now();
-  const context = {
-    email,
-    requestId,
-  };
-
-  logger.start(requestId, 'Fetching Hubspot contact', context);
-
-  try {
-    logger.process(
+export const getHubspotContact = hubspotLimiter.wrap(
+  async (email: string): Promise<HubspotContact | null> => {
+    const requestId = crypto.randomUUID();
+    const startTime = Date.now();
+    const context = {
+      email,
       requestId,
-      'Searching for Hubspot contact',
-      {
-        metadata: {
-          environment: process.env.NODE_ENV,
-          hubspotApiKey: process.env.HUBSPOT_API_KEY ? '✅ Configured' : '❌ Missing',
-          hubspotApiBase: process.env.HUBSPOT_API_BASE ? '✅ Configured' : '❌ Missing',
-        },
-      },
-      context
-    );
+    };
 
-    // First search for the contact by email
-    const searchResponse = await fetch(
-      `${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/search`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+    logger.start(requestId, 'Fetching Hubspot contact', context);
+
+    try {
+      logger.process(
+        requestId,
+        'Searching for Hubspot contact',
+        {
+          metadata: {
+            environment: process.env.NODE_ENV,
+            hubspotApiKey: process.env.HUBSPOT_API_KEY ? '✅ Configured' : '❌ Missing',
+            hubspotApiBase: process.env.HUBSPOT_API_BASE ? '✅ Configured' : '❌ Missing',
+          },
         },
-        body: JSON.stringify({
-          filterGroups: [
-            {
-              filters: [
-                {
-                  propertyName: 'email',
-                  operator: 'EQ',
-                  value: email,
-                },
-              ],
-            },
-          ],
-        }),
+        context
+      );
+
+      // First search for the contact by email
+      const searchResponse = await fetch(
+        `${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/search`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+          },
+          body: JSON.stringify({
+            filterGroups: [
+              {
+                filters: [
+                  {
+                    propertyName: 'email',
+                    operator: 'EQ',
+                    value: email,
+                  },
+                ],
+              },
+            ],
+          }),
+        }
+      );
+
+      if (!searchResponse.ok) {
+        logger.error(requestId, 'Hubspot search API error', new Error('API Error'), {
+          ...context,
+          status: searchResponse.status,
+          statusText: searchResponse.statusText,
+          duration: Date.now() - startTime,
+        });
+        return null;
       }
-    );
 
-    if (!searchResponse.ok) {
-      logger.error(requestId, 'Hubspot search API error', new Error('API Error'), {
-        ...context,
-        status: searchResponse.status,
-        statusText: searchResponse.statusText,
+      const searchData = await searchResponse.json();
+      logger.data(requestId, 'Retrieved Hubspot search results', {
+        resultsCount: searchData.results?.length || 0,
         duration: Date.now() - startTime,
       });
-      return null;
-    }
 
-    const searchData = await searchResponse.json();
-    logger.data(requestId, 'Retrieved Hubspot search results', {
-      resultsCount: searchData.results?.length || 0,
-      duration: Date.now() - startTime,
-    });
-
-    if (!searchData.results?.length) {
-      logger.warning(requestId, 'No Hubspot contact found', undefined, context);
-      return null;
-    }
-
-    const contactId = searchData.results[0].id;
-
-    const detailResponse = await fetch(
-      `${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone,city,country,biography,website,spotify,apple_music,twitterhandle,instagram,soundcloud`,
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
-        },
+      if (!searchData.results?.length) {
+        logger.warning(requestId, 'No Hubspot contact found', undefined, context);
+        return null;
       }
-    );
 
-    if (!detailResponse.ok) {
-      logger.error(requestId, 'Hubspot detail API error', new Error('API Error'), {
-        ...context,
+      const contactId = searchData.results[0].id;
+
+      const detailResponse = await fetch(
+        `${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/${contactId}?properties=firstname,lastname,email,phone,city,country,biography,website,spotify,apple_music,twitterhandle,instagram,soundcloud`,
+        {
+          headers: {
+            Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+          },
+        }
+      );
+
+      if (!detailResponse.ok) {
+        logger.error(requestId, 'Hubspot detail API error', new Error('API Error'), {
+          ...context,
+          contactId,
+          status: detailResponse.status,
+          statusText: detailResponse.statusText,
+          duration: Date.now() - startTime,
+        });
+        return null;
+      }
+
+      const contactData = await detailResponse.json();
+      logger.success(requestId, 'Successfully retrieved Hubspot contact', {
         contactId,
-        status: detailResponse.status,
-        statusText: detailResponse.statusText,
+        availableFields: Object.keys(contactData.properties),
+        duration: Date.now() - startTime,
+      });
+
+      return contactData;
+    } catch (err) {
+      const serializedError = serializeError(err) as Error;
+      logger.error(requestId, 'Error fetching Hubspot contact', serializedError, {
+        ...context,
         duration: Date.now() - startTime,
       });
       return null;
     }
-
-    const contactData = await detailResponse.json();
-    logger.success(requestId, 'Successfully retrieved Hubspot contact', {
-      contactId,
-      availableFields: Object.keys(contactData.properties),
-      duration: Date.now() - startTime,
-    });
-
-    return contactData;
-  } catch (err) {
-    const serializedError = serializeError(err) as Error;
-    logger.error(requestId, 'Error fetching Hubspot contact', serializedError, {
-      ...context,
-      duration: Date.now() - startTime,
-    });
-    return null;
   }
-}
+);
 
 // Wrap the syncToHubspot function with the rate limiter
 export const syncToHubspot = hubspotLimiter.wrap(
@@ -249,57 +251,61 @@ export const syncToHubspot = hubspotLimiter.wrap(
   }
 );
 
-export async function getHubspotData(email: string): Promise<{
-  id: string;
-  properties: Record<string, string | null>;
-}> {
-  const response = await fetch(`${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/search`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
-    },
-    body: JSON.stringify({
-      filterGroups: [
-        {
-          filters: [
-            {
-              propertyName: 'email',
-              operator: 'EQ',
-              value: email,
-            },
-          ],
-        },
-      ],
-      properties: [
-        'email',
-        'firstname',
-        'lastname',
-        'website',
-        'spotify',
-        'apple_music',
-        'soundcloud',
-        'bandcamp',
-        'instagram',
-        'phone',
-        'city',
-        'country',
-        'biography',
-      ],
-    }),
-  });
+export const getHubspotData = hubspotLimiter.wrap(
+  async (
+    email: string
+  ): Promise<{
+    id: string;
+    properties: Record<string, string | null>;
+  }> => {
+    const response = await fetch(`${process.env.HUBSPOT_API_BASE}/crm/v3/objects/contacts/search`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.HUBSPOT_API_KEY}`,
+      },
+      body: JSON.stringify({
+        filterGroups: [
+          {
+            filters: [
+              {
+                propertyName: 'email',
+                operator: 'EQ',
+                value: email,
+              },
+            ],
+          },
+        ],
+        properties: [
+          'email',
+          'firstname',
+          'lastname',
+          'website',
+          'spotify',
+          'apple_music',
+          'soundcloud',
+          'bandcamp',
+          'instagram',
+          'phone',
+          'city',
+          'country',
+          'biography',
+        ],
+      }),
+    });
 
-  if (!response.ok) {
-    throw new Error(`Hubspot API error: ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`Hubspot API error: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    if (data.results.length === 0) {
+      throw new Error('Artist not found in Hubspot');
+    }
+
+    return {
+      id: data.results[0].id,
+      properties: data.results[0].properties,
+    };
   }
-
-  const data = await response.json();
-  if (data.results.length === 0) {
-    throw new Error('Artist not found in Hubspot');
-  }
-
-  return {
-    id: data.results[0].id,
-    properties: data.results[0].properties,
-  };
-}
+);
