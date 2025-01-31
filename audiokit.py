@@ -12,6 +12,8 @@ from pydantic_ai import Agent, RunContext
 from pydantic_ai.models.openai import OpenAIModel
 from datetime import date
 import httpx
+import time
+from datetime import datetime
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -256,49 +258,170 @@ def display_artist_dashboard(artist_data: Dict):
     plt.show()
 
 
+class Logger:
+    @staticmethod
+    def info(message: str):
+        print(f"ℹ️ [INFO] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message}")
+
+    @staticmethod
+    def success(message: str):
+        print(
+            f"✅ [SUCCESS] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message}"
+        )
+
+    @staticmethod
+    def warning(message: str):
+        print(
+            f"⚠️  [WARNING] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message}"
+        )
+
+    @staticmethod
+    def error(message: str):
+        print(f"❌ [ERROR] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message}")
+
+    @staticmethod
+    def start_task(message: str):
+        print(f"⏳ [START] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message}")
+        return time.time()
+
+    @staticmethod
+    def end_task(start_time: float, message: str):
+        duration = time.time() - start_time
+        print(
+            f"🏁 [END] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message} (Duration: {duration:.2f}s)"
+        )
+
+    @staticmethod
+    def progress(current: int, total: int, message: str):
+        print(
+            f"📊 [PROGRESS] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message} ({current}/{total} completed)"
+        )
+
+
 def generate_reports(json_data: dict):
     reports = {"EPK": {}, "Internal Report": {}, "Market Analysis": {}}
+    total_models = len(AI_MODELS)
+    current_model = 0
 
     for model_name, model_id in AI_MODELS.items():
-        print(f"Generating reports with {model_name}...")
+        current_model += 1
+        Logger.progress(current_model, total_models, f"Processing model {model_name}")
 
         # Generate EPK Report
+        epk_start = Logger.start_task(f"Generating EPK with {model_name}")
         epk_agent.model = model_id
-        epk_result = epk_agent.run_sync(json.dumps(json_data, indent=2))
-        reports["EPK"][model_name] = epk_result.data
+        try:
+            epk_result = epk_agent.run_sync(json.dumps(json_data, indent=2))
+            reports["EPK"][model_name] = epk_result.data
+            Logger.success(f"EPK generated successfully with {model_name}")
+        except Exception as e:
+            Logger.warning(f"Failed to generate EPK with {model_name}: {str(e)}")
+            reports["EPK"][model_name] = f"EPK generation failed: {str(e)}"
+        finally:
+            Logger.end_task(epk_start, f"Completed EPK with {model_name}")
 
         # Generate Internal Report
-        internal_report_agent.model = model_id
-        internal_report_result = internal_report_agent.run_sync(
-            json.dumps(json_data, indent=2)
+        internal_start = Logger.start_task(
+            f"Generating Internal Report with {model_name}"
         )
-        reports["Internal Report"][model_name] = internal_report_result.data
+        internal_report_agent.model = model_id
+        try:
+            internal_report_result = internal_report_agent.run_sync(
+                json.dumps(json_data, indent=2)
+            )
+            reports["Internal Report"][model_name] = internal_report_result.data
+            Logger.success(f"Internal Report generated successfully with {model_name}")
+        except Exception as e:
+            Logger.warning(
+                f"Failed to generate Internal Report with {model_name}: {str(e)}"
+            )
+            reports["Internal Report"][model_name] = (
+                f"Internal Report generation failed: {str(e)}"
+            )
+        finally:
+            Logger.end_task(
+                internal_start, f"Completed Internal Report with {model_name}"
+            )
 
         # Generate Market Analysis Report
-        market_analysis_agent.model = model_id  # ✅ FIXED
-        market_analysis_result = market_analysis_agent.run_sync(
-            json.dumps(json_data, indent=2)
+        market_start = Logger.start_task(
+            f"Generating Market Analysis with {model_name}"
         )
-        reports["Market Analysis"][model_name] = market_analysis_result.data
+        market_analysis_agent.model = model_id
+        try:
+            market_analysis_result = market_analysis_agent.run_sync(
+                json.dumps(json_data, indent=2)
+            )
+            reports["Market Analysis"][model_name] = market_analysis_result.data
+            Logger.success(f"Market Analysis generated successfully with {model_name}")
+        except Exception as e:
+            Logger.warning(
+                f"Failed to generate Market Analysis with {model_name}: {str(e)}"
+            )
+            reports["Market Analysis"][model_name] = (
+                f"Market Analysis generation failed: {str(e)}"
+            )
+        finally:
+            Logger.end_task(
+                market_start, f"Completed Market Analysis with {model_name}"
+            )
 
+    Logger.success("All report attempts completed")
     return reports
 
 
 def run_full_ai_marketing_pipeline(json_data: Dict):
+    pipeline_start = Logger.start_task("Starting full marketing pipeline")
     try:
-        # Use the static model instead of creating a dynamic one
+        Logger.info("Validating artist data")
         artist_info = ArtistData(**json_data)
+        Logger.success("Artist data validated successfully")
 
-        # Generate all reports using multiple AI models
+        Logger.info("Generating reports")
         all_reports = generate_reports(json_data)
+        Logger.success("Report generation completed")
 
-        # Run the Strategy Selection Agent
-        strategy_result = strategy_selection_agent.run_sync(
-            json.dumps(all_reports, indent=2)
-        )
-        integrated_strategy = strategy_result.data
+        Logger.info("Running strategy selection")
+        strategy_start = Logger.start_task("Running strategy selection agent")
+        try:
+            strategy_result = strategy_selection_agent.run_sync(
+                json.dumps(all_reports, indent=2)
+            )
+            integrated_strategy = strategy_result.data
+            Logger.success("Strategy selection completed")
+        except Exception as e:
+            Logger.warning(f"Strategy selection failed: {str(e)}")
+            # Fallback to selecting the first successful report from each category
+            integrated_strategy = {
+                "EPK": next(
+                    (
+                        report
+                        for report in all_reports["EPK"].values()
+                        if "failed" not in str(report)
+                    ),
+                    "No successful EPK generated",
+                ),
+                "Internal Report": next(
+                    (
+                        report
+                        for report in all_reports["Internal Report"].values()
+                        if "failed" not in str(report)
+                    ),
+                    "No successful Internal Report generated",
+                ),
+                "Market Analysis": next(
+                    (
+                        report
+                        for report in all_reports["Market Analysis"].values()
+                        if "failed" not in str(report)
+                    ),
+                    "No successful Market Analysis generated",
+                ),
+            }
+        finally:
+            Logger.end_task(strategy_start, "Strategy selection process completed")
 
-        # Extract best reports (SAFELY)
+        Logger.info("Extracting best reports")
         best_epk_report = integrated_strategy.get("EPK", "No EPK generated.")
         best_internal_report = integrated_strategy.get(
             "Internal Report", "No Internal Report generated."
@@ -307,59 +430,75 @@ def run_full_ai_marketing_pipeline(json_data: Dict):
             "Market Analysis", "No Market Analysis generated."
         )
 
-        # Write reports to files
+        Logger.info("Saving reports to files")
         artist_name_slug = artist_info.name.replace(" ", "_")
 
         with open(f"{artist_name_slug}_epk.md", "w") as epk_file:
             epk_file.write(best_epk_report)
+        Logger.success(f"EPK saved to {artist_name_slug}_epk.md")
 
         with open(f"{artist_name_slug}_internal.md", "w") as internal_file:
             internal_file.write(best_internal_report)
+        Logger.success(f"Internal report saved to {artist_name_slug}_internal.md")
 
         with open(f"{artist_name_slug}_market_analysis.md", "w") as market_file:
             market_file.write(best_market_analysis)
+        Logger.success(
+            f"Market analysis saved to {artist_name_slug}_market_analysis.md"
+        )
 
-        # Display the artist dashboard
+        Logger.info("Displaying artist dashboard")
         display_artist_dashboard(artist_info.dict())
+        Logger.success("Dashboard displayed successfully")
 
-        print(f"✅ Reports generated and saved for {artist_info.name}")
+        Logger.end_task(pipeline_start, "Full marketing pipeline completed")
+        Logger.success(f"✅ Reports generated and saved for {artist_info.name}")
 
     except Exception as e:
-        print(f"❌ Error in marketing pipeline: {str(e)}")
+        Logger.error(f"Error in marketing pipeline: {str(e)}")
         raise
 
 
 def get_artist_data_from_db(artist_id: str) -> Dict:
+    db_start = Logger.start_task(f"Fetching artist data for ID {artist_id}")
     connection = None
     try:
+        Logger.info("Connecting to database")
         connection = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
         with connection.cursor() as cursor:
+            Logger.info("Executing database query")
             query = "SELECT * FROM artists WHERE id = %s"
             cursor.execute(query, (artist_id,))
             result = cursor.fetchone()
 
             if not result:
+                Logger.error(f"Artist with ID {artist_id} not found")
                 raise ValueError(f"Artist with ID {artist_id} not found")
 
-            # Convert to dictionary and handle date serialization
+            Logger.info("Processing database result")
             artist_data = dict(result)
             for key, value in artist_data.items():
                 if isinstance(value, date):
                     artist_data[key] = value.isoformat()
 
-            # Write to JSON file
+            Logger.info("Saving artist data to JSON file")
             artist_name_slug = artist_data["stage_name"].replace(" ", "_")
             with open(f"{artist_name_slug}_json.txt", "w") as json_file:
                 json.dump(artist_data, json_file, indent=2)
+            Logger.success(f"Artist data saved to {artist_name_slug}_json.txt")
 
+            Logger.end_task(db_start, "Database operation completed")
             return artist_data
 
     except Exception as e:
+        Logger.error(f"Database error: {str(e)}")
         raise Exception(f"Database error: {str(e)}")
     finally:
         if connection:
+            Logger.info("Closing database connection")
             connection.close()
+            Logger.success("Database connection closed")
 
 
 # Updated example usage:
