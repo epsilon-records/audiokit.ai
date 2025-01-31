@@ -160,38 +160,46 @@ As a music industry analytics expert, create a comprehensive internal artist rep
 # Remove individual DB environment variables
 DATABASE_URL = os.getenv("DATABASE_URL")
 
+# Initialize single DeepSeek model
+ai_model = OpenAIModel(
+    model_name="deepseek/deepseek-r1",
+    api_key=OPENROUTER_API_KEY,
+    base_url="https://openrouter.ai/api/v1",
+    http_client=async_client,
+)
+
 # Define the EPK Agent
 epk_agent = Agent(
-    model=AI_MODELS["DeepSeek-R1"],
+    model=ai_model,
     system_prompt=EPK_SYSTEM_PROMPT,
-    result_type=str,  # Assuming the result is a Markdown string
+    result_type=str,
 )
 
 # Define the Internal Report Agent
 internal_report_agent = Agent(
-    model=AI_MODELS["DeepSeek-R1"],
+    model=ai_model,
     system_prompt=INTERNAL_REPORT_PROMPT,
-    result_type=str,  # Assuming the result is a Markdown string
+    result_type=str,
 )
 
 market_analysis_agent = Agent(
-    model=AI_MODELS["DeepSeek-R1"],  # Will be set dynamically
-    system_prompt="You are a strategic music marketing expert. Generate a market analysis report...",
+    model=ai_model,
+    system_prompt="You are a strategic music marketing expert...",
     result_type=str,
 )
 
 # Define the Strategy Selection Agent
 strategy_selection_agent = Agent(
-    model=AI_MODELS["DeepSeek-R1"],
+    model=ai_model,
     system_prompt=(
         "You are an expert music marketing strategist. You have received marketing reports "
         "from multiple AI models. Your task is to:\n"
         "1. Identify the best marketing strategy from these reports.\n"
         "2. Integrate the strongest insights from all reports into a single, optimized plan.\n"
         "3. Ensure the strategy is detailed, realistic, and well-budgeted.\n"
-        "Respond in JSON format with keys: 'selected_model' (string), 'integrated_report' (string), and 'budget_allocation' (object of string:float)."
+        "Respond in JSON format with keys: 'selected_model' (string), 'integrated_report' (string), and budget_allocation' (object of string:float)."
     ),
-    result_type=dict,  # Assuming the result is a JSON object
+    result_type=dict,
 )
 
 
@@ -302,8 +310,8 @@ def generate_report_with_agent(
     agent, artist_data: dict, report_type: str, model_name: str, reports: dict
 ):
     start_time = Logger.start_task(f"Generating {report_type} with {model_name}")
-    agent.model = AI_MODELS[model_name]
     try:
+        agent.model.model_name = model_name  # Update just the model name
         result = agent.run_sync(json.dumps(artist_data))
         reports[report_type][model_name] = result.data
         Logger.success(f"{report_type} generated successfully with {model_name}")
@@ -339,10 +347,6 @@ def run_full_ai_marketing_pipeline(artist_id: str):
     try:
         Logger.info("Fetching artist data from database")
         artist_data = get_artist_data_from_db(artist_id)
-
-        Logger.info("Validating artist data")
-        artist_info = ArtistData.model_validate_json(artist_data)
-        Logger.success("Artist data validated successfully")
 
         Logger.info("Generating reports")
         all_reports = generate_reports(artist_data)
