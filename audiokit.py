@@ -11,7 +11,8 @@ from psycopg2.extras import RealDictCursor
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 from datetime import date
-import requests
+import time
+from datetime import datetime
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -25,16 +26,11 @@ YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
 # Define custom headers
 CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
 
-# Create sync client with custom headers
-sync_client = requests.Session()
-sync_client.headers.update(CUSTOM_HEADERS)
-
-# Update the AI model initialization to use sync client
+# Initialize single DeepSeek model
 ai_model = OpenAIModel(
     model_name="deepseek/deepseek-r1",
     api_key=OPENROUTER_API_KEY,
     base_url="https://openrouter.ai/api/v1",
-    http_client=sync_client,
 )
 
 # EPK System Prompt
@@ -295,9 +291,9 @@ def generate_report_with_agent(
 ):
     start_time = Logger.start_task(f"Generating {report_type} with {model_name}")
     try:
-        agent.model.model_name = model_name
+        agent.model.model_name = model_name  # Update just the model name
         artist_data = sanitize_artist_data(artist_data)
-        result = agent.run_sync(json.dumps(artist_data))
+        result = agent.run(json.dumps(artist_data))
 
         if result is None or result.data is None:
             raise ValueError(f"{report_type} generation returned None for {model_name}")
@@ -319,7 +315,7 @@ def generate_reports(artist_data: dict):
     for current_model, model_name in enumerate(AI_MODELS, 1):
         Logger.progress(current_model, total_models, f"Processing model {model_name}")
 
-        # Generate reports synchronously
+        # Generate reports using helper function
         generate_report_with_agent(epk_agent, artist_data, "EPK", model_name, reports)
         generate_report_with_agent(
             internal_report_agent, artist_data, "Internal Report", model_name, reports
@@ -352,6 +348,7 @@ def run_full_ai_marketing_pipeline(artist_id: str):
             Logger.success("Strategy selection completed")
         except Exception as e:
             Logger.warning(f"Strategy selection failed: {str(e)}")
+            # Fallback to selecting the first successful report from each category
             integrated_strategy = {
                 "EPK": next(
                     (
@@ -463,10 +460,6 @@ def get_artist_data_from_db(artist_id: str) -> dict:
             Logger.success("Database connection closed")
 
 
-def main():
+if __name__ == "__main__":
     artist_id = "fdf3afd2-a3d8-462c-b2dc-7e0805573d03"
     run_full_ai_marketing_pipeline(artist_id)
-
-
-if __name__ == "__main__":
-    main()
