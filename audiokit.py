@@ -36,7 +36,6 @@ Report Requirements:
 Output Instructions:
 	• Return ONLY the content itself - do not wrap it in any code blocks or markdown syntax
 	• Ensure the document is engaging, professional, and well-structured
-	• Use markdown-like formatting for headings (#, ##, ###) and lists
 	• Maintain a professional tone while being approachable
 	• Do not include any backticks, code block markers, or other syntax wrappers
 	• Output must be plain text with the formatted content only
@@ -82,7 +81,6 @@ Report Requirements:
 Output Instructions:
 	• Return ONLY the content itself - do not wrap it in any code blocks or markdown syntax
 	• Ensure the report is structured for clarity, professionalism, and maximum readability
-	• Use markdown-like formatting for headings (#, ##, ###) and lists
 	• Maintain a professional tone while being approachable
 	• Do not include any backticks, code block markers, or other syntax wrappers
 	• Output must be plain text with the formatted content only
@@ -140,7 +138,7 @@ AI_MODELS = [
 EPK_INTEGRATION_MODEL = "deepseek/deepseek-chat"
 
 EPK_INTEGRATION_PROMPT = """
-You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models and the original artist_data. Your task is to generate a professionally formatted, publication-ready rich text document by following these steps:
+You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models and the original artist_data. Your task is to generate a professionally formatted, publication-ready latex document by following these steps:
 
 Data Verification:
 • Cross-check all facts and figures against the original artist_data
@@ -193,7 +191,7 @@ The final EPK should be comprehensive, professional, and designed to attract boo
 """
 
 INTERNAL_REPORT_INTEGRATION_PROMPT = """
-You are an expert music industry analyst. You will receive multiple Internal Reports from AI models and the original artist_data. Your task is to generate a professionally formatted, publication-ready rich text document by following these steps:
+You are an expert music industry analyst. You will receive multiple Internal Reports from AI models and the original artist_data. Your task is to generate a professionally formatted, publication-ready latex document by following these steps:
 
 Data Verification:
 • Cross-check all facts and figures against the original artist_data
