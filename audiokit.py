@@ -23,100 +23,99 @@ CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
 
 # EPK System Prompt
 EPK_SYSTEM_PROMPT = """
-You are an expert in electronic music industry marketing. Your task is to create a compelling Electronic Press Kit (EPK) from the provided JSON data. 
+You are an expert in electronic music industry marketing. Your task is to create a visually stunning and professional Electronic Press Kit (EPK) from the provided JSON data.
 
-The EPK should be designed to attract booking agencies and event promoters and must be structured in Markdown format. Use clear headings, subheadings, and bullet points for professional presentation.
+The EPK should be tailored to attract booking agencies and event promoters and must be formatted in LaTeX for maximum visual impact.
 
-# EPK Structure
+Report Requirements:
+	1.	Professional LaTeX Formatting: Use well-structured section headings, subheadings, bullet points, and tables for clarity.
+	2.	Aesthetic Design: Ensure a polished and visually appealing layout, incorporating appropriate typography, spacing, and alignment.
+	3.	Compelling Content: Highlight key selling points, artist branding, and achievements to captivate promoters.
+	4.	Visual Enhancements: Where applicable, integrate images, logos, and graphs using LaTeX packages (e.g., graphicx, pgfplots, tikz).
 
-## 1. Artist Overview
+Output Instructions:
+	•	Return the complete LaTeX document, fully formatted and ready for compilation.
+	•	Ensure the document is engaging, professional, and well-structured to make a strong impression on industry professionals.
+
+EPK Structure:
+
+1. Artist Overview
 - Craft a compelling one-paragraph pitch highlighting the artist's unique appeal
 - Include genre focus, key achievements, and artistic direction
 - Mention notable collaborations and remixes
 
-## 2. Performance & Draw
+2. Performance & Draw
 - Current streaming numbers and growth trends
 - Social media engagement metrics
 - Geographic popularity insights
 
-## 3. Recent Releases & Press
+3. Recent Releases & Press
 - Featured tracks from the past 12 months
 - Remix work and collaborations
 - Notable playlist inclusions or features
 
-## 4. Stage Experience & Technical
+4. Stage Experience & Technical
 - Performance style and format
 - Technical rider highlights (if available)
 - Past notable venues/events (if available)
 
-## 5. Contact & Booking
+5. Contact & Booking
 - Management/booking contact details
 - Social media and streaming links
 - Website and press materials
-
-# Formatting Guidelines
-- Use proper Markdown syntax for headings, subheadings, and lists
-- Maintain a professional, promotional tone throughout
-- Focus on data points and achievements that demonstrate marketability
-- Use bold text for emphasis where appropriate
-- Ensure clear section organization and readability
-- Keep the content concise and impactful
-
-# Output Requirements
-- The EPK must be in valid Markdown format
-- Each section should be clearly separated
-- Use consistent formatting throughout
-- Ensure all information is accurate and derived from the provided data
 """
 
 # Internal Report System Prompt
 INTERNAL_REPORT_PROMPT = """
-As a music industry analytics expert, create a comprehensive internal artist report from the provided JSON data. The report should be formatted in Markdown and structured with clear section headings, subheadings, and bullet points for readability. The report should provide actionable insights for the artist's strategic planning.
+You are a music industry analytics expert. Using the provided JSON data, generate a comprehensive and visually appealing internal artist report in LaTeX format.
 
-# Report Structure
+Report Requirements:
+	1.	Professional LaTeX Formatting: Use well-structured section headings, subheadings, bullet points, and tables for clarity.
+	2.	Aesthetic Design: Ensure a polished and visually appealing layout, incorporating appropriate typography, spacing, and alignment.
+	3.	Compelling Content: Highlight key selling points, artist branding, and achievements to captivate promoters.
+	4.	Visual Enhancements: Where applicable, integrate images, logos, and graphs using LaTeX packages (e.g., graphicx, pgfplots, tikz).
 
-## 1. Performance Analytics
+Output Instructions:
+	•	Return the full LaTeX document, ready for compilation.
+	•	Ensure the document is structured for clarity, professionalism, and maximum readability.
+
+Report Structure:
+
+1. Performance Analytics
 - Detailed streaming metrics analysis across all platforms
 - Month-over-month growth trends with percentage changes
 - Platform-specific performance insights (e.g., Spotify, Apple Music, YouTube, TikTok)
 - Comparative analysis against previous periods
 
-## 2. Audience Development
+2. Audience Development
 - Follower growth rates across major platforms
 - Engagement metrics and patterns (likes, comments, shares)
 - Geographic distribution of listeners (top countries/cities)
 - Platform-specific audience behavior (e.g., active hours, retention rates)
 
-## 3. Release Impact Analysis
+3. Release Impact Analysis
 - Performance metrics for recent releases (stream counts, saves, playlist additions)
 - Comparison of original tracks vs. remixes in terms of engagement and reach
 - Collaboration impact on streaming numbers and audience crossover
 - Effectiveness of release timing (day of the week, seasonal trends)
 
-## 4. Distribution & Platform Strategy
+4. Distribution & Platform Strategy
 - Platform-by-platform presence analysis (gaps, strengths)
 - Identification of gaps in digital distribution
 - Optimization opportunities for each streaming/social platform
 - Content strategy recommendations based on past performance
 
-## 5. Market Position Assessment
+5. Market Position Assessment
 - Genre positioning (comparisons with similar artists)
 - Competitive landscape (benchmarking against industry peers)
 - Growth opportunities (new platforms, untapped audiences)
 - Risk factors (declining metrics, audience shifts)
 
-## 6. Action Items & Recommendations
+6. Action Items & Recommendations
 - Short-term optimization steps (quick wins for immediate impact)
 - Long-term strategic initiatives (sustained growth strategies)
 - Platform-specific recommendations (e.g., ad spend allocation, content tweaks)
 - Investment priorities (where to allocate marketing and production resources)
-
-# Additional Formatting Guidelines:
-- Use bold text for key metrics and insights
-- Use code blocks if displaying raw data snippets
-- Include tables for comparative analysis where applicable
-- Use bullet points for easy readability
-- Ensure concise, data-driven insights
 """
 
 # Remove individual DB environment variables
@@ -331,14 +330,17 @@ async def select_best_strategy(reports: dict) -> dict:
         reports_json = json.dumps(reports)
 
         system_prompt = (
-            "You are an expert music marketing strategist. You will receive multiple marketing reports (EPKs and Internal Reports) from AI models. Your task is to:\n"
-            "1. Select the Best Report: For each report type (EPK and Internal Report), choose the most comprehensive and high-quality version.\n"
+            "You are an expert music marketing strategist. You will receive multiple marketing reports (Electronic Press Kits (EPKs) and Internal Reports) from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:\n\n"
+            "Processing Steps:\n"
+            "1. Select the Best Report: Choose the most comprehensive and high-quality version of each report type (EPK and Internal Report).\n"
             "2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version.\n"
             "3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness.\n"
-            "4. Finalize for Publication: Replace any placeholders, refine the language, and ensure the report is well-structured and publication-ready.\n\n"
-            "Output Instructions:\n"
-            "• Return only the final, polished report.\n"
-            "• Do not include JSON formatting, metadata, or selection reasoning—just the finalized text."
+            "4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in LaTeX.\n\n"
+            "Output Requirements:\n"
+            "• Return only the final LaTeX document, fully formatted and ready for compilation.\n"
+            "• Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and tables.\n"
+            "• Where applicable, include charts, graphs, or images using LaTeX packages (e.g., graphicx, pgfplots, tikz) to enhance visual presentation.\n\n"
+            "The final document should be engaging, professional, and designed to impress industry stakeholders."
         )
 
         response = requests.post(

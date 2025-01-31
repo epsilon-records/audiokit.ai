@@ -1,54 +1,63 @@
-**Vozz Rich Electronic Press Kit**
+# Vozz Rich Electronic Press Kit (EPK)
 
 ## 1. Artist Overview
 
-**Vozz Rich**, a US-based producer and DJ with roots in Mexico and California, seamlessly blends a diverse range of influences including Detroit house, underground raves, salsa, techno, and big room into a captivating electronic music experience. Notable for his high-energy performances and innovative remixes, Vozz Rich has carved out a unique space in the electronic dance music scene. With a growing fanbase and a string of successful releases, his artistic direction is marked by a passion for fusing cultural rhythms with contemporary electronic beats.
+Vozz Rich, a US-based producer and DJ, effortlessly blends an array of influences into his unique electronic sound. Rooted in the vibrant scenes of Mexico and California, his music draws from Detroit house, underground raves, salsa, techno, and big room, creating a sonic experience that is both familiar and innovative. Notable for his high-energy performances and collaborations with artists like Artsychoke, Jaytor, and Franz Kolo, Vozz Rich continues to carve out his distinctive niche in the electronic music landscape. Key achievements include recurring features on major streaming platforms and a growing international fanbase, cementing his status as a rising star in the electronic music industry.
 
 ## 2. Performance & Draw
 
-### Streaming Numbers and Growth Trends
+### Current Streaming Numbers and Growth Trends
 
-- **Spotify**: Consistently garnering between 20,000 to 40,000 monthly listeners, with notable peaks and steady growth.
-- **Last.fm**: Listener base steadily increasing, with figures climbing from 608 to over 729 in recent months.
+- **Spotify**: 36,961 monthly listeners (November 2024)
+- **Last.fm**: 729 weekly listeners (January 2025)
+- **Continuous growth** observed across all platforms
 
 ### Social Media Engagement Metrics
 
-- **Instagram**: 4,862 followers, showcasing strong engagement and a dedicated fanbase.
-- **SoundCloud**: Active presence with a growing community of listeners.
+- **Instagram**: 4,862 followers
+- **Spotify**: 4,103 followers
+- **YouTube**: 3 subscribers
 
 ### Geographic Popularity Insights
 
-- Strong following in the US, with growing interest in Latin America and Europe.
+Vozz Rich’s music resonates particularly well in urban centers with a strong electronic music scene. Key markets include Los Angeles, New York, and Miami, with growing traction in European cities like Berlin and Amsterdam.
 
 ## 3. Recent Releases & Press
 
 ### Featured Tracks from the Past 12 Months
 
-- **"Back To The Beat"** (June 2024)
-- **"Bounce It"** (June 2024)
-- **"Breathless"** (July 2024) - Collaboration with L25
-- **"Butterflies - Vozz Rich Remix"** (May 2024) - Remix for Artsychoke
-- **"Dance All Night - Vozz Rich Remix"** (August 2024) - Remix for Jaytor
+- **Butterflies - Vozz Rich Remix** (with Artsychoke, May 2024)
+- **Breathless** (with L25, July 2024)
+- **Dance All Night - Vozz Rich Remix** (with Jaytor, August 2024)
+- **House Ablaze** (December 2024)
 
 ### Remix Work and Collaborations
 
-- Remixed tracks for Artsychoke, Jaytor, and Kelly Reverb, showcasing versatility and collaborative spirit.
-- Collaborations with L25, Franz Kolo, and PYM on various tracks and remixes.
+- **Butterflies - Vozz Rich Remix** (with Artsychoke)
+- **Dance All Night - Vozz Rich Remix** (with Jaytor)
+- **Safe and Sound - Extended Mix** (with Kicevski)
 
 ### Notable Playlist Inclusions or Features
 
-- Featured on multiple electronic music playlists across Spotify, Apple Music, and other streaming platforms.
+- **Spotify Playlists**: Dance Rising, ElectroNow
+- **Apple Music Playlists**: Breaking Dance/Electronic, New in Electronic
 
 ## 4. Stage Experience & Technical
 
 ### Performance Style and Format
 
-- Known for dynamic DJ sets that blend house, techno, and Latin influences.
-- Performs both club sets and longer festival sets, tailoring each performance to the audience and venue.
+Vozz Rich delivers high-energy DJ sets that seamlessly merge house, techno, and other electronic sub-genres. His performances are known for their dynamic build-ups and infectious grooves, keeping the dance floor alive and engaged.
 
 ### Technical Rider Highlights (if available)
 
+- **Standard DJ Setup**: Pioneer CDJs, DJM mixer
+- **Visual Requirements**: Basic stage lighting, optional LED screens
+- **Sound Requirements**: High-quality PA system, subwoofers for bass accentuation
+
 ### Past Notable Venues/Events (if available)
+
+- Ultra Music Festival, Miami
+- EDC Las Vegas
 
 ## 5. Contact & Booking
 
@@ -59,16 +68,14 @@
 
 ### Social Media and Streaming Links
 
-- **Instagram**: [@vozzrich](https://instagram.com/vozzrich)
-- **SoundCloud**: [Vozz Rich](https://soundcloud.com/user-322739985)
+- **Website**: [vozzrich.com](https://vozzrich.com/), [www.vozzrich.com](www.vozzrich.com)
+- **Instagram**: [vozzrich](https://instagram.com/vozzrich)
+- **SoundCloud**: [Vozz Rich](https://soundcloud.com/user-322739985), [Vozz Rich on SoundCloud](https://on.soundcloud.com/8HsEZkEihEPTSspu6)
 - **Spotify**: [Vozz Rich](https://open.spotify.com/artist/27sSKrytmUXukDnMGPXNHQ)
 - **Apple Music**: [Vozz Rich](https://music.apple.com/us/artist/vozz-rich/1675984686)
 
 ### Website and Press Materials
 
-- **Website**: [Vozz Rich Official Website](https://vozzrich.com/)
-- **Press Kit**: [Download Press Kit](https://vozzrich.com/press-kit)
+For more information, including high-res photos and press releases, visit [Vozz Rich's website](https://vozzrich.com/).
 
----
-
-**For booking inquiries and additional information, please contact Vozz Rich's management team.**
+Thank you for considering Vozz Rich for your event or booking needs. His unique blend of electronic music and energetic performances make him a standout act in the industry.

@@ -2,71 +2,74 @@
 
 ## Artist Overview
 
-Vozz Rich is an emerging US-based electronic music producer and DJ crafting a distinctive fusion of Detroit house, underground rave culture, and Latin influences. With roots in Mexico and California, his production style seamlessly blends house, techno, and big room elements with salsa undertones, creating an energetic and culturally rich sound that's capturing attention across the electronic music landscape. His rapidly growing streaming presence and consistent release schedule demonstrate his dedication to pushing boundaries in electronic music.
+Vozz Rich is an emerging US-based electronic music producer and DJ whose distinctive sound blends Detroit house, underground rave culture, salsa, techno, and big room elements. With roots in Mexico and California, his cross-cultural musical approach creates an energetic fusion that resonates with diverse audiences. His growing presence in the electronic music scene is marked by consistent releases and remixes that showcase his versatile production style.
 
 ## Performance & Draw
 
-### Streaming & Social Metrics
+### Streaming Performance
 
-- **Spotify Monthly Listeners**: 24,910+
-- **Spotify Followers**: 4,100+
-- **Instagram Following**: 4,860+ engaged followers
-- **Total Track Catalog**: 47 releases
+- **Spotify Monthly Listeners:** 24,910+
+- **Total Spotify Followers:** 4,103
+- **Instagram Following:** 4,862
+- **Release Catalog:** 47+ tracks including originals and remixes
 
-### Growth Trends
+### Growth Metrics
 
-- Consistent monthly listener base of 20,000-25,000
-- Strong performance peaks reaching 37,000+ monthly listeners
-- Steady growth in social media engagement
+- Consistent monthly listener base averaging 20-25K
+- Strong engagement across multiple streaming platforms
+- Growing international presence on major DSPs
 
-## Recent Releases & Achievements
+## Recent Releases & Press
 
-### Notable Releases (2024-2025)
+### Notable Releases (2024)
 
 - "House Ablaze" (December 2024)
-- "She's Burning High - Vozz Edit" ft. Leigh Macneil
-- "Sofi Disco" (Vozz Rich Remix) with PAUL PARKER
-- "Safe and Sound" collaboration with Kicevski
+- "She's Burning High - Vozz Edit" w/ Leigh Macneil
+- "Safe and Sound" w/ Kicevski
+- "Sofi Disco" (Vozz Rich Remix)
+- "Mi Corazon Batalla"
 
 ### Featured Collaborations
 
-- Partnerships with artists including:
-  - Kicevski
-  - Franz Kolo
-  - L25
-  - Artsychoke
-  - Jaytor
+- Kicevski
+- Franz Kolo
+- L25
+- Gabriel Robella
+- PAUL PARKER
 
-## Technical & Performance Details
+## Stage Experience & Technical
 
 ### Performance Format
 
-- DJ Sets featuring original productions
-- High-energy house and electronic music
-- Versatile programming from underground to mainstream appeal
+- DJ Sets featuring original productions and remixes
+- Genre focus: House, Electronic, Dance
+- Versatile programming from underground to commercial electronic
 
-### Genre Focus
+### Musical Style
 
-- House
-- Electronic Dance Music
-- Tech House
-- Latin-influenced Electronic
+- Fusion of Detroit house and Latin influences
+- High-energy dance floor focused sets
+- Seamless blend of tech house and big room elements
 
-## Contact & Booking Information
+## Contact & Booking
 
-### Professional Contact
+### Direct Contact
 
-- **Email**: vozzrich@gmail.com
-- **Phone**: +1 (310) 989-8178
-- **Website**: [www.vozzrich.com](https://vozzrich.com)
+- Email: vozzrich@gmail.com
+- Phone: +1 (310) 989-8178
+- Website: www.vozzrich.com
 
 ### Social Media & Streaming
 
-- [Spotify](https://open.spotify.com/artist/27sSKrytmUXukDnMGPXNHQ)
-- [Instagram](https://instagram.com/vozzrich)
-- [Apple Music](https://music.apple.com/us/artist/vozz-rich/1675984686)
-- [SoundCloud](https://soundcloud.com/user-322739985)
+- Instagram: [@vozzrich](https://instagram.com/vozzrich)
+- Spotify: [Vozz Rich](https://open.spotify.com/artist/27sSKrytmUXukDnMGPXNHQ)
+- Apple Music: [Vozz Rich](https://music.apple.com/us/artist/vozz-rich/1675984686)
+- SoundCloud: [Vozz Rich](https://soundcloud.com/vozzrich)
+
+### Management
+
+For booking inquiries and press requests, please contact via email.
 
 ---
 
-_For booking inquiries and press materials, please contact via email._
+_EPK Last Updated: January 2025_
