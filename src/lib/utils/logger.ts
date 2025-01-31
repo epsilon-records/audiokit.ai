@@ -118,11 +118,10 @@ const logSuccess = (
   });
 };
 
-const logWarning = (requestId: string, msg: string, warning?: any, context?: any) => {
+const logWarning = (requestId: string, msg: string, context?: any) => {
   activeLogger.warn({
     request: { id: requestId },
     message: `⚠️ ${msg}`,
-    warning,
     ...context,
   });
 };
