@@ -1,17 +1,23 @@
 import Bottleneck from 'bottleneck';
+import { createCache } from '../../utils/cache.js';
 import logger from '../../utils/logger.js';
 
-const MUSICFETCH_RATE_LIMIT = 1; // Reduced to 1 request per second
+const MUSICFETCH_RATE_LIMIT = 5; // Increased to 5 requests per second
 const MUSICFETCH_WINDOW = 1000; // 1 second window
-const MUSICFETCH_MAX_CONCURRENT = 1; // Keep at 1 concurrent request
+const MUSICFETCH_MAX_CONCURRENT = 3; // Increased to 3 concurrent requests
 
 const musicfetchLimiter = new Bottleneck({
-  minTime: 1000, // Exactly 1 second between requests
+  minTime: 200, // 200ms between requests (5 requests per second)
   maxConcurrent: MUSICFETCH_MAX_CONCURRENT,
   reservoir: MUSICFETCH_RATE_LIMIT,
   reservoirRefreshInterval: MUSICFETCH_WINDOW,
   reservoirRefreshAmount: MUSICFETCH_RATE_LIMIT,
   trackDoneStatus: true,
+});
+
+const musicfetchCache = createCache<Record<string, any>>('musicfetch', {
+  ttl: 60 * 1000, // 1 minute
+  maxSize: 1000, // Max 1000 cached items
 });
 
 class RateLimitError extends Error {
@@ -45,6 +51,17 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
     const startTime = Date.now();
 
     try {
+      const cacheKey = `${spotifyUrl}:${services.join(',')}`;
+
+      const cached = musicfetchCache.get(cacheKey);
+      if (cached) {
+        logger.success(requestId, 'Returning cached Musicfetch data', undefined, {
+          cacheHit: true,
+          duration: Date.now() - startTime,
+        });
+        return cached;
+      }
+
       logger.start(requestId, 'Starting Musicfetch API request', {
         metadata: {
           environment: process.env.NODE_ENV,
@@ -121,9 +138,13 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
       }
 
       const data = await response.json();
+
+      musicfetchCache.set(cacheKey, data.result.services);
+
       logger.success(requestId, 'Successfully retrieved Musicfetch data', undefined, {
         availableServices: Object.keys(data.result.services),
         duration: Date.now() - startTime,
+        cacheHit: false,
       });
 
       return data.result.services;
