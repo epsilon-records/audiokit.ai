@@ -14,6 +14,13 @@ const musicfetchLimiter = new Bottleneck({
   trackDoneStatus: true,
 });
 
+class RateLimitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RateLimitError';
+  }
+}
+
 function getMusicfetchConfig() {
   const apiBase = process.env.MUSICFETCH_API_BASE;
   const token = process.env.MUSICFETCH_TOKEN;
@@ -96,7 +103,7 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
             duration: Date.now() - startTime,
           });
           // Continue processing by throwing the error
-          throw new Error(`Rate limit exceeded: ${errorText}`);
+          throw new RateLimitError(`Rate limit exceeded: ${errorText}`);
         } else {
           logger.error(
             requestId,
@@ -122,9 +129,12 @@ export const getMusicfetchData = musicfetchLimiter.wrap(
       return data.result.services;
     } catch (err) {
       const error = err instanceof Error ? err : new Error(String(err));
-      logger.error(requestId, 'Error fetching Musicfetch data', error, {
-        duration: Date.now() - startTime,
-      });
+      // Check if it's a RateLimitError instance
+      if (!(error instanceof RateLimitError)) {
+        logger.error(requestId, 'Error fetching Musicfetch data', error, {
+          duration: Date.now() - startTime,
+        });
+      }
       return;
     }
   }
