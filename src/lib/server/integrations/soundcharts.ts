@@ -35,7 +35,7 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
       throw new Error('Soundcharts API configuration missing');
     }
 
-    const url = `${process.env.SOUNDCHARTS_API_BASE}/artists/spotify/${spotifyId}`;
+    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.9/artist/by-platform/spotify/${spotifyId}`;
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
@@ -60,11 +60,11 @@ export async function getArtistIdFromSpotify(spotifyId: string): Promise<string 
 
     const data = await response.json();
     logger.success(requestId, 'Successfully retrieved Soundcharts artist ID', {
-      soundchartsId: data.id,
+      soundchartsId: data.object?.uuid,
       duration: Date.now() - startTime,
     });
 
-    return data.id;
+    return data.object?.uuid || null;
   } catch (err) {
     const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Error fetching Soundcharts artist ID', serializedError);
@@ -322,41 +322,66 @@ export async function getArtistStats(uuid: string): Promise<{
   logger.start(requestId, 'Fetching Soundcharts artist stats', context);
 
   try {
-    if (!process.env.SOUNDCHARTS_APP_ID || !process.env.SOUNDCHARTS_API_KEY) {
-      throw new Error('Soundcharts API configuration missing');
-    }
-
-    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2/artist/${uuid}/current/stats`;
-    const response = await fetch(url, {
-      headers: {
-        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
-        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
-        Accept: 'application/json',
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      logger.error(
-        requestId,
-        'Soundcharts API error',
-        new Error(`API Error: ${response.status} ${response.statusText}`),
-        {
-          url,
-          status: response.status,
-          statusText: response.statusText,
-          ...context,
-        }
-      );
+    // Get artist metadata
+    const metadata = await getArtistMetadata(uuid);
+    if (!metadata) {
+      logger.warning(requestId, 'No metadata found for artist', null, context);
       return null;
     }
 
-    const data = await response.json();
+    // Get streaming data for different platforms
+    const platforms = ['spotify', 'apple_music', 'deezer'] as const;
+    const streamingPromises = platforms.map((platform) =>
+      getArtistStreamingAudience(uuid, platform)
+    );
+
+    const streamingResults = await Promise.allSettled(streamingPromises);
+    const streaming = streamingResults.reduce(
+      (acc, result, index) => {
+        if (result.status === 'fulfilled' && result.value) {
+          acc[platforms[index]] = result.value;
+        }
+        return acc;
+      },
+      {} as Record<string, any>
+    );
+
+    // Get audience data for social platforms
+    const socialPlatforms = ['spotify', 'instagram', 'twitter', 'facebook', 'youtube'] as const;
+    const audiencePromises = socialPlatforms.map((platform) => getArtistAudience(uuid, platform));
+
+    const audienceResults = await Promise.allSettled(audiencePromises);
+    const followers = audienceResults.reduce(
+      (acc, result, index) => {
+        const platform = socialPlatforms[index];
+
+        if (result.status === 'fulfilled' && result.value?.items) {
+          const items = result.value.items;
+          // Get the most recent item by sorting dates
+          const latestItem = [...items].sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )[0];
+
+          acc[platform] = latestItem?.followerCount ?? null;
+        } else {
+          acc[platform] = null;
+        }
+        return acc;
+      },
+      {} as Record<string, number | null>
+    );
+
     logger.success(requestId, 'Successfully retrieved Soundcharts artist stats', {
       duration: Date.now() - startTime,
+      platforms: Object.keys(streaming),
+      socialPlatforms: Object.keys(followers),
     });
 
-    return data;
+    return {
+      metadata: metadata.object || {},
+      streaming,
+      followers,
+    };
   } catch (err) {
     const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Error fetching Soundcharts artist stats', serializedError, {
@@ -500,11 +525,12 @@ export async function getTrackMetadata(uuid: string): Promise<Track | null> {
   logger.start(requestId, 'Fetching Soundcharts track metadata', context);
 
   try {
-    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2/tracks/${uuid}`;
+    const url = `${process.env.SOUNDCHARTS_API_BASE}/api/v2.25/song/${uuid}`;
     const response = await fetch(url, {
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `bearer ${process.env.SOUNDCHARTS_API_KEY}`,
+        'x-app-id': process.env.SOUNDCHARTS_APP_ID,
+        'x-api-key': process.env.SOUNDCHARTS_API_KEY,
       },
     });
 
@@ -522,7 +548,7 @@ export async function getTrackMetadata(uuid: string): Promise<Track | null> {
       duration: Date.now() - startTime,
     });
 
-    return data as Track;
+    return data.object as Track;
   } catch (err) {
     const serializedError = serializeError(err) as Error;
     logger.error(requestId, 'Error fetching Soundcharts track metadata', serializedError, {
