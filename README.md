@@ -1,17 +1,36 @@
-# Epsilon Music Platform
+# AudioKit Music Platform
 
 A modern music distribution and artist management platform built with SvelteKit 2 and Python.
 
 ## Project Structure
 
 ```
-epsilon/
-├── apps/
-│   └── web/               # SvelteKit 2 frontend
-├── packages/
-│   └── audiokit/          # Python backend services
-├── justfile              # Command runner
-└── README.md
+audiokit/
+  apps/
+    web/                  # Svelte frontend application
+      src/               
+      package.json
+      tsconfig.json
+      vite.config.ts
+      tailwind.config.ts
+  
+  packages/
+    audiokit/            # Python backend package
+      audiokit/
+        core.py         # Core audio processing
+        db.py          # Database operations
+        llm.py         # AI/ML functionality
+        logger.py      # Logging utilities
+        utils.py       # Helper functions
+      tests/
+      pyproject.toml
+      poetry.lock
+      README.md
+
+  .cursorrules          # Development guidelines
+  .env                  # Environment configuration
+  justfile             # Command runner
+  README.md            # Project documentation
 ```
 
 ## Prerequisites
@@ -63,6 +82,26 @@ The web app will be available at `http://localhost:5173` and the API at `http://
 - `just audiokit-version` - Show backend package version
 - `just audiokit-run <artist_id>` - Run AI pipeline for a specific artist
 
+## Core Technical Stack
+
+### Frontend Framework (apps/web)
+
+- Svelte 5 with Runes
+- SvelteKit 2 for routing and server features
+- TypeScript for all code
+- Tailwind CSS with Shadcn UI components
+- Paraglide.js for internationalization
+- Vite for build tooling
+
+### Backend Services (packages/audiokit)
+
+- Python 3.11+ with Poetry
+- FastAPI for API endpoints
+- SQLAlchemy 2.0 for database operations
+- Celery for background job processing
+- Redis for caching and message queue
+- Docker for containerization
+
 ## Code Quality
 
 - Python code is formatted and linted with [ruff](https://github.com/astral-sh/ruff)
@@ -73,6 +112,8 @@ The web app will be available at `http://localhost:5173` and the API at `http://
 
 - Backend API documentation is generated with `just audiokit-docs`
 - Frontend documentation is available in the `apps/web/README.md`
+- OpenAPI specification for API endpoints
+- Component storybook for UI components
 
 ## License
 

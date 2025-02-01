@@ -1,0 +1,71 @@
+**VOZZ RICH ARTIST REPORT**  
+*CONFIDENTIAL - INTERNAL USE ONLY* | *Generated: [DATE]*  
+
+---
+
+### 1. STREAMING GROWTH ANALYSIS  
+**Spotify Performance**  
+```  
+NOV 2024: █████████████████▊ 24.7k avg daily (▲ 12% MoM)  
+DEC 2024: ██████████████▉ 23.1k avg daily (▼ 6.5% MoM)  
+JAN 2025: ████████████████▌ 22.9k avg daily (→ Stable)  
+```  
+**Key Metric**: **729 peak daily listeners** (Jan 30) | **Status**: AMBER (Recent 3% decline in Feb)  
+
+**Cross-Platform Growth**  
+| Platform   | Nov 2024 | Jan 2025 | Growth  | Status |  
+|------------|----------|----------|---------|--------|  
+| Spotify    | 24,780   | 24,910   | +0.5%   | 🟢     |  
+| Last.fm    | 608      | 729      | +19.9%  | 🟢     |  
+| Apple Music| N/A      | N/A      | -       | 🔴     |  
+
+---
+
+### 2. SOCIAL MEDIA ENGAGEMENT  
+**Instagram**:  
+- **4,875 followers** (+12% YoY)  
+- Engagement Rate: **3.2%** (Industry avg: 2.8%) 🟢  
+- Top Post Type: Studio snippets (32% of interactions)  
+
+**SoundCloud**:  
+- 14 tracks / **112k plays** (▲ 8% MoM)  
+- "Breathless" (w/L25): **18k plays** 🟢  
+
+---
+
+### 3. DEMOGRAPHIC BREAKDOWN  
+```  
+AGE: 18-24 (38%) | 25-34 (42%) | 35+ (20%)  
+GENDER: Male (65%) | Female (35%)  
+TOP CITIES: Los Angeles | Mexico City | Toronto  
+```  
+**Cultural Note**: 23% Spanish-language engagement on lyric sites  
+
+---
+
+### 4. COMPETITIVE LANDSCAPE  
+| Artist       | Monthly Listeners | Follower Growth | Release Frequency |  
+|--------------|-------------------|-----------------|-------------------|  
+| Vozz Rich    | 24,910           | 0.5% MoM        | 1.2 tracks/month  |  
+| Artist X     | 41,200           | 1.8% MoM        | 0.8 tracks/month  |  
+| Artist Y     | 18,750           | -0.3% MoM       | 2.1 tracks/month  |  
+
+**Key Insight**: Outperforms peers in release consistency 🟢, needs playlist placements 🔴  
+
+---
+
+### 5. FINANCIAL PROJECTIONS  
+**Q1 2025 Royalty Forecast**  
+| Platform    | Est. Streams | Rate       | Projected Revenue |  
+|-------------|--------------|------------|-------------------|  
+| Spotify     | 747,300      | $0.003     | **$2,242**        |  
+| Apple Music | 149,460      | $0.006     | **$897**          |  
+| SoundCloud  | 336,000      | $0.0025    | **$840**          |  
+
+**Total Q1 Estimate**: **$3,979** (+15% QoQ) 🟢  
+
+---
+
+**CONFIDENTIALITY NOTICE**: This report contains proprietary data for internal strategy development only. Unauthorized distribution prohibited.  
+
+*Data Sources: Soundcharts API, Platform Analytics (2024-11-04 to 2025-01-30)*
