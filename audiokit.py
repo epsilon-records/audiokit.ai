@@ -146,7 +146,9 @@ Output Requirements:
 • Return only the final LaTeX document, fully formatted and ready for compilation
 • Do not wrap the content in any code blocks or markdown syntax
 • Ensure the EPK is aesthetically polished, clear, and well-structured, using professional LaTeX typography, section headings, bullet points, and lists
-• Where applicable, include emojis sparingly to enhance key points (1-2 per section max)
+• Use colorful, engaging design elements appropriate for external presentation
+• Maintain a fun, approachable tone while being professional
+• Use emojis strategically to enhance visual appeal and engagement
 
 EPK Structure Requirements:
 # 🎤 Artist Overview
@@ -174,7 +176,7 @@ EPK Structure Requirements:
 - Social media and streaming links
 - Website and press materials
 
-The final EPK should be comprehensive, professional, and designed to attract booking agencies and event promoters.
+The final EPK should be comprehensive, professional, and designed to attract booking agencies and event promoters, with a fun and colorful presentation style.
 """
 
 INTERNAL_REPORT_INTEGRATION_PROMPT = """
@@ -189,8 +191,10 @@ Processing Steps:
 Output Requirements:
 • Return only the final LaTeX document, fully formatted and ready for compilation
 • Do not wrap the content in any code blocks or markdown syntax
-• Ensure the report is aesthetically polished, clear, and well-structured, using professional LaTeX typography, section headings, bullet points, and lists
-• Where applicable, include emojis sparingly to enhance key points
+• Use monospace fonts for a formal, professional appearance
+• Include a prominent header stating "CONFIDENTIAL" at the top of the document
+• Use emojis very sparingly (maximum 1-2 in the entire document)
+• Maintain a strictly formal and professional tone
 • All data must be verified against the original artist data
 
 Report Structure Requirements:
@@ -231,7 +235,7 @@ Report Structure Requirements:
 - Platform-specific recommendations (e.g., ad spend allocation, content tweaks)
 - Investment priorities (where to allocate marketing and production resources)
 
-The final report should be comprehensive, professional, and designed for internal decision-making.
+The final report should be comprehensive, professional, and designed for internal decision-making, with a formal and confidential presentation style.
 """
 
 
