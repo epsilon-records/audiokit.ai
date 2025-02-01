@@ -482,19 +482,41 @@ async def integrate_reports(reports: dict) -> dict:
             )
             epk_response.raise_for_status()
 
-            # Validate response structure
+            # Validate response structure with improved error handling
             try:
-                response_data = epk_response.json()
+                # First try to decode the JSON
+                try:
+                    response_data = epk_response.json()
+                except json.JSONDecodeError as decode_error:
+                    Logger.error(f"Failed to decode JSON response: {str(decode_error)}")
+                    Logger.info(
+                        f"Raw response content: {epk_response.text[:500]}"
+                    )  # Log first 500 chars
+                    final_reports["EPK"] = (
+                        "EPK integration failed: Invalid JSON response from API"
+                    )
+                    return final_reports
+
+                # Then validate the structure
                 if not response_data.get("choices") or not response_data["choices"][
                     0
                 ].get("message"):
-                    raise ValueError("Invalid response structure from OpenRouter API")
+                    Logger.error("Invalid response structure - missing required fields")
+                    Logger.info(f"Response data: {json.dumps(response_data, indent=2)}")
+                    final_reports["EPK"] = (
+                        "EPK integration failed: Invalid API response structure"
+                    )
+                    return final_reports
+
+                # If we get here, the response is valid
                 final_reports["EPK"] = response_data["choices"][0]["message"]["content"]
-            except (json.JSONDecodeError, KeyError) as e:
-                Logger.error(f"Failed to parse EPK response: {str(e)}")
-                final_reports["EPK"] = (
-                    "EPK integration failed: Invalid API response format"
+
+            except Exception as e:
+                Logger.error(
+                    f"Unexpected error during EPK response processing: {str(e)}"
                 )
+                final_reports["EPK"] = "EPK integration failed: Unexpected error"
+                return final_reports
 
         # Handle Internal Reports
         if len(reports["Internal Report"]) == 1:
@@ -531,21 +553,45 @@ async def integrate_reports(reports: dict) -> dict:
             )
             internal_response.raise_for_status()
 
-            # Validate response structure
+            # Validate response structure with improved error handling
             try:
-                response_data = internal_response.json()
+                # First try to decode the JSON
+                try:
+                    response_data = internal_response.json()
+                except json.JSONDecodeError as decode_error:
+                    Logger.error(f"Failed to decode JSON response: {str(decode_error)}")
+                    Logger.info(
+                        f"Raw response content: {internal_response.text[:500]}"
+                    )  # Log first 500 chars
+                    final_reports["Internal Report"] = (
+                        "Internal Report integration failed: Invalid JSON response from API"
+                    )
+                    return final_reports
+
+                # Then validate the structure
                 if not response_data.get("choices") or not response_data["choices"][
                     0
                 ].get("message"):
-                    raise ValueError("Invalid response structure from OpenRouter API")
+                    Logger.error("Invalid response structure - missing required fields")
+                    Logger.info(f"Response data: {json.dumps(response_data, indent=2)}")
+                    final_reports["Internal Report"] = (
+                        "Internal Report integration failed: Invalid API response structure"
+                    )
+                    return final_reports
+
+                # If we get here, the response is valid
                 final_reports["Internal Report"] = response_data["choices"][0][
                     "message"
                 ]["content"]
-            except (json.JSONDecodeError, KeyError) as e:
-                Logger.error(f"Failed to parse internal report response: {str(e)}")
-                final_reports["Internal Report"] = (
-                    "Internal Report integration failed: Invalid API response format"
+
+            except Exception as e:
+                Logger.error(
+                    f"Unexpected error during internal report response processing: {str(e)}"
                 )
+                final_reports["Internal Report"] = (
+                    "Internal Report integration failed: Unexpected error"
+                )
+                return final_reports
 
         return final_reports
 
