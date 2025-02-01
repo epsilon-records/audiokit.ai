@@ -36,3 +36,7 @@ class Config:
         if artist_slug:
             path_template = path_template.format(artist_slug=artist_slug)
         return Path(path_template)
+
+
+# Create and export a singleton instance
+cfg = Config.get()

@@ -1,5 +1,4 @@
 import json
-from dotenv import load_dotenv
 import os
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -9,82 +8,7 @@ import time
 from datetime import datetime
 import traceback
 import hashlib
-from config import Config
-
-cfg = Config.get()
-
-load_dotenv()  # Load environment variables from .env file
-
-# API Configuration - Using os.getenv() with defaults where appropriate
-# All references updated to use cfg instance:
-# OLD: SOUNDCHARTS_API_BASE -> cfg.api.soundcharts.base_url
-# OLD: SOUNDCHARTS_APP_ID -> cfg.api.soundcharts.app_id
-# OLD: SOUNDCHARTS_API_KEY -> cfg.api.soundcharts.api_key
-# OLD: OPENROUTER_API_KEY -> cfg.api.openrouter.api_key
-# OLD: YOUTUBE_API_KEY -> cfg.api.youtube.api_key
-
-# Define custom headers
-# All references updated to use cfg instance
-# OLD: CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
-
-# EPK System Prompt
-# All references updated to use cfg instance
-# OLD: EPK_SYSTEM_PROMPT = """
-# ... full original EPK_SYSTEM_PROMPT content ...
-# """
-
-# Internal Report System Prompt
-# All references updated to use cfg instance
-# OLD: INTERNAL_REPORT_PROMPT = """
-# ... full original INTERNAL_REPORT_PROMPT content ...
-# """
-
-# Remove individual DB environment variables
-# All references updated to use cfg instance
-# OLD: DATABASE_URL = os.getenv("DATABASE_URL")
-
-# Add this near other configuration constants
-# All references updated to use cfg instance
-# OLD: AI_MODELS = [
-#     "deepseek/deepseek-chat",
-#     "deepseek/deepseek-r1",
-#     "anthropic/claude-3.5-sonnet",
-#     "openai/o1-mini",
-# ]
-
-# Constants for report integration
-# All references updated to use cfg instance
-# OLD: EPK_INTEGRATION_MODEL = "deepseek/deepseek-r1"
-# OLD: INTERNAL_REPORT_INTEGRATION_MODEL = "deepseek/deepseek-r1"
-
-# EPK Integration Prompt
-# All references updated to use cfg instance
-# OLD: EPK_INTEGRATION_PROMPT = """
-# ... full original EPK_INTEGRATION_PROMPT content ...
-# """
-
-# Internal Report Integration Prompt
-# All references updated to use cfg instance
-# OLD: INTERNAL_REPORT_INTEGRATION_PROMPT = """
-# ... full original INTERNAL_REPORT_INTEGRATION_PROMPT content ...
-# """
-
-# Add this with other constants
-# All references updated to use cfg instance
-# OLD: BEAUTIFICATION_MODEL = "deepseek/deepseek-r1"
-# OLD: BEAUTIFICATION_PROMPT = """
-# ... full original BEAUTIFICATION_PROMPT content ...
-# """
-
-# Add new constants near other prompts
-# All references updated to use cfg instance
-# OLD: BOOKING_RESEARCH_PROMPT = """
-# ... full original BOOKING_RESEARCH_PROMPT content ...
-# """
-
-# Add this with other constants
-# All references updated to use cfg instance
-# OLD: BOOKING_MODEL = "openai/o1-mini"
+from config import cfg  # Directly import the configured instance
 
 
 class Logger:
