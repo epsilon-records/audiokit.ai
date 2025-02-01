@@ -22,8 +22,8 @@
   "stage_name": "Vozz Rich",
   "tiktok": null,
   "twitch": "",
-  "updated": "2025-01-31T12:00:38.235000+00:00",
-  "website": "https://vozzrich.com/,%20www.vozzrich.com",
+  "updated": "2025-02-01T00:00:10.631000+00:00",
+  "website": "https://vozzrich.com/",
   "x": null,
   "youtube": null,
   "country": "",
@@ -56,171 +56,6 @@
     "birthDate": null
   },
   "streaming": {
-    "lastfm": {
-      "related": {
-        "artist": {
-          "uuid": "8fab7c54-0e0f-43a5-bf62-def4792d345a",
-          "slug": "vozz-rich",
-          "name": "Vozz Rich",
-          "appUrl": "https://app.soundcharts.com/app/artist/vozz-rich/overview",
-          "imageUrl": "https://assets.soundcharts.com/artist/f/0/e/8fab7c54-0e0f-43a5-bf62-def4792d345a.jpg"
-        },
-        "platform": "lastfm",
-        "lastCrawlDate": "2025-01-30T00:00:00+00:00"
-      },
-      "items": [
-        {
-          "date": "2024-11-04T00:00:00+00:00",
-          "value": 608
-        },
-        {
-          "date": "2024-11-07T00:00:00+00:00",
-          "value": 609
-        },
-        {
-          "date": "2024-11-10T00:00:00+00:00",
-          "value": 621
-        },
-        {
-          "date": "2024-11-13T00:00:00+00:00",
-          "value": 625
-        },
-        {
-          "date": "2024-11-16T00:00:00+00:00",
-          "value": 632
-        },
-        {
-          "date": "2024-11-19T00:00:00+00:00",
-          "value": 637
-        },
-        {
-          "date": "2024-11-22T00:00:00+00:00",
-          "value": 641
-        },
-        {
-          "date": "2024-11-25T00:00:00+00:00",
-          "value": 649
-        },
-        {
-          "date": "2024-11-28T00:00:00+00:00",
-          "value": 655
-        },
-        {
-          "date": "2024-12-01T00:00:00+00:00",
-          "value": 661
-        },
-        {
-          "date": "2024-12-04T00:00:00+00:00",
-          "value": 663
-        },
-        {
-          "date": "2024-12-07T00:00:00+00:00",
-          "value": 667
-        },
-        {
-          "date": "2024-12-10T00:00:00+00:00",
-          "value": 675
-        },
-        {
-          "date": "2024-12-13T00:00:00+00:00",
-          "value": 681
-        },
-        {
-          "date": "2024-12-16T00:00:00+00:00",
-          "value": 685
-        },
-        {
-          "date": "2024-12-19T00:00:00+00:00",
-          "value": 695
-        },
-        {
-          "date": "2024-12-22T00:00:00+00:00",
-          "value": 700
-        },
-        {
-          "date": "2024-12-25T00:00:00+00:00",
-          "value": 700
-        },
-        {
-          "date": "2024-12-28T00:00:00+00:00",
-          "value": 702
-        },
-        {
-          "date": "2024-12-31T00:00:00+00:00",
-          "value": 705
-        },
-        {
-          "date": "2025-01-03T00:00:00+00:00",
-          "value": 705
-        },
-        {
-          "date": "2025-01-06T00:00:00+00:00",
-          "value": 706
-        },
-        {
-          "date": "2025-01-09T00:00:00+00:00",
-          "value": 707
-        },
-        {
-          "date": "2025-01-12T00:00:00+00:00",
-          "value": 707
-        },
-        {
-          "date": "2025-01-15T00:00:00+00:00",
-          "value": 707
-        },
-        {
-          "date": "2025-01-18T00:00:00+00:00",
-          "value": 709
-        },
-        {
-          "date": "2025-01-21T00:00:00+00:00",
-          "value": 714
-        },
-        {
-          "date": "2025-01-24T00:00:00+00:00",
-          "value": 722
-        },
-        {
-          "date": "2025-01-27T00:00:00+00:00",
-          "value": 727
-        },
-        {
-          "date": "2025-01-30T00:00:00+00:00",
-          "value": 729
-        }
-      ],
-      "page": {
-        "offset": 0,
-        "limit": 100,
-        "next": null,
-        "previous": null,
-        "total": 30
-      },
-      "errors": []
-    },
-    "pandora": {
-      "related": {
-        "artist": {
-          "uuid": "8fab7c54-0e0f-43a5-bf62-def4792d345a",
-          "slug": "vozz-rich",
-          "name": "Vozz Rich",
-          "appUrl": "https://app.soundcharts.com/app/artist/vozz-rich/overview",
-          "imageUrl": "https://assets.soundcharts.com/artist/f/0/e/8fab7c54-0e0f-43a5-bf62-def4792d345a.jpg"
-        },
-        "platform": "pandora",
-        "lastCrawlDate": "2025-01-18T00:00:00+00:00"
-      },
-      "items": [],
-      "page": {
-        "offset": 0,
-        "limit": 100,
-        "next": null,
-        "previous": null,
-        "total": 0
-      },
-      "errors": []
-    },
     "spotify": {
       "related": {
         "artist": {
@@ -234,10 +69,6 @@
         "lastCrawlDate": "2025-01-31T00:00:00+00:00"
       },
       "items": [
-        {
-          "date": "2024-11-02T00:00:00+00:00",
-          "value": 36961
-        },
         {
           "date": "2024-11-03T00:00:00+00:00",
           "value": 37380
@@ -604,7 +435,7 @@
         "limit": 100,
         "next": null,
         "previous": null,
-        "total": 91
+        "total": 90
       },
       "errors": []
     }

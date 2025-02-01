@@ -134,18 +134,18 @@ AI_MODELS = [
 EPK_INTEGRATION_MODEL = "deepseek/deepseek-chat"
 
 EPK_INTEGRATION_PROMPT = """
-You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models. Your task is to generate a professionally formatted, publication-ready latex document by following these steps:
+You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:
 
 Processing Steps:
 1. Select the Best Report: Choose the most comprehensive and high-quality version
 2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
 3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
-4. Finalize for Publication: Replace any placeholders, refine the language, and structure the document to be visually appealing and professionally formatted in rich text
+4. Finalize for Publication: Replace any placeholders, refine the language, and structure the document to be visually appealing and professionally formatted in LaTeX
 
 Output Requirements:
-• Return only the final rich text document, fully formatted and ready for display
+• Return only the final LaTeX document, fully formatted and ready for compilation
 • Do not wrap the content in any code blocks or markdown syntax
-• Ensure the EPK is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and lists
+• Ensure the EPK is aesthetically polished, clear, and well-structured, using professional LaTeX typography, section headings, bullet points, and lists
 • Where applicable, include emojis sparingly to enhance key points (1-2 per section max)
 
 EPK Structure Requirements:
@@ -178,18 +178,18 @@ The final EPK should be comprehensive, professional, and designed to attract boo
 """
 
 INTERNAL_REPORT_INTEGRATION_PROMPT = """
-You are an expert music industry analyst. You will receive multiple Internal Reports from AI models. Your task is to generate a professionally formatted, publication-ready latex document by following these steps:
+You are an expert music industry analyst. You will receive multiple Internal Reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:
 
 Processing Steps:
 1. Select the Best Report: Choose the most comprehensive and high-quality version
 2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
 3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
-4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in rich text
+4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in LaTeX
 
 Output Requirements:
-• Return only the final rich text document, fully formatted and ready for display
+• Return only the final LaTeX document, fully formatted and ready for compilation
 • Do not wrap the content in any code blocks or markdown syntax
-• Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and lists
+• Ensure the report is aesthetically polished, clear, and well-structured, using professional LaTeX typography, section headings, bullet points, and lists
 • Where applicable, include emojis sparingly to enhance key points
 • All data must be verified against the original artist data
 
@@ -312,7 +312,7 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
     try:
         # Create cache key and filename
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
-        cache_key = f"{artist_name_slug}_epk_{model_name.replace('/', '_')}.json"
+        cache_key = f"{artist_name_slug}_epk_{model_name.replace('/', '_')}.txt"
 
         # Check cache
         if os.path.exists(cache_key):
@@ -358,7 +358,7 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
         # Create cache key and filename
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
         cache_key = (
-            f"{artist_name_slug}_internal_report_{model_name.replace('/', '_')}.json"
+            f"{artist_name_slug}_internal_report_{model_name.replace('/', '_')}.txt"
         )
 
         # Check cache
@@ -597,8 +597,8 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         save_start = Logger.start_task("Saving reports")
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
 
-        # Save integrated reports as rich text files
-        Logger.info("Saving integrated reports as rich text files")
+        # Save integrated reports as LaTeX files
+        Logger.info("Saving integrated reports as LaTeX files")
         if integrated_reports["EPK"]:
             epk_filename = f"{artist_name_slug}_integrated_epk.tex"
             with open(epk_filename, "w") as f:
