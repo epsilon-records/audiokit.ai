@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Knowledge base implementation with LlamaIndex and Pinecone
+  - Basic knowledge base structure
+  - Document metadata handling
+  - Pinecone vector store integration
+  - RAG pipeline with query transformation
+  - Redis-based query result caching
+  - Rate limiting and retry mechanisms
 - Comprehensive API documentation with OpenAPI/Swagger UI configuration
 - Authentication system documentation with JWT and rate limiting details
 - Core endpoints documentation covering all major API functionalities
@@ -52,7 +59,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation deployment issues
 - Documentation testing coverage
 
-## [1.0.0] - 2024-02-15
+## [1.0.0] - 2025-02-15
 
 ### Added
 - Initial release of AudioKit AI Platform
