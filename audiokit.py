@@ -128,13 +128,14 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # Add this near other configuration constants
 AI_MODELS = [
     "deepseek/deepseek-chat",
+    "deepseek/deepseek-r1",
     "anthropic/claude-3.5-sonnet",
     "openai/gpt-4o-2024-11-20",
 ]
 
 # Constants for report integration
-EPK_INTEGRATION_MODEL = "anthropic/claude-3.5-sonnet"
-INTERNAL_REPORT_INTEGRATION_MODEL = "anthropic/claude-3.5-sonnet"
+EPK_INTEGRATION_MODEL = "deepseek/deepseek-r1"
+INTERNAL_REPORT_INTEGRATION_MODEL = "deepseek/deepseek-r1"
 
 EPK_INTEGRATION_PROMPT = """
 You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:
