@@ -131,7 +131,8 @@ AI_MODELS = [
 ]
 
 # Constants for report integration
-EPK_INTEGRATION_MODEL = "deepseek/deepseek-chat"
+EPK_INTEGRATION_MODEL = "anthropic/claude-3.5-sonnet"
+INTERNAL_REPORT_INTEGRATION_MODEL = "anthropic/claude-3.5-sonnet"
 
 EPK_INTEGRATION_PROMPT = """
 You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:
@@ -149,6 +150,13 @@ Output Requirements:
 • Use colorful, engaging design elements appropriate for external presentation
 • Maintain a fun, approachable tone while being professional
 • Use emojis strategically to enhance visual appeal and engagement
+
+LaTeX Document Structure:
+\\documentclass{article}
+\\usepackage{fontspec}
+\\usepackage{emoji}
+\\setmainfont{Noto Color Emoji}
+\\begin{document}
 
 EPK Structure Requirements:
 # 🎤 Artist Overview
@@ -196,6 +204,13 @@ Output Requirements:
 • Use emojis very sparingly (maximum 1-2 in the entire document)
 • Maintain a strictly formal and professional tone
 • All data must be verified against the original artist data
+
+LaTeX Document Structure:
+\\documentclass{article}
+\\usepackage{fontspec}
+\\usepackage{emoji}
+\\setmainfont{Noto Color Emoji}
+\\begin{document}
 
 Report Structure Requirements:
 
@@ -534,7 +549,7 @@ async def integrate_reports(reports: dict) -> dict:
                     "X-Title": "AudioKit",
                 },
                 json={
-                    "model": EPK_INTEGRATION_MODEL,
+                    "model": INTERNAL_REPORT_INTEGRATION_MODEL,
                     "messages": [
                         {
                             "role": "system",
