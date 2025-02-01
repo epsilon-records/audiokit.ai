@@ -9,6 +9,7 @@ import time
 from datetime import datetime
 import traceback
 import hashlib
+import shutil
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -675,6 +676,95 @@ async def beautify_report(content: str, report_type: str, artist_name_slug: str)
         return content  # Return original content on failure
 
 
+async def compile_latex_to_pdf(
+    content: str, report_type: str, artist_name_slug: str
+) -> str:
+    """Compile LaTeX to PDF using local MacTeX installation"""
+    try:
+        artist_dir = os.path.join("data", "artists", artist_name_slug)
+        cache_dir = os.path.join(artist_dir, "cache")
+        final_dir = artist_dir
+
+        # Create input hash
+        content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()[:12]
+        cache_pdf = os.path.join(
+            cache_dir, f"{report_type.replace(' ', '_')}_{content_hash}.pdf"
+        )
+        final_pdf = os.path.join(
+            final_dir, f"{artist_name_slug}_{report_type.replace(' ', '_')}.pdf"
+        )
+
+        # Create directories if needed
+        os.makedirs(cache_dir, exist_ok=True)
+        os.makedirs(final_dir, exist_ok=True)
+
+        # Check cache first
+        if os.path.exists(cache_pdf):
+            Logger.info(f"Using cached PDF from {cache_pdf}")
+            # Copy to final location if needed
+            if not os.path.exists(final_pdf):
+                shutil.copy(cache_pdf, final_pdf)
+            return final_pdf
+
+        # Save LaTeX to cache
+        tex_path = os.path.join(
+            cache_dir, f"{report_type.replace(' ', '_')}_{content_hash}.tex"
+        )
+        with open(tex_path, "w") as f:
+            f.write(content)
+
+        # Compile with pdflatex directly in cache directory
+        compile_attempts = 3
+        for attempt in range(compile_attempts):
+            process = await asyncio.create_subprocess_exec(
+                "pdflatex",
+                "-interaction=nonstopmode",
+                "-halt-on-error",
+                "-output-directory",
+                cache_dir,
+                tex_path,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+
+            stdout, stderr = await process.communicate()
+
+            if process.returncode != 0:
+                Logger.warning(f"LaTeX compilation attempt {attempt+1} failed")
+                if attempt == compile_attempts - 1:
+                    raise RuntimeError(f"pdflatex failed: {stderr.decode()}")
+                continue
+            break
+
+        # Verify PDF was created
+        if not os.path.exists(cache_pdf):
+            raise RuntimeError("PDF output not generated")
+
+        # Copy to final location without hash
+        shutil.copy(cache_pdf, final_pdf)
+        Logger.success(f"PDF compiled successfully: {final_pdf}")
+        return final_pdf
+
+    except Exception as e:
+        Logger.error(f"PDF compilation failed: {str(e)}")
+        # Save fallback files to cache
+        fallback_tex = os.path.join(
+            cache_dir, f"{report_type.replace(' ', '_')}_FALLBACK.tex"
+        )
+        with open(fallback_tex, "w") as f:
+            f.write(content)
+
+        if "stderr" in locals():
+            fallback_log = os.path.join(
+                cache_dir, f"{report_type.replace(' ', '_')}_FALLBACK.log"
+            )
+            with open(fallback_log, "wb") as f:
+                f.write(stderr)
+
+        Logger.warning(f"Saved fallback files to cache: {cache_dir}")
+        return None
+
+
 async def run_full_ai_marketing_pipeline(artist_id: str):
     """Run the full marketing pipeline"""
     pipeline_start = Logger.start_task("Starting full marketing pipeline")
@@ -739,27 +829,31 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         # Save reports (update filenames to reflect beautification)
         Logger.info("Starting report saving process")
         save_start = Logger.start_task("Saving reports")
-        artist_name_slug = artist_data["stage_name"].replace(" ", "_")
         artist_dir = os.path.join("data", "artists", artist_name_slug)
+        cache_dir = os.path.join(artist_dir, "cache")
 
-        # Save beautified reports
-        Logger.info("Saving beautified reports as LaTeX files")
+        # Save beautified reports to cache
+        Logger.info("Saving beautified reports to cache")
+        os.makedirs(cache_dir, exist_ok=True)
+
         if integrated_reports["EPK"]:
             epk_filename = os.path.join(
-                artist_dir, f"{artist_name_slug}_integrated_epk_beautified.tex"
+                cache_dir, f"{artist_name_slug}_integrated_epk_beautified.tex"
             )
             with open(epk_filename, "w") as f:
                 f.write(integrated_reports["EPK"])
-            Logger.success(f"Saved beautified EPK to {epk_filename}")
+            Logger.success(f"Saved beautified EPK to cache: {epk_filename}")
 
         if integrated_reports["Internal Report"]:
             internal_filename = os.path.join(
-                artist_dir,
+                cache_dir,
                 f"{artist_name_slug}_integrated_internal_report_beautified.tex",
             )
             with open(internal_filename, "w") as f:
                 f.write(integrated_reports["Internal Report"])
-            Logger.success(f"Saved beautified internal report to {internal_filename}")
+            Logger.success(
+                f"Saved beautified internal report to cache: {internal_filename}"
+            )
 
         Logger.end_task(save_start, "Reports saved successfully")
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
