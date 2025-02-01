@@ -6,4 +6,4 @@ interface FAQCategory {
   }[];
 }
 
-export type FAQData = FAQCategory[]; 
+export type FAQData = FAQCategory[];

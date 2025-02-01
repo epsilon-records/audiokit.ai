@@ -1,8 +1,8 @@
 import { db } from '$lib/db';
-import type { PageServerLoad } from './$types';
-import { ne, and, isNotNull } from 'drizzle-orm';
 import { artists } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
+import { and, isNotNull, ne } from 'drizzle-orm';
+import type { PageServerLoad } from './$types';
 
 export const load = (async () => {
   try {

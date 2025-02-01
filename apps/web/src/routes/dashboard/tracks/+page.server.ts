@@ -1,11 +1,11 @@
-import { requireAuth } from '$lib/server/auth';
-import type { PageServerLoad } from './$types';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
-import { eq } from 'drizzle-orm';
-import { error } from '@sveltejs/kit';
+import { requireAuth } from '$lib/server/auth';
 import { getTrackMetadata } from '$lib/server/integrations/soundcharts';
 import logger from '$lib/utils/logger';
+import { error } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
+import type { PageServerLoad } from './$types';
 
 interface Artist {
   id: string;

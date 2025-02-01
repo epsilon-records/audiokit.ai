@@ -1,5 +1,5 @@
-import { error, json } from '@sveltejs/kit';
 import { STRIPE_SECRET_KEY } from '$env/static/private';
+import { error, json } from '@sveltejs/kit';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(STRIPE_SECRET_KEY);

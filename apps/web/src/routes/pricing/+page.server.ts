@@ -1,5 +1,5 @@
-import type { PageServerLoad } from './$types';
 import { redirectAuthenticated } from '$lib/server/auth';
+import type { PageServerLoad } from './$types';
 
 export const load = (async ({ locals }) => {
   redirectAuthenticated(locals, 303, '/upgrade');

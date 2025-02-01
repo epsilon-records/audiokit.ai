@@ -1,7 +1,7 @@
-import { error, json, type RequestHandler } from '@sveltejs/kit';
-import { stripe } from '$lib/server/stripe';
-import { requireCustomer } from '$lib/server/auth';
 import { PUBLIC_ORIGIN } from '$env/static/public';
+import { requireCustomer } from '$lib/server/auth';
+import { stripe } from '$lib/server/stripe';
+import { error, json, type RequestHandler } from '@sveltejs/kit';
 
 export const POST: RequestHandler = async ({ locals }) => {
   const { customerId } = await requireCustomer(locals);

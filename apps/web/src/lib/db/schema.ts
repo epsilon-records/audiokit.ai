@@ -1,5 +1,5 @@
-import { pgTable, text, json, boolean, uuid, timestamp, date } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
+import { boolean, date, json, pgTable, text, timestamp, uuid } from 'drizzle-orm/pg-core';
 
 export const artists = pgTable('artists', {
   appleMusic: text('apple_music').default(''),

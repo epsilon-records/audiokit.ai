@@ -1,7 +1,7 @@
-import { error, json } from '@sveltejs/kit';
 import { stripe } from '$lib/server/stripe';
-import type { RequestHandler } from './$types';
+import { error, json } from '@sveltejs/kit';
 import { clerkClient } from 'svelte-clerk/server';
+import type { RequestHandler } from './$types';
 
 export const POST: RequestHandler = async ({ locals, url }) => {
   try {

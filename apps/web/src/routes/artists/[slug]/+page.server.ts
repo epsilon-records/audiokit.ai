@@ -1,8 +1,8 @@
-import { error } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
+import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
+import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params }) => {
   try {

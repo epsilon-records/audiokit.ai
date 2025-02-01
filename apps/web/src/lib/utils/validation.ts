@@ -10,15 +10,18 @@ export type FieldValidation = {
 export const validators = {
   required: (message = 'This field is required'): ValidationRule => ({
     test: (value: any) => value !== undefined && value !== null && value !== '',
-    message
+    message,
   }),
   email: (message = 'Please enter a valid email'): ValidationRule => ({
     test: (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
-    message
+    message,
   }),
-  minLength: (length: number, message = `Must be at least ${length} characters`): ValidationRule => ({
+  minLength: (
+    length: number,
+    message = `Must be at least ${length} characters`
+  ): ValidationRule => ({
     test: (value: string) => value.length >= length,
-    message
+    message,
   }),
   url: (message = 'Please enter a valid URL'): ValidationRule => ({
     test: (value: string) => {
@@ -29,8 +32,8 @@ export const validators = {
         return false;
       }
     },
-    message
-  })
+    message,
+  }),
 };
 
 export function validateField(value: any, rules: ValidationRule[]): string | null {
@@ -44,13 +47,13 @@ export function validateField(value: any, rules: ValidationRule[]): string | nul
 
 export function validateForm(values: Record<string, any>, validation: FieldValidation) {
   const errors: Record<string, string> = {};
-  
+
   for (const [field, rules] of Object.entries(validation)) {
     const error = validateField(values[field], rules);
     if (error) {
       errors[field] = error;
     }
   }
-  
+
   return errors;
-} 
+}

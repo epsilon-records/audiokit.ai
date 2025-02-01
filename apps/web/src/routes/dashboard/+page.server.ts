@@ -1,10 +1,10 @@
-import { getOrg, getUser, requireAuth } from '$lib/server/auth';
-import type { PageServerLoad } from './$types';
-import { error } from '@sveltejs/kit';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { getOrg, getUser, requireAuth } from '$lib/server/auth';
 import type { Artist } from '$lib/types';
+import { error } from '@sveltejs/kit';
+import { eq } from 'drizzle-orm';
+import type { PageServerLoad } from './$types';
 
 export const load = (async ({ locals }) => {
   const auth = await requireAuth(locals);

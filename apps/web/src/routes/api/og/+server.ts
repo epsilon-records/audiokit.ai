@@ -1,6 +1,6 @@
-import { ImageResponse } from '@vercel/og';
-import type { RequestHandler } from '@sveltejs/kit';
 import { OGImage } from '$lib/components/og-image';
+import type { RequestHandler } from '@sveltejs/kit';
+import { ImageResponse } from '@vercel/og';
 
 export const GET: RequestHandler = async ({ url }) => {
   const text = url.searchParams.get('text') ?? undefined;

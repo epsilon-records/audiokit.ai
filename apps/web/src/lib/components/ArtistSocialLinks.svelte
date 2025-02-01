@@ -32,7 +32,7 @@
         platform,
         url: data.url as string,
         path: data.icon.path,
-      })),
+      }))
   );
 </script>
 

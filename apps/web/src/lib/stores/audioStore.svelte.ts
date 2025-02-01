@@ -19,4 +19,4 @@ class AudioStore {
 }
 
 // Create and export a singleton instance
-export const audioStore = new AudioStore(); 
+export const audioStore = new AudioStore();

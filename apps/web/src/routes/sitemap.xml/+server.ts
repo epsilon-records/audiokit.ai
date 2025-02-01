@@ -1,6 +1,6 @@
+import { PUBLIC_ORIGIN } from '$env/static/public';
 import type { RequestHandler } from '@sveltejs/kit';
 import * as sitemap from 'super-sitemap';
-import { PUBLIC_ORIGIN } from '$env/static/public';
 
 export const prerender = true; // optional
 

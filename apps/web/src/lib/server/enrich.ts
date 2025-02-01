@@ -1,11 +1,11 @@
+import { and, eq, not, or } from 'drizzle-orm';
+import { serializeError } from 'serialize-error';
 import { db } from '../db/index.js';
 import { artists } from '../db/schema.js';
-import { eq, not, or, and } from 'drizzle-orm';
 import logger from '../utils/logger.js';
-import { enrichWithSoundcharts } from './enrichers/soundcharts.js';
 import { enrichWithHubspot } from './enrichers/hubspot.js';
 import { enrichWithMusicfetch } from './enrichers/musicfetch.js';
-import { serializeError } from 'serialize-error';
+import { enrichWithSoundcharts } from './enrichers/soundcharts.js';
 
 async function getArtistsToUpdate() {
   const soundchartsArtists = await db

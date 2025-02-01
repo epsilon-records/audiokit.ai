@@ -1,11 +1,6 @@
+import { error, redirect } from '@sveltejs/kit';
+import { clerkClient, type EmailAddress, type PhoneNumber } from 'svelte-clerk/server';
 import { stripe } from './stripe';
-import { redirect, error } from '@sveltejs/kit';
-import {
-  clerkClient,
-  type EmailAddress,
-  type PhoneNumber,
-  type ExternalAccount,
-} from 'svelte-clerk/server';
 
 /**
  * Common error messages as constants to maintain consistency
@@ -302,4 +297,4 @@ async function getOrg(orgId: string) {
   }
 }
 
-export { requireAuth, requireOrg, requireCustomer, requireSubscription, getUser, getOrg };
+export { getOrg, getUser, requireAuth, requireCustomer, requireOrg, requireSubscription };

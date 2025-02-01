@@ -17,7 +17,7 @@
       onLogin: fn(),
       onLogout: fn(),
       onCreateAccount: fn(),
-    }
+    },
   });
 </script>
 

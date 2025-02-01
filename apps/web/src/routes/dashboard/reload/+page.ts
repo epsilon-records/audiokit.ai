@@ -1,6 +1,6 @@
-import { redirect } from '@sveltejs/kit';
 import { invalidateAll } from '$app/navigation';
 import logger from '$lib/utils/logger';
+import { redirect } from '@sveltejs/kit';
 
 export const load = async () => {
   logger.debug({

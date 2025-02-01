@@ -1,7 +1,10 @@
 import { z } from 'zod';
 
 export const releaseSchema = z.object({
-  id: z.string().length(15).regex(/^[a-z0-9]+$/),
+  id: z
+    .string()
+    .length(15)
+    .regex(/^[a-z0-9]+$/),
   org_id: z.string(),
   release_title: z.string().min(1),
   release_version: z.string().optional(),
@@ -25,4 +28,4 @@ export const releaseSchema = z.object({
   updated: z.string().optional(), // autodate fields
 });
 
-export type Release = z.infer<typeof releaseSchema>; 
+export type Release = z.infer<typeof releaseSchema>;
