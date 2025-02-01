@@ -246,6 +246,31 @@ Report Structure Requirements:
 The final report should be comprehensive, professional, and designed for internal decision-making, with a formal and confidential presentation style.
 """
 
+# Add this with other constants
+BEAUTIFICATION_MODEL = "deepseek/deepseek-r1"
+BEAUTIFICATION_PROMPT = """
+You are a professional document formatting expert. Improve the visual presentation and formatting of this LaTeX document while maintaining all content:
+
+Formatting Requirements:
+1. Apply consistent spacing and alignment
+2. Ensure proper section hierarchy with clear headings
+3. Add professional document elements (header/footer, page numbers)
+4. Implement color schemes using xcolor package
+5. Add subtle decorative elements (e.g., horizontal rules, tasteful icons)
+6. Fix any LaTeX syntax issues
+7. Maintain original content structure
+8. Ensure mobile-friendly formatting
+9. Add responsive design elements
+10. Optimize for PDF export
+
+Do NOT:
+- Alter or remove any content
+- Change section order
+- Modify any factual information
+
+Output ONLY the improved LaTeX code with no additional commentary or markdown formatting.
+"""
+
 
 class Logger:
     @staticmethod
@@ -628,6 +653,38 @@ async def integrate_reports(reports: dict) -> dict:
         }
 
 
+async def beautify_report(content: str, report_type: str) -> str:
+    """Beautify formatted reports using R1 model without caching"""
+    try:
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "HTTP-Referer": "https://audiokit.ai",
+                "X-Title": "AudioKit",
+            },
+            json={
+                "model": BEAUTIFICATION_MODEL,
+                "messages": [
+                    {"role": "system", "content": BEAUTIFICATION_PROMPT},
+                    {"role": "user", "content": content},
+                ],
+            },
+        )
+        response.raise_for_status()
+        response_data = response.json()
+
+        if not response_data.get("choices") or not response_data["choices"][0].get(
+            "message"
+        ):
+            raise ValueError("Invalid response structure from OpenRouter API")
+
+        return response_data["choices"][0]["message"]["content"]
+    except Exception as e:
+        Logger.error(f"Beautification failed: {str(e)}")
+        return content  # Return original content on failure
+
+
 async def run_full_ai_marketing_pipeline(artist_id: str):
     """Run the full marketing pipeline"""
     pipeline_start = Logger.start_task("Starting full marketing pipeline")
@@ -659,33 +716,57 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         Logger.end_task(strategy_start, "Report integration completed")
         Logger.success("Reports integrated and optimized")
 
-        # Save reports
+        # Beautify reports
+        Logger.info("Starting report beautification process")
+        beautify_start = Logger.start_task("Report beautification")
+
+        # Beautify EPK
+        if integrated_reports["EPK"]:
+            epk_beautify_start = Logger.start_task("EPK beautification")
+            integrated_reports["EPK"] = await beautify_report(
+                integrated_reports["EPK"], "EPK"
+            )
+            Logger.end_task(epk_beautify_start, "EPK beautification completed")
+
+        # Beautify Internal Report
+        if integrated_reports["Internal Report"]:
+            internal_beautify_start = Logger.start_task(
+                "Internal Report beautification"
+            )
+            integrated_reports["Internal Report"] = await beautify_report(
+                integrated_reports["Internal Report"], "Internal Report"
+            )
+            Logger.end_task(
+                internal_beautify_start, "Internal Report beautification completed"
+            )
+
+        Logger.end_task(beautify_start, "Report beautification completed")
+        Logger.success("Reports beautified successfully")
+
+        # Save reports (update filenames to reflect beautification)
         Logger.info("Starting report saving process")
         save_start = Logger.start_task("Saving reports")
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
-
-        # Create artist directory if it doesn't exist
         artist_dir = os.path.join("data", "artists", artist_name_slug)
-        os.makedirs(artist_dir, exist_ok=True)
-        Logger.success(f"Created artist directory at {artist_dir}")
 
-        # Save integrated reports as LaTeX files
-        Logger.info("Saving integrated reports as LaTeX files")
+        # Save beautified reports
+        Logger.info("Saving beautified reports as LaTeX files")
         if integrated_reports["EPK"]:
             epk_filename = os.path.join(
-                artist_dir, f"{artist_name_slug}_integrated_epk.tex"
+                artist_dir, f"{artist_name_slug}_integrated_epk_beautified.tex"
             )
             with open(epk_filename, "w") as f:
                 f.write(integrated_reports["EPK"])
-            Logger.success(f"Saved integrated EPK to {epk_filename}")
+            Logger.success(f"Saved beautified EPK to {epk_filename}")
 
         if integrated_reports["Internal Report"]:
             internal_filename = os.path.join(
-                artist_dir, f"{artist_name_slug}_integrated_internal_report.tex"
+                artist_dir,
+                f"{artist_name_slug}_integrated_internal_report_beautified.tex",
             )
             with open(internal_filename, "w") as f:
                 f.write(integrated_reports["Internal Report"])
-            Logger.success(f"Saved internal report to {internal_filename}")
+            Logger.success(f"Saved beautified internal report to {internal_filename}")
 
         Logger.end_task(save_start, "Reports saved successfully")
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
