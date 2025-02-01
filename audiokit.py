@@ -356,7 +356,7 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
         ).hexdigest()[:12]
 
         # Create cache path with input hash
-        artist_name_slug = sanitized_data["stage_name"].replace(" ", "_")
+        artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
         cache_path = os.path.join(
             "data",
             "artists",
@@ -416,7 +416,7 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
         ).hexdigest()[:12]
 
         # Create cache path with input hash
-        artist_name_slug = sanitized_data["stage_name"].replace(" ", "_")
+        artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
         cache_path = os.path.join(
             "data",
             "artists",
@@ -792,7 +792,7 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         # Integrate and optimize reports with dependency tracking
         Logger.info("Starting report integration process")
         strategy_start = Logger.start_task("Report integration")
-        artist_name_slug = artist_data["stage_name"].replace(" ", "_")
+        artist_name_slug = artist_data["stage_name"].replace(" ", "-").lower()
         integrated_reports = await integrate_reports(all_reports, artist_name_slug)
         Logger.end_task(strategy_start, "Report integration completed")
         Logger.success("Reports integrated and optimized")
@@ -890,7 +890,7 @@ def get_artist_data_from_db(artist_id: str) -> dict:
                     artist_data[key] = value.isoformat()
 
             Logger.info("Saving artist data to JSON file")
-            artist_name_slug = artist_data["stage_name"].replace(" ", "_")
+            artist_name_slug = artist_data["stage_name"].replace(" ", "-").lower()
             with open(f"{artist_name_slug}_json.txt", "w") as json_file:
                 json.dump(artist_data, json_file, indent=2)
             Logger.success(f"Artist data saved to {artist_name_slug}_json.txt")
