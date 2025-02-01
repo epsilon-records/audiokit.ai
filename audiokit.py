@@ -130,7 +130,7 @@ AI_MODELS = [
     "deepseek/deepseek-chat",
     "deepseek/deepseek-r1",
     "anthropic/claude-3.5-sonnet",
-    "openai/gpt-4o-2024-11-20",
+    "openai/o1-mini",
 ]
 
 # Constants for report integration
@@ -273,6 +273,39 @@ Do NOT:
 
 Output ONLY the improved LaTeX code with no additional commentary or markdown formatting.
 """
+
+# Add new constants near other prompts
+BOOKING_RESEARCH_PROMPT = """
+You are an expert music industry researcher. Using all available artist data, create 5 targeted booking agency recommendations and draft professional cold emails.
+
+Artist Data:
+{artist_data}
+
+Requirements:
+1. Research 5 booking agencies that specialize in the artist's genre and location
+2. For each agency:
+   - Include actual verified email address
+   - List 3 specific reasons why they're a good match
+3. Write complete cold emails with:
+   - Professional subject line
+   - Personalized introduction
+   - Concise pitch (3-5 sentences)
+   - Clear call-to-action
+   - Proper email signature
+
+Email Format:
+To: agency@email.com
+Subject: [Catchy Professional Subject]
+
+[Personalized Body]
+
+Best,
+Nate Houk
+Artist Manager @ AudioKit
+"""
+
+# Add this with other constants
+BOOKING_MODEL = "openai/o1-mini"
 
 
 class Logger:
@@ -766,6 +799,106 @@ async def compile_latex_to_pdf(
         return None
 
 
+async def generate_booking_emails(artist_data: dict, artist_name_slug: str) -> list:
+    """Generate targeted booking emails with input-based caching"""
+    try:
+        # Create input hash
+        input_hash = hashlib.sha256(
+            json.dumps(artist_data, sort_keys=True).encode("utf-8")
+        ).hexdigest()[:12]
+
+        cache_path = os.path.join(
+            "data",
+            "artists",
+            artist_name_slug,
+            "cache",
+            f"{artist_name_slug}_booking_emails_{input_hash}.txt",
+        )
+
+        if os.path.exists(cache_path):
+            Logger.info(f"Using cached booking emails from {cache_path}")
+            with open(cache_path, "r") as f:
+                return f.read()
+
+        # Generate emails via API
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "HTTP-Referer": "https://audiokit.ai",
+                "X-Title": "AudioKit",
+            },
+            json={
+                "model": BOOKING_MODEL,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are a music industry professional helping artists connect with booking agencies.",
+                    },
+                    {
+                        "role": "user",
+                        "content": BOOKING_RESEARCH_PROMPT.format(
+                            artist_data=json.dumps(artist_data, indent=2)
+                        ),
+                    },
+                ],
+            },
+        )
+        response.raise_for_status()
+        response_data = response.json()
+
+        if not response_data.get("choices") or not response_data["choices"][0].get(
+            "message"
+        ):
+            raise ValueError("Invalid response structure from OpenRouter API")
+
+        emails_content = response_data["choices"][0]["message"]["content"]
+
+        # Cache the result
+        with open(cache_path, "w") as f:
+            f.write(emails_content)
+
+        return emails_content
+
+    except Exception as e:
+        Logger.error(f"Booking email generation failed: {str(e)}")
+        return "Email generation failed"
+
+
+async def save_emails_to_file(content: str, artist_name_slug: str):
+    """Save formatted emails to individual files"""
+    try:
+        email_dir = os.path.join("data", "artists", artist_name_slug, "emails")
+        os.makedirs(email_dir, exist_ok=True)
+
+        # Split emails by agency
+        emails = content.split("\n\n")  # Assuming double newline separates emails
+        for idx, email in enumerate(emails, 1):
+            if not email.strip():
+                continue
+
+            # Extract agency name from email
+            agency_name = "unknown_agency"
+            if "To:" in email:
+                email_part = email.split("To:")[1].split("\n")[0].strip()
+                agency_name = (
+                    email_part.split("@")[0].replace(".", "_").replace("-", "_")
+                )
+
+            filename = os.path.join(
+                email_dir, f"{artist_name_slug}_booking_{agency_name}_{idx}.txt"
+            )
+
+            with open(filename, "w") as f:
+                f.write(email)
+
+        Logger.success(f"Saved {len(emails)} emails to {email_dir}")
+        return True
+    except Exception as e:
+        Logger.error(f"Failed to save emails: {str(e)}")
+        return False
+
+
 async def run_full_ai_marketing_pipeline(artist_id: str):
     """Run the full marketing pipeline"""
     pipeline_start = Logger.start_task("Starting full marketing pipeline")
@@ -857,6 +990,14 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
             )
 
         Logger.end_task(save_start, "Reports saved successfully")
+
+        # NEW: Generate booking emails
+        Logger.info("Starting booking email research")
+        email_start = Logger.start_task("Booking email generation")
+        emails_content = await generate_booking_emails(artist_data, artist_name_slug)
+        await save_emails_to_file(emails_content, artist_name_slug)
+        Logger.end_task(email_start, "Booking emails generated and saved")
+
         Logger.end_task(pipeline_start, "Full marketing pipeline completed")
         Logger.success(f"✅ All tasks completed for {artist_data['stage_name']}")
 
