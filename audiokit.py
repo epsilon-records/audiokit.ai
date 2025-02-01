@@ -322,14 +322,20 @@ def handle_report_error(
 async def generate_epk(artist_data: dict, model_name: str) -> str:
     """Generate EPK using the specified model"""
     try:
-        # Create cache key and filename
+        # Create cache path
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
-        cache_key = f"{artist_name_slug}_epk_{model_name.replace('/', '_')}.txt"
+        artist_dir = os.path.join("data", "artists", artist_name_slug, "cache")
+        cache_path = os.path.join(
+            artist_dir, f"{artist_name_slug}_epk_{model_name.replace('/', '_')}.txt"
+        )
+
+        # Create directory if needed
+        os.makedirs(artist_dir, exist_ok=True)
 
         # Check cache
-        if os.path.exists(cache_key):
-            Logger.info(f"Using cached EPK from {cache_key}")
-            with open(cache_key, "r") as f:
+        if os.path.exists(cache_path):
+            Logger.info(f"Using cached EPK from {cache_path}")
+            with open(cache_path, "r") as f:
                 return f.read()
 
         # Proceed with API call if not cached
@@ -356,7 +362,7 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
             raise ValueError("Invalid response structure from OpenRouter API")
 
         # Cache the result
-        with open(cache_key, "w") as f:
+        with open(cache_path, "w") as f:
             f.write(response_data["choices"][0]["message"]["content"])
 
         return response_data["choices"][0]["message"]["content"]
@@ -367,16 +373,21 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
 async def generate_internal_report(artist_data: dict, model_name: str) -> str:
     """Generate internal report using the specified model"""
     try:
-        # Create cache key and filename
+        # Create cache path
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
-        cache_key = (
-            f"{artist_name_slug}_internal_report_{model_name.replace('/', '_')}.txt"
+        artist_dir = os.path.join("data", "artists", artist_name_slug, "cache")
+        cache_path = os.path.join(
+            artist_dir,
+            f"{artist_name_slug}_internal_report_{model_name.replace('/', '_')}.txt",
         )
 
+        # Create directory if needed
+        os.makedirs(artist_dir, exist_ok=True)
+
         # Check cache
-        if os.path.exists(cache_key):
-            Logger.info(f"Using cached internal report from {cache_key}")
-            with open(cache_key, "r") as f:
+        if os.path.exists(cache_path):
+            Logger.info(f"Using cached internal report from {cache_path}")
+            with open(cache_path, "r") as f:
                 return f.read()
 
         # Proceed with API call if not cached
@@ -403,7 +414,7 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
             raise ValueError("Invalid response structure from OpenRouter API")
 
         # Cache the result
-        with open(cache_key, "w") as f:
+        with open(cache_path, "w") as f:
             f.write(response_data["choices"][0]["message"]["content"])
 
         return response_data["choices"][0]["message"]["content"]
@@ -653,16 +664,25 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         save_start = Logger.start_task("Saving reports")
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
 
+        # Create artist directory if it doesn't exist
+        artist_dir = os.path.join("data", "artists", artist_name_slug)
+        os.makedirs(artist_dir, exist_ok=True)
+        Logger.success(f"Created artist directory at {artist_dir}")
+
         # Save integrated reports as LaTeX files
         Logger.info("Saving integrated reports as LaTeX files")
         if integrated_reports["EPK"]:
-            epk_filename = f"{artist_name_slug}_integrated_epk.tex"
+            epk_filename = os.path.join(
+                artist_dir, f"{artist_name_slug}_integrated_epk.tex"
+            )
             with open(epk_filename, "w") as f:
                 f.write(integrated_reports["EPK"])
             Logger.success(f"Saved integrated EPK to {epk_filename}")
 
         if integrated_reports["Internal Report"]:
-            internal_filename = f"{artist_name_slug}_integrated_internal_report.tex"
+            internal_filename = os.path.join(
+                artist_dir, f"{artist_name_slug}_integrated_internal_report.tex"
+            )
             with open(internal_filename, "w") as f:
                 f.write(integrated_reports["Internal Report"])
             Logger.success(f"Saved internal report to {internal_filename}")
