@@ -116,11 +116,6 @@ class LLMRequest:
             if not cfg.api.openrouter.api_key:
                 raise ValueError("OpenRouter API key is missing in configuration")
 
-            if (
-                len(cfg.api.openrouter.api_key) != 64
-            ):  # OpenRouter API keys are 64 chars
-                raise ValueError("Invalid OpenRouter API key format")
-
             retry_count = 0
             max_retries = 2 if retry_on_stream_error else 1
             final_content = ""
