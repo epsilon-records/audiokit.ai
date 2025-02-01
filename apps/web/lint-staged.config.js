@@ -1,3 +1,5 @@
 export default {
-  '**/*.{ts,js,md,svelte,css,html,json}': ['prettier --write --list-different'],
+  '**/*.ts': () => 'bun x tsc --noEmit',
+
+  '**/*.{ts,js,md,svelte,css,html,json}': ['bun x prettier --write --list-different', 'eslint'],
 };

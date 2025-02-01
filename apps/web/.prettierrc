@@ -10,5 +10,12 @@
   "arrowParens": "always",
   "endOfLine": "lf",
   "svelteIndentScriptAndStyle": true,
-  "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }]
+  "overrides": [
+    {
+      "files": "*.svelte",
+      "options": {
+        "parser": "svelte"
+      }
+    }
+  ]
 }
