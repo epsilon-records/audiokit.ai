@@ -22,8 +22,13 @@ class Config:
 
     def __getattr__(self, name):
         if name in self.config:
-            return self.config[name]
-        raise AttributeError(f"No such configuration section: {name}")
+            value = self.config[name]
+            if isinstance(value, dict):
+                return ConfigDict(value)  # Wrap nested dicts
+            return value
+        raise AttributeError(
+            f"'{self.__class__.__name__}' object has no attribute '{name}'"
+        )
 
     @classmethod
     def get(cls):
@@ -36,6 +41,21 @@ class Config:
         if artist_slug:
             path_template = path_template.format(artist_slug=artist_slug)
         return Path(path_template)
+
+
+class ConfigDict:
+    def __init__(self, data):
+        self._data = data
+
+    def __getattr__(self, name):
+        if name in self._data:
+            value = self._data[name]
+            if isinstance(value, dict):
+                return ConfigDict(value)  # Recursively wrap nested dicts
+            return value
+        raise AttributeError(
+            f"'{self.__class__.__name__}' object has no attribute '{name}'"
+        )
 
 
 # Create and export a singleton instance
