@@ -9,302 +9,82 @@ import time
 from datetime import datetime
 import traceback
 import hashlib
+from config import Config
+
+cfg = Config.get()
 
 load_dotenv()  # Load environment variables from .env file
 
 # API Configuration - Using os.getenv() with defaults where appropriate
-SOUNDCHARTS_API_BASE = os.getenv("SOUNDCHARTS_API_BASE", "https://api.soundcharts.com")
-SOUNDCHARTS_APP_ID = os.getenv("SOUNDCHARTS_APP_ID")
-SOUNDCHARTS_API_KEY = os.getenv("SOUNDCHARTS_API_KEY")
-OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
-YOUTUBE_API_KEY = os.getenv("YOUTUBE_API_KEY")
+# All references updated to use cfg instance:
+# OLD: SOUNDCHARTS_API_BASE -> cfg.api.soundcharts.base_url
+# OLD: SOUNDCHARTS_APP_ID -> cfg.api.soundcharts.app_id
+# OLD: SOUNDCHARTS_API_KEY -> cfg.api.soundcharts.api_key
+# OLD: OPENROUTER_API_KEY -> cfg.api.openrouter.api_key
+# OLD: YOUTUBE_API_KEY -> cfg.api.youtube.api_key
 
 # Define custom headers
-CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
+# All references updated to use cfg instance
+# OLD: CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
 
 # EPK System Prompt
-EPK_SYSTEM_PROMPT = """
-You are an expert in electronic music industry marketing. Using the provided JSON data, generate a comprehensive and visually appealing Electronic Press Kit (EPK).
-
-Report Requirements:
-	1.	Professional Formatting: Use clear section headings, subheadings, and bullet points for readability
-	2.	Aesthetic Design: Create a polished and visually appealing layout with proper spacing and alignment
-	3.	Compelling Content: Highlight key selling points, artist branding, and achievements to captivate promoters
-	4.	Visual Enhancements: Use emojis sparingly to enhance key points (1-2 per section max)
-
-Output Instructions:
-	• Maintain a professional tone while being approachable
-	• Do not include any backticks, code block markers, or other syntax wrappers
-	• Do not wrap the output in JSON blocks or any other formatting
-	• Output must be plain text with the formatted content only
-
-EPK Structure:
-
-# 🎤 Artist Overview
-- Craft a compelling one-paragraph pitch highlighting the artist's unique appeal
-- Include genre focus, key achievements, and artistic direction
-- Mention notable collaborations and remixes
-
-# 📊 Performance & Draw
-- Current streaming numbers and growth trends
-- Social media engagement metrics
-- Geographic popularity insights
-
-# 🎧 Recent Releases & Press
-- Featured tracks from the past 12 months
-- Remix work and collaborations
-- Notable playlist inclusions or features
-
-# 🎪 Stage Experience & Technical
-- Performance style and format
-- Technical rider highlights (if available)
-- Past notable venues/events (if available)
-
-# 📞 Contact & Booking
-- Management/booking contact details
-- Social media and streaming links
-- Website and press materials
-"""
+# All references updated to use cfg instance
+# OLD: EPK_SYSTEM_PROMPT = """
+# ... full original EPK_SYSTEM_PROMPT content ...
+# """
 
 # Internal Report System Prompt
-INTERNAL_REPORT_PROMPT = """
-You are a music industry analytics expert. Using the provided JSON data, generate a comprehensive and visually appealing internal artist report.
-
-Report Requirements:
-	1.	Professional Formatting: Use clear section headings, subheadings, and bullet points for readability
-	2.	Aesthetic Design: Create a polished and visually appealing layout with proper spacing and alignment
-	3.	Compelling Content: Highlight key selling points, artist branding, and achievements
-	4.	Visual Enhancements: Use emojis sparingly to enhance key points (1-2 per section max)
-
-Output Instructions:
-	• Maintain a professional tone while being approachable
-	• Do not include any backticks, code block markers, or other syntax wrappers
-	• Do not wrap the output in JSON blocks or any other formatting
-	• Output must be plain text with the formatted content only
-
-Report Structure:
-
-# 📈 Performance Analytics
-- Detailed streaming metrics analysis across all platforms
-- Month-over-month growth trends with percentage changes
-- Platform-specific performance insights (e.g., Spotify, Apple Music, YouTube, TikTok)
-- Comparative analysis against previous periods
-
-# 🌍 Audience Development
-- Follower growth rates across major platforms
-- Engagement metrics and patterns (likes, comments, shares)
-- Geographic distribution of listeners (top countries/cities)
-- Platform-specific audience behavior (e.g., active hours, retention rates)
-
-# 🎵 Release Impact Analysis
-- Performance metrics for recent releases (stream counts, saves, playlist additions)
-- Comparison of original tracks vs. remixes in terms of engagement and reach
-- Collaboration impact on streaming numbers and audience crossover
-- Effectiveness of release timing (day of the week, seasonal trends)
-
-# 📱 Distribution & Platform Strategy
-- Platform-by-platform presence analysis (gaps, strengths)
-- Identification of gaps in digital distribution
-- Optimization opportunities for each streaming/social platform
-- Content strategy recommendations based on past performance
-
-# 🏆 Market Position Assessment
-- Genre positioning (comparisons with similar artists)
-- Competitive landscape (benchmarking against industry peers)
-- Growth opportunities (new platforms, untapped audiences)
-- Risk factors (declining metrics, audience shifts)
-
-# 🚀 Action Items & Recommendations
-- Short-term optimization steps (quick wins for immediate impact)
-- Long-term strategic initiatives (sustained growth strategies)
-- Platform-specific recommendations (e.g., ad spend allocation, content tweaks)
-- Investment priorities (where to allocate marketing and production resources)
-"""
+# All references updated to use cfg instance
+# OLD: INTERNAL_REPORT_PROMPT = """
+# ... full original INTERNAL_REPORT_PROMPT content ...
+# """
 
 # Remove individual DB environment variables
-DATABASE_URL = os.getenv("DATABASE_URL")
+# All references updated to use cfg instance
+# OLD: DATABASE_URL = os.getenv("DATABASE_URL")
 
 # Add this near other configuration constants
-AI_MODELS = [
-    "deepseek/deepseek-chat",
-    "deepseek/deepseek-r1",
-    "anthropic/claude-3.5-sonnet",
-    "openai/o1-mini",
-]
+# All references updated to use cfg instance
+# OLD: AI_MODELS = [
+#     "deepseek/deepseek-chat",
+#     "deepseek/deepseek-r1",
+#     "anthropic/claude-3.5-sonnet",
+#     "openai/o1-mini",
+# ]
 
 # Constants for report integration
-EPK_INTEGRATION_MODEL = "deepseek/deepseek-r1"
-INTERNAL_REPORT_INTEGRATION_MODEL = "deepseek/deepseek-r1"
+# All references updated to use cfg instance
+# OLD: EPK_INTEGRATION_MODEL = "deepseek/deepseek-r1"
+# OLD: INTERNAL_REPORT_INTEGRATION_MODEL = "deepseek/deepseek-r1"
 
-EPK_INTEGRATION_PROMPT = """
-You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:
+# EPK Integration Prompt
+# All references updated to use cfg instance
+# OLD: EPK_INTEGRATION_PROMPT = """
+# ... full original EPK_INTEGRATION_PROMPT content ...
+# """
 
-Processing Steps:
-1. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
-2. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
-3. Finalize for Publication: Replace any placeholders, refine the language, and structure the document to be visually appealing and professionally formatted in LaTeX
-
-Output Requirements:
-• Do not wrap the content in any code blocks or markdown syntax
-• Maintain a strictly formal and professional tone
-• Use emojis strategically to enhance visual appeal and engagement
-
-LaTeX Document Structure:
-\\documentclass{article}
-\\usepackage{fontspec}
-\\usepackage{emoji}
-\\setmainfont{Noto Color Emoji}
-\\begin{document}
-
-EPK Structure Requirements:
-# 🎤 Artist Overview
-- Craft a compelling one-paragraph pitch
-- Highlight unique selling points and artistic vision
-- Include genre focus and key achievements
-
-# 📊 Performance & Draw
-- Current streaming numbers and growth trends
-- Social media engagement metrics
-- Geographic popularity insights
-
-# 🎧 Recent Releases & Press
-- Featured tracks from the past 12 months
-- Remix work and collaborations
-- Notable playlist inclusions or features
-
-# 🎪 Stage Experience & Technical
-- Performance style and format
-- Technical rider highlights (if available)
-- Past notable venues/events (if available)
-
-# 📞 Contact & Booking
-- Management/booking contact details
-- Social media and streaming links
-- Website and press materials
-
-The final EPK should be comprehensive, professional, and designed to attract booking agencies and event promoters, with a fun and colorful presentation style.
-"""
-
-INTERNAL_REPORT_INTEGRATION_PROMPT = """
-You are an expert music industry analyst. You will receive multiple Internal Reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:
-
-Processing Steps:
-1. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
-2. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
-3. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in LaTeX
-
-Output Requirements:
-• Do not wrap the content in any code blocks or markdown syntax
-• Maintain a strictly formal and professional tone
-• Use emojis strategically to enhance visual appeal and engagement
-• Use monospace fonts for a formal, professional appearance
-• Include a prominent header stating "CONFIDENTIAL" at the top of the document
-
-LaTeX Document Structure:
-\\documentclass{article}
-\\usepackage{fontspec}
-\\usepackage{emoji}
-\\setmainfont{Noto Color Emoji}
-\\begin{document}
-
-Report Structure Requirements:
-
-# 📈 Performance Analytics
-- Detailed streaming metrics analysis across all platforms
-- Month-over-month growth trends with percentage changes
-- Platform-specific performance insights (e.g., Spotify, Apple Music, YouTube, TikTok)
-- Comparative analysis against previous periods
-
-# 🌍 Audience Development
-- Follower growth rates across major platforms
-- Engagement metrics and patterns (likes, comments, shares)
-- Geographic distribution of listeners (top countries/cities)
-- Platform-specific audience behavior (e.g., active hours, retention rates)
-
-# 🎵 Release Impact Analysis
-- Performance metrics for recent releases (stream counts, saves, playlist additions)
-- Comparison of original tracks vs. remixes in terms of engagement and reach
-- Collaboration impact on streaming numbers and audience crossover
-- Effectiveness of release timing (day of the week, seasonal trends)
-
-# 📱 Distribution & Platform Strategy
-- Platform-by-platform presence analysis (gaps, strengths)
-- Identification of gaps in digital distribution
-- Optimization opportunities for each streaming/social platform
-- Content strategy recommendations based on past performance
-
-# 🏆 Market Position Assessment
-- Genre positioning (comparisons with similar artists)
-- Competitive landscape (benchmarking against industry peers)
-- Growth opportunities (new platforms, untapped audiences)
-- Risk factors (declining metrics, audience shifts)
-
-# 🚀 Action Items & Recommendations
-- Short-term optimization steps (quick wins for immediate impact)
-- Long-term strategic initiatives (sustained growth strategies)
-- Platform-specific recommendations (e.g., ad spend allocation, content tweaks)
-- Investment priorities (where to allocate marketing and production resources)
-
-The final report should be comprehensive, professional, and designed for internal decision-making, with a formal and confidential presentation style.
-"""
+# Internal Report Integration Prompt
+# All references updated to use cfg instance
+# OLD: INTERNAL_REPORT_INTEGRATION_PROMPT = """
+# ... full original INTERNAL_REPORT_INTEGRATION_PROMPT content ...
+# """
 
 # Add this with other constants
-BEAUTIFICATION_MODEL = "deepseek/deepseek-r1"
-BEAUTIFICATION_PROMPT = """
-You are a professional document formatting expert. Improve the visual presentation and formatting of this LaTeX document while maintaining all content:
-
-Formatting Requirements:
-1. Apply consistent spacing and alignment
-2. Ensure proper section hierarchy with clear headings
-3. Add professional document elements (header/footer, page numbers)
-4. Implement color schemes using xcolor package
-5. Add subtle decorative elements (e.g., horizontal rules, tasteful icons)
-6. Fix any LaTeX syntax issues
-7. Maintain original content structure
-8. Ensure mobile-friendly formatting
-9. Add responsive design elements
-10. Optimize for PDF export
-
-Do NOT:
-- Alter or remove any content
-- Change section order
-- Modify any factual information
-
-Output ONLY the improved LaTeX code with no additional commentary or markdown formatting.
-"""
+# All references updated to use cfg instance
+# OLD: BEAUTIFICATION_MODEL = "deepseek/deepseek-r1"
+# OLD: BEAUTIFICATION_PROMPT = """
+# ... full original BEAUTIFICATION_PROMPT content ...
+# """
 
 # Add new constants near other prompts
-BOOKING_RESEARCH_PROMPT = """
-You are an expert music industry researcher. Using all available artist data, create 5 targeted booking agency recommendations and draft professional cold emails.
-
-Artist Data:
-{artist_data}
-
-Requirements:
-1. Research 5 booking agencies that specialize in the artist's genre and location
-2. For each agency:
-   - Include actual verified email address
-   - List 3 specific reasons why they're a good match
-3. Write complete cold emails with:
-   - Professional subject line
-   - Personalized introduction
-   - Concise pitch (3-5 sentences)
-   - Clear call-to-action
-   - Proper email signature
-
-Email Format:
-To: agency@email.com
-Subject: [Catchy Professional Subject]
-
-[Personalized Body]
-
-Best,
-Nate Houk
-Artist Manager @ AudioKit
-"""
+# All references updated to use cfg instance
+# OLD: BOOKING_RESEARCH_PROMPT = """
+# ... full original BOOKING_RESEARCH_PROMPT content ...
+# """
 
 # Add this with other constants
-BOOKING_MODEL = "openai/o1-mini"
+# All references updated to use cfg instance
+# OLD: BOOKING_MODEL = "openai/o1-mini"
 
 
 class Logger:
@@ -416,11 +196,11 @@ class LLMRequest:
                 try:
                     stream = retry_count == 0  # First try with streaming
                     response = requests.post(
-                        "https://openrouter.ai/api/v1/chat/completions",
+                        cfg.api.openrouter.base_url,
                         headers={
-                            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                            "HTTP-Referer": "https://audiokit.ai",
-                            "X-Title": "AudioKit",
+                            "Authorization": f"Bearer {cfg.api.openrouter.api_key}",
+                            "HTTP-Referer": cfg.api.headers.referer,
+                            "X-Title": cfg.api.headers.title,
                         },
                         json={
                             "model": model_name,
@@ -509,17 +289,13 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
         json.dumps(sanitized_data, sort_keys=True).encode()
     ).hexdigest()[:12]
     artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
-    cache_path = os.path.join(
-        "data",
-        "artists",
-        artist_name_slug,
-        "cache",
-        f"{artist_name_slug}_epk_{model_name.replace('/', '_')}_{input_hash}.txt",
+    cache_path = cfg.get_path("cache_dir", artist_name_slug).joinpath(
+        f"{artist_name_slug}_epk_{model_name.replace('/', '_')}_{input_hash}.txt"
     )
 
     return await LLMRequest.execute(
         model_name=model_name,
-        system_prompt=EPK_SYSTEM_PROMPT,
+        system_prompt=cfg.prompts.epk_system,
         user_content=json.dumps(artist_data),
         cache_path=cache_path,
         process_name=f"EPK Generation ({model_name})",
@@ -533,17 +309,13 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
         json.dumps(sanitized_data, sort_keys=True).encode()
     ).hexdigest()[:12]
     artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
-    cache_path = os.path.join(
-        "data",
-        "artists",
-        artist_name_slug,
-        "cache",
-        f"{artist_name_slug}_internal_{model_name.replace('/', '_')}_{input_hash}.txt",
+    cache_path = cfg.get_path("cache_dir", artist_name_slug).joinpath(
+        f"{artist_name_slug}_internal_{model_name.replace('/', '_')}_{input_hash}.txt"
     )
 
     return await LLMRequest.execute(
         model_name=model_name,
-        system_prompt=INTERNAL_REPORT_PROMPT,
+        system_prompt=cfg.prompts.internal_report,
         user_content=json.dumps(artist_data),
         cache_path=cache_path,
         process_name=f"Internal Report Generation ({model_name})",
@@ -554,16 +326,14 @@ async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
     """Integrated reports using DRY handler"""
     try:
         final_reports = {"EPK": None, "Internal Report": None}
-        cache_dir = os.path.join("data", "artists", artist_name_slug, "cache")
+        cache_dir = cfg.get_path("cache_dir", artist_name_slug)
 
         # EPK Integration
-        epk_cache_path = os.path.join(
-            cache_dir, f"{artist_name_slug}_integrated_epk.tex"
-        )
+        epk_cache_path = cache_dir.joinpath(f"{artist_name_slug}_integrated_epk.tex")
         if not os.path.exists(epk_cache_path):
             final_reports["EPK"] = await LLMRequest.execute(
-                model_name=EPK_INTEGRATION_MODEL,
-                system_prompt=EPK_INTEGRATION_PROMPT,
+                model_name=cfg.models.epk_integration,
+                system_prompt=cfg.prompts.epk_integration,
                 user_content=json.dumps({"EPKs": reports["EPK"]}),
                 cache_path=epk_cache_path,
                 process_name="EPK Integration",
@@ -571,13 +341,13 @@ async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
             )
 
         # Internal Report Integration
-        internal_cache_path = os.path.join(
-            cache_dir, f"{artist_name_slug}_integrated_internal.tex"
+        internal_cache_path = cache_dir.joinpath(
+            f"{artist_name_slug}_integrated_internal.tex"
         )
         if not os.path.exists(internal_cache_path):
             final_reports["Internal Report"] = await LLMRequest.execute(
-                model_name=INTERNAL_REPORT_INTEGRATION_MODEL,
-                system_prompt=INTERNAL_REPORT_INTEGRATION_PROMPT,
+                model_name=cfg.models.internal_report_integration,
+                system_prompt=cfg.prompts.internal_report_integration,
                 user_content=json.dumps(
                     {"Internal Reports": reports["Internal Report"]}
                 ),
@@ -595,17 +365,13 @@ async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
 async def beautify_report(content: str, report_type: str, artist_name_slug: str) -> str:
     """Beautify report using DRY handler"""
     content_hash = hashlib.sha256(content.encode()).hexdigest()[:12]
-    cache_path = os.path.join(
-        "data",
-        "artists",
-        artist_name_slug,
-        "cache",
-        f"{artist_name_slug}_{report_type.replace(' ', '_')}_beautified_{content_hash}.tex",
+    cache_path = cfg.get_path("cache_dir", artist_name_slug).joinpath(
+        f"{artist_name_slug}_{report_type.replace(' ', '_')}_beautified_{content_hash}.tex"
     )
 
     return await LLMRequest.execute(
-        model_name=BEAUTIFICATION_MODEL,
-        system_prompt=BEAUTIFICATION_PROMPT,
+        model_name=cfg.models.beautification,
+        system_prompt=cfg.prompts.beautification,
         user_content=content,
         cache_path=cache_path,
         process_name=f"{report_type} Beautification",
@@ -616,18 +382,16 @@ async def beautify_report(content: str, report_type: str, artist_name_slug: str)
 async def generate_booking_emails(artist_data: dict, artist_name_slug: str) -> list:
     """Generate booking emails using DRY handler"""
     content_hash = hashlib.sha256(json.dumps(artist_data).encode()).hexdigest()[:12]
-    cache_path = os.path.join(
-        "data",
-        "artists",
-        artist_name_slug,
-        "cache",
-        f"{artist_name_slug}_booking_emails_{content_hash}.txt",
+    cache_path = cfg.get_path("cache_dir", artist_name_slug).joinpath(
+        f"{artist_name_slug}_booking_emails_{content_hash}.txt"
     )
 
     return await LLMRequest.execute(
-        model_name=BOOKING_MODEL,
-        system_prompt="You are a music industry professional...",
-        user_content=BOOKING_RESEARCH_PROMPT.format(
+        model_name=cfg.models.booking,
+        system_prompt=cfg.prompts.booking_research.format(
+            artist_data=json.dumps(artist_data)
+        ),
+        user_content=cfg.prompts.booking_research.format(
             artist_data=json.dumps(artist_data)
         ),
         cache_path=cache_path,
@@ -638,7 +402,7 @@ async def generate_booking_emails(artist_data: dict, artist_name_slug: str) -> l
 async def generate_reports(artist_data: dict):
     """Generate all reports using available models"""
     reports = {"EPK": {}, "Internal Report": {}}
-    total_models = len(AI_MODELS)
+    total_models = len(cfg.models.ai_models)
     total_steps = (
         len(reports) * total_models
     )  # Calculate based on number of report types and models
@@ -650,7 +414,7 @@ async def generate_reports(artist_data: dict):
     Logger.info(f"Total models to process: {total_models}")
     Logger.info(f"Total steps to complete: {total_steps}")
 
-    for model_name in AI_MODELS:
+    for model_name in cfg.models.ai_models:
         current_step += 1
         Logger.info(f"Processing model {model_name} ({current_step}/{total_steps})")
 
@@ -686,7 +450,7 @@ async def generate_reports(artist_data: dict):
 async def save_emails_to_file(content: str, artist_name_slug: str):
     """Save formatted emails to individual files"""
     try:
-        email_dir = os.path.join("data", "artists", artist_name_slug, "emails")
+        email_dir = cfg.get_path("email_dir", artist_name_slug)
         os.makedirs(email_dir, exist_ok=True)
 
         # Split emails by agency
@@ -703,8 +467,8 @@ async def save_emails_to_file(content: str, artist_name_slug: str):
                     email_part.split("@")[0].replace(".", "_").replace("-", "_")
                 )
 
-            filename = os.path.join(
-                email_dir, f"{artist_name_slug}_booking_{agency_name}_{idx}.txt"
+            filename = email_dir.joinpath(
+                f"{artist_name_slug}_booking_{agency_name}_{idx}.txt"
             )
 
             with open(filename, "w") as f:
@@ -781,24 +545,22 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         # Save reports (update filenames to reflect beautification)
         Logger.info("Starting report saving process")
         save_start = Logger.start_task("Saving reports")
-        artist_dir = os.path.join("data", "artists", artist_name_slug)
-        cache_dir = os.path.join(artist_dir, "cache")
+        cache_dir = cfg.get_path("cache_dir", artist_name_slug)
 
         # Save beautified reports to cache
         Logger.info("Saving beautified reports to cache")
         os.makedirs(cache_dir, exist_ok=True)
 
         if integrated_reports["EPK"]:
-            epk_filename = os.path.join(
-                cache_dir, f"{artist_name_slug}_integrated_epk_beautified.tex"
+            epk_filename = cache_dir.joinpath(
+                f"{artist_name_slug}_integrated_epk_beautified.tex"
             )
             with open(epk_filename, "w") as f:
                 f.write(integrated_reports["EPK"])
             Logger.success(f"Saved beautified EPK to cache: {epk_filename}")
 
         if integrated_reports["Internal Report"]:
-            internal_filename = os.path.join(
-                cache_dir,
+            internal_filename = cache_dir.joinpath(
                 f"{artist_name_slug}_integrated_internal_report_beautified.tex",
             )
             with open(internal_filename, "w") as f:
@@ -830,7 +592,7 @@ def get_artist_data_from_db(artist_id: str) -> dict:
     try:
         Logger.info("Connecting to database")
         connect_start = Logger.start_task("Database connection")
-        connection = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
+        connection = psycopg2.connect(cfg.db_url, cursor_factory=RealDictCursor)
         Logger.end_task(connect_start, "Database connected successfully")
 
         with connection.cursor() as cursor:
