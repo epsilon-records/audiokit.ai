@@ -1,173 +1,207 @@
 import json
 import os
-import requests
-import time
 import hashlib
-from .logger import Logger
-from .utils import sanitize_artist_data
-from config import cfg
-from typing import Dict, Any
 from datetime import datetime
+from typing import Dict, Any, Optional, List
+from pydantic import BaseModel, Field
+import httpx
+
+from .logger import Logger
+from .models import ArtistData
+from config import cfg
 
 
-class LLMRequest:
-    @staticmethod
-    async def execute(
-        model_name: str,
-        system_prompt: str,
-        user_content: str,
-        cache_path: str,
-        process_name: str,
-        retry_on_stream_error: bool = True,
-    ) -> str:
+class Report(BaseModel):
+    content: str
+    model_name: str
+    timestamp: datetime = Field(default_factory=datetime.now)
+
+
+class ReportCollection(BaseModel):
+    epk: Dict[str, Report] = Field(default_factory=dict)
+    internal: Dict[str, Report] = Field(default_factory=dict)
+
+
+class OpenRouterClient:
+    """Simple client for OpenRouter API"""
+
+    def __init__(self, model_name: str):
+        self.model_name = model_name
+        self.base_url = f"{cfg.api.openrouter.base_url}/api/v1"
+        self.client = httpx.AsyncClient(
+            headers={
+                "HTTP-Referer": cfg.api.headers.referer,
+                "X-Title": cfg.api.headers.title,
+                "Authorization": f"Bearer {cfg.api.openrouter.api_key}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
+            timeout=30.0,
+        )
+
+    async def chat_completion(self, messages: List[Dict[str, str]]) -> str:
+        """Send a chat completion request to OpenRouter"""
         try:
-            os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-
-            if os.path.exists(cache_path):
-                Logger.info(f"Using cached response from {cache_path}")
-                with open(cache_path, "r") as f:
-                    return f.read()
-
-            if not cfg.api.openrouter.api_key:
-                raise ValueError("OpenRouter API key is missing in configuration")
-
-            # Use streaming for deepseek model on first attempt
-            use_streaming = model_name.startswith("deepseek/deepseek-r1")
-
-            Logger.info(
-                f"{process_name}: Making request {'with' if use_streaming else 'without'} streaming"
-            )
-
-            response = requests.post(
-                cfg.api.openrouter.base_url,
-                headers={
-                    "Authorization": f"Bearer {cfg.api.openrouter.api_key}",
-                    "HTTP-Referer": cfg.api.headers.referer,
-                    "X-Title": cfg.api.headers.title,
-                },
+            response = await self.client.post(
+                f"{self.base_url}/chat/completions",
                 json={
-                    "model": model_name,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_content},
-                    ],
-                    "stream": use_streaming,
-                    "temperature": 0.7,
-                    "max_tokens": 4000,
+                    "model": self.model_name,
+                    "messages": messages,
                 },
-                stream=use_streaming,
-                timeout=60,
             )
             response.raise_for_status()
+            result = response.json()
 
-            if use_streaming:
-                final_content = await LLMRequest._handle_response(
-                    response, process_name, model_name
+            # Extract content from response
+            content = (
+                result.get("choices", [{}])[0].get("message", {}).get("content", "")
+            )
+
+            if not content:
+                raise ValueError("Empty response from OpenRouter API")
+
+            return content
+
+        except httpx.HTTPError as e:
+            error_msg = str(e)
+            Logger.error(f"OpenRouter API request failed: {error_msg}")
+
+            if "429" in error_msg:
+                raise ValueError("Rate limit exceeded - please wait before retrying")
+            if "402" in error_msg:
+                raise ValueError(
+                    "Insufficient credits - please check your OpenRouter balance"
                 )
-            else:
-                data = response.json()
-                final_content = data["choices"][0]["message"]["content"]
-                Logger.success(f"{process_name}: Received complete response")
+            if "401" in error_msg:
+                raise ValueError("Authentication failed - check your API key")
 
-            # Validate response content
-            if not final_content or len(final_content.strip()) < 50:
-                raise ValueError("Response content too short or empty")
-
-            # For booking emails, validate completeness before caching
-            if process_name.startswith("Booking"):
-                if (
-                    "**To:**" not in final_content
-                    or "**Subject:**" not in final_content
-                ):
-                    Logger.warning("Incomplete email response - not caching")
-                    raise ValueError("Generated email content is incomplete")
-
-            # Cache the valid response
-            with open(cache_path, "w") as f:
-                f.write(final_content)
-            Logger.success(f"Cached complete response to {cache_path}")
-            return final_content
-
-        except requests.exceptions.HTTPError as e:
-            if e.response.status_code == 401:
-                Logger.error(
-                    "Authentication failed - please check your OpenRouter API key"
-                )
-                raise ValueError("Invalid OpenRouter API key") from e
-            error_data = e.response.json() if e.response.content else {}
-            error_msg = f"HTTP error {e.response.status_code}: {error_data.get('error', str(e))}"
-            Logger.error(error_msg)
-            raise ValueError(error_msg) from e
-
-        except requests.exceptions.Timeout as e:
-            error_msg = f"Request timeout after {60} seconds"
-            Logger.error(error_msg)
-            raise ValueError(error_msg) from e
+            raise ValueError(f"HTTP error: {error_msg}")
 
         except Exception as e:
-            Logger.error(f"LLM request failed: {str(e)}")
-            raise
+            Logger.error(f"Unexpected error in chat completion: {str(e)}")
+            raise ValueError(f"Failed to get completion: {str(e)}")
 
-    @staticmethod
-    async def _handle_response(response, process_name: str, model_name: str) -> str:
-        full_response = []
-        buffer = ""
-        last_log_time = time.time()
-        min_log_interval = 0.5
+    async def close(self):
+        """Close the HTTP client"""
+        await self.client.aclose()
 
+
+class BaseGenerator:
+    """Base class for text generators"""
+
+    def __init__(self, model_name: str, system_prompt: str, name: str):
+        self.client = OpenRouterClient(model_name)
+        self.system_prompt = system_prompt
+        self.name = name
+
+    async def generate(self, data: Any) -> str:
+        """Generate text based on input data"""
         try:
-            if response.headers.get("content-type") == "text/event-stream":
-                Logger.info(f"Processing streaming response for {process_name}")
-                for chunk in response.iter_lines():
-                    if chunk:
-                        decoded = chunk.decode().replace("data: ", "")
-                        if decoded == "[DONE]":
-                            break
-                        try:
-                            data = json.loads(decoded)
-                            if "content" in data["choices"][0]["delta"]:
-                                token = data["choices"][0]["delta"]["content"]
-                                buffer += token
+            Logger.info(
+                f"Sending request to {self.name} with model {self.client.model_name}"
+            )
 
-                                current_time = time.time()
-                                if token in ("\n", ".", "!", "?") or (
-                                    current_time - last_log_time >= min_log_interval
-                                ):
-                                    if buffer.strip():
-                                        Logger.stream_log(
-                                            f"{process_name}: {buffer.strip()}"
-                                        )
-                                        full_response.append(buffer)
-                                        buffer = ""
-                                    last_log_time = current_time
-                        except json.JSONDecodeError:
-                            continue
-            else:
-                Logger.warning(f"Processing non-streaming response for {process_name}")
-                data = response.json()
-                content = data["choices"][0]["message"]["content"]
-                full_response.append(content)
-                Logger.stream_log(f"{process_name}: Completed non-streaming response")
+            messages = [
+                {"role": "system", "content": self.system_prompt},
+                {"role": "user", "content": self._format_data(data)},
+            ]
 
-            if buffer:
-                full_response.append(buffer)
-                Logger.stream_log(f"{process_name}: {buffer.strip()}")
+            result = await self.client.chat_completion(messages)
 
-            return "".join(full_response)
+            # Validate response
+            if len(result.strip()) < 50:
+                Logger.error(f"Suspiciously short response from {self.name}: {result}")
+                raise ValueError(f"Response too short from {self.name}")
+
+            Logger.info(f"Got response from {self.name}: {result[:100]}...")
+            return result
 
         except Exception as e:
-            Logger.error(f"Response handling failed: {str(e)}")
-            raise
+            Logger.error(f"Failed to generate with {self.name}: {str(e)}")
+            raise ValueError(f"Generation failed with {self.name}: {str(e)}")
+
+        finally:
+            await self.client.close()
+
+    def _format_data(self, data: Any) -> str:
+        """Format input data for the prompt - override in subclasses"""
+        # Handle Pydantic models by converting to dict first
+        if hasattr(data, "model_dump"):
+            data = data.model_dump()
+        elif hasattr(data, "dict"):
+            data = data.dict()
+        return json.dumps(data, indent=2)
 
 
-def generate_stable_hash(data: Dict[str, Any]) -> str:
-    """
-    Generate a stable hash for a dictionary.
-    Ensures consistent hashing by:
-    1. Sorting dictionary keys
-    2. Using consistent JSON serialization
-    3. Handling nested dictionaries and lists
-    """
+class EPKGenerator(BaseGenerator):
+    """Generates Electronic Press Kits"""
+
+    def __init__(self, model_name: str):
+        super().__init__(
+            model_name=model_name,
+            system_prompt=cfg.prompts.epk_system,
+            name="EPK Generator",
+        )
+
+
+class InternalReportGenerator(BaseGenerator):
+    """Generates Internal Reports"""
+
+    def __init__(self, model_name: str):
+        super().__init__(
+            model_name=model_name,
+            system_prompt=cfg.prompts.internal_report,
+            name="Internal Report Generator",
+        )
+
+
+class BookingEmailGenerator(BaseGenerator):
+    """Generates Booking Emails"""
+
+    def __init__(self):
+        super().__init__(
+            model_name=cfg.models.booking,
+            system_prompt=cfg.prompts.booking_research,
+            name="Booking Email Generator",
+        )
+
+
+class ReportIntegrator(BaseGenerator):
+    """Integrates multiple reports"""
+
+    def __init__(self, model_name: str = None):
+        super().__init__(
+            model_name=model_name or cfg.models.epk_integration,
+            system_prompt=cfg.prompts.epk_integration,
+            name="Report Integration",
+        )
+
+    def _format_data(self, data: Dict[str, List[str]]) -> str:
+        return json.dumps({"reports": data}, indent=2)
+
+
+class ReportBeautifier(BaseGenerator):
+    """Beautifies reports"""
+
+    def __init__(self):
+        super().__init__(
+            model_name=cfg.models.beautification,
+            system_prompt=cfg.prompts.beautification,
+            name="Report Beautification",
+        )
+
+
+# Cache Management
+def get_cache_path(
+    artist_name_slug: str, report_type: str, model_name: str, content_hash: str
+) -> str:
+    """Generate standardized cache path"""
+    filename = f"{artist_name_slug}_{report_type}_{model_name.replace('/', '_')}_{content_hash}.txt"
+    return os.path.join(cfg.get_path("cache_dir", artist_name_slug), filename)
+
+
+def generate_content_hash(data: Dict[str, Any]) -> str:
+    """Generate stable hash for caching"""
 
     def normalize(obj):
         if isinstance(obj, dict):
@@ -177,207 +211,145 @@ def generate_stable_hash(data: Dict[str, Any]) -> str:
         elif isinstance(obj, (str, int, float, bool)) or obj is None:
             return obj
         else:
-            return str(obj)  # Convert other types to strings
+            return str(obj)
 
-    normalized_data = normalize(data)
-    serialized = json.dumps(normalized_data, sort_keys=True, separators=(",", ":"))
+    normalized = normalize(data)
+    serialized = json.dumps(normalized, sort_keys=True, separators=(",", ":"))
     return hashlib.sha256(serialized.encode()).hexdigest()[:12]
 
 
-def normalize_timestamps(data: Dict[str, Any]) -> Dict[str, Any]:
-    for key, value in data.items():
-        if isinstance(value, datetime):
-            data[key] = value.isoformat(timespec="seconds")  # Round to seconds
-    return data
+# Main Functions
+async def generate_reports(artist_data: dict) -> ReportCollection:
+    """Generate all reports using available models"""
+    artist = ArtistData(**artist_data)
+    reports = ReportCollection()
+    total_models = len(cfg.models.ai_models)
 
+    Logger.info(f"Starting report generation for {artist.stage_name}")
+    Logger.info(f"Total models to process: {total_models}")
 
-async def generate_epk(artist_data: dict, model_name: str) -> str:
-    """Generate EPK using DRY handler"""
-    sanitized_data = normalize_timestamps(sanitize_artist_data(artist_data.copy()))
-    input_hash = generate_stable_hash(sanitized_data)
-    artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
-    cache_path = cfg.get_path("cache_dir", artist_name_slug).joinpath(
-        f"{artist_name_slug}_epk_{model_name.replace('/', '_')}_{input_hash}.txt"
-    )
+    for model_name in cfg.models.ai_models:
+        Logger.info(f"Processing model {model_name}")
 
-    # Check if cached version exists
-    if os.path.exists(cache_path):
-        Logger.info(f"Using cached EPK from {cache_path}")
-        with open(cache_path, "r") as f:
-            return f.read()
+        # Generate EPK
+        epk_generator = EPKGenerator(model_name=model_name)
+        epk_start = Logger.start_task(f"EPK generation with {model_name}")
+        epk_result = await epk_generator.generate(artist)
+        Logger.end_task(epk_start, f"Completed EPK generation with {model_name}")
+        reports.epk[model_name] = Report(content=epk_result, model_name=model_name)
 
-    # If no cache exists, generate new one
-    return await LLMRequest.execute(
-        model_name=model_name,
-        system_prompt=cfg.prompts.epk_system,
-        user_content=json.dumps(artist_data),
-        cache_path=cache_path,
-        process_name=f"EPK Generation ({model_name})",
-    )
-
-
-async def generate_internal_report(artist_data: dict, model_name: str) -> str:
-    """Generate internal report using DRY handler"""
-    sanitized_data = normalize_timestamps(sanitize_artist_data(artist_data.copy()))
-    input_hash = generate_stable_hash(sanitized_data)
-    artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
-    cache_path = cfg.get_path("cache_dir", artist_name_slug).joinpath(
-        f"{artist_name_slug}_internal_{model_name.replace('/', '_')}_{input_hash}.txt"
-    )
-
-    # Check if cached version exists
-    if os.path.exists(cache_path):
-        Logger.info(f"Using cached internal report from {cache_path}")
-        with open(cache_path, "r") as f:
-            return f.read()
-
-    # If no cache exists, generate new one
-    return await LLMRequest.execute(
-        model_name=model_name,
-        system_prompt=cfg.prompts.internal_report,
-        user_content=json.dumps(artist_data),
-        cache_path=cache_path,
-        process_name=f"Internal Report Generation ({model_name})",
-    )
-
-
-async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
-    """Integrated reports using DRY handler"""
-    try:
-        final_reports = {"EPK": None, "Internal Report": None}
-        cache_dir = cfg.get_path("cache_dir", artist_name_slug)
-
-        # EPK Integration
-        epk_cache_path = cache_dir.joinpath(f"{artist_name_slug}_integrated_epk.tex")
-        if not os.path.exists(epk_cache_path):
-            final_reports["EPK"] = await LLMRequest.execute(
-                model_name=cfg.models.epk_integration,
-                system_prompt=cfg.prompts.epk_integration,
-                user_content=json.dumps({"EPKs": reports["EPK"]}),
-                cache_path=epk_cache_path,
-                process_name="EPK Integration",
-                retry_on_stream_error=False,
-            )
-
-        # Internal Report Integration
-        internal_cache_path = cache_dir.joinpath(
-            f"{artist_name_slug}_integrated_internal.tex"
+        # Generate Internal Report
+        internal_generator = InternalReportGenerator(model_name=model_name)
+        internal_start = Logger.start_task(
+            f"Internal report generation with {model_name}"
         )
-        if not os.path.exists(internal_cache_path):
-            final_reports["Internal Report"] = await LLMRequest.execute(
-                model_name=cfg.models.internal_report_integration,
-                system_prompt=cfg.prompts.internal_report_integration,
-                user_content=json.dumps(
-                    {"Internal Reports": reports["Internal Report"]}
-                ),
-                cache_path=internal_cache_path,
-                process_name="Internal Report Integration",
-                retry_on_stream_error=False,
-            )
+        internal_result = await internal_generator.generate(artist)
+        Logger.end_task(
+            internal_start, f"Completed internal report generation with {model_name}"
+        )
+        reports.internal[model_name] = Report(
+            content=internal_result, model_name=model_name
+        )
 
-        return final_reports
-    except Exception as e:
-        Logger.error(f"Report integration failed: {str(e)}")
-        return {"EPK": "Integration failed", "Internal Report": "Integration failed"}
-
-
-async def beautify_report(content: str, report_type: str, artist_name_slug: str) -> str:
-    """Beautify report using DRY handler"""
-    content_hash = hashlib.sha256(content.encode()).hexdigest()[:12]
-    cache_path = cfg.get_path("cache_dir", artist_name_slug).joinpath(
-        f"{artist_name_slug}_{report_type.replace(' ', '_')}_beautified_{content_hash}.tex"
-    )
-
-    return await LLMRequest.execute(
-        model_name=cfg.models.beautification,
-        system_prompt=cfg.prompts.beautification,
-        user_content=content,
-        cache_path=cache_path,
-        process_name=f"{report_type} Beautification",
-        retry_on_stream_error=False,
-    )
+    Logger.success(f"All report generation completed for {artist.stage_name}")
+    return reports
 
 
 async def generate_booking_emails(artist_data: dict, artist_name_slug: str) -> str:
-    """Generate booking emails using DRY handler"""
+    """Generate booking emails
+
+    Args:
+        artist_data: Raw artist data dictionary
+        artist_name_slug: Slug for caching and file paths
+
+    Returns:
+        Generated booking email content
+    """
     try:
-        # Validate artist data has required fields
-        required_fields = ["stage_name", "email", "phone"]
-        for field in required_fields:
-            if field not in artist_data or not artist_data[field]:
-                raise ValueError(f"Missing required field: {field}")
-
-        content_hash = hashlib.sha256(json.dumps(artist_data).encode()).hexdigest()[:12]
-        cache_path = cfg.get_path("cache_dir", artist_name_slug).joinpath(
-            f"{artist_name_slug}_booking_emails_{content_hash}.txt"
-        )
-
-        # Check if cached version exists and is valid
-        if os.path.exists(cache_path):
-            with open(cache_path, "r") as f:
-                content = f.read()
-                if "**To:**" in content and "**Subject:**" in content:
-                    return content
-
-        return await LLMRequest.execute(
-            model_name=cfg.models.booking,
-            system_prompt=cfg.prompts.booking_research.format(
-                artist_data=json.dumps(artist_data)
-            ),
-            user_content=cfg.prompts.booking_research.format(
-                artist_data=json.dumps(artist_data)
-            ),
-            cache_path=cache_path,
-            process_name="Booking Email Research",
-        )
+        artist = ArtistData(**artist_data)
+        generator = BookingEmailGenerator()
+        result = await generator.generate(artist)
+        return result
     except Exception as e:
         Logger.error(f"Failed to generate booking emails: {str(e)}")
         raise ValueError(f"Booking email generation failed: {str(e)}") from e
 
 
-async def generate_reports(artist_data: dict) -> dict:
-    """Generate all reports using available models"""
-    reports = {"EPK": {}, "Internal Report": {}}
-    total_models = len(cfg.models.ai_models)
-    total_steps = (
-        len(reports) * total_models
-    )  # Calculate based on number of report types and models
-    current_step = 0
+async def integrate_reports(
+    reports: ReportCollection, artist_name_slug: str
+) -> Dict[str, Optional[str]]:
+    """Integrate reports"""
+    try:
+        integrator = ReportIntegrator()
+        final_reports = {"EPK": None, "Internal Report": None}
 
-    Logger.info(
-        f"Starting report generation for {artist_data.get('stage_name', 'Unknown Artist')}"
-    )
-    Logger.info(f"Total models to process: {total_models}")
-    Logger.info(f"Total steps to complete: {total_steps}")
+        # EPK Integration
+        if reports.epk:
+            Logger.info(f"Integrating {len(reports.epk)} EPK reports")
+            epk_contents = [report.content for report in reports.epk.values()]
+            epk_result = await integrator.generate({"EPKs": epk_contents})
+            if not epk_result:
+                Logger.error("EPK integration returned empty result")
+            final_reports["EPK"] = epk_result
+        else:
+            Logger.warning("No EPK reports to integrate")
 
-    for model_name in cfg.models.ai_models:
-        current_step += 1
-        Logger.info(f"Processing model {model_name} ({current_step}/{total_steps})")
+        # Internal Report Integration
+        if reports.internal:
+            Logger.info(f"Integrating {len(reports.internal)} Internal reports")
+            internal_contents = [report.content for report in reports.internal.values()]
+            internal_result = await integrator.generate(
+                {"Internal Reports": internal_contents}
+            )
+            if not internal_result:
+                Logger.error("Internal report integration returned empty result")
+            final_reports["Internal Report"] = internal_result
+        else:
+            Logger.warning("No Internal reports to integrate")
 
-        # Generate EPK
-        Logger.info(f"Starting EPK generation with {model_name}")
-        epk_start = Logger.start_task(f"EPK generation with {model_name}")
-        epk_report = await generate_epk(artist_data, model_name)
-        Logger.end_task(epk_start, f"Completed EPK generation with {model_name}")
-        reports["EPK"][model_name] = epk_report
-        Logger.success(f"EPK from {model_name} completed successfully")
+        # Validate results
+        for report_type, content in final_reports.items():
+            if not content:
+                Logger.error(f"No content generated for {report_type}")
+            else:
+                Logger.success(f"Successfully integrated {report_type}")
 
-        # Generate Internal Report
-        current_step += 1
-        Logger.info(
-            f"Starting internal report generation with {model_name} ({current_step}/{total_steps})"
-        )
-        internal_start = Logger.start_task(
-            f"Internal report generation with {model_name}"
-        )
-        internal_report = await generate_internal_report(artist_data, model_name)
-        Logger.end_task(
-            internal_start, f"Completed internal report generation with {model_name}"
-        )
-        reports["Internal Report"][model_name] = internal_report
-        Logger.success(f"Internal report from {model_name} completed successfully")
+        return final_reports
+    except Exception as e:
+        Logger.error(f"Report integration failed: {str(e)}")
+        raise
 
-    Logger.success(
-        f"All report generation completed for {artist_data.get('stage_name', 'Unknown Artist')}"
-    )
-    return reports
+
+async def beautify_report(content: str, report_type: str, artist_name_slug: str) -> str:
+    """Beautify a report"""
+    try:
+        if not content:
+            Logger.error(f"Cannot beautify empty {report_type} content")
+            return ""
+
+        beautifier = ReportBeautifier()
+        Logger.info(f"Beautifying {report_type} for {artist_name_slug}")
+
+        # Add LaTeX wrapper if not present
+        if not content.strip().startswith("\\documentclass"):
+            content = f"""\\documentclass{{article}}
+\\usepackage{{geometry}}
+\\geometry{{a4paper, margin=2cm}}
+\\begin{{document}}
+
+{content}
+
+\\end{{document}}"""
+
+        result = await beautifier.generate(content)
+
+        if not result:
+            Logger.error(f"Beautification returned empty result for {report_type}")
+            return content  # Return original content if beautification fails
+
+        Logger.success(f"Successfully beautified {report_type}")
+        return result
+
+    except Exception as e:
+        Logger.error(f"Failed to beautify {report_type}: {str(e)}")
+        return content  # Return original content if beautification fails

@@ -1,0 +1,1038 @@
+{
+  "apple_music": "https://music.apple.com/us/artist/vozz-rich/1675984686",
+  "artist_photos": [],
+  "bandcamp": "",
+  "bandsintown": "",
+  "biography": "",
+  "birthdate": "1977-07-07",
+  "city": "",
+  "created": "2025-01-24T16:54:40.407000+00:00",
+  "email": "vozzrich@gmail.com",
+  "facebook": "",
+  "id": "fdf3afd2-a3d8-462c-b2dc-7e0805573d03",
+  "instagram": "https://instagram.com/vozzrich",
+  "legal_name": "Richard Park",
+  "linkedin": "",
+  "mixcloud": "",
+  "phone": "3109898178",
+  "snapchat": "",
+  "songkick": "",
+  "soundcloud": "https://soundcloud.com/vozzrich",
+  "spotify": "https://open.spotify.com/artist/27sSKrytmUXukDnMGPXNHQ",
+  "stage_name": "Vozz Rich",
+  "tiktok": "",
+  "twitch": "",
+  "updated": "2025-02-01T18:05:52.319000+00:00",
+  "website": "https://vozzrich.com/",
+  "x": "",
+  "youtube": "",
+  "country": "",
+  "anr": "",
+  "is_signed": false,
+  "org_id": "org_2indKLmMmxTzFvEtknU9PH5LCpY",
+  "soundcharts_id": "8fab7c54-0e0f-43a5-bf62-def4792d345a",
+  "metadata": {
+    "uuid": "8fab7c54-0e0f-43a5-bf62-def4792d345a",
+    "slug": "vozz-rich",
+    "name": "Vozz Rich",
+    "appUrl": "https://app.soundcharts.com/app/artist/vozz-rich/overview",
+    "imageUrl": "https://assets.soundcharts.com/artist/f/0/e/8fab7c54-0e0f-43a5-bf62-def4792d345a.jpg",
+    "countryCode": "US",
+    "genres": [
+      {
+        "root": "electronic",
+        "sub": [
+          "electronic",
+          "house",
+          "dance"
+        ]
+      }
+    ],
+    "biography": "US based Producer and DJ with roots in Mexico, and California. I blend sounds from my many influences including Detroit house, underground raves, salsa, techno, and big room! \n ",
+    "isni": "",
+    "ipi": "",
+    "gender": "",
+    "type": "",
+    "birthDate": null
+  },
+  "streaming": {
+    "lastfm": {
+      "related": {
+        "artist": {
+          "uuid": "8fab7c54-0e0f-43a5-bf62-def4792d345a",
+          "slug": "vozz-rich",
+          "name": "Vozz Rich",
+          "appUrl": "https://app.soundcharts.com/app/artist/vozz-rich/overview",
+          "imageUrl": "https://assets.soundcharts.com/artist/f/0/e/8fab7c54-0e0f-43a5-bf62-def4792d345a.jpg"
+        },
+        "platform": "lastfm",
+        "lastCrawlDate": "2025-01-30T00:00:00+00:00"
+      },
+      "items": [
+        {
+          "date": "2024-11-04T00:00:00+00:00",
+          "value": 608
+        },
+        {
+          "date": "2024-11-07T00:00:00+00:00",
+          "value": 609
+        },
+        {
+          "date": "2024-11-10T00:00:00+00:00",
+          "value": 621
+        },
+        {
+          "date": "2024-11-13T00:00:00+00:00",
+          "value": 625
+        },
+        {
+          "date": "2024-11-16T00:00:00+00:00",
+          "value": 632
+        },
+        {
+          "date": "2024-11-19T00:00:00+00:00",
+          "value": 637
+        },
+        {
+          "date": "2024-11-22T00:00:00+00:00",
+          "value": 641
+        },
+        {
+          "date": "2024-11-25T00:00:00+00:00",
+          "value": 649
+        },
+        {
+          "date": "2024-11-28T00:00:00+00:00",
+          "value": 655
+        },
+        {
+          "date": "2024-12-01T00:00:00+00:00",
+          "value": 661
+        },
+        {
+          "date": "2024-12-04T00:00:00+00:00",
+          "value": 663
+        },
+        {
+          "date": "2024-12-07T00:00:00+00:00",
+          "value": 667
+        },
+        {
+          "date": "2024-12-10T00:00:00+00:00",
+          "value": 675
+        },
+        {
+          "date": "2024-12-13T00:00:00+00:00",
+          "value": 681
+        },
+        {
+          "date": "2024-12-16T00:00:00+00:00",
+          "value": 685
+        },
+        {
+          "date": "2024-12-19T00:00:00+00:00",
+          "value": 695
+        },
+        {
+          "date": "2024-12-22T00:00:00+00:00",
+          "value": 700
+        },
+        {
+          "date": "2024-12-25T00:00:00+00:00",
+          "value": 700
+        },
+        {
+          "date": "2024-12-28T00:00:00+00:00",
+          "value": 702
+        },
+        {
+          "date": "2024-12-31T00:00:00+00:00",
+          "value": 705
+        },
+        {
+          "date": "2025-01-03T00:00:00+00:00",
+          "value": 705
+        },
+        {
+          "date": "2025-01-06T00:00:00+00:00",
+          "value": 706
+        },
+        {
+          "date": "2025-01-09T00:00:00+00:00",
+          "value": 707
+        },
+        {
+          "date": "2025-01-12T00:00:00+00:00",
+          "value": 707
+        },
+        {
+          "date": "2025-01-15T00:00:00+00:00",
+          "value": 707
+        },
+        {
+          "date": "2025-01-18T00:00:00+00:00",
+          "value": 709
+        },
+        {
+          "date": "2025-01-21T00:00:00+00:00",
+          "value": 714
+        },
+        {
+          "date": "2025-01-24T00:00:00+00:00",
+          "value": 722
+        },
+        {
+          "date": "2025-01-27T00:00:00+00:00",
+          "value": 727
+        },
+        {
+          "date": "2025-01-30T00:00:00+00:00",
+          "value": 729
+        }
+      ],
+      "page": {
+        "offset": 0,
+        "limit": 100,
+        "next": null,
+        "previous": null,
+        "total": 30
+      },
+      "errors": []
+    },
+    "pandora": {
+      "related": {
+        "artist": {
+          "uuid": "8fab7c54-0e0f-43a5-bf62-def4792d345a",
+          "slug": "vozz-rich",
+          "name": "Vozz Rich",
+          "appUrl": "https://app.soundcharts.com/app/artist/vozz-rich/overview",
+          "imageUrl": "https://assets.soundcharts.com/artist/f/0/e/8fab7c54-0e0f-43a5-bf62-def4792d345a.jpg"
+        },
+        "platform": "pandora",
+        "lastCrawlDate": "2025-01-18T00:00:00+00:00"
+      },
+      "items": [],
+      "page": {
+        "offset": 0,
+        "limit": 100,
+        "next": null,
+        "previous": null,
+        "total": 0
+      },
+      "errors": []
+    },
+    "spotify": {
+      "related": {
+        "artist": {
+          "uuid": "8fab7c54-0e0f-43a5-bf62-def4792d345a",
+          "slug": "vozz-rich",
+          "name": "Vozz Rich",
+          "appUrl": "https://app.soundcharts.com/app/artist/vozz-rich/overview",
+          "imageUrl": "https://assets.soundcharts.com/artist/f/0/e/8fab7c54-0e0f-43a5-bf62-def4792d345a.jpg"
+        },
+        "platform": "spotify",
+        "lastCrawlDate": "2025-02-01T00:00:00+00:00"
+      },
+      "items": [
+        {
+          "date": "2024-11-03T00:00:00+00:00",
+          "value": 37380
+        },
+        {
+          "date": "2024-11-04T00:00:00+00:00",
+          "value": 37764
+        },
+        {
+          "date": "2024-11-05T00:00:00+00:00",
+          "value": 37764
+        },
+        {
+          "date": "2024-11-06T00:00:00+00:00",
+          "value": 37970
+        },
+        {
+          "date": "2024-11-07T00:00:00+00:00",
+          "value": 37977
+        },
+        {
+          "date": "2024-11-08T00:00:00+00:00",
+          "value": 26187
+        },
+        {
+          "date": "2024-11-09T00:00:00+00:00",
+          "value": 24833
+        },
+        {
+          "date": "2024-11-10T00:00:00+00:00",
+          "value": 23771
+        },
+        {
+          "date": "2024-11-11T00:00:00+00:00",
+          "value": 25464
+        },
+        {
+          "date": "2024-11-12T00:00:00+00:00",
+          "value": 28190
+        },
+        {
+          "date": "2024-11-13T00:00:00+00:00",
+          "value": 28563
+        },
+        {
+          "date": "2024-11-14T00:00:00+00:00",
+          "value": 28659
+        },
+        {
+          "date": "2024-11-15T00:00:00+00:00",
+          "value": 27590
+        },
+        {
+          "date": "2024-11-16T00:00:00+00:00",
+          "value": 25067
+        },
+        {
+          "date": "2024-11-17T00:00:00+00:00",
+          "value": 23906
+        },
+        {
+          "date": "2024-11-18T00:00:00+00:00",
+          "value": 26983
+        },
+        {
+          "date": "2024-11-19T00:00:00+00:00",
+          "value": 26983
+        },
+        {
+          "date": "2024-11-20T00:00:00+00:00",
+          "value": 27097
+        },
+        {
+          "date": "2024-11-21T00:00:00+00:00",
+          "value": 25196
+        },
+        {
+          "date": "2024-11-22T00:00:00+00:00",
+          "value": 24584
+        },
+        {
+          "date": "2024-11-23T00:00:00+00:00",
+          "value": 24838
+        },
+        {
+          "date": "2024-11-24T00:00:00+00:00",
+          "value": 23501
+        },
+        {
+          "date": "2024-11-25T00:00:00+00:00",
+          "value": 23901
+        },
+        {
+          "date": "2024-11-26T00:00:00+00:00",
+          "value": 24208
+        },
+        {
+          "date": "2024-11-27T00:00:00+00:00",
+          "value": 24493
+        },
+        {
+          "date": "2024-11-28T00:00:00+00:00",
+          "value": 23976
+        },
+        {
+          "date": "2024-11-29T00:00:00+00:00",
+          "value": 20784
+        },
+        {
+          "date": "2024-11-30T00:00:00+00:00",
+          "value": 21200
+        },
+        {
+          "date": "2024-12-01T00:00:00+00:00",
+          "value": 22030
+        },
+        {
+          "date": "2024-12-02T00:00:00+00:00",
+          "value": 22703
+        },
+        {
+          "date": "2024-12-03T00:00:00+00:00",
+          "value": 22703
+        },
+        {
+          "date": "2024-12-04T00:00:00+00:00",
+          "value": 22831
+        },
+        {
+          "date": "2024-12-05T00:00:00+00:00",
+          "value": 23072
+        },
+        {
+          "date": "2024-12-06T00:00:00+00:00",
+          "value": 23650
+        },
+        {
+          "date": "2024-12-07T00:00:00+00:00",
+          "value": 24389
+        },
+        {
+          "date": "2024-12-08T00:00:00+00:00",
+          "value": 24934
+        },
+        {
+          "date": "2024-12-09T00:00:00+00:00",
+          "value": 24364
+        },
+        {
+          "date": "2024-12-10T00:00:00+00:00",
+          "value": 21560
+        },
+        {
+          "date": "2024-12-11T00:00:00+00:00",
+          "value": 21442
+        },
+        {
+          "date": "2024-12-12T00:00:00+00:00",
+          "value": 21566
+        },
+        {
+          "date": "2024-12-13T00:00:00+00:00",
+          "value": 21752
+        },
+        {
+          "date": "2024-12-14T00:00:00+00:00",
+          "value": 21257
+        },
+        {
+          "date": "2024-12-15T00:00:00+00:00",
+          "value": 20780
+        },
+        {
+          "date": "2024-12-16T00:00:00+00:00",
+          "value": 20780
+        },
+        {
+          "date": "2024-12-17T00:00:00+00:00",
+          "value": 21653
+        },
+        {
+          "date": "2024-12-18T00:00:00+00:00",
+          "value": 22794
+        },
+        {
+          "date": "2024-12-19T00:00:00+00:00",
+          "value": 24498
+        },
+        {
+          "date": "2024-12-20T00:00:00+00:00",
+          "value": 25344
+        },
+        {
+          "date": "2024-12-21T00:00:00+00:00",
+          "value": 25307
+        },
+        {
+          "date": "2024-12-22T00:00:00+00:00",
+          "value": 25361
+        },
+        {
+          "date": "2024-12-23T00:00:00+00:00",
+          "value": 25315
+        },
+        {
+          "date": "2024-12-24T00:00:00+00:00",
+          "value": 25279
+        },
+        {
+          "date": "2024-12-25T00:00:00+00:00",
+          "value": 25130
+        },
+        {
+          "date": "2024-12-26T00:00:00+00:00",
+          "value": 25087
+        },
+        {
+          "date": "2024-12-27T00:00:00+00:00",
+          "value": 24947
+        },
+        {
+          "date": "2024-12-28T00:00:00+00:00",
+          "value": 24895
+        },
+        {
+          "date": "2024-12-29T00:00:00+00:00",
+          "value": 24650
+        },
+        {
+          "date": "2024-12-30T00:00:00+00:00",
+          "value": 24121
+        },
+        {
+          "date": "2024-12-31T00:00:00+00:00",
+          "value": 24280
+        },
+        {
+          "date": "2025-01-01T00:00:00+00:00",
+          "value": 22206
+        },
+        {
+          "date": "2025-01-02T00:00:00+00:00",
+          "value": 22635
+        },
+        {
+          "date": "2025-01-03T00:00:00+00:00",
+          "value": 22593
+        },
+        {
+          "date": "2025-01-04T00:00:00+00:00",
+          "value": 21487
+        },
+        {
+          "date": "2025-01-05T00:00:00+00:00",
+          "value": 21647
+        },
+        {
+          "date": "2025-01-06T00:00:00+00:00",
+          "value": 21607
+        },
+        {
+          "date": "2025-01-07T00:00:00+00:00",
+          "value": 21607
+        },
+        {
+          "date": "2025-01-08T00:00:00+00:00",
+          "value": 22168
+        },
+        {
+          "date": "2025-01-09T00:00:00+00:00",
+          "value": 22464
+        },
+        {
+          "date": "2025-01-10T00:00:00+00:00",
+          "value": 22598
+        },
+        {
+          "date": "2025-01-11T00:00:00+00:00",
+          "value": 22258
+        },
+        {
+          "date": "2025-01-12T00:00:00+00:00",
+          "value": 21755
+        },
+        {
+          "date": "2025-01-13T00:00:00+00:00",
+          "value": 22174
+        },
+        {
+          "date": "2025-01-14T00:00:00+00:00",
+          "value": 22049
+        },
+        {
+          "date": "2025-01-15T00:00:00+00:00",
+          "value": 22588
+        },
+        {
+          "date": "2025-01-16T00:00:00+00:00",
+          "value": 21143
+        },
+        {
+          "date": "2025-01-17T00:00:00+00:00",
+          "value": 20685
+        },
+        {
+          "date": "2025-01-18T00:00:00+00:00",
+          "value": 20235
+        },
+        {
+          "date": "2025-01-19T00:00:00+00:00",
+          "value": 21363
+        },
+        {
+          "date": "2025-01-20T00:00:00+00:00",
+          "value": 22940
+        },
+        {
+          "date": "2025-01-21T00:00:00+00:00",
+          "value": 22940
+        },
+        {
+          "date": "2025-01-22T00:00:00+00:00",
+          "value": 23153
+        },
+        {
+          "date": "2025-01-23T00:00:00+00:00",
+          "value": 23321
+        },
+        {
+          "date": "2025-01-24T00:00:00+00:00",
+          "value": 23804
+        },
+        {
+          "date": "2025-01-25T00:00:00+00:00",
+          "value": 24168
+        },
+        {
+          "date": "2025-01-26T00:00:00+00:00",
+          "value": 24383
+        },
+        {
+          "date": "2025-01-27T00:00:00+00:00",
+          "value": 24590
+        },
+        {
+          "date": "2025-01-28T00:00:00+00:00",
+          "value": 24765
+        },
+        {
+          "date": "2025-01-29T00:00:00+00:00",
+          "value": 24927
+        },
+        {
+          "date": "2025-01-30T00:00:00+00:00",
+          "value": 24795
+        },
+        {
+          "date": "2025-01-31T00:00:00+00:00",
+          "value": 24910
+        },
+        {
+          "date": "2025-02-01T00:00:00+00:00",
+          "value": 24778
+        }
+      ],
+      "page": {
+        "offset": 0,
+        "limit": 100,
+        "next": null,
+        "previous": null,
+        "total": 91
+      },
+      "errors": []
+    }
+  },
+  "followers": {
+    "spotify": 4109,
+    "instagram": 4875,
+    "twitter": null,
+    "facebook": null,
+    "youtube": 3
+  },
+  "address": "",
+  "tracks": {
+    "related": {
+      "uuid": "8fab7c54-0e0f-43a5-bf62-def4792d345a",
+      "slug": "vozz-rich",
+      "name": "Vozz Rich",
+      "appUrl": "https://app.soundcharts.com/app/artist/vozz-rich/overview",
+      "imageUrl": "https://assets.soundcharts.com/artist/f/0/e/8fab7c54-0e0f-43a5-bf62-def4792d345a.jpg"
+    },
+    "items": [
+      {
+        "uuid": "95f4b279-c077-43ed-9b27-11a0af35e9f0",
+        "name": "Back To The Beat",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-06-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "6c5297c0-637a-4f18-83d0-d9168690c612",
+        "name": "Bounce It",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-06-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "157c8c8e-68b8-47cb-b776-1917e50ed9e7",
+        "name": "Breathless",
+        "creditName": "Vozz Rich & L25",
+        "releaseDate": "2024-07-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "0340a6d2-458e-4d7e-b6a6-1d553fd3b731",
+        "name": "Breathless - Extended Mix",
+        "creditName": "Vozz Rich & L25",
+        "releaseDate": "2024-07-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "439f9e91-1e63-4c32-8b16-6a46ed14bf4b",
+        "name": "Butterflies - Vozz Rich Remix",
+        "creditName": "Artsychoke & Vozz Rich",
+        "releaseDate": "2024-05-03T00:00:00+00:00"
+      },
+      {
+        "uuid": "de5a716a-51b3-4b66-af1c-67d986ba4125",
+        "name": "Butterflies - Vozz Rich Remix",
+        "creditName": "Artsychoke & Vozz Rich",
+        "releaseDate": "2024-05-03T00:00:00+00:00"
+      },
+      {
+        "uuid": "d71bed06-51f1-4034-a2f0-8ab411a4e1b2",
+        "name": "Dance All Night - Vozz Rich Remix",
+        "creditName": "Jaytor & Vozz Rich",
+        "releaseDate": "2024-08-19T00:00:00+00:00"
+      },
+      {
+        "uuid": "357c5e0d-1332-4c3b-ba81-b15f0529d638",
+        "name": "Dance All Night - Vozz Rich Remix",
+        "creditName": "Jaytor & Vozz Rich",
+        "releaseDate": "2024-07-12T00:00:00+00:00"
+      },
+      {
+        "uuid": "2bf997ae-f2ca-4512-b1b1-411870eff6ff",
+        "name": "Despues De La Moet",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-03-15T00:00:00+00:00"
+      },
+      {
+        "uuid": "4bea239e-881f-420e-93f5-d0f626a7decd",
+        "name": "Don't Want It to End",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-04-05T00:00:00+00:00"
+      },
+      {
+        "uuid": "facd577b-8373-4786-8d12-2c19edc19c66",
+        "name": "Don't Want It to End - Kicevski Remix",
+        "creditName": "Vozz Rich & Kicevski",
+        "releaseDate": "2024-08-02T00:00:00+00:00"
+      },
+      {
+        "uuid": "e27b46d2-ac74-43bb-b139-364af35fff5e",
+        "name": "Don't Want It to End - Pillars Remix",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-08-02T00:00:00+00:00"
+      },
+      {
+        "uuid": "ebafd250-c7b8-44ae-955a-9dcf565cf929",
+        "name": "Don't Want It to End - PYM Remix",
+        "creditName": "Vozz Rich & PYM",
+        "releaseDate": "2024-08-02T00:00:00+00:00"
+      },
+      {
+        "uuid": "e442501d-4af6-488a-a3e2-271ed72ae435",
+        "name": "Far From Done - Club Edit",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-06-21T00:00:00+00:00"
+      },
+      {
+        "uuid": "b19f0473-5c1b-49f5-8b11-3ca16d7cbbe9",
+        "name": "Far From Done - Radio Edit",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-06-21T00:00:00+00:00"
+      },
+      {
+        "uuid": "610d0729-3f12-4417-9ef1-32baa16a5b4f",
+        "name": "Get Up On The Floor",
+        "creditName": "Vozz Rich & Franz Kolo",
+        "releaseDate": "2023-10-12T00:00:00+00:00"
+      },
+      {
+        "uuid": "86c4f547-e5ef-4e29-b61d-ac165524c3c7",
+        "name": "Get Up On The Floor - Extended Mix",
+        "creditName": "Vozz Rich & Franz Kolo",
+        "releaseDate": "2023-10-12T00:00:00+00:00"
+      },
+      {
+        "uuid": "36e5d92a-9948-45b3-aff7-02eefc7ff191",
+        "name": "House Ablaze",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-12-20T00:00:00+00:00"
+      },
+      {
+        "uuid": "0e0fa9bc-8736-438e-b173-bd53393d9eaf",
+        "name": "I Got the Keys",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-07-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "0c24693a-8410-41b8-93cc-348f3b9e80f1",
+        "name": "I'll Be There",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-07-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "e93f07c0-60b2-4a92-baac-b4239fcd9662",
+        "name": "I'll Be There - Extended Mix",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-07-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "dfa58f7c-edf0-4fb5-b575-817e60a39169",
+        "name": "Let This One Ride - Vozz Rich Remix",
+        "creditName": "Kelly Reverb & Chad LeMans & Vozz Rich",
+        "releaseDate": "2023-12-01T00:00:00+00:00"
+      },
+      {
+        "uuid": "b7ddaac5-0134-45c3-b4ba-97c8c93b9785",
+        "name": "Let This One Ride - Vozz Rich Remix (Radio Edit)",
+        "creditName": "Kelly Reverb & Chad LeMans & Vozz Rich",
+        "releaseDate": "2023-12-01T00:00:00+00:00"
+      },
+      {
+        "uuid": "7e54d955-82f4-48c9-9e84-47439b7cf682",
+        "name": "Mi Corazon Batalla",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-08-30T00:00:00+00:00"
+      },
+      {
+        "uuid": "30175212-1461-4c8b-a3af-9be7b2827b37",
+        "name": "Mi Corazon Batalla - Extended",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-08-30T00:00:00+00:00"
+      },
+      {
+        "uuid": "3d0296b1-51ad-4a14-9d94-0891bc9cd7af",
+        "name": "Moving Like That",
+        "creditName": "Vozz Rich",
+        "releaseDate": null
+      },
+      {
+        "uuid": "2a4302fb-8056-4f0b-b44a-fcf3ec2d8ce6",
+        "name": "Never Stopping - Extended Mix",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-04-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "d1d35ce2-a21c-4700-b154-e6a4f8a6829f",
+        "name": "Never Stopping - Radio Edit",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-04-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "2d9316bb-57ef-4b13-9f4e-a9a5f0a8a31c",
+        "name": "Nothing Without Your Love",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2023-03-31T00:00:00+00:00"
+      },
+      {
+        "uuid": "0a6c44c7-7db0-4f91-b811-7f9b27b78b2f",
+        "name": "Nothing Without Your Love - Afro Extended Mix",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-11-15T00:00:00+00:00"
+      },
+      {
+        "uuid": "585b7a2b-65f9-46a0-9b27-cad204aeeaf7",
+        "name": "Nothing Without Your Love - Afro Radio Mix",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-11-15T00:00:00+00:00"
+      },
+      {
+        "uuid": "dbab5075-4dab-4825-81f1-be7162777cba",
+        "name": "Only Four Things I Need (Club Party Drinks House) - Club Edit",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-06-21T00:00:00+00:00"
+      },
+      {
+        "uuid": "9ddd7147-1f90-42b0-961e-bac44e1229cb",
+        "name": "Only Four Things I Need (Club Party Drinks House) - Radio Edit",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-06-21T00:00:00+00:00"
+      },
+      {
+        "uuid": "2bf22349-98cb-483d-a21c-e0450070bbdf",
+        "name": "Prendelo",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-03-15T00:00:00+00:00"
+      },
+      {
+        "uuid": "fb3e8dd1-6283-4020-ae13-c9919775ad14",
+        "name": "Prendelo - Extended Mix",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-03-15T00:00:00+00:00"
+      },
+      {
+        "uuid": "3019b2f7-cfa2-409a-ad72-ee127cc39789",
+        "name": "Prendelo - Remix",
+        "creditName": "Vozz Rich & Gabriel Robella",
+        "releaseDate": "2024-03-15T00:00:00+00:00"
+      },
+      {
+        "uuid": "f3757742-e1a5-4c6f-b4d4-c5c89ada338a",
+        "name": "Safe and Sound - Extended Mix",
+        "creditName": "Kicevski & Vozz Rich",
+        "releaseDate": "2024-10-21T00:00:00+00:00"
+      },
+      {
+        "uuid": "625a7bf2-4570-499c-aba0-8d7323d6d271",
+        "name": "Safe and Sound - Radio Edit",
+        "creditName": "Kicevski & Vozz Rich",
+        "releaseDate": "2024-10-21T00:00:00+00:00"
+      },
+      {
+        "uuid": "b440ab0f-eff5-4fc4-89b2-a2aabbdd1b29",
+        "name": "She's Burning High - Vozz Edit",
+        "creditName": "Leigh Macneil & Vozz Rich",
+        "releaseDate": "2024-12-06T00:00:00+00:00"
+      },
+      {
+        "uuid": "5f4786d6-6f85-4966-8259-d18287532a65",
+        "name": "Sofi Disco - Vozz Rich Extended Remix",
+        "creditName": "PAUL PARKER & Vozz Rich",
+        "releaseDate": "2024-10-30T00:00:00+00:00"
+      },
+      {
+        "uuid": "e27beddb-2ee1-45b3-8c13-ae2d5d623ce1",
+        "name": "Sofi Disco - Vozz Rich Radio Remix",
+        "creditName": "PAUL PARKER & Vozz Rich",
+        "releaseDate": "2024-10-30T00:00:00+00:00"
+      },
+      {
+        "uuid": "a2313466-7aed-41ba-9886-da655abc2ade",
+        "name": "Take Off That Noise - Club Edit",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-06-21T00:00:00+00:00"
+      },
+      {
+        "uuid": "23c6d8cd-3f07-4914-b459-bd0528aff77e",
+        "name": "Take Off That Noise - Radio Edit",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-06-21T00:00:00+00:00"
+      },
+      {
+        "uuid": "14e2c0fb-8536-469f-8714-adba52b96263",
+        "name": "Trompetina",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2023-03-31T00:00:00+00:00"
+      },
+      {
+        "uuid": "1d8c0b41-e7a6-44f2-86c4-29b6aa28e862",
+        "name": "Wake the Neighbors - Extended Mix",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-04-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "dcd277c6-1619-4cef-8f4f-17d138b54302",
+        "name": "Wake the Neighbors - Radio Edit",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-04-26T00:00:00+00:00"
+      },
+      {
+        "uuid": "a65df12a-dd98-4e47-95c6-c28bd31e9f5e",
+        "name": "Wanna See You Smile Again",
+        "creditName": "Vozz Rich",
+        "releaseDate": "2024-04-05T00:00:00+00:00"
+      }
+    ],
+    "page": {
+      "offset": 0,
+      "limit": 100,
+      "next": null,
+      "previous": null,
+      "total": 47
+    },
+    "errors": []
+  },
+  "services": {
+    "spotify": {
+      "id": "27sSKrytmUXukDnMGPXNHQ",
+      "link": "https://open.spotify.com/artist/27sSKrytmUXukDnMGPXNHQ"
+    },
+    "appleMusic": {
+      "id": "1675984686",
+      "link": "https://music.apple.com/us/artist/vozz-rich/1675984686?app=music"
+    },
+    "deezer": {
+      "id": "205502067",
+      "link": "https://www.deezer.com/artist/205502067"
+    },
+    "tidal": {
+      "id": "37974452",
+      "link": "https://tidal.com/artist/37974452"
+    },
+    "pandora": {
+      "id": "AR:13331175",
+      "link": "https://www.pandora.com/artist/vozz-rich/ARXr7xhztjfc7w2"
+    },
+    "yandex": {
+      "id": "18936866",
+      "link": "https://music.yandex.com/artist/18936866"
+    },
+    "amazon": {
+      "id": "B0BYGKX99B",
+      "link": "https://amazon.com/dp/B0BYGKX99B"
+    },
+    "soundcloud": {
+      "id": "1123811647",
+      "link": "https://soundcloud.com/vozzrich"
+    },
+    "youtubeMusic": {
+      "id": "UC628EL96EB0utlcDImVHBcA",
+      "link": "https://music.youtube.com/channel/UC628EL96EB0utlcDImVHBcA"
+    },
+    "qobuz": {
+      "id": "17733316",
+      "link": "https://open.qobuz.com/artist/17733316"
+    },
+    "audiomack": {
+      "id": "140004577",
+      "link": "https://audiomack.com/vozz-rich"
+    },
+    "boomplay": {
+      "id": "66177750",
+      "link": "https://boomplay.com/artists/66177750"
+    },
+    "jioSaavn": {
+      "id": "17598669",
+      "link": "https://www.jiosaavn.com/artist/vozz-rich-songs/sYKUGC3fICg_"
+    },
+    "beatport": {
+      "id": "1158114",
+      "link": "https://beatport.com/artist/vozz-rich/1158114"
+    },
+    "trebel": {
+      "id": "33775713",
+      "link": "https://trebel.io/artist?id=33775713"
+    },
+    "sevenDigital": {
+      "id": "11362785",
+      "link": "https://us.7digital.com/artist/vozz-rich"
+    },
+    "anghami": {
+      "id": "17313134",
+      "link": "https://play.anghami.com/artist/17313134"
+    },
+    "iHeartRadio": {
+      "id": "39960634",
+      "link": "https://www.iheart.com/artist/vozz-rich-39960634"
+    },
+    "youseeMusik": {
+      "id": "59234211",
+      "link": "https://musik.yousee.dk/kunstner/59234211"
+    },
+    "awa": {
+      "id": "7e58aa8c95155d90c641",
+      "link": "https://s.awa.fm/artist/7e58aa8c95155d90c641"
+    },
+    "netease": {
+      "id": "56088959",
+      "link": "https://music.163.com/artist?id=56088959"
+    },
+    "flo": {
+      "id": "408318971",
+      "link": "https://m.music-flo.com/detail/artist/408318971"
+    },
+    "qqMusic": {
+      "id": "000S6Ipd18wez6",
+      "link": "https://y.qq.com/n/ryqq/singer/000S6Ipd18wez6"
+    },
+    "lineMusic": {
+      "id": "mi00000000230486fd",
+      "link": "https://music.line.me/webapp/artist/mi00000000230486fd"
+    },
+    "kkbox": {
+      "id": "GrTpxnYkMQFlMJzgDP",
+      "link": "https://www.kkbox.com/jp/ja/artist/GrTpxnYkMQFlMJzgDP"
+    },
+    "shazam": {
+      "id": "1675984686",
+      "link": "https://www.shazam.com/artist/vozz-rich/1675984686"
+    },
+    "amazonMusic": {
+      "id": "B0BYGKX99B",
+      "link": "https://music.amazon.com/artists/B0BYGKX99B"
+    },
+    "instagram": {
+      "link": "https://www.instagram.com/vozzrich"
+    },
+    "telmoreMusik": {
+      "id": "59234211",
+      "link": "https://musik.telmore.dk/kunstner/59234211"
+    }
+  }
+}
