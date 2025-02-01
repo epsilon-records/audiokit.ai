@@ -8,6 +8,7 @@ from datetime import date
 import time
 from datetime import datetime
 import traceback
+import hashlib
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -347,15 +348,24 @@ def handle_report_error(
 async def generate_epk(artist_data: dict, model_name: str) -> str:
     """Generate EPK using the specified model"""
     try:
-        # Create cache path
-        artist_name_slug = artist_data["stage_name"].replace(" ", "_")
-        artist_dir = os.path.join("data", "artists", artist_name_slug, "cache")
+        # Sanitize and create input hash
+        sanitized_data = sanitize_artist_data(artist_data.copy())
+        input_hash = hashlib.sha256(
+            json.dumps(sanitized_data, sort_keys=True).encode("utf-8")
+        ).hexdigest()[:12]
+
+        # Create cache path with input hash
+        artist_name_slug = sanitized_data["stage_name"].replace(" ", "_")
         cache_path = os.path.join(
-            artist_dir, f"{artist_name_slug}_epk_{model_name.replace('/', '_')}.txt"
+            "data",
+            "artists",
+            artist_name_slug,
+            "cache",
+            f"{artist_name_slug}_epk_{model_name.replace('/', '_')}_{input_hash}.txt",
         )
 
         # Create directory if needed
-        os.makedirs(artist_dir, exist_ok=True)
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
 
         # Check cache
         if os.path.exists(cache_path):
@@ -398,16 +408,24 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
 async def generate_internal_report(artist_data: dict, model_name: str) -> str:
     """Generate internal report using the specified model"""
     try:
-        # Create cache path
-        artist_name_slug = artist_data["stage_name"].replace(" ", "_")
-        artist_dir = os.path.join("data", "artists", artist_name_slug, "cache")
+        # Sanitize and create input hash
+        sanitized_data = sanitize_artist_data(artist_data.copy())
+        input_hash = hashlib.sha256(
+            json.dumps(sanitized_data, sort_keys=True).encode("utf-8")
+        ).hexdigest()[:12]
+
+        # Create cache path with input hash
+        artist_name_slug = sanitized_data["stage_name"].replace(" ", "_")
         cache_path = os.path.join(
-            artist_dir,
-            f"{artist_name_slug}_internal_report_{model_name.replace('/', '_')}.txt",
+            "data",
+            "artists",
+            artist_name_slug,
+            "cache",
+            f"{artist_name_slug}_internal_{model_name.replace('/', '_')}_{input_hash}.txt",
         )
 
         # Create directory if needed
-        os.makedirs(artist_dir, exist_ok=True)
+        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
 
         # Check cache
         if os.path.exists(cache_path):
@@ -495,17 +513,36 @@ async def generate_reports(artist_data: dict):
     return reports
 
 
-async def integrate_reports(reports: dict) -> dict:
-    """Integrate multiple reports into optimized versions and return as dictionary"""
+async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
+    """Integrate multiple reports into optimized versions with input-based caching"""
     try:
         final_reports = {"EPK": None, "Internal Report": None}
+        cache_dir = os.path.join("data", "artists", artist_name_slug, "cache")
 
-        # Handle EPK reports
-        if len(reports["EPK"]) == 1:
-            single_epk_model = next(iter(reports["EPK"]))
-            final_reports["EPK"] = reports["EPK"][single_epk_model]
+        # Create separate hashes for each report type
+        epk_hash = hashlib.sha256()
+        internal_hash = hashlib.sha256()
+
+        # Hash EPK reports
+        for model_name, content in reports["EPK"].items():
+            epk_hash.update(content.encode("utf-8"))
+        epk_input_hash = epk_hash.hexdigest()[:12]
+
+        # Hash Internal reports
+        for model_name, content in reports["Internal Report"].items():
+            internal_hash.update(content.encode("utf-8"))
+        internal_input_hash = internal_hash.hexdigest()[:12]
+
+        # EPK Integration with cache checking
+        epk_cache_path = os.path.join(
+            cache_dir, f"{artist_name_slug}_integrated_epk_{epk_input_hash}.tex"
+        )
+        if os.path.exists(epk_cache_path):
+            Logger.info(f"Using cached integrated EPK from {epk_cache_path}")
+            with open(epk_cache_path, "r") as f:
+                final_reports["EPK"] = f.read()
         else:
-            # Process EPKs
+            # Process EPKs via API
             epk_response = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={
@@ -525,51 +562,30 @@ async def integrate_reports(reports: dict) -> dict:
                 },
             )
             epk_response.raise_for_status()
+            response_data = epk_response.json()
 
-            # Validate response structure with improved error handling
-            try:
-                # First try to decode the JSON
-                try:
-                    response_data = epk_response.json()
-                except json.JSONDecodeError as decode_error:
-                    Logger.error(f"Failed to decode JSON response: {str(decode_error)}")
-                    Logger.info(
-                        f"Raw response content: {epk_response.text[:500]}"
-                    )  # Log first 500 chars
-                    final_reports["EPK"] = (
-                        "EPK integration failed: Invalid JSON response from API"
-                    )
-                    return final_reports
+            if not response_data.get("choices") or not response_data["choices"][0].get(
+                "message"
+            ):
+                raise ValueError("Invalid response structure from OpenRouter API")
 
-                # Then validate the structure
-                if not response_data.get("choices") or not response_data["choices"][
-                    0
-                ].get("message"):
-                    Logger.error("Invalid response structure - missing required fields")
-                    Logger.info(f"Response data: {json.dumps(response_data, indent=2)}")
-                    final_reports["EPK"] = (
-                        "EPK integration failed: Invalid API response structure"
-                    )
-                    return final_reports
+            final_reports["EPK"] = response_data["choices"][0]["message"]["content"]
+            with open(epk_cache_path, "w") as f:
+                f.write(final_reports["EPK"])
 
-                # If we get here, the response is valid
-                final_reports["EPK"] = response_data["choices"][0]["message"]["content"]
-
-            except Exception as e:
-                Logger.error(
-                    f"Unexpected error during EPK response processing: {str(e)}"
-                )
-                final_reports["EPK"] = "EPK integration failed: Unexpected error"
-                return final_reports
-
-        # Handle Internal Reports
-        if len(reports["Internal Report"]) == 1:
-            single_internal_model = next(iter(reports["Internal Report"]))
-            final_reports["Internal Report"] = reports["Internal Report"][
-                single_internal_model
-            ]
+        # Internal Report Integration with cache checking
+        internal_cache_path = os.path.join(
+            cache_dir,
+            f"{artist_name_slug}_integrated_internal_{internal_input_hash}.tex",
+        )
+        if os.path.exists(internal_cache_path):
+            Logger.info(
+                f"Using cached integrated internal report from {internal_cache_path}"
+            )
+            with open(internal_cache_path, "r") as f:
+                final_reports["Internal Report"] = f.read()
         else:
-            # Process Internal Reports
+            # Process Internal Reports via API
             internal_response = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={
@@ -587,75 +603,49 @@ async def integrate_reports(reports: dict) -> dict:
                         {
                             "role": "user",
                             "content": json.dumps(
-                                {
-                                    "Internal Reports": reports["Internal Report"],
-                                }
+                                {"Internal Reports": reports["Internal Report"]}
                             ),
                         },
                     ],
                 },
             )
             internal_response.raise_for_status()
+            response_data = internal_response.json()
 
-            # Validate response structure with improved error handling
-            try:
-                # First try to decode the JSON
-                try:
-                    response_data = internal_response.json()
-                except json.JSONDecodeError as decode_error:
-                    Logger.error(f"Failed to decode JSON response: {str(decode_error)}")
-                    Logger.info(
-                        f"Raw response content: {internal_response.text[:500]}"
-                    )  # Log first 500 chars
-                    final_reports["Internal Report"] = (
-                        "Internal Report integration failed: Invalid JSON response from API"
-                    )
-                    return final_reports
+            if not response_data.get("choices") or not response_data["choices"][0].get(
+                "message"
+            ):
+                raise ValueError("Invalid response structure from OpenRouter API")
 
-                # Then validate the structure
-                if not response_data.get("choices") or not response_data["choices"][
-                    0
-                ].get("message"):
-                    Logger.error("Invalid response structure - missing required fields")
-                    Logger.info(f"Response data: {json.dumps(response_data, indent=2)}")
-                    final_reports["Internal Report"] = (
-                        "Internal Report integration failed: Invalid API response structure"
-                    )
-                    return final_reports
-
-                # If we get here, the response is valid
-                final_reports["Internal Report"] = response_data["choices"][0][
-                    "message"
-                ]["content"]
-
-            except Exception as e:
-                Logger.error(
-                    f"Unexpected error during internal report response processing: {str(e)}"
-                )
-                final_reports["Internal Report"] = (
-                    "Internal Report integration failed: Unexpected error"
-                )
-                return final_reports
+            final_reports["Internal Report"] = response_data["choices"][0]["message"][
+                "content"
+            ]
+            with open(internal_cache_path, "w") as f:
+                f.write(final_reports["Internal Report"])
 
         return final_reports
 
-    except requests.exceptions.RequestException as e:
-        Logger.error(f"API request failed: {str(e)}")
-        return {
-            "EPK": "EPK integration failed: API request error",
-            "Internal Report": "Internal Report integration failed: API request error",
-        }
     except Exception as e:
-        Logger.error(f"Unexpected error during report integration: {str(e)}")
+        Logger.error(f"Report integration failed: {str(e)}")
         return {
-            "EPK": "EPK integration failed: Unexpected error",
-            "Internal Report": "Internal Report integration failed: Unexpected error",
+            "EPK": "EPK integration failed",
+            "Internal Report": "Internal Report integration failed",
         }
 
 
-async def beautify_report(content: str, report_type: str) -> str:
-    """Beautify formatted reports using R1 model without caching"""
+async def beautify_report(content: str, report_type: str, artist_name_slug: str) -> str:
+    """Beautify formatted reports with input-based caching"""
     try:
+        # Create input hash from content
+        input_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()[:12]
+        cache_path = os.path.join(
+            "data",
+            "artists",
+            artist_name_slug,
+            "cache",
+            f"{artist_name_slug}_{report_type.replace(' ', '_')}_beautified_{input_hash}.tex",
+        )
+
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -709,10 +699,11 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
             f"Generated {len(all_reports['EPK'])} EPKs and {len(all_reports['Internal Report'])} internal reports"
         )
 
-        # Integrate and optimize reports
+        # Integrate and optimize reports with dependency tracking
         Logger.info("Starting report integration process")
         strategy_start = Logger.start_task("Report integration")
-        integrated_reports = await integrate_reports(all_reports)
+        artist_name_slug = artist_data["stage_name"].replace(" ", "_")
+        integrated_reports = await integrate_reports(all_reports, artist_name_slug)
         Logger.end_task(strategy_start, "Report integration completed")
         Logger.success("Reports integrated and optimized")
 
@@ -724,7 +715,7 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         if integrated_reports["EPK"]:
             epk_beautify_start = Logger.start_task("EPK beautification")
             integrated_reports["EPK"] = await beautify_report(
-                integrated_reports["EPK"], "EPK"
+                integrated_reports["EPK"], "EPK", artist_name_slug
             )
             Logger.end_task(epk_beautify_start, "EPK beautification completed")
 
@@ -734,7 +725,9 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
                 "Internal Report beautification"
             )
             integrated_reports["Internal Report"] = await beautify_report(
-                integrated_reports["Internal Report"], "Internal Report"
+                integrated_reports["Internal Report"],
+                "Internal Report",
+                artist_name_slug,
             )
             Logger.end_task(
                 internal_beautify_start, "Internal Report beautification completed"
