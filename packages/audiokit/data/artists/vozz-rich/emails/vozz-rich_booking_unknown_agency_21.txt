@@ -1,0 +1,6 @@
+| Venue Name          | Location         | Average Booking Fee | Additional Costs        | Notable Pricing Factors                  |
+|---------------------|------------------|---------------------|-------------------------|------------------------------------------|
+| The Echo            | Los Angeles, CA  | $8,000              | Sound rental: $1,500    | High-demand indie venue                   |
+| Brooklyn Bowl       | New York, NY     | $12,000             | Insurance: $2,000       | Premium location with multiple amenities |
+| The Fillmore        | San Francisco, CA | $15,000             | Staffing: $3,000        | Historic prestige and large capacity      |
+| Red Rocks Amphitheatre | Morrison, CO      | $25,000             | Logistics: $5,000       | Iconic venue with exceptional views        |

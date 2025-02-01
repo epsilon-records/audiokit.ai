@@ -1,0 +1,6 @@
+| Venue Name          | Date           | Artist Similarity  | Attendance | Revenue Generated | Audience Feedback                                  |
+|---------------------|----------------|---------------------|------------|--------------------|----------------------------------------------------|
+| The Echo            | 2023-06-15     | Indie Rock          | 450        | $45,000            | Highly positive; praised acoustics and vibe        |
+| Brooklyn Bowl       | 2023-08-22     | Funk Pop            | 580        | $69,000            | Mixed reviews; some technical issues reported      |
+| The Fillmore        | 2023-09-10     | Alternative Rock    | 1,200      | $120,000           | Excellent turnout; strong media coverage           |
+| Red Rocks Amphitheatre | 2023-07-05   | Acoustic            | 9,200      | $250,000           | Outstanding reviews; praised natural acoustics     |

@@ -1,0 +1,6 @@
+| Venue Name      | Location           | Map Coordinates          | Capacity | Genre Suitability      | Amenities                             | Contact Information      |
+|-----------------|--------------------|--------------------------|----------|------------------------|---------------------------------------|--------------------------|
+| **The Echo**    | Los Angeles, CA    | 34.0901° N, 118.3617° W  | 500      | Indie, Rock, Alternative | State-of-the-art sound system, Lighting, VIP areas | contact@theecho.com      |
+| **Brooklyn Bowl** | New York, NY        | 40.7233° N, 73.9880° W   | 600      | Rock, Funk, Pop        | Bowling lanes, Full bar, Outdoor patio | info@brooklynbowl.com    |
+| **The Fillmore** | San Francisco, CA   | 37.7763° N, 122.4294° W  | 1,280    | Rock, Alternative      | Historic venue, Advanced acoustics, Multiple entrances | bookings@fillmore.com    |
+| **Red Rocks Amphitheatre** | Morrison, CO        | 39.6654° N, 105.2055° W | 9,525    | Rock, Electronic, Acoustic | Natural acoustics, Scenic views, Ample parking | reservations@redrocks.com |

@@ -1,0 +1,1 @@
+*Risk Scoring: Likelihood and Impact are rated on a scale of 1 (Low) to 5 (High).*
