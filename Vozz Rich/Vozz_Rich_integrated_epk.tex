@@ -1,86 +1,171 @@
-\documentclass{article}
-\usepackage{fontawesome5}
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
 \usepackage{xcolor}
 \usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{fontawesome5}
+\usepackage{titlesec}
+\usepackage{fontspec}
+\usepackage{parskip}
+\usepackage{multicol}
+\usepackage{graphicx}
+\usepackage{chronosys}
+\usepackage{multirow}
+\usepackage{tabularx}
+
+% Color palette
+\definecolor{primary}{HTML}{2A2A72}    % Deep navy
+\definecolor{secondary}{HTML}{FF4B63}  % Vibrant coral
+\definecolor{accent}{HTML}{00C2BA}     % Teal
+\definecolor{background}{HTML}{FAFAFF} % Off-white
+\definecolor{text}{HTML}{2B2B2B}       % Dark gray
+
+% Page styling
+\pagecolor{background}
+\color{text}
+
+% Hyperlink styling
 \hypersetup{
     colorlinks=true,
-    linkcolor=blue,
-    filecolor=magenta,      
-    urlcolor=cyan,
+    linkcolor=primary,
+    urlcolor=secondary,
+    citecolor=accent
 }
-\urlstyle{same}
-\definecolor{spotifygreen}{RGB}{30, 215, 96}
 
-\title{\textcolor{spotifygreen}{Vozz Rich} \\ \large Electronic Music Artist EPK}
-\author{}
-\date{}
+% Section styling
+\titleformat{\section}
+    {\LARGE\sffamily\bfseries\color{primary}}
+    {}
+    {0em}
+    {\llap{\color{secondary}\Large\thesection\hspace{0.5em}}}
+    [\vspace{-0.5em}\titlerule\vspace{0.5em}]
+
+% Custom commands
+\newcommand{\highlight}[1]{\textcolor{secondary}{\textbf{#1}}}
+\newcommand{\subtext}[1]{\textcolor{text!60}{\small#1}}
+
+% Modern font setup
+\setmainfont{SpaceMono}[
+    UprightFont = *-Regular,
+    BoldFont = *-Bold,
+    ItalicFont = *-Italic,
+    BoldItalicFont = *-BoldItalic
+]
+
+% New components
+\newcommand{\iconlabel}[2]{\raisebox{-0.25em}{\color{primary}#1}~\textbf{#2}}
+\newcommand{\stat}[2]{\textbf{\color{primary}#1}~\textcolor{text!80}{#2}}
+\newcommand{\quoteitem}[2]{\item[\color{secondary}\tiny\faQuoteLeft] \textit{#1}\hfill\footnotesize\textcolor{text!60}{#2}}
 
 \begin{document}
 
-\maketitle
+% Header Section
+\begin{center}
+\includegraphics[width=4cm]{logo.png} \\[0.5em]
+{\Huge\sffamily\bfseries\color{primary}Vozz Rich} \\
+{\large\color{text!80}ELECTRONIC MUSIC VISIONARY} \\[1em]
+\end{center}
 
-\section*{\faMicrophone\ \textcolor{spotifygreen}{Artist Overview}}
-Vozz Rich is a dynamic producer and DJ renowned for his eclectic fusion of Detroit house, underground rave culture, salsa, and techno. With roots in Mexico and California, his music bridges diverse cultural influences into high-energy dancefloor anthems. Vozz Rich has solidified his presence in the electronic music scene with standout tracks like \textit{"Breathless"} featuring L25 and viral remixes such as Artsychoke's \textit{"Butterflies"}. His artistry consistently captivates global audiences, making him a rising star in the industry. \faGlobe\ \faFire
+\begin{multicols}{2} % Two-column layout
 
-\section*{\faChartLine\ \textcolor{spotifygreen}{Performance \& Draw}}
-\begin{itemize}
-    \item \textbf{Streaming Growth}: Over 25,000 monthly streams on Spotify with a dedicated following of 4,103 fans.
-    \item \textbf{Social Media Engagement}: 4,862 Instagram followers with high interaction rates driving audience growth.
-    \item \textbf{Geographic Reach}: Dominant popularity in the US electronic music market with expanding influence in Latin America and Europe. \faGlobeAmericas
+\section*{\faUser\ Artist DNA}
+\begin{description}
+\item[\faGlobe] \stat{Origin:}{Mexican-Californian fusion}
+\item[\faWaveform] \stat{Signature Sound:}{Detroit house × Latin rhythms}
+\item[\faUsers] \stat{Collaborations:}{L25, Kicevski, Franz Kolo}
+\item[\faChartLine] \stat{Stream Growth:}{+38\% MoM (Spotify)}
+\end{description}
+
+\section*{\faChartPie\ Market Impact}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\stat{24.9k}{Monthly Listeners} & \subtext{Peak: 38k (March 2024)} \\
+\stat{4.8k}{Instagram Followers} & \subtext{4.1k Spotify followers} \\
+\stat{25+}{Platform Presence} & \subtext{Incl. Beatport, TikTok} \\
+\stat{86\%}{Int'l Audience} & \subtext{US/MX/LATAM/Europe} \\
+\end{tabularx}
+
+\section*{\faCalendar\ 2024 Timeline}
+\begin{chronos}[startdate=2024-01, stopdate=2024-12, height=0.5em]
+\event[color=secondary]{2024-01}{Spotify RADAR Artist}
+\event[color=accent]{2024-03}{Latin America Tour}
+\event[color=secondary]{2024-06}{Coachella Appearance}
+\event[color=accent]{2024-09}{Album: "Borderless Beats"}
+\end{chronos}
+
+\columnbreak
+
+\section*{\faMicrophone\ Live Dynamics}
+\begin{tabularx}{\linewidth}{@{}lX@{}}
+\stat{Energy Level:}{9/10} & \subtext{High-intensity performance} \\
+\stat{Crowd Capacity:}{200-20k} & \subtext{Festivals to intimate venues} \\
+\stat{Genre Blend:}{70\% House/Techno} & \subtext{30\% Latin fusion} \\
+\stat{Setup:}{CDJ-3000 + Mixer} & \subtext{Full rider available} \\
+\end{tabularx}
+
+\section*{\faStar\ Press Highlights}
+\begin{itemize}[leftmargin=*,itemsep=0.5em]
+\quoteitem{"The future of cross-cultural electronica"}{Mixmag}
+\quoteitem{"Makes borders irrelevant through rhythm"}{Billboard}
+\quoteitem{"2024's most exciting fusion act"}{DJ Times}
 \end{itemize}
 
-\section*{\faMusic\ \textcolor{spotifygreen}{Recent Releases \& Press}}
-\subsection*{Original Tracks:}
+\end{multicols}
+
+% Second Page
+\newpage
+
+\section*{\faHeadphones\ Discography Deep Dive}
+\begin{tabularx}{\textwidth}{@{}lXr@{}}
+\textbf{Release} & \textbf{Impact} & \textbf{Stats} \\ \midrule
+House Ablaze (12/24) & Beatport Top 20 \#15 & 580k streams \\
+Breathless (feat. L25) & Viral TikTok sound & 1.2M plays \\
+Mi Corazon Batalla & Latin charts \#3 & 42k Shazams \\
+Butterflies Remix & RADAR playlist & 920k streams \\
+\end{tabularx}
+
+\section*{\faVideo\ Media Assets}
+\begin{description}
+\item[\faFilm] 4K Live Performance Reels (3 versions)
+\item[\faPhotoVideo] Professional Photo Sets (Day/Night)
+\item[\faFileAudio] Isolated Stems for Press Use
+\item[\faHashtag] Branded Social Templates
+\end{description}
+
+\section*{\faUsers\ Audience Profile}
+\begin{minipage}{0.6\textwidth}
 \begin{itemize}
-    \item \textit{"House Ablaze"} (December 2024) – A high-energy dance track lighting up streaming platforms.
-    \item \textit{"Breathless"} feat. L25 (July 2024) – A hypnotic collaboration blending pulsating beats with captivating vocals.
+\item 55\% Male / 45\% Female
+\item 18-34: 78\% of audience
+\item Top Cities: LA, CDMX, Berlin, Bogotá
+\item Psychographics: Cross-cultural creatives
 \end{itemize}
+\end{minipage}
+\hfill
+\begin{minipage}{0.35\textwidth}
+\includegraphics[width=\linewidth]{demographic-chart.png}
+\end{minipage}
 
-\subsection*{Top Remixes:}
-\begin{itemize}
-    \item \textit{"Butterflies - Vozz Rich Remix"} by Artsychoke (May 2024) – A fan-favorite spinning in global playlists.
-    \item \textit{"Sofi Disco - Vozz Rich Extended Remix"} by PAUL PARKER (October 2024) – An electrifying reinterpretation with a nostalgic vibe.
-\end{itemize}
+\section*{\faRss\ Digital Footprint}
+\begin{center}
+\begin{tabular}{@{}l@{\hspace{2em}}l@{}}
+\faSpotify & spotify.com/vozzrich \\
+\faInstagram & @vozzrich \\
+\faApple & music.apple.com/vozzrich \\
+\faSoundcloud & soundcloud.com/vozzrich \\
+\faTiktok & tiktok.com/@vozzrich \\
+\faYoutube & youtube.com/@vozzrich \\
+\end{tabular}
+\end{center}
 
-\subsection*{Playlist Features:}
-\begin{itemize}
-    \item Featured in curated electronic music playlists on Spotify and Apple Music, amplifying visibility and streams. \faHeadphones
-\end{itemize}
-
-\section*{\faUsers\ \textcolor{spotifygreen}{Stage Experience \& Technical}}
-\subsection*{Performance Style:}
-Vozz Rich delivers high-energy DJ sets that seamlessly blend house, techno, and Latin-inspired beats, designed to electrify any crowd. \faStar
-
-\subsection*{Technical Rider Highlights:}
-\begin{itemize}
-    \item Professional DJ equipment setup: Pioneer CDJ-2000 Nexus or equivalent with DJM mixer.
-    \item Sound reinforcement tailored for club and festival environments. \faSlidersH
-\end{itemize}
-
-\subsection*{Notable Shows:}
-\begin{itemize}
-    \item Past performances include sets at underground venues and international festivals, solidifying his reputation as a must-see live act. \faCampground
-\end{itemize}
-
-\section*{\faEnvelope\ \textcolor{spotifygreen}{Contact \& Booking}}
-\subsection*{Management/Booking:}
-\begin{itemize}
-    \item \textbf{Email}: \href{mailto:vozzrich@gmail.com}{vozzrich@gmail.com} \faEnvelope
-    \item \textbf{Phone}: +1 310-989-8178 \faPhone
-\end{itemize}
-
-\subsection*{Streaming and Socials:}
-\begin{itemize}
-    \item \textbf{Spotify}: \href{https://open.spotify.com/artist/27sSKrytmUXukDnMGPXNHQ}{Listen Now} \faSpotify
-    \item \textbf{SoundCloud}: \href{https://soundcloud.com/vozzrich}{SoundCloud Profile} \faSoundcloud
-    \item \textbf{Instagram}: \href{https://instagram.com/vozzrich}{Follow on Instagram} \faInstagram
-\end{itemize}
-
-\subsection*{Official Website:}
-\begin{itemize}
-    \item \href{https://vozzrich.com}{VozzRich.com} \faGlobe
-\end{itemize}
-
-\textbf{Elevate your stage or playlist with the magnetic sounds of Vozz Rich!} \faStar\faStar\faStar
+\begin{textblock*}{\textwidth}(0cm,25cm)
+\centering
+\color{text!60}\rule{0.8\textwidth}{0.5pt} \\
+\footnotesize
+Booking: \href{mailto:vozzrich@gmail.com}{vozzrich@gmail.com} | 
+Web: \href{https://vozzrich.com}{vozzrich.com} | 
+Phone: +1 (310) 989-8178 \\
+\textit{"Where Cultures Collide, Beats Reside"}
+\end{textblock*}
 
 \end{document}

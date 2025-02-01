@@ -138,17 +138,13 @@ EPK_INTEGRATION_PROMPT = """
 You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:
 
 Processing Steps:
-1. Select the Best Report: Choose the most comprehensive and high-quality version
-2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
-3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
-4. Finalize for Publication: Replace any placeholders, refine the language, and structure the document to be visually appealing and professionally formatted in LaTeX
+1. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
+2. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
+3. Finalize for Publication: Replace any placeholders, refine the language, and structure the document to be visually appealing and professionally formatted in LaTeX
 
 Output Requirements:
-• Return only the final LaTeX document, fully formatted and ready for compilation
 • Do not wrap the content in any code blocks or markdown syntax
-• Ensure the EPK is aesthetically polished, clear, and well-structured, using professional LaTeX typography, section headings, bullet points, and lists
-• Use colorful, engaging design elements appropriate for external presentation
-• Maintain a fun, approachable tone while being professional
+• Maintain a strictly formal and professional tone
 • Use emojis strategically to enhance visual appeal and engagement
 
 LaTeX Document Structure:
@@ -191,19 +187,16 @@ INTERNAL_REPORT_INTEGRATION_PROMPT = """
 You are an expert music industry analyst. You will receive multiple Internal Reports from AI models. Your task is to generate a professionally formatted, publication-ready LaTeX document by following these steps:
 
 Processing Steps:
-1. Select the Best Report: Choose the most comprehensive and high-quality version
-2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
-3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
-4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in LaTeX
+1. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
+2. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
+3. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in LaTeX
 
 Output Requirements:
-• Return only the final LaTeX document, fully formatted and ready for compilation
 • Do not wrap the content in any code blocks or markdown syntax
+• Maintain a strictly formal and professional tone
+• Use emojis strategically to enhance visual appeal and engagement
 • Use monospace fonts for a formal, professional appearance
 • Include a prominent header stating "CONFIDENTIAL" at the top of the document
-• Use emojis very sparingly (maximum 1-2 in the entire document)
-• Maintain a strictly formal and professional tone
-• All data must be verified against the original artist data
 
 LaTeX Document Structure:
 \\documentclass{article}
