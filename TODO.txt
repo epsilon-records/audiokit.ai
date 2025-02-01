@@ -1,0 +1,221 @@
+<ai_instruction>
+STRUCTURE:
+  - Each task starts with a status indicator: [TODO], [IN_PROGRESS], [DONE], [BLOCKED]
+  - Priority is indicated by order (top = highest priority)
+  - Each task has tags in {curly braces} for categorization
+  - Tasks can have subtasks indented with 2 spaces
+  - Tasks can have assignees in (parentheses)
+  - Tasks can have dependencies marked with "Depends on: #task_number"
+  - Each task has an ID (#number) for reference
+  - Optional due dates in [square brackets] after the task
+  - Comments start with // and can appear anywhere
+
+EXAMPLE:
+  [TODO] #1 {feature} Implement user authentication [2024-03-01]
+    [IN_PROGRESS] #1.1 Set up JWT handling (alice)
+    [DONE] #1.2 Create login endpoints (bob)
+  [BLOCKED] #2 {deployment} Set up production environment
+    // Blocked by cloud provider approval
+    Depends on: #1
+
+MAINTENANCE:
+  - Never delete tasks, only update their status
+  - Keep tasks sorted by priority (considering dependencies)
+  - Update daily during standup
+  - Add new tasks at appropriate priority level
+  - Include task completion dates in comments
+</ai_instruction>
+
+// AudioKit AI Pipeline Enhancement Project
+// Last updated: 2024-02-01
+// Team: Claude & Human
+
+[IN_PROGRESS] #1 {core} Implement Knowledge Base with LlamaIndex and Pinecone [2024-02-15]
+  [DONE] #1.1 Create basic knowledge base structure
+  [DONE] #1.2 Implement document metadata handling
+  [DONE] #1.3 Set up Pinecone integration
+  [IN_PROGRESS] #1.4 Implement basic RAG pipeline
+  [TODO] #1.5 Add caching layer for query results
+  [TODO] #1.6 Implement rate limiting and retry logic
+
+[IN_PROGRESS] #2 {data} Implement Platform Processor [2024-02-28]
+  [IN_PROGRESS] #2.1 Create base platform processor structure
+    [DONE] #2.1.1 Implement rate limiting
+    [DONE] #2.1.2 Add error handling
+    [DONE] #2.1.3 Create base response model
+    [DONE] #2.1.4 Set up HTTP client with timeouts
+    [IN_PROGRESS] #2.1.5 Add platform authentication base
+    [TODO] #2.1.6 Implement response caching
+    [TODO] #2.1.7 Add retry mechanisms
+  [TODO] #2.2 Implement Soundcharts processor
+    // Artist metrics and analytics
+    // Social performance tracking
+    // Audience insights and demographics
+    // Competitor analysis
+  [TODO] #2.3 Implement music platforms processor
+    // Spotify metrics and playlists
+    // Apple Music performance
+    // SoundCloud engagement
+    // YouTube Music stats
+  [TODO] #2.4 Implement social platforms processor
+    // Instagram engagement and growth
+    // Twitter reach and interaction
+    // Facebook page insights
+    // TikTok performance
+  [TODO] #2.5 Implement media platforms processor
+    // Music blogs and news
+    // Press releases
+    // Reviews aggregation
+    // Industry news
+  [TODO] #2.6 Implement data transformation pipeline
+    // Standardize platform responses
+    // Clean and validate data
+    // Normalize metrics across platforms
+    // Handle platform-specific quirks
+  [TODO] #2.7 Implement platform data persistence
+    // Efficient caching strategies
+    // Historical data tracking
+    // Delta updates
+    // Data versioning
+
+[TODO] #3 {feature} Enhanced Content Generation [2024-03-15]
+  [TODO] #3.1 Implement better prompt engineering
+  [TODO] #3.2 Add support for multilingual content
+  [TODO] #3.3 Implement content versioning
+  [TODO] #3.4 Add A/B testing framework for prompts
+
+[TODO] #4 {infra} System Improvements [2024-03-30]
+  [TODO] #4.1 Add comprehensive error handling
+  [TODO] #4.2 Implement proper async connection pooling
+  [TODO] #4.3 Add monitoring and alerting
+  [TODO] #4.4 Implement proper cleanup jobs
+
+[TODO] #5 {feature} Analytics and Reporting [2024-04-15]
+  [TODO] #5.1 Implement generation quality metrics
+  [TODO] #5.2 Add content effectiveness tracking
+  [TODO] #5.3 Create dashboard for content insights
+  [TODO] #5.4 Implement A/B testing analytics
+
+[TODO] #6 {optimization} Performance Enhancements [2024-04-30]
+  [TODO] #6.1 Implement query result caching
+  [TODO] #6.2 Optimize embedding generation
+  [TODO] #6.3 Add batch processing for documents
+  [TODO] #6.4 Implement parallel processing where possible
+
+[TODO] #7 {security} Security Improvements [2024-05-15]
+  [TODO] #7.1 Implement proper API key rotation
+  [TODO] #7.2 Add content sanitization
+  [TODO] #7.3 Implement proper access controls
+  [TODO] #7.4 Add audit logging
+
+[TODO] #8 {testing} Testing Infrastructure [2024-05-30]
+  [TODO] #8.1 Add unit tests for all components
+  [TODO] #8.2 Implement integration tests
+  [TODO] #8.3 Add performance benchmarks
+  [TODO] #8.4 Create test data generators
+
+[TODO] #9 {opensource} Open Source Preparation [2024-02-15]
+  [TODO] #9.1 Add MIT License
+  [TODO] #9.2 Create CONTRIBUTING.md
+    // Guidelines for contributors
+    // Code style guide
+    // PR process
+    // Development setup
+  [TODO] #9.3 Create CODE_OF_CONDUCT.md
+  [TODO] #9.4 Update README.md
+    // Project overview
+    // Installation guide
+    // Usage examples
+    // API documentation
+  [TODO] #9.5 Create SECURITY.md
+    // Security policy
+    // Vulnerability reporting
+  [TODO] #9.6 Add issue templates
+    // Bug report template
+    // Feature request template
+    // Pull request template
+  [TODO] #9.7 Setup CI/CD pipeline
+    // GitHub Actions
+    // Code quality checks
+    // Test automation
+    // Security scanning
+  [TODO] #9.8 Add code documentation
+    // API documentation
+    // Function documentation
+    // Example usage
+  [TODO] #9.9 Create CHANGELOG.md
+  [TODO] #9.10 Review and secure dependencies
+    // Audit dependencies
+    // Remove unnecessary deps
+    // Update to stable versions
+
+[TODO] #10 {cleanup} Code Comment Regeneration [2024-02-15]
+  [TODO] #10.1 Audit existing code comments
+    // Review against new commenting standards
+    // Identify gaps and inconsistencies
+    // Flag outdated or incorrect comments
+  [TODO] #10.2 Update Python codebase comments
+    // Apply new block comment format
+    // Add missing algorithm explanations
+    // Update performance notes
+    // Add security considerations
+  [TODO] #10.3 Update TypeScript codebase comments
+    // Apply JSDoc standards
+    // Add React component documentation
+    // Document state management patterns
+  [TODO] #10.4 Update API documentation
+    // Regenerate OpenAPI specs
+    // Add detailed endpoint comments
+    // Document error scenarios
+  [TODO] #10.5 Validate comment quality
+    // Run automated comment checkers
+    // Review comment coverage
+    // Verify technical accuracy
+  [TODO] #10.6 Update documentation generation
+    // Configure doc generators
+    // Update templates
+    // Verify generated output
+
+[TODO] #11 {docs} Documentation Regeneration [2024-02-15]
+  [TODO] #11.1 Audit existing documentation
+    // Review against new documentation standards
+    // Map documentation coverage
+    // Identify missing or outdated sections
+    // Create documentation debt report
+  [TODO] #11.2 Update API documentation
+    // Regenerate OpenAPI/Swagger specs
+    // Update endpoint documentation
+    // Add request/response examples
+    // Document authentication flows
+    // Update error handling documentation
+  [TODO] #11.3 Update technical documentation
+    // Refresh architecture diagrams
+    // Update deployment guides
+    // Document configuration options
+    // Update troubleshooting guides
+    // Add performance tuning guides
+  [TODO] #11.4 Update developer documentation
+    // Refresh setup guides
+    // Update contribution guidelines
+    // Add development workflow docs
+    // Document testing procedures
+    // Update code style guides
+  [TODO] #11.5 Create user documentation
+    // Write quickstart guides
+    // Create tutorial series
+    // Document common use cases
+    // Add best practices guide
+    // Create FAQ section
+  [TODO] #11.6 Implement documentation testing
+    // Add documentation linting
+    // Test code examples
+    // Verify documentation links
+    // Validate markdown formatting
+  [TODO] #11.7 Setup documentation infrastructure
+    // Configure documentation generators
+    // Setup documentation hosting
+    // Implement search functionality
+    // Add versioning support
+    // Setup automated builds
+
+// COMPLETED TASKS (Moved to bottom, never deleted) 

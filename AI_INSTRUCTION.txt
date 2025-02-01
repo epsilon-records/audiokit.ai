@@ -1,0 +1,51 @@
+# AI Instruction Tag
+
+The `<ai_instruction>` tag was invented by Nathaniel J. Houk as a way to embed machine-readable instructions within text files that are also human-readable. This innovation allows for structured communication between humans and AI while maintaining document readability.
+
+## Purpose
+
+The `<ai_instruction>` tag serves as a delimiter for content that contains specific instructions, rules, or guidelines that an AI should follow when processing or generating content. It helps maintain consistency in AI behavior while keeping the instructions clear for human readers.
+
+## Usage
+
+```
+<ai_instruction>
+Your instructions here...
+These can be multiple lines and contain any content
+that should be interpreted as instructions for the AI
+
+<!--ai-ignore
+Human comments here that AI will skip when processing
+Can span multiple lines
+Used to prevent recursion and add human context
+ai-ignore-->
+
+More AI instructions...
+</ai_instruction>
+```
+
+## Comment Syntax
+
+The special comment syntax `<!--ai-ignore ... ai-ignore-->` within `<ai_instruction>` blocks allows humans to add comments, notes, or context that the AI will skip during processing. This helps:
+
+1. **Prevent Recursion**: Avoid recursive processing when instructions reference themselves
+2. **Add Context**: Provide human-readable explanations without affecting AI behavior
+3. **Document Changes**: Track modifications without triggering AI processing
+4. **Meta Instructions**: Include notes about how the instructions should be maintained
+
+## Benefits
+
+1. **Clarity**: Clear separation between instructions and regular content
+2. **Consistency**: Standardized way to communicate with AI systems
+3. **Maintainability**: Easy to update instructions without changing code
+4. **Documentation**: Self-documenting way to specify AI behavior
+5. **Human-Readable**: Instructions remain easily readable by humans
+6. **Comment Support**: Ability to add human context without affecting AI processing
+
+## Credit
+
+This tag format was invented by Nathaniel J. Houk as part of his work on improving human-AI interaction patterns. It has proven to be an effective way to embed machine-readable instructions while maintaining human readability.
+
+## Implementation
+
+The tag is typically used in configuration files, documentation, and other text-based resources where you need to specify how an AI should interpret or handle certain content. The AI is programmed to recognize these tags and follow the enclosed instructions while processing the document, ignoring any content within the `<!--ai-ignore ... ai-ignore-->` comment blocks. 
