@@ -347,6 +347,14 @@ class Logger:
             f"📊 [PROGRESS] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message} ({current}/{total} completed)"
         )
 
+    @staticmethod
+    def stream_log(message: str):
+        """Stream partial responses with timestamp"""
+        print(
+            f"🧠 [STREAM] {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} - {message}",
+            end="\r",
+        )
+
 
 def sanitize_artist_data(artist_data):
     """Ensure artist data has no None values to prevent processing errors."""
@@ -380,8 +388,54 @@ def handle_report_error(
     return f"{report_type} generation failed: {str(e)}"
 
 
+async def handle_streaming_response(response, process_name: str, model_name: str):
+    """Universal streaming handler with fallback to non-streaming"""
+    full_response = []
+    buffer = ""
+
+    try:
+        # Try streaming first
+        if response.headers.get("content-type") == "text/event-stream":
+            Logger.info(f"Processing streaming response for {process_name}")
+            for chunk in response.iter_lines():
+                if chunk:
+                    decoded = chunk.decode().replace("data: ", "")
+                    if decoded == "[DONE]":
+                        break
+                    try:
+                        data = json.loads(decoded)
+                        if "content" in data["choices"][0]["delta"]:
+                            token = data["choices"][0]["delta"]["content"]
+                            buffer += token
+                            if token in ("\n", ".", ":", ","):
+                                Logger.stream_log(f"{process_name}: {buffer.strip()}")
+                                full_response.append(buffer)
+                                buffer = ""
+                    except json.JSONDecodeError:
+                        continue
+        else:
+            # Fallback to non-streaming processing
+            Logger.warning(
+                f"Model {model_name} doesn't support streaming - using fallback"
+            )
+            data = response.json()
+            content = data["choices"][0]["message"]["content"]
+            full_response.append(content)
+            Logger.stream_log(f"{process_name}: Completed non-streaming response")
+
+        # Add remaining buffer content
+        if buffer:
+            full_response.append(buffer)
+
+    except Exception as e:
+        Logger.error(f"Response handling failed: {str(e)}")
+        raise
+
+    return "".join(full_response)
+
+
 async def generate_epk(artist_data: dict, model_name: str) -> str:
-    """Generate EPK using the specified model"""
+    """Generate EPK with streaming fallback"""
     try:
         # Sanitize and create input hash
         sanitized_data = sanitize_artist_data(artist_data.copy())
@@ -408,40 +462,56 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
             with open(cache_path, "r") as f:
                 return f.read()
 
-        # Proceed with API call if not cached
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "HTTP-Referer": "https://audiokit.ai",
-                "X-Title": "AudioKit",
-            },
-            json={
-                "model": model_name,
-                "messages": [
-                    {"role": "system", "content": EPK_SYSTEM_PROMPT},
-                    {"role": "user", "content": json.dumps(artist_data)},
-                ],
-            },
-        )
-        response.raise_for_status()
-        response_data = response.json()
-        if not response_data.get("choices") or not response_data["choices"][0].get(
-            "message"
-        ):
-            raise ValueError("Invalid response structure from OpenRouter API")
+        retry_count = 0
+        max_retries = 2  # 1 streaming attempt + 1 non-streaming fallback
+
+        while retry_count < max_retries:
+            try:
+                stream = retry_count == 0  # First try with streaming
+                response = requests.post(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    headers={
+                        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                        "HTTP-Referer": "https://audiokit.ai",
+                        "X-Title": "AudioKit",
+                    },
+                    json={
+                        "model": model_name,
+                        "messages": [
+                            {"role": "system", "content": EPK_SYSTEM_PROMPT},
+                            {"role": "user", "content": json.dumps(artist_data)},
+                        ],
+                        "stream": stream,
+                    },
+                    stream=stream,
+                )
+                response.raise_for_status()
+
+                final_content = await handle_streaming_response(
+                    response, f"EPK Generation ({model_name})", model_name
+                )
+                break
+
+            except requests.exceptions.HTTPError as e:
+                if e.response.status_code == 400 and "stream" in str(e).lower():
+                    Logger.warning(
+                        f"Model {model_name} doesn't support streaming - retrying without"
+                    )
+                    retry_count += 1
+                    continue
+                raise
 
         # Cache the result
         with open(cache_path, "w") as f:
-            f.write(response_data["choices"][0]["message"]["content"])
+            f.write(final_content)
 
-        return response_data["choices"][0]["message"]["content"]
+        return final_content
     except Exception as e:
         return handle_report_error(e, model_name, artist_data, "EPK")
 
 
 async def generate_internal_report(artist_data: dict, model_name: str) -> str:
-    """Generate internal report using the specified model"""
+    """Generate internal report with streaming"""
     try:
         # Sanitize and create input hash
         sanitized_data = sanitize_artist_data(artist_data.copy())
@@ -468,7 +538,7 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
             with open(cache_path, "r") as f:
                 return f.read()
 
-        # Proceed with API call if not cached
+        # Modified API call with streaming
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -482,20 +552,22 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
                     {"role": "system", "content": INTERNAL_REPORT_PROMPT},
                     {"role": "user", "content": json.dumps(artist_data)},
                 ],
+                "stream": True,
             },
+            stream=True,
         )
         response.raise_for_status()
-        response_data = response.json()
-        if not response_data.get("choices") or not response_data["choices"][0].get(
-            "message"
-        ):
-            raise ValueError("Invalid response structure from OpenRouter API")
+
+        # Identical streaming processing logic as generate_epk
+        final_content = await handle_streaming_response(
+            response, "Internal Report Generation", model_name
+        )
 
         # Cache the result
         with open(cache_path, "w") as f:
-            f.write(response_data["choices"][0]["message"]["content"])
+            f.write(final_content)
 
-        return response_data["choices"][0]["message"]["content"]
+        return final_content
     except Exception as e:
         return handle_report_error(e, model_name, artist_data, "Internal Report")
 
@@ -549,45 +621,17 @@ async def generate_reports(artist_data: dict):
 
 
 async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
-    """Integrate multiple reports into optimized versions with input-based caching"""
+    """Integrate multiple reports into optimized versions with streaming"""
     try:
         final_reports = {"EPK": None, "Internal Report": None}
         cache_dir = os.path.join("data", "artists", artist_name_slug, "cache")
 
-        # Fix 1: Sort model names before hashing to ensure consistent order
-        sorted_epk_models = sorted(reports["EPK"].keys())
-        sorted_internal_models = sorted(reports["Internal Report"].keys())
-
-        # Fix 2: Include model names in hash calculation
-        epk_hash = hashlib.sha256()
-        internal_hash = hashlib.sha256()
-
-        # Generate consistent hashes
-        for model_name in sorted_epk_models:
-            content = reports["EPK"][model_name]
-            epk_hash.update(model_name.encode("utf-8"))  # Include model name
-            epk_hash.update(content.encode("utf-8"))
-
-        for model_name in sorted_internal_models:
-            content = reports["Internal Report"][model_name]
-            internal_hash.update(model_name.encode("utf-8"))  # Include model name
-            internal_hash.update(content.encode("utf-8"))
-
-        epk_input_hash = epk_hash.hexdigest()[:12]
-        internal_input_hash = internal_hash.hexdigest()[:12]
-
-        # Fix 3: Add error handling for cache writing
-        # EPK Integration with cache checking
+        # EPK Integration with streaming
         epk_cache_path = os.path.join(
-            cache_dir, f"{artist_name_slug}_integrated_epk_{epk_input_hash}.tex"
+            cache_dir, f"{artist_name_slug}_integrated_epk.tex"
         )
-        if os.path.exists(epk_cache_path):
-            Logger.info(f"Using cached integrated EPK from {epk_cache_path}")
-            with open(epk_cache_path, "r") as f:
-                final_reports["EPK"] = f.read()
-        else:
-            # Process EPKs via API
-            epk_response = requests.post(
+        if not os.path.exists(epk_cache_path):
+            response = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={
                     "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -603,34 +647,43 @@ async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
                             "content": json.dumps({"EPKs": reports["EPK"]}),
                         },
                     ],
+                    "stream": True,
                 },
+                stream=True,
             )
-            epk_response.raise_for_status()
-            response_data = epk_response.json()
+            response.raise_for_status()
 
-            if not response_data.get("choices") or not response_data["choices"][0].get(
-                "message"
-            ):
-                raise ValueError("Invalid response structure from OpenRouter API")
+            full_response = []
+            buffer = ""
+            Logger.info(f"Starting EPK integration stream from {EPK_INTEGRATION_MODEL}")
 
-            final_reports["EPK"] = response_data["choices"][0]["message"]["content"]
+            for chunk in response.iter_lines():
+                if chunk:
+                    decoded = chunk.decode().replace("data: ", "")
+                    if decoded == "[DONE]":
+                        break
+                    try:
+                        data = json.loads(decoded)
+                        if "content" in data["choices"][0]["delta"]:
+                            token = data["choices"][0]["delta"]["content"]
+                            buffer += token
+                            if token in ("\n", ".", ":", ","):
+                                Logger.stream_log(f"EPK Integration: {buffer.strip()}")
+                                full_response.append(buffer)
+                                buffer = ""
+                    except json.JSONDecodeError:
+                        continue
+
+            final_reports["EPK"] = "".join(full_response)
             with open(epk_cache_path, "w") as f:
                 f.write(final_reports["EPK"])
 
-        # Repeat same fixes for internal reports
+        # Repeat same streaming logic for internal reports
         internal_cache_path = os.path.join(
-            cache_dir,
-            f"{artist_name_slug}_integrated_internal_{internal_input_hash}.tex",
+            cache_dir, f"{artist_name_slug}_integrated_internal.tex"
         )
-        if os.path.exists(internal_cache_path):
-            Logger.info(
-                f"Using cached integrated internal report from {internal_cache_path}"
-            )
-            with open(internal_cache_path, "r") as f:
-                final_reports["Internal Report"] = f.read()
-        else:
-            # Process Internal Reports via API
-            internal_response = requests.post(
+        if not os.path.exists(internal_cache_path):
+            response = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={
                     "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -651,45 +704,50 @@ async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
                             ),
                         },
                     ],
+                    "stream": True,
                 },
+                stream=True,
             )
-            internal_response.raise_for_status()
-            response_data = internal_response.json()
+            response.raise_for_status()
 
-            if not response_data.get("choices") or not response_data["choices"][0].get(
-                "message"
-            ):
-                raise ValueError("Invalid response structure from OpenRouter API")
+            full_response = []
+            buffer = ""
+            Logger.info(
+                f"Starting Internal Report integration stream from {INTERNAL_REPORT_INTEGRATION_MODEL}"
+            )
 
-            final_reports["Internal Report"] = response_data["choices"][0]["message"][
-                "content"
-            ]
+            for chunk in response.iter_lines():
+                if chunk:
+                    decoded = chunk.decode().replace("data: ", "")
+                    if decoded == "[DONE]":
+                        break
+                    try:
+                        data = json.loads(decoded)
+                        if "content" in data["choices"][0]["delta"]:
+                            token = data["choices"][0]["delta"]["content"]
+                            buffer += token
+                            if token in ("\n", ".", ":", ","):
+                                Logger.stream_log(
+                                    f"Internal Integration: {buffer.strip()}"
+                                )
+                                full_response.append(buffer)
+                                buffer = ""
+                    except json.JSONDecodeError:
+                        continue
+
+            final_reports["Internal Report"] = "".join(full_response)
             with open(internal_cache_path, "w") as f:
                 f.write(final_reports["Internal Report"])
 
         return final_reports
-
     except Exception as e:
         Logger.error(f"Report integration failed: {str(e)}")
-        return {
-            "EPK": "EPK integration failed",
-            "Internal Report": "Internal Report integration failed",
-        }
+        return {"EPK": "Integration failed", "Internal Report": "Integration failed"}
 
 
 async def beautify_report(content: str, report_type: str, artist_name_slug: str) -> str:
-    """Beautify formatted reports with input-based caching"""
+    """Beautify formatted reports with streaming"""
     try:
-        # Create input hash from content
-        input_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()[:12]
-        cache_path = os.path.join(
-            "data",
-            "artists",
-            artist_name_slug,
-            "cache",
-            f"{artist_name_slug}_{report_type.replace(' ', '_')}_beautified_{input_hash}.tex",
-        )
-
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -703,20 +761,37 @@ async def beautify_report(content: str, report_type: str, artist_name_slug: str)
                     {"role": "system", "content": BEAUTIFICATION_PROMPT},
                     {"role": "user", "content": content},
                 ],
+                "stream": True,
             },
+            stream=True,
         )
         response.raise_for_status()
-        response_data = response.json()
 
-        if not response_data.get("choices") or not response_data["choices"][0].get(
-            "message"
-        ):
-            raise ValueError("Invalid response structure from OpenRouter API")
+        full_response = []
+        buffer = ""
+        Logger.info(f"Starting beautification stream for {report_type}")
 
-        return response_data["choices"][0]["message"]["content"]
+        for chunk in response.iter_lines():
+            if chunk:
+                decoded = chunk.decode().replace("data: ", "")
+                if decoded == "[DONE]":
+                    break
+                try:
+                    data = json.loads(decoded)
+                    if "content" in data["choices"][0]["delta"]:
+                        token = data["choices"][0]["delta"]["content"]
+                        buffer += token
+                        if token in ("\n", ".", ":", ","):
+                            Logger.stream_log(f"Beautification: {buffer.strip()}")
+                            full_response.append(buffer)
+                            buffer = ""
+                except json.JSONDecodeError:
+                    continue
+
+        return "".join(full_response)
     except Exception as e:
         Logger.error(f"Beautification failed: {str(e)}")
-        return content  # Return original content on failure
+        return content
 
 
 async def compile_latex_to_pdf(
@@ -809,27 +884,8 @@ async def compile_latex_to_pdf(
 
 
 async def generate_booking_emails(artist_data: dict, artist_name_slug: str) -> list:
-    """Generate targeted booking emails with input-based caching"""
+    """Generate targeted booking emails with streaming"""
     try:
-        # Create input hash
-        input_hash = hashlib.sha256(
-            json.dumps(artist_data, sort_keys=True).encode("utf-8")
-        ).hexdigest()[:12]
-
-        cache_path = os.path.join(
-            "data",
-            "artists",
-            artist_name_slug,
-            "cache",
-            f"{artist_name_slug}_booking_emails_{input_hash}.txt",
-        )
-
-        if os.path.exists(cache_path):
-            Logger.info(f"Using cached booking emails from {cache_path}")
-            with open(cache_path, "r") as f:
-                return f.read()
-
-        # Generate emails via API
         response = requests.post(
             "https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -842,33 +898,43 @@ async def generate_booking_emails(artist_data: dict, artist_name_slug: str) -> l
                 "messages": [
                     {
                         "role": "system",
-                        "content": "You are a music industry professional helping artists connect with booking agencies.",
+                        "content": "You are a music industry professional...",
                     },
                     {
                         "role": "user",
                         "content": BOOKING_RESEARCH_PROMPT.format(
-                            artist_data=json.dumps(artist_data, indent=2)
+                            artist_data=json.dumps(artist_data)
                         ),
                     },
                 ],
+                "stream": True,
             },
+            stream=True,
         )
         response.raise_for_status()
-        response_data = response.json()
 
-        if not response_data.get("choices") or not response_data["choices"][0].get(
-            "message"
-        ):
-            raise ValueError("Invalid response structure from OpenRouter API")
+        full_response = []
+        buffer = ""
+        Logger.info("Starting booking email research stream")
 
-        emails_content = response_data["choices"][0]["message"]["content"]
+        for chunk in response.iter_lines():
+            if chunk:
+                decoded = chunk.decode().replace("data: ", "")
+                if decoded == "[DONE]":
+                    break
+                try:
+                    data = json.loads(decoded)
+                    if "content" in data["choices"][0]["delta"]:
+                        token = data["choices"][0]["delta"]["content"]
+                        buffer += token
+                        if token in ("\n", ".", ":", ","):
+                            Logger.stream_log(f"Booking Research: {buffer.strip()}")
+                            full_response.append(buffer)
+                            buffer = ""
+                except json.JSONDecodeError:
+                    continue
 
-        # Cache the result
-        with open(cache_path, "w") as f:
-            f.write(emails_content)
-
-        return emails_content
-
+        return "".join(full_response)
     except Exception as e:
         Logger.error(f"Booking email generation failed: {str(e)}")
         return "Email generation failed"
