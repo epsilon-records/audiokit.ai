@@ -554,20 +554,29 @@ async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
         final_reports = {"EPK": None, "Internal Report": None}
         cache_dir = os.path.join("data", "artists", artist_name_slug, "cache")
 
-        # Create separate hashes for each report type
+        # Fix 1: Sort model names before hashing to ensure consistent order
+        sorted_epk_models = sorted(reports["EPK"].keys())
+        sorted_internal_models = sorted(reports["Internal Report"].keys())
+
+        # Fix 2: Include model names in hash calculation
         epk_hash = hashlib.sha256()
         internal_hash = hashlib.sha256()
 
-        # Hash EPK reports
-        for model_name, content in reports["EPK"].items():
+        # Generate consistent hashes
+        for model_name in sorted_epk_models:
+            content = reports["EPK"][model_name]
+            epk_hash.update(model_name.encode("utf-8"))  # Include model name
             epk_hash.update(content.encode("utf-8"))
-        epk_input_hash = epk_hash.hexdigest()[:12]
 
-        # Hash Internal reports
-        for model_name, content in reports["Internal Report"].items():
+        for model_name in sorted_internal_models:
+            content = reports["Internal Report"][model_name]
+            internal_hash.update(model_name.encode("utf-8"))  # Include model name
             internal_hash.update(content.encode("utf-8"))
+
+        epk_input_hash = epk_hash.hexdigest()[:12]
         internal_input_hash = internal_hash.hexdigest()[:12]
 
+        # Fix 3: Add error handling for cache writing
         # EPK Integration with cache checking
         epk_cache_path = os.path.join(
             cache_dir, f"{artist_name_slug}_integrated_epk_{epk_input_hash}.tex"
@@ -608,7 +617,7 @@ async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
             with open(epk_cache_path, "w") as f:
                 f.write(final_reports["EPK"])
 
-        # Internal Report Integration with cache checking
+        # Repeat same fixes for internal reports
         internal_cache_path = os.path.join(
             cache_dir,
             f"{artist_name_slug}_integrated_internal_{internal_input_hash}.tex",

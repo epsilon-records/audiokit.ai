@@ -22,7 +22,7 @@
   "stage_name": "Vozz Rich",
   "tiktok": "",
   "twitch": "",
-  "updated": "2025-02-01T11:15:50.395000+00:00",
+  "updated": "2025-02-01T11:35:50.628000+00:00",
   "website": "https://vozzrich.com/",
   "x": "",
   "youtube": "",
