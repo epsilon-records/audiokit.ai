@@ -176,6 +176,8 @@ class LLMRequest:
         """Handle both streaming and non-streaming responses"""
         full_response = []
         buffer = ""
+        last_log_time = time.time()
+        min_log_interval = 0.5  # Minimum time between logs in seconds
 
         try:
             if response.headers.get("content-type") == "text/event-stream":
@@ -190,12 +192,19 @@ class LLMRequest:
                             if "content" in data["choices"][0]["delta"]:
                                 token = data["choices"][0]["delta"]["content"]
                                 buffer += token
-                                if token in ("\n", ".", ":", ","):
-                                    Logger.stream_log(
-                                        f"{process_name}: {buffer.strip()}"
-                                    )
-                                    full_response.append(buffer)
-                                    buffer = ""
+
+                                # Only log when we have a complete sentence or after minimum interval
+                                current_time = time.time()
+                                if token in ("\n", ".", "!", "?") or (
+                                    current_time - last_log_time >= min_log_interval
+                                ):
+                                    if buffer.strip():
+                                        Logger.stream_log(
+                                            f"{process_name}: {buffer.strip()}"
+                                        )
+                                        full_response.append(buffer)
+                                        buffer = ""
+                                    last_log_time = current_time
                         except json.JSONDecodeError:
                             continue
             else:
@@ -207,6 +216,7 @@ class LLMRequest:
 
             if buffer:
                 full_response.append(buffer)
+                Logger.stream_log(f"{process_name}: {buffer.strip()}")
 
             return "".join(full_response)
 
