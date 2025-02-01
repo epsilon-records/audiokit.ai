@@ -13,12 +13,11 @@ class Config:
         with open("config.yaml", "r") as f:
             self.config = yaml.safe_load(f)
 
-        # Sensitive values from environment
-        self.db_url = os.getenv("DATABASE_URL")
-        self.soundcharts_app_id = os.getenv("SOUNDCHARTS_APP_ID")
-        self.soundcharts_api_key = os.getenv("SOUNDCHARTS_API_KEY")
-        self.openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
-        self.youtube_api_key = os.getenv("YOUTUBE_API_KEY")
+        # Load environment variables into the config structure
+        self.config["api"]["soundcharts"]["app_id"] = os.getenv("SOUNDCHARTS_APP_ID")
+        self.config["api"]["soundcharts"]["api_key"] = os.getenv("SOUNDCHARTS_API_KEY")
+        self.config["api"]["openrouter"]["api_key"] = os.getenv("OPENROUTER_API_KEY")
+        self.config["api"]["youtube"]["api_key"] = os.getenv("YOUTUBE_API_KEY")
 
     def __getattr__(self, name):
         if name in self.config:

@@ -112,6 +112,15 @@ class LLMRequest:
                 with open(cache_path, "r") as f:
                     return f.read()
 
+            # Validate API key before making request
+            if not cfg.api.openrouter.api_key:
+                raise ValueError("OpenRouter API key is missing in configuration")
+
+            if (
+                len(cfg.api.openrouter.api_key) != 64
+            ):  # OpenRouter API keys are 64 chars
+                raise ValueError("Invalid OpenRouter API key format")
+
             retry_count = 0
             max_retries = 2 if retry_on_stream_error else 1
             final_content = ""
@@ -144,6 +153,11 @@ class LLMRequest:
                     break
 
                 except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 401:
+                        Logger.error(
+                            "Authentication failed - please check your OpenRouter API key"
+                        )
+                        raise ValueError("Invalid OpenRouter API key") from e
                     if e.response.status_code == 400 and "stream" in str(e).lower():
                         Logger.warning(
                             f"Model {model_name} doesn't support streaming - retrying without"
