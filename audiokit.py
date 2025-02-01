@@ -474,7 +474,6 @@ async def integrate_reports(reports: dict) -> dict:
                             "content": json.dumps({"EPKs": reports["EPK"]}),
                         },
                     ],
-                    "response_format": {"type": "json_object"},
                 },
             )
             epk_response.raise_for_status()
@@ -524,7 +523,6 @@ async def integrate_reports(reports: dict) -> dict:
                             ),
                         },
                     ],
-                    "response_format": {"type": "json_object"},
                 },
             )
             internal_response.raise_for_status()
