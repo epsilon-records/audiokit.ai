@@ -1,355 +1,369 @@
-You are an expert in Svelte 5, SvelteKit 2, TypeScript, and modern web development.
+# AudioKit Development Guidelines
 
-FUNDAMENTAL PRINCIPLES
+## Monorepo Structure
 
-- ALWAYS use Svelte 5 runes mode - NEVER use the older reactive syntax
-- ALWAYS use SvelteKit 2 (not SvelteKit 1.x) features and conventions
-- ALWAYS provide complete code examples - NEVER use ellipsis or "rest of code remains same"
-- Write all code in TypeScript with proper type definitions
-- Leverage SvelteKit 2's server-side rendering (SSR) and static site generation (SSG)
-- Prioritize performance optimization and minimal JavaScript
-- Follow SvelteKit 2's file-based routing and conventions
+```
+audiokit/
+  apps/
+    web/                  # Svelte frontend application
+      src/               
+      package.json
+      tsconfig.json
+      vite.config.ts
+      tailwind.config.ts
+  
+  packages/
+    audiokit/            # Python backend package
+      audiokit/
+        core.py         # Core audio processing
+        db.py          # Database operations
+        llm.py         # AI/ML functionality
+        logger.py      # Logging utilities
+        utils.py       # Helper functions
+      tests/
+      pyproject.toml
+      poetry.lock
+      README.md
 
-SvelteKit 2 Key Features
+  .cursorrules          # Development guidelines
+  .env                  # Environment configuration
+  justfile             # Command runner
+  README.md            # Project documentation
+```
 
-- Use new route groups (+), server hooks, and middleware
-- Leverage new data loading patterns with Universal Load
-- Implement enhanced form actions
-- Use declarative redirects and responses
-- Take advantage of improved error handling
-- Use the new streaming features for enhanced performance
+## Core Technical Stack
 
-Runes Usage (Required)
+### Frontend Framework (apps/web)
 
-- NEVER use the old `$:` reactive syntax
-- ALWAYS use these runes:
+- Svelte 5 with Runes (REQUIRED)
+- SvelteKit 2 for routing and server features
+- TypeScript for all code
+- Tailwind CSS with Shadcn UI components
+- Paraglide.js for internationalization
+- Vite for build tooling
 
-  ```typescript
-  // State management
-  let count = $state(0);
+### Backend Services (packages/audiokit)
 
-  // Derived values
-  let doubled = $derived(count * 2);
+- Python 3.11+ with Poetry for dependency management
+- Core Dependencies:
+  - spotipy: Spotify API integration
+  - pydantic: Data validation and settings management
+  - pandas: Data processing and analytics
+  - matplotlib/seaborn: Visualization
+  - fastapi: REST API framework
+  - asyncpg: Async PostgreSQL interface
+  - transformers: AI model integration
 
-  // Side effects
-  $effect(() => {
-    console.log(`Count is now ${count}`);
+- FastAPI for API endpoints
+- SQLAlchemy 2.0 for database operations
+- Celery for background job processing
+- Redis for caching and message queue
+- Docker for containerization
+
+## Svelte 5 Runes Guidelines
+
+### State Management Patterns
+
+```typescript
+// Basic state management
+let track = $state<Track>({
+  id: '',
+  title: '',
+  artist: '',
+  duration: 0
+});
+
+// Derived state
+let totalStreams = $derived(
+  releases.reduce((sum, release) => sum + release.streamCount, 0)
+);
+
+// Effects
+$effect(() => {
+  if (track.currentTime > 0) {
+    trackPlaybackProgress(track.currentTime);
+  }
+});
+
+// Props with TypeScript
+interface ReleaseCardProps {
+  release: Release;
+  onPublish?: () => void;
+}
+
+let { release, onPublish } = $props<ReleaseCardProps>();
+
+// Two-way binding
+let audioFile = $bindable<File | null>(null);
+
+// Debugging
+$inspect(release.status);
+```
+
+### Core Data Structures
+
+```typescript
+interface Release {
+  id: string;
+  title: string;
+  artist: string;
+  type: 'Single' | 'EP' | 'Album';
+  releaseDate: Date;
+  artwork: string;
+  tracks: Track[];
+  status: 'draft' | 'pending' | 'processing' | 'live' | 'rejected';
+  platforms: DistributionPlatform[];
+}
+
+interface Track {
+  id: string;
+  title: string;
+  duration: number;
+  audioFile: string;
+  isrc?: string;
+  lyrics?: string;
+  credits: ArtistCredit[];
+}
+
+interface Artist {
+  id: string;
+  name: string;
+  bio: string;
+  profileImage: string;
+  socialLinks: SocialLink[];
+  releases: Release[];
+  analytics: ArtistAnalytics;
+}
+```
+
+## Project Structure
+
+### Frontend Structure (apps/web)
+
+```
+src/
+  lib/
+    components/
+      ui/              # Shadcn components
+      releases/        # Release management
+      analytics/       # Analytics dashboard
+      events/         # Event management
+      profiles/       # Artist profiles
+    server/
+      distribution/   # Distribution service
+      analytics/      # Analytics processing
+      payments/       # Payment processing
+    stores/
+      release-store.ts
+      analytics-store.ts
+      event-store.ts
+    types/
+      release.ts
+      event.ts
+      analytics.ts
+    utils/
+      audio-processing.ts
+      validation.ts
+  routes/
+    (dashboard)/
+      releases/
+        +page.svelte
+        +page.server.ts
+      analytics/
+      events/
+    (auth)/
+      login/
+      register/
+    +layout.svelte
+    +error.svelte
+```
+
+### Backend Structure (packages/audiokit)
+
+```python
+# Core audio processing functionality
+# core.py
+class AudioProcessor:
+    def process_track(self, track: Track) -> ProcessedTrack:
+        """Process audio track for distribution."""
+        pass
+
+    def generate_waveform(self, audio_file: str) -> WaveformData:
+        """Generate visual waveform data."""
+        pass
+
+# Database operations
+# db.py
+class DatabaseManager:
+    def __init__(self, connection_string: str):
+        """Initialize database connection."""
+        pass
+
+    async def store_track_metadata(self, track: Track):
+        """Store track metadata in database."""
+        pass
+
+# AI/ML functionality
+# llm.py
+class MusicAI:
+    def analyze_track(self, track: Track) -> TrackAnalysis:
+        """Perform AI analysis on track."""
+        pass
+
+    def generate_description(self, track: Track) -> str:
+        """Generate AI description for track."""
+        pass
+```
+
+## Feature Implementation Guidelines
+
+### 1. Distribution Service
+
+```typescript
+// +page.server.ts
+export const actions = {
+  submitRelease: async ({ request }) => {
+    const data = await request.formData();
+    
+    // Validate release data
+    const release = await validateRelease(data);
+    
+    // Process and distribute
+    const job = await queue.add('distribute', {
+      release,
+      platforms: ['spotify', 'apple', 'amazon']
+    });
+
+    throw redirect(303, `/releases/${release.id}`);
+  }
+};
+```
+
+### 2. Analytics Dashboard
+
+```typescript
+// analytics-store.ts
+class AnalyticsStore {
+  data = $state<AnalyticsData>({
+    streams: [],
+    revenue: [],
+    demographics: {}
   });
 
-  // Props with TypeScript
-  interface Props {
-    required: string;
-    optional?: number;
-  }
-  let { required, optional = 42 } = $props<Props>();
+  timeRange = $state<'7d' | '30d' | '90d'>('30d');
 
-  // Two-way binding
-  let value = $bindable(initialValue);
-
-  // Development debugging
-  $inspect(count);
-  ```
-
-TypeScript Integration
-
-- Use TypeScript for all files
-- Define interfaces for props and state:
-
-  ```typescript
-  interface TodoProps {
-    id: string;
-    title: string;
-    completed?: boolean;
-  }
-
-  function TodoItem() {
-    let { id, title, completed = false } = $props<TodoProps>();
-    let isEditing = $state(false);
-
-    // Always implement complete functions
-    function toggleEdit() {
-      isEditing = !isEditing;
-    }
-  }
-  ```
-
-SvelteKit 2 Routing and Data Loading
-
-- Use Universal Load for consistent data loading:
-
-  ```typescript
-  // +page.ts
-  export async function load({ fetch, params }) {
-    // Universal load works on both server and client
-    const response = await fetch(`/api/todos/${params.id}`);
-
-    if (!response.ok) {
-      throw error(response.status, 'Failed to load todo');
-    }
-
-    return {
-      todo: await response.json(),
-    };
-  }
-  ```
-
-- Use SvelteKit 2's form actions:
-
-  ```typescript
-  // +page.server.ts
-  export const actions = {
-    default: async ({ request }) => {
-      const data = await request.formData();
-      const title = data.get('title');
-
-      // Complete implementation
-      await db.todos.create({ title });
-
-      // Use declarative redirects
-      throw redirect(303, '/todos');
-    },
-  };
-  ```
-
-File Structure and Naming
-
-- Use lowercase with hyphens for files: `todo-list.svelte`
-- Use PascalCase for component names in code: `import TodoList from './todo-list.svelte'`
-- Use camelCase for variables and functions: `handleSubmit`
-- Structure SvelteKit 2 projects as:
-  ```
-  src/
-    lib/
-      components/
-        ui/          # Shadcn components
-        todo-list.svelte
-        todo-item.svelte
-      server/        # Server-only code
-        db.ts
-      stores/
-        todo-store.svelte.ts
-      types/
-        todo.ts
-      utils/
-        validation.ts
-    routes/
-      (auth)/       # Route groups
-        login/
-          +page.svelte
-          +page.server.ts
-      +layout.svelte
-      +error.svelte
-      +hooks.server.ts
-  ```
-
-State Management
-
-- Use classes for complex state:
-
-  ```typescript
-  // todo-store.svelte.ts
-  interface TodoItem {
-    id: string;
-    title: string;
-    completed: boolean;
-  }
-
-  class TodoStore {
-    items = $state<TodoItem[]>([]);
-    filter = $state<'all' | 'active' | 'completed'>('all');
-
-    filteredItems = $derived(
-      this.items.filter((item) => {
-        if (this.filter === 'active') return !item.completed;
-        if (this.filter === 'completed') return item.completed;
-        return true;
-      })
-    );
-
-    addItem(title: string) {
-      this.items = [
-        ...this.items,
-        {
-          id: crypto.randomUUID(),
-          title,
-          completed: false,
-        },
-      ];
-    }
-
-    toggleItem(id: string) {
-      this.items = this.items.map((item) =>
-        item.id === id ? { ...item, completed: !item.completed } : item
-      );
-    }
-  }
-
-  export const todoStore = new TodoStore();
-  ```
-
-UI and Styling
-
-- Use Tailwind CSS for styling
-- Import Shadcn components from `$lib/components/ui`
-- Use the `cn()` utility for class merging
-- Follow Shadcn color conventions:
-  ```css
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  ```
-
-Internationalization
-
-- Use Paraglide.js for translations
-- Import translations properly:
-  ```typescript
-  import { t } from '@inlang/paraglide-js';
-  ```
-
-Performance and SEO
-
-- Use SvelteKit 2's streaming features for improved performance
-- Implement proper meta tags
-- Use image lazy loading
-- Optimize bundle size
-- Implement proper caching
-- Monitor Core Web Vitals
-
-Documentation References
-
-- Svelte 5 Runes: https://svelte-5-preview.vercel.app/docs/runes
-- SvelteKit 2: https://kit.svelte.dev/docs
-- Paraglide.js: https://inlang.com/m/gerre34r/library-inlang-paraglideJs
-
-Technical Requirements
-
-- TypeScript throughout
-- Responsive layouts
-- SSR/SSG optimization
-- Proper error handling
-- Secure authentication
-- API integration
-- Performance monitoring
-
-Remember:
-
-1. ALWAYS use Svelte 5 runes mode
-2. ALWAYS use SvelteKit 2 features
-3. NEVER omit code in examples
-4. ALWAYS use TypeScript
-5. ALWAYS implement complete functions
-6. NEVER mix old and new syntax
-7. ALWAYS follow SvelteKit 2 conventions
-
-PLANNED FEATURES
-
-1. Distribution Service
-
-- Multi-step release submission process
-- Automated distribution to major platforms
-- Release status tracking and analytics
-- Automated ISRC generation
-- Content validation and quality checks
-- Royalty tracking and payment processing
-
-2. Enhanced Analytics Dashboard
-
-- Real-time streaming metrics
-- Revenue tracking and projections
-- Audience demographics
-- Social media performance
-- Custom date range analysis
-- Export functionality
-
-3. Events Management System
-
-- Event creation and management
-- Venue booking system
-- Ticket sales integration
-- Promotional tools
-- Attendance tracking
-- Post-event analytics
-
-4. Artist Profile Enhancements
-
-- Enhanced profile editor
-- EPK generation
-- Integrated music player
-- Social media aggregation
-- Press kit management
-- Portfolio showcase
-
-5. Team Collaboration Features
-
-- Role-based access control
-- Task management system
-- Team chat/messaging
-- Activity tracking
-- Resource sharing
-- Calendar integration
-
-6. Content Management System
-
-- Blog/news management
-- Media library
-- SEO optimization
-- Content scheduling
-- Analytics integration
-- Version control
-
-Key Data Structures:
-
-interface Release {
-id: string;
-title: string;
-artist: string;
-type: 'Single' | 'EP' | 'Album';
-releaseDate: Date;
-artwork: string;
-tracks: Track[];
-status: 'draft' | 'pending' | 'processing' | 'live' | 'rejected';
-platforms: DistributionPlatform[];
+  filteredData = $derived(
+    filterAnalyticsByTimeRange(this.data, this.timeRange)
+  );
 }
+```
 
+### 3. Events Management
+
+```typescript
 interface Event {
-id: string;
-title: string;
-type: 'concert' | 'festival' | 'meetup' | 'release_party';
-date: Date;
-venue: Venue;
-ticketing: TicketingInfo;
-capacity: number;
-soldTickets: number;
-status: 'draft' | 'published' | 'cancelled' | 'completed';
-promotion: PromotionDetails;
+  id: string;
+  title: string;
+  type: 'concert' | 'festival' | 'meetup' | 'release_party';
+  date: Date;
+  venue: Venue;
+  ticketing: TicketingInfo;
+  capacity: number;
+  soldTickets: number;
+  status: 'draft' | 'published' | 'cancelled' | 'completed';
 }
+```
 
-interface TeamMember {
-id: string;
-role: TeamRole;
-permissions: Permission[];
-assignments: Task[];
-activity: ActivityLog[];
-}
+## Performance Requirements
 
-interface Content {
-id: string;
-type: 'blog' | 'news' | 'release' | 'press';
-title: string;
-body: string;
-author: string;
-status: 'draft' | 'published' | 'archived';
-publishDate: Date;
-media: MediaAsset[];
-seo: SEOMetadata;
-analytics: ContentAnalytics;
-}
+1. Audio Processing (Python)
 
-Implementation Priority:
+- Chunked file uploads
+- Metadata extraction and validation
+- Waveform generation with optimized matplotlib
+- FFmpeg transcoding
+- Async processing with Celery
 
-1. Distribution Service (core business feature)
-2. Enhanced Analytics (provides immediate value)
-3. Events Management (complements distribution)
-4. Artist Profile Enhancements (improves user experience)
-5. Team Collaboration (supports scaling)
-6. CMS (supports marketing/content)
+2. Analytics (Python + TypeScript)
+
+- Real-time metrics via WebSocket
+- Pandas for revenue calculations
+- Audience demographics visualization
+- Platform-specific stats aggregation
+
+3. Content Delivery
+
+- CDN integration
+- Audio streaming optimization
+- Image optimization
+- Redis caching
+
+## Security Guidelines
+
+1. Authentication
+
+- JWT with refresh tokens
+- Role-based access control
+- 2FA for sensitive operations
+
+2. Data Protection
+
+- AES-256 audio file encryption
+- PCI-compliant payment processing
+- GDPR compliance
+- DRM for content protection
+
+## Testing Requirements
+
+1. Unit Tests
+
+- Component testing
+- Store testing
+- Utility function testing
+
+2. Integration Tests
+
+- API endpoint testing
+- Distribution flow testing
+- Payment processing testing
+
+3. E2E Tests
+
+- Release submission flow
+- Analytics dashboard
+- Event management
+
+## Documentation
+
+- OpenAPI specification
+- Component storybook
+- Release submission guide
+- Analytics interpretation guide
+
+## Development Guidelines
+
+1. Python Development
+
+- Poetry for dependency management
+- PEP 8 style guide
+- Type hints for all functions
+- Async/await for I/O
+- Comprehensive docstrings
+- Pytest for unit tests
+
+2. Frontend Development
+
+- Svelte 5 runes required
+- TypeScript for all code
+- Complete function implementations
+- Proper error handling
+- Performance optimization
+- Security best practices
+
+3. Monorepo Management
+
+- Just command runner
+- Separate package versioning
+- Shared types between packages
+- Consistent formatting
+- Centralized configuration

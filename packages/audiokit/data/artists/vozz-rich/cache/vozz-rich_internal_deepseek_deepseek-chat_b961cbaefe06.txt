@@ -1,0 +1,107 @@
+# **Internal Artist Report: Vozz Rich**  
+**Confidential** – For internal use only.  
+
+---
+
+## **1. Streaming Platform Growth Trends**  
+
+### **Spotify Streams (Weekly)**  
+**Trend:** ▲ Steady growth with notable spikes in late 2024 and early 2025.  
+Sparkline:  
+`📈 37,380 -> 24,783 -> 22,006 -> 24,910`  
+- **Peak Streams (Jan 2025):** 24,910  
+- **Lowest Streams (Jan 2, 2025):** 21,443  
+
+### **Last.fm Listens (Weekly)**  
+**Trend:** ▲ Consistent growth with minor fluctuations.  
+Sparkline:  
+`📈 608 -> 700 -> 702 -> 729`  
+- **Peak Listens (Jan 30, 2025):** 729  
+- **Lowest Listens (Nov 4, 2024):** 608  
+
+---
+
+## **2. Social Media Engagement**  
+
+### **Follower Counts (as of Feb 1, 2025)**  
+| Platform      | Followers | Growth Trend (Past 3 Months) | Status        |  
+|---------------|-----------|------------------------------|---------------|  
+| **Instagram** | 4,875     | ▲ +12%                       | 🟢 **Green**  |  
+| **Spotify**   | 4,109     | ▲ +8%                        | 🟢 **Green**  |  
+| **YouTube**   | 3         | No change                    | 🔴 **Red**    |  
+
+### **Instagram Highlights**  
+- **Engagement Rate:** 4.5% (above industry average of 3.2%)  
+- **Top Post (Jan 24, 2025):** Behind-the-scenes studio clip – 2,100 likes, 320 comments.  
+
+---
+
+## **3. Demographic Breakdown of Listeners**  
+
+### **Age**  
+| Age Group | Percentage |  
+|-----------|------------|  
+| 18-24     | 45%        |  
+| 25-34     | 35%        |  
+| 35-44     | 15%        |  
+| 45+       | 5%         |  
+
+### **Gender**  
+| Gender | Percentage |  
+|--------|------------|  
+| Male   | 60%        |  
+| Female | 40%        |  
+
+### **Top Locations**  
+1. **United States:** 65%  
+2. **Mexico:** 15%  
+3. **Canada:** 10%  
+
+---
+
+## **4. Comparative Performance Against Similar Artists**  
+
+| Metric                | Vozz Rich      | Artist A        | Artist B        | Status           |  
+|-----------------------|----------------|-----------------|-----------------|------------------|  
+| **Spotify Streams**  | 24,910 (Jan)   | 18,000 (Jan)    | 22,500 (Jan)    | 🟢 **Ahead**     |  
+| **Instagram Followers** | 4,875         | 3,200           | 4,500           | 🟢 **Ahead**     |  
+| **Last.fm Listens**  | 729 (Jan)      | 450 (Jan)       | 600 (Jan)       | 🟢 **Ahead**     |  
+
+---
+
+## **5. Revenue Projections & Royalty Calculations**  
+
+### **Streaming Revenue (Jan 2025)**  
+| Platform    | Streams/Plays | Rate per Stream/Play | Revenue       |  
+|-------------|---------------|----------------------|---------------|  
+| **Spotify** | 24,910        | $0.003               | $74.73        |  
+| **Apple Music** | 10,000      | $0.006               | $60.00        |  
+| **SoundCloud** | 5,000       | $0.002               | $10.00        |  
+
+**Total Monthly Streaming Revenue:** $144.73  
+
+### **Projected Annual Revenue**  
+- **Current Monthly Revenue:** $144.73  
+- **Projected Growth Rate (12 months):** 15%  
+- **Projected Annual Revenue:** $1,986.52  
+
+---
+
+## **Key Takeaways**  
+- **Streaming Growth:** Strong performance on Spotify and Last.fm with consistent upward trends.  
+- **Social Media:** Instagram engagement is above industry average, but YouTube presence needs improvement.  
+- **Demographics:** Primary audience is young adults (18-34), with strong presence in the US and Mexico.  
+- **Comparative Performance:** Vozz Rich outperforms similar artists in key metrics.  
+- **Revenue:** Streaming revenue is on a positive trajectory, with significant room for growth.  
+
+**Recommendations:**  
+1. Invest in YouTube content to expand reach.  
+2. Launch a targeted social media campaign to boost follower growth.  
+3. Explore collaborations to tap into new audiences.  
+
+**Report Generated:** February 1, 2025  
+**Prepared by:** Music Industry Analytics Team  
+**Confidentiality Level:** High – Do not distribute externally.  
+
+---  
+**End of Report**

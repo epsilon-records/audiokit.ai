@@ -4,6 +4,7 @@ import json
 from datetime import date
 from .logger import Logger
 from config import cfg
+import os
 
 
 def get_artist_data_from_db(artist_id: str) -> dict:
@@ -33,9 +34,13 @@ def get_artist_data_from_db(artist_id: str) -> dict:
 
             Logger.info("Saving artist data to JSON file")
             artist_name_slug = artist_data["stage_name"].replace(" ", "-").lower()
-            with open(f"{artist_name_slug}_json.txt", "w") as json_file:
+            cache_dir = cfg.get_path("cache_dir", artist_name_slug)
+            os.makedirs(cache_dir, exist_ok=True)
+            json_path = cache_dir.joinpath(f"{artist_name_slug}_json.txt")
+
+            with open(json_path, "w") as json_file:
                 json.dump(artist_data, json_file, indent=2)
-            Logger.success(f"Artist data saved to {artist_name_slug}_json.txt")
+            Logger.success(f"Artist data saved to {json_path}")
 
             Logger.end_task(db_start, "Database operation completed")
             return artist_data

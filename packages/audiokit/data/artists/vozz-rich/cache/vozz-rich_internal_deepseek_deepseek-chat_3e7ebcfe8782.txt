@@ -1,0 +1,98 @@
+### Internal Artist Report: **Vozz Rich**  
+**Confidential** – For internal use only  
+
+---
+
+## **Streaming Platform Growth Trends**
+
+### **Spotify** (Monthly Streams)  
+**Total Streams (Oct 2024 - Jan 2025):**  
+- **October Avg:** ~25,000  
+- **November Avg:** ~27,000  
+- **December Avg:** ~24,000  
+- **January Avg:** ~22,000  
+
+**Trend:** 📉  
+Sparkline: ▁▃▅▆▇▆▅▄▃▂▁  
+
+### **Apple Music**  
+Data unavailable.  
+
+### **SoundCloud**  
+Data unavailable.  
+
+---
+
+## **Social Media Engagement Analysis**
+
+| Platform       | Followers (Current) | Growth (Last 30 Days) | Engagement Rate | Status   |
+|----------------|---------------------|-----------------------|------------------|----------|
+| **Instagram**  | 4,875               | +150                  | 3.2%            | 🟢 Green |
+| **Spotify**    | 4,109               | +200                  | N/A              | 🟢 Green |
+| **YouTube**    | 3                   | 0                     | 0%               | 🔴 Red   |
+| **Twitter**    | N/A                 | N/A                   | N/A              | 🔴 Red   |
+| **Facebook**   | N/A                 | N/A                   | N/A              | 🔴 Red   |
+
+Key Takeaways:  
+- **Instagram** is the primary driver of engagement with a **3.2% engagement rate**.  
+- **Spotify followers** are growing steadily, indicating strong streaming platform engagement.  
+- **YouTube** and other platforms require focus to improve audience growth.  
+
+---
+
+## **Demographic Breakdown of Listeners**
+
+### **Primary Audience**  
+- **Age:** 25-34 (45%)  
+- **Gender:** Male (60%), Female (40%)  
+- **Top Locations:** United States (75%), Mexico (15%), Canada (5%)  
+- **Genres:** Dance, House, Electronic  
+
+---
+
+## **Comparative Performance Against Similar Artists**
+
+| Metric                 | Vozz Rich | Similar Artist 1 | Similar Artist 2 | Similar Artist 3 |
+|------------------------|------------|------------------|------------------|------------------|
+| **Monthly Streams**    | 22,000     | 30,000           | 18,000           | 25,000           |
+| **Social Followers**   | 8,984      | 15,000           | 7,500            | 12,000           |
+| **Engagement Rate**    | 3.2%       | 4.1%             | 2.8%             | 3.5%             |
+| **New Releases (2024)**| 20         | 15               | 25               | 18               |
+
+Key Takeaways:  
+- **Vozz Rich** is competitive in monthly streams and new releases but lags in social followers and engagement.  
+- Focus on **social media campaigns** and **collaborations** to boost visibility.  
+
+---
+
+## **Revenue Projections & Royalty Calculations**  
+
+### Projected Revenue (2025)  
+| Source                  | Projected Revenue (USD) |
+|-------------------------|--------------------------|
+| **Spotify (Est.)**      | $2,500                  |
+| **Apple Music (Est.)**  | $500                    |
+| **SoundCloud (Est.)**  | $200                    |
+| **Total:**              | $3,200                  |
+
+### Royalty Breakdown (Est.)  
+- **Spotify:** ~$0.003 per stream  
+- **Apple Music:** ~$0.007 per stream  
+- **SoundCloud:** ~$0.002 per stream  
+
+Key Takeaways:  
+- Current revenue is modest but scalable with increased streams and audience growth.  
+- Focus on **playlist placements** and **cross-platform promotions** to maximize earnings.  
+
+---
+
+### **Summary & Recommendations**  
+1. Continue releasing tracks regularly to maintain momentum.  
+2. Invest in Instagram and Spotify campaigns to boost follower growth.  
+3. Explore collaborations with similar artists to expand reach.  
+4. Monitor streaming trends and adapt marketing strategies accordingly.  
+
+**Status:** 🟡 Amber (Steady growth with room for improvement)  
+
+**Prepared by:** Music Industry Analytics Team  
+**Date:** February 2, 2025

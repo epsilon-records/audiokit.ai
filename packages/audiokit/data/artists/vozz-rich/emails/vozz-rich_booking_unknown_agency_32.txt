@@ -1,7 +1,0 @@
-| Risk Category     | Description                                         | Likelihood (1-5) | Impact (1-5) | Mitigation Strategy                           |
-|-------------------|-----------------------------------------------------|------------------|--------------|-----------------------------------------------|
-| **Financial**     | Overbudgeting due to unforeseen costs               | 3                | 4            | Detailed budgeting and contingency funds      |
-| **Logistical**    | Technical failures (sound, lighting)               | 2                | 5            | Reliable technical team and backup equipment  |
-| **Reputational**  | Poor event experience affecting artist's image      | 2                | 5            | High-quality performances and customer service|
-| **Weather**       | Outdoor venue affected by bad weather               | 1                | 4            | Weather insurance and contingency plans       |
-| **Health & Safety** | Emergencies or accidents during event           | 2                | 5            | Comprehensive safety protocols and staff training |

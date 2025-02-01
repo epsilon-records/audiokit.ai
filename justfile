@@ -77,4 +77,8 @@ clean: audiokit-clean
 # Update all dependencies
 update:
     cd packages/audiokit && poetry update
-    cd apps/web && bun update 
+    cd apps/web && bun update
+
+# Run the audiokit core module
+run-audiokit:
+    cd packages/audiokit && poetry run python -m audiokit.core

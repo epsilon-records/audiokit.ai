@@ -1,5 +1,0 @@
-- **Booking Fee:** Negotiate based on venue size and expected turnout.
-- **Revenue Splits:** Discuss percentages for ticket sales and concessions.
-- **Technical Requirements:** Ensure the venue can meet specific technical needs.
-- **Marketing Support:** Leverage promoter’s marketing channels for better reach.
-- **Cancellation Policies:** Clarify terms to mitigate potential risks.
