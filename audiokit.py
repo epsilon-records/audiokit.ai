@@ -23,7 +23,7 @@ CUSTOM_HEADERS = {"HTTP-Referer": "https://audiokit.ai", "X-Title": "AudioKit"}
 
 # EPK System Prompt
 EPK_SYSTEM_PROMPT = """
-You are an expert in electronic music industry marketing. Using the provided JSON data, generate a comprehensive and visually appealing Electronic Press Kit (EPK) in json format.
+You are an expert in electronic music industry marketing. Using the provided JSON data, generate a comprehensive and visually appealing Electronic Press Kit (EPK).
 
 Report Requirements:
 	1.	Professional Formatting: Use clear section headings, subheadings, and bullet points for readability
@@ -34,6 +34,7 @@ Report Requirements:
 Output Instructions:
 	• Maintain a professional tone while being approachable
 	• Do not include any backticks, code block markers, or other syntax wrappers
+	• Do not wrap the output in JSON blocks or any other formatting
 	• Output must be plain text with the formatted content only
 
 EPK Structure:
@@ -66,7 +67,7 @@ EPK Structure:
 
 # Internal Report System Prompt
 INTERNAL_REPORT_PROMPT = """
-You are a music industry analytics expert. Using the provided JSON data, generate a comprehensive and visually appealing internal artist report in json format.
+You are a music industry analytics expert. Using the provided JSON data, generate a comprehensive and visually appealing internal artist report.
 
 Report Requirements:
 	1.	Professional Formatting: Use clear section headings, subheadings, and bullet points for readability
@@ -77,6 +78,7 @@ Report Requirements:
 Output Instructions:
 	• Maintain a professional tone while being approachable
 	• Do not include any backticks, code block markers, or other syntax wrappers
+	• Do not wrap the output in JSON blocks or any other formatting
 	• Output must be plain text with the formatted content only
 
 Report Structure:
@@ -132,28 +134,19 @@ AI_MODELS = [
 EPK_INTEGRATION_MODEL = "deepseek/deepseek-chat"
 
 EPK_INTEGRATION_PROMPT = """
-You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models and the original artist_data. Your task is to generate a professionally formatted, publication-ready latex document by following these steps:
-
-Data Verification:
-• Cross-check all facts and figures against the original artist_data
-• Verify all statistics match the source data exactly
-• Confirm all dates, names, and titles are accurate
-• Double-check numerical values against the original data
-• Ensure all conclusions are supported by the artist_data
+You are an expert music marketing strategist and professional document designer. You will receive multiple EPK reports from AI models. Your task is to generate a professionally formatted, publication-ready latex document by following these steps:
 
 Processing Steps:
-1. Verify Data Accuracy: Cross-check all facts and figures against the original artist data
-2. Select the Best Report: Choose the most comprehensive and high-quality version
-3. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
-4. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
-5. Finalize for Publication: Replace any placeholders, refine the language, and structure the document to be visually appealing and professionally formatted in rich text
+1. Select the Best Report: Choose the most comprehensive and high-quality version
+2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
+3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
+4. Finalize for Publication: Replace any placeholders, refine the language, and structure the document to be visually appealing and professionally formatted in rich text
 
 Output Requirements:
 • Return only the final rich text document, fully formatted and ready for display
 • Do not wrap the content in any code blocks or markdown syntax
 • Ensure the EPK is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and lists
 • Where applicable, include emojis sparingly to enhance key points (1-2 per section max)
-• All data must be verified against the original artist data
 
 EPK Structure Requirements:
 # 🎤 Artist Overview
@@ -185,21 +178,13 @@ The final EPK should be comprehensive, professional, and designed to attract boo
 """
 
 INTERNAL_REPORT_INTEGRATION_PROMPT = """
-You are an expert music industry analyst. You will receive multiple Internal Reports from AI models and the original artist_data. Your task is to generate a professionally formatted, publication-ready latex document by following these steps:
-
-Data Verification:
-• Cross-check all facts and figures against the original artist_data
-• Verify all statistics match the source data exactly
-• Confirm all dates, names, and titles are accurate
-• Double-check numerical values against the original data
-• Ensure all conclusions are supported by the artist_data
+You are an expert music industry analyst. You will receive multiple Internal Reports from AI models. Your task is to generate a professionally formatted, publication-ready latex document by following these steps:
 
 Processing Steps:
-1. Verify Data Accuracy: Cross-check all facts and figures against the original artist data
-2. Select the Best Report: Choose the most comprehensive and high-quality version
-3. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
-4. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
-5. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in rich text
+1. Select the Best Report: Choose the most comprehensive and high-quality version
+2. Integrate Valuable Insights: Extract and incorporate useful data, insights, or recommendations from the other reports to enhance the final version
+3. Eliminate Redundancies: Remove repetitive or unnecessary information to ensure clarity and conciseness
+4. Finalize for Publication: Replace any placeholders, refine the language, and structure the report to be visually appealing and professionally formatted in rich text
 
 Output Requirements:
 • Return only the final rich text document, fully formatted and ready for display
@@ -207,6 +192,44 @@ Output Requirements:
 • Ensure the report is aesthetically polished, clear, and well-structured, using professional typography, section headings, bullet points, and lists
 • Where applicable, include emojis sparingly to enhance key points
 • All data must be verified against the original artist data
+
+Report Structure Requirements:
+
+# 📈 Performance Analytics
+- Detailed streaming metrics analysis across all platforms
+- Month-over-month growth trends with percentage changes
+- Platform-specific performance insights (e.g., Spotify, Apple Music, YouTube, TikTok)
+- Comparative analysis against previous periods
+
+# 🌍 Audience Development
+- Follower growth rates across major platforms
+- Engagement metrics and patterns (likes, comments, shares)
+- Geographic distribution of listeners (top countries/cities)
+- Platform-specific audience behavior (e.g., active hours, retention rates)
+
+# 🎵 Release Impact Analysis
+- Performance metrics for recent releases (stream counts, saves, playlist additions)
+- Comparison of original tracks vs. remixes in terms of engagement and reach
+- Collaboration impact on streaming numbers and audience crossover
+- Effectiveness of release timing (day of the week, seasonal trends)
+
+# 📱 Distribution & Platform Strategy
+- Platform-by-platform presence analysis (gaps, strengths)
+- Identification of gaps in digital distribution
+- Optimization opportunities for each streaming/social platform
+- Content strategy recommendations based on past performance
+
+# 🏆 Market Position Assessment
+- Genre positioning (comparisons with similar artists)
+- Competitive landscape (benchmarking against industry peers)
+- Growth opportunities (new platforms, untapped audiences)
+- Risk factors (declining metrics, audience shifts)
+
+# 🚀 Action Items & Recommendations
+- Short-term optimization steps (quick wins for immediate impact)
+- Long-term strategic initiatives (sustained growth strategies)
+- Platform-specific recommendations (e.g., ad spend allocation, content tweaks)
+- Investment priorities (where to allocate marketing and production resources)
 
 The final report should be comprehensive, professional, and designed for internal decision-making.
 """
@@ -289,7 +312,7 @@ async def generate_epk(artist_data: dict, model_name: str) -> str:
     try:
         # Create cache key and filename
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
-        cache_key = f"{artist_name_slug}_epk_{model_name.replace('/', '_')}.md"
+        cache_key = f"{artist_name_slug}_epk_{model_name.replace('/', '_')}.json"
 
         # Check cache
         if os.path.exists(cache_key):
@@ -335,7 +358,7 @@ async def generate_internal_report(artist_data: dict, model_name: str) -> str:
         # Create cache key and filename
         artist_name_slug = artist_data["stage_name"].replace(" ", "_")
         cache_key = (
-            f"{artist_name_slug}_internal_report_{model_name.replace('/', '_')}.md"
+            f"{artist_name_slug}_internal_report_{model_name.replace('/', '_')}.json"
         )
 
         # Check cache
@@ -424,7 +447,7 @@ async def generate_reports(artist_data: dict):
     return reports
 
 
-async def integrate_reports(reports: dict, artist_data: dict) -> dict:
+async def integrate_reports(reports: dict) -> dict:
     """Integrate multiple reports into optimized versions and return as dictionary"""
     try:
         final_reports = {"EPK": None, "Internal Report": None}
@@ -434,7 +457,7 @@ async def integrate_reports(reports: dict, artist_data: dict) -> dict:
             single_epk_model = next(iter(reports["EPK"]))
             final_reports["EPK"] = reports["EPK"][single_epk_model]
         else:
-            # Process EPKs with artist data
+            # Process EPKs
             epk_response = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={
@@ -448,9 +471,7 @@ async def integrate_reports(reports: dict, artist_data: dict) -> dict:
                         {"role": "system", "content": EPK_INTEGRATION_PROMPT},
                         {
                             "role": "user",
-                            "content": json.dumps(
-                                {"EPKs": reports["EPK"], "artist_data": artist_data}
-                            ),
+                            "content": json.dumps({"EPKs": reports["EPK"]}),
                         },
                     ],
                     "response_format": {"type": "json_object"},
@@ -479,7 +500,7 @@ async def integrate_reports(reports: dict, artist_data: dict) -> dict:
                 single_internal_model
             ]
         else:
-            # Process Internal Reports with artist data
+            # Process Internal Reports
             internal_response = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={
@@ -499,7 +520,6 @@ async def integrate_reports(reports: dict, artist_data: dict) -> dict:
                             "content": json.dumps(
                                 {
                                     "Internal Reports": reports["Internal Report"],
-                                    "artist_data": artist_data,
                                 }
                             ),
                         },
@@ -568,7 +588,7 @@ async def run_full_ai_marketing_pipeline(artist_id: str):
         # Integrate and optimize reports
         Logger.info("Starting report integration process")
         strategy_start = Logger.start_task("Report integration")
-        integrated_reports = await integrate_reports(all_reports, artist_data)
+        integrated_reports = await integrate_reports(all_reports)
         Logger.end_task(strategy_start, "Report integration completed")
         Logger.success("Reports integrated and optimized")
 
