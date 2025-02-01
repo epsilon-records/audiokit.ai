@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from 'clsx';
-import { twMerge } from 'tailwind-merge';
 import { cubicOut } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
+import { twMerge } from 'tailwind-merge';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -72,3 +72,26 @@ export const getImageURL = (fileName: string) => {
   // Update this based on your image storage solution
   return `${process.env.STORAGE_URL}/${fileName}`;
 };
+
+export function isValidLink(link: string | undefined): boolean {
+  if (!link?.trim()) return false;
+
+  try {
+    // Basic URL validation
+    const url = new URL(link);
+
+    // Ensure it has a valid protocol
+    if (!['http:', 'https:'].includes(url.protocol)) {
+      return false;
+    }
+
+    // Ensure it has a valid hostname
+    if (!url.hostname) {
+      return false;
+    }
+
+    return true;
+  } catch {
+    return false;
+  }
+}

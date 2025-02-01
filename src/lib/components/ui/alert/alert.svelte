@@ -1,17 +1,22 @@
 <script lang="ts">
-	import type { HTMLAttributes } from "svelte/elements";
-	import { type Variant, alertVariants } from "./index.js";
-	import { cn } from "$lib/utils.js";
+  import type { HTMLAttributes } from 'svelte/elements';
+  import { type Variant, alertVariants } from './index.js';
+  import { cn } from '$lib/utils.js';
 
-	type $$Props = HTMLAttributes<HTMLDivElement> & {
-		variant?: Variant;
-	};
+  type $$Props = HTMLAttributes<HTMLDivElement> & {
+    variant?: Variant;
+  };
 
-	let className: $$Props["class"] = undefined;
-	export let variant: $$Props["variant"] = "default";
-	export { className as class };
+  interface Props {
+    class?: $$Props['class'];
+    variant?: $$Props['variant'];
+    children?: import('svelte').Snippet;
+    [key: string]: any;
+  }
+
+  let { class: className = undefined, variant = 'default', children, ...rest }: Props = $props();
 </script>
 
-<div class={cn(alertVariants({ variant }), className)} {...$$restProps} role="alert">
-	<slot />
+<div class={cn(alertVariants({ variant }), className)} {...rest} role="alert">
+  {@render children?.()}
 </div>

@@ -55,7 +55,7 @@
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-3">
         {#if !isLoaded}
-          <div class="h-7 w-[180px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div class="h-7 w-[180px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
         {:else}
           <OrganizationSwitcher
             hidePersonal={true}
@@ -239,7 +239,7 @@
             </svg>
           </button>
           {#if !isLoaded}
-            <div class="h-7 w-[180px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div class="h-7 w-[180px] bg-gray-200 dark:bg-gray-700 rounded animate-pulse"></div>
           {:else}
             <OrganizationSwitcher
               hidePersonal={true}

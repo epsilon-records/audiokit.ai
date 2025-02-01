@@ -1,25 +1,15 @@
-import { requireAuth, requireOrg, getOrg } from '$lib/server/auth';
-import { message, superValidate } from 'sveltekit-superforms/server';
-import { zod } from 'sveltekit-superforms/adapters';
-import { error, fail } from '@sveltejs/kit';
-import type { PageServerLoad } from './$types';
-import { artistSchema, type Artist } from '$lib/schemas/artist';
 import { db } from '$lib/db';
 import { artists } from '$lib/db/schema';
+import { artistSchema } from '$lib/schemas/artist';
+import { getOrg, requireAuth, requireOrg } from '$lib/server/auth';
+import { syncToHubspot } from '$lib/server/integrations/hubspot';
+import logger from '$lib/utils/logger';
+import { sanitizeUrl } from '$lib/utils/sanitize';
+import { error, fail } from '@sveltejs/kit';
 import { sql } from 'drizzle-orm';
-import { warn } from '$lib/utils/logger';
-import { syncToHubspot } from '$lib/server/hubspot';
-
-// Add this helper function at the top of the file
-function sanitizeUrl(url: string | null | undefined): string | null {
-  if (!url) return null;
-  try {
-    const urlObj = new URL(url);
-    return urlObj.origin + urlObj.pathname;
-  } catch {
-    return url;
-  }
-}
+import { zod } from 'sveltekit-superforms/adapters';
+import { message, superValidate } from 'sveltekit-superforms/server';
+import type { PageServerLoad } from './$types';
 
 export const load = (async ({ locals }) => {
   const auth = await requireOrg(locals);
@@ -79,7 +69,7 @@ export const actions = {
 
     const form = await superValidate(request, zod(artistSchema));
     if (!form.valid) {
-      warn('Profile form validation failed', {
+      logger.warning(crypto.randomUUID(), 'Profile form validation failed', {
         errors: form.errors,
         orgId: auth.orgId,
       });
@@ -122,7 +112,25 @@ export const actions = {
     }
 
     // Sync the updated artist data to HubSpot
-    await syncToHubspot(updatedArtist as Artist);
+    if (updatedArtist.email) {
+      const hubspotData = {
+        email: updatedArtist.email,
+        phone: updatedArtist.phone || null,
+        city: updatedArtist.city || null,
+        country: updatedArtist.country || null,
+        biography: updatedArtist.biography || null,
+        website: updatedArtist.website || null,
+        spotify: updatedArtist.spotify || null,
+        instagram: updatedArtist.instagram || null,
+        twitterhandle: updatedArtist.x || null,
+        soundcloud: updatedArtist.soundcloud || null,
+      };
+      await syncToHubspot(updatedArtist.email, hubspotData);
+    } else {
+      logger.warning(crypto.randomUUID(), 'Unable to sync to HubSpot due to missing email', {
+        orgId: locals.auth.orgId,
+      });
+    }
 
     return message(form, 'Profile updated successfully!');
   },

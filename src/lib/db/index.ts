@@ -1,9 +1,10 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
+import logger from '../utils/logger.js';
 
 // Disable prefetch as it is not supported for "Transaction" pool mode
 if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is not set');
+  logger.warning(crypto.randomUUID(), 'DATABASE_URL is not set');
 }
-const client = postgres(process.env.DATABASE_URL, { prepare: false, ssl: 'require' });
+const client = postgres(process.env.DATABASE_URL ?? '', { prepare: false, ssl: 'require' });
 export const db = drizzle({ client });

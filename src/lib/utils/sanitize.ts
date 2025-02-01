@@ -1,6 +1,8 @@
+import { isValidLink } from '../utils.js';
+
 export function sanitizeUrl(url: string | null | undefined): string {
   // Early return for invalid inputs
-  if (!url || typeof url !== 'string') return '';
+  if (!url || typeof url !== 'string' || !isValidLink(url)) return '';
 
   let sanitized = url.trim();
 
@@ -22,16 +24,8 @@ export function sanitizeUrl(url: string | null | undefined): string {
 
   try {
     const urlObj = new URL(sanitized);
-
-    // Additional validation
-    if (!urlObj.hostname || !urlObj.protocol.match(/^https?:$/)) {
-      console.warn('Invalid URL structure:', url);
-      return '';
-    }
-
     return urlObj.origin + urlObj.pathname;
   } catch (error) {
-    console.warn('Failed to parse URL:', url, error);
     return '';
   }
 }
