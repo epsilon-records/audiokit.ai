@@ -19,6 +19,9 @@ class Config:
         self.config["api"]["openrouter"]["api_key"] = os.getenv("OPENROUTER_API_KEY")
         self.config["api"]["youtube"]["api_key"] = os.getenv("YOUTUBE_API_KEY")
 
+        # Add database URL from environment
+        self.config["database"] = {"url": os.getenv("DATABASE_URL")}
+
     def __getattr__(self, name):
         if name in self.config:
             value = self.config[name]

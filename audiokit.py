@@ -530,7 +530,7 @@ def get_artist_data_from_db(artist_id: str) -> dict:
     try:
         Logger.info("Connecting to database")
         connect_start = Logger.start_task("Database connection")
-        connection = psycopg2.connect(cfg.db_url, cursor_factory=RealDictCursor)
+        connection = psycopg2.connect(cfg.database.url, cursor_factory=RealDictCursor)
         Logger.end_task(connect_start, "Database connected successfully")
 
         with connection.cursor() as cursor:
