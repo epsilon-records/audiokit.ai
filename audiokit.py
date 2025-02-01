@@ -9,7 +9,6 @@ import time
 from datetime import datetime
 import traceback
 import hashlib
-import shutil
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -388,188 +387,252 @@ def handle_report_error(
     return f"{report_type} generation failed: {str(e)}"
 
 
-async def handle_streaming_response(response, process_name: str, model_name: str):
-    """Universal streaming handler with fallback to non-streaming"""
-    full_response = []
-    buffer = ""
+class LLMRequest:
+    @staticmethod
+    async def execute(
+        model_name: str,
+        system_prompt: str,
+        user_content: str,
+        cache_path: str,
+        process_name: str,
+        retry_on_stream_error: bool = True,
+    ) -> str:
+        """Generic LLM request handler with streaming and caching"""
+        try:
+            # Create directory if needed
+            os.makedirs(os.path.dirname(cache_path), exist_ok=True)
 
-    try:
-        # Try streaming first
-        if response.headers.get("content-type") == "text/event-stream":
-            Logger.info(f"Processing streaming response for {process_name}")
-            for chunk in response.iter_lines():
-                if chunk:
-                    decoded = chunk.decode().replace("data: ", "")
-                    if decoded == "[DONE]":
-                        break
-                    try:
-                        data = json.loads(decoded)
-                        if "content" in data["choices"][0]["delta"]:
-                            token = data["choices"][0]["delta"]["content"]
-                            buffer += token
-                            if token in ("\n", ".", ":", ","):
-                                Logger.stream_log(f"{process_name}: {buffer.strip()}")
-                                full_response.append(buffer)
-                                buffer = ""
-                    except json.JSONDecodeError:
+            # Check cache first
+            if os.path.exists(cache_path):
+                Logger.info(f"Using cached response from {cache_path}")
+                with open(cache_path, "r") as f:
+                    return f.read()
+
+            retry_count = 0
+            max_retries = 2 if retry_on_stream_error else 1
+            final_content = ""
+
+            while retry_count < max_retries:
+                try:
+                    stream = retry_count == 0  # First try with streaming
+                    response = requests.post(
+                        "https://openrouter.ai/api/v1/chat/completions",
+                        headers={
+                            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                            "HTTP-Referer": "https://audiokit.ai",
+                            "X-Title": "AudioKit",
+                        },
+                        json={
+                            "model": model_name,
+                            "messages": [
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": user_content},
+                            ],
+                            "stream": stream,
+                        },
+                        stream=stream,
+                    )
+                    response.raise_for_status()
+
+                    final_content = await LLMRequest._handle_response(
+                        response, process_name, model_name
+                    )
+                    break
+
+                except requests.exceptions.HTTPError as e:
+                    if e.response.status_code == 400 and "stream" in str(e).lower():
+                        Logger.warning(
+                            f"Model {model_name} doesn't support streaming - retrying without"
+                        )
+                        retry_count += 1
                         continue
-        else:
-            # Fallback to non-streaming processing
-            Logger.warning(
-                f"Model {model_name} doesn't support streaming - using fallback"
-            )
-            data = response.json()
-            content = data["choices"][0]["message"]["content"]
-            full_response.append(content)
-            Logger.stream_log(f"{process_name}: Completed non-streaming response")
+                    raise
 
-        # Add remaining buffer content
-        if buffer:
-            full_response.append(buffer)
+            # Cache the result
+            with open(cache_path, "w") as f:
+                f.write(final_content)
 
-    except Exception as e:
-        Logger.error(f"Response handling failed: {str(e)}")
-        raise
+            return final_content
 
-    return "".join(full_response)
+        except Exception as e:
+            Logger.error(f"LLM request failed: {str(e)}")
+            raise
+
+    @staticmethod
+    async def _handle_response(response, process_name: str, model_name: str) -> str:
+        """Handle both streaming and non-streaming responses"""
+        full_response = []
+        buffer = ""
+
+        try:
+            if response.headers.get("content-type") == "text/event-stream":
+                Logger.info(f"Processing streaming response for {process_name}")
+                for chunk in response.iter_lines():
+                    if chunk:
+                        decoded = chunk.decode().replace("data: ", "")
+                        if decoded == "[DONE]":
+                            break
+                        try:
+                            data = json.loads(decoded)
+                            if "content" in data["choices"][0]["delta"]:
+                                token = data["choices"][0]["delta"]["content"]
+                                buffer += token
+                                if token in ("\n", ".", ":", ","):
+                                    Logger.stream_log(
+                                        f"{process_name}: {buffer.strip()}"
+                                    )
+                                    full_response.append(buffer)
+                                    buffer = ""
+                        except json.JSONDecodeError:
+                            continue
+            else:
+                Logger.warning(f"Processing non-streaming response for {process_name}")
+                data = response.json()
+                content = data["choices"][0]["message"]["content"]
+                full_response.append(content)
+                Logger.stream_log(f"{process_name}: Completed non-streaming response")
+
+            if buffer:
+                full_response.append(buffer)
+
+            return "".join(full_response)
+
+        except Exception as e:
+            Logger.error(f"Response handling failed: {str(e)}")
+            raise
 
 
 async def generate_epk(artist_data: dict, model_name: str) -> str:
-    """Generate EPK with streaming fallback"""
-    try:
-        # Sanitize and create input hash
-        sanitized_data = sanitize_artist_data(artist_data.copy())
-        input_hash = hashlib.sha256(
-            json.dumps(sanitized_data, sort_keys=True).encode("utf-8")
-        ).hexdigest()[:12]
+    """Generate EPK using DRY handler"""
+    sanitized_data = sanitize_artist_data(artist_data.copy())
+    input_hash = hashlib.sha256(
+        json.dumps(sanitized_data, sort_keys=True).encode()
+    ).hexdigest()[:12]
+    artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
+    cache_path = os.path.join(
+        "data",
+        "artists",
+        artist_name_slug,
+        "cache",
+        f"{artist_name_slug}_epk_{model_name.replace('/', '_')}_{input_hash}.txt",
+    )
 
-        # Create cache path with input hash
-        artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
-        cache_path = os.path.join(
-            "data",
-            "artists",
-            artist_name_slug,
-            "cache",
-            f"{artist_name_slug}_epk_{model_name.replace('/', '_')}_{input_hash}.txt",
-        )
-
-        # Create directory if needed
-        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-
-        # Check cache
-        if os.path.exists(cache_path):
-            Logger.info(f"Using cached EPK from {cache_path}")
-            with open(cache_path, "r") as f:
-                return f.read()
-
-        retry_count = 0
-        max_retries = 2  # 1 streaming attempt + 1 non-streaming fallback
-
-        while retry_count < max_retries:
-            try:
-                stream = retry_count == 0  # First try with streaming
-                response = requests.post(
-                    "https://openrouter.ai/api/v1/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                        "HTTP-Referer": "https://audiokit.ai",
-                        "X-Title": "AudioKit",
-                    },
-                    json={
-                        "model": model_name,
-                        "messages": [
-                            {"role": "system", "content": EPK_SYSTEM_PROMPT},
-                            {"role": "user", "content": json.dumps(artist_data)},
-                        ],
-                        "stream": stream,
-                    },
-                    stream=stream,
-                )
-                response.raise_for_status()
-
-                final_content = await handle_streaming_response(
-                    response, f"EPK Generation ({model_name})", model_name
-                )
-                break
-
-            except requests.exceptions.HTTPError as e:
-                if e.response.status_code == 400 and "stream" in str(e).lower():
-                    Logger.warning(
-                        f"Model {model_name} doesn't support streaming - retrying without"
-                    )
-                    retry_count += 1
-                    continue
-                raise
-
-        # Cache the result
-        with open(cache_path, "w") as f:
-            f.write(final_content)
-
-        return final_content
-    except Exception as e:
-        return handle_report_error(e, model_name, artist_data, "EPK")
+    return await LLMRequest.execute(
+        model_name=model_name,
+        system_prompt=EPK_SYSTEM_PROMPT,
+        user_content=json.dumps(artist_data),
+        cache_path=cache_path,
+        process_name=f"EPK Generation ({model_name})",
+    )
 
 
 async def generate_internal_report(artist_data: dict, model_name: str) -> str:
-    """Generate internal report with streaming"""
+    """Generate internal report using DRY handler"""
+    sanitized_data = sanitize_artist_data(artist_data.copy())
+    input_hash = hashlib.sha256(
+        json.dumps(sanitized_data, sort_keys=True).encode()
+    ).hexdigest()[:12]
+    artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
+    cache_path = os.path.join(
+        "data",
+        "artists",
+        artist_name_slug,
+        "cache",
+        f"{artist_name_slug}_internal_{model_name.replace('/', '_')}_{input_hash}.txt",
+    )
+
+    return await LLMRequest.execute(
+        model_name=model_name,
+        system_prompt=INTERNAL_REPORT_PROMPT,
+        user_content=json.dumps(artist_data),
+        cache_path=cache_path,
+        process_name=f"Internal Report Generation ({model_name})",
+    )
+
+
+async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
+    """Integrated reports using DRY handler"""
     try:
-        # Sanitize and create input hash
-        sanitized_data = sanitize_artist_data(artist_data.copy())
-        input_hash = hashlib.sha256(
-            json.dumps(sanitized_data, sort_keys=True).encode("utf-8")
-        ).hexdigest()[:12]
+        final_reports = {"EPK": None, "Internal Report": None}
+        cache_dir = os.path.join("data", "artists", artist_name_slug, "cache")
 
-        # Create cache path with input hash
-        artist_name_slug = sanitized_data["stage_name"].replace(" ", "-").lower()
-        cache_path = os.path.join(
-            "data",
-            "artists",
-            artist_name_slug,
-            "cache",
-            f"{artist_name_slug}_internal_{model_name.replace('/', '_')}_{input_hash}.txt",
+        # EPK Integration
+        epk_cache_path = os.path.join(
+            cache_dir, f"{artist_name_slug}_integrated_epk.tex"
         )
+        if not os.path.exists(epk_cache_path):
+            final_reports["EPK"] = await LLMRequest.execute(
+                model_name=EPK_INTEGRATION_MODEL,
+                system_prompt=EPK_INTEGRATION_PROMPT,
+                user_content=json.dumps({"EPKs": reports["EPK"]}),
+                cache_path=epk_cache_path,
+                process_name="EPK Integration",
+                retry_on_stream_error=False,
+            )
 
-        # Create directory if needed
-        os.makedirs(os.path.dirname(cache_path), exist_ok=True)
-
-        # Check cache
-        if os.path.exists(cache_path):
-            Logger.info(f"Using cached internal report from {cache_path}")
-            with open(cache_path, "r") as f:
-                return f.read()
-
-        # Modified API call with streaming
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "HTTP-Referer": "https://audiokit.ai",
-                "X-Title": "AudioKit",
-            },
-            json={
-                "model": model_name,
-                "messages": [
-                    {"role": "system", "content": INTERNAL_REPORT_PROMPT},
-                    {"role": "user", "content": json.dumps(artist_data)},
-                ],
-                "stream": True,
-            },
-            stream=True,
+        # Internal Report Integration
+        internal_cache_path = os.path.join(
+            cache_dir, f"{artist_name_slug}_integrated_internal.tex"
         )
-        response.raise_for_status()
+        if not os.path.exists(internal_cache_path):
+            final_reports["Internal Report"] = await LLMRequest.execute(
+                model_name=INTERNAL_REPORT_INTEGRATION_MODEL,
+                system_prompt=INTERNAL_REPORT_INTEGRATION_PROMPT,
+                user_content=json.dumps(
+                    {"Internal Reports": reports["Internal Report"]}
+                ),
+                cache_path=internal_cache_path,
+                process_name="Internal Report Integration",
+                retry_on_stream_error=False,
+            )
 
-        # Identical streaming processing logic as generate_epk
-        final_content = await handle_streaming_response(
-            response, "Internal Report Generation", model_name
-        )
-
-        # Cache the result
-        with open(cache_path, "w") as f:
-            f.write(final_content)
-
-        return final_content
+        return final_reports
     except Exception as e:
-        return handle_report_error(e, model_name, artist_data, "Internal Report")
+        Logger.error(f"Report integration failed: {str(e)}")
+        return {"EPK": "Integration failed", "Internal Report": "Integration failed"}
+
+
+async def beautify_report(content: str, report_type: str, artist_name_slug: str) -> str:
+    """Beautify report using DRY handler"""
+    content_hash = hashlib.sha256(content.encode()).hexdigest()[:12]
+    cache_path = os.path.join(
+        "data",
+        "artists",
+        artist_name_slug,
+        "cache",
+        f"{artist_name_slug}_{report_type.replace(' ', '_')}_beautified_{content_hash}.tex",
+    )
+
+    return await LLMRequest.execute(
+        model_name=BEAUTIFICATION_MODEL,
+        system_prompt=BEAUTIFICATION_PROMPT,
+        user_content=content,
+        cache_path=cache_path,
+        process_name=f"{report_type} Beautification",
+        retry_on_stream_error=False,
+    )
+
+
+async def generate_booking_emails(artist_data: dict, artist_name_slug: str) -> list:
+    """Generate booking emails using DRY handler"""
+    content_hash = hashlib.sha256(json.dumps(artist_data).encode()).hexdigest()[:12]
+    cache_path = os.path.join(
+        "data",
+        "artists",
+        artist_name_slug,
+        "cache",
+        f"{artist_name_slug}_booking_emails_{content_hash}.txt",
+    )
+
+    return await LLMRequest.execute(
+        model_name=BOOKING_MODEL,
+        system_prompt="You are a music industry professional...",
+        user_content=BOOKING_RESEARCH_PROMPT.format(
+            artist_data=json.dumps(artist_data)
+        ),
+        cache_path=cache_path,
+        process_name="Booking Email Research",
+    )
 
 
 async def generate_reports(artist_data: dict):
@@ -618,326 +681,6 @@ async def generate_reports(artist_data: dict):
         f"All report generation completed for {artist_data.get('stage_name', 'Unknown Artist')}"
     )
     return reports
-
-
-async def integrate_reports(reports: dict, artist_name_slug: str) -> dict:
-    """Integrate multiple reports into optimized versions with streaming"""
-    try:
-        final_reports = {"EPK": None, "Internal Report": None}
-        cache_dir = os.path.join("data", "artists", artist_name_slug, "cache")
-
-        # EPK Integration with streaming
-        epk_cache_path = os.path.join(
-            cache_dir, f"{artist_name_slug}_integrated_epk.tex"
-        )
-        if not os.path.exists(epk_cache_path):
-            response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "HTTP-Referer": "https://audiokit.ai",
-                    "X-Title": "AudioKit",
-                },
-                json={
-                    "model": EPK_INTEGRATION_MODEL,
-                    "messages": [
-                        {"role": "system", "content": EPK_INTEGRATION_PROMPT},
-                        {
-                            "role": "user",
-                            "content": json.dumps({"EPKs": reports["EPK"]}),
-                        },
-                    ],
-                    "stream": True,
-                },
-                stream=True,
-            )
-            response.raise_for_status()
-
-            full_response = []
-            buffer = ""
-            Logger.info(f"Starting EPK integration stream from {EPK_INTEGRATION_MODEL}")
-
-            for chunk in response.iter_lines():
-                if chunk:
-                    decoded = chunk.decode().replace("data: ", "")
-                    if decoded == "[DONE]":
-                        break
-                    try:
-                        data = json.loads(decoded)
-                        if "content" in data["choices"][0]["delta"]:
-                            token = data["choices"][0]["delta"]["content"]
-                            buffer += token
-                            if token in ("\n", ".", ":", ","):
-                                Logger.stream_log(f"EPK Integration: {buffer.strip()}")
-                                full_response.append(buffer)
-                                buffer = ""
-                    except json.JSONDecodeError:
-                        continue
-
-            final_reports["EPK"] = "".join(full_response)
-            with open(epk_cache_path, "w") as f:
-                f.write(final_reports["EPK"])
-
-        # Repeat same streaming logic for internal reports
-        internal_cache_path = os.path.join(
-            cache_dir, f"{artist_name_slug}_integrated_internal.tex"
-        )
-        if not os.path.exists(internal_cache_path):
-            response = requests.post(
-                "https://openrouter.ai/api/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "HTTP-Referer": "https://audiokit.ai",
-                    "X-Title": "AudioKit",
-                },
-                json={
-                    "model": INTERNAL_REPORT_INTEGRATION_MODEL,
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": INTERNAL_REPORT_INTEGRATION_PROMPT,
-                        },
-                        {
-                            "role": "user",
-                            "content": json.dumps(
-                                {"Internal Reports": reports["Internal Report"]}
-                            ),
-                        },
-                    ],
-                    "stream": True,
-                },
-                stream=True,
-            )
-            response.raise_for_status()
-
-            full_response = []
-            buffer = ""
-            Logger.info(
-                f"Starting Internal Report integration stream from {INTERNAL_REPORT_INTEGRATION_MODEL}"
-            )
-
-            for chunk in response.iter_lines():
-                if chunk:
-                    decoded = chunk.decode().replace("data: ", "")
-                    if decoded == "[DONE]":
-                        break
-                    try:
-                        data = json.loads(decoded)
-                        if "content" in data["choices"][0]["delta"]:
-                            token = data["choices"][0]["delta"]["content"]
-                            buffer += token
-                            if token in ("\n", ".", ":", ","):
-                                Logger.stream_log(
-                                    f"Internal Integration: {buffer.strip()}"
-                                )
-                                full_response.append(buffer)
-                                buffer = ""
-                    except json.JSONDecodeError:
-                        continue
-
-            final_reports["Internal Report"] = "".join(full_response)
-            with open(internal_cache_path, "w") as f:
-                f.write(final_reports["Internal Report"])
-
-        return final_reports
-    except Exception as e:
-        Logger.error(f"Report integration failed: {str(e)}")
-        return {"EPK": "Integration failed", "Internal Report": "Integration failed"}
-
-
-async def beautify_report(content: str, report_type: str, artist_name_slug: str) -> str:
-    """Beautify formatted reports with streaming"""
-    try:
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "HTTP-Referer": "https://audiokit.ai",
-                "X-Title": "AudioKit",
-            },
-            json={
-                "model": BEAUTIFICATION_MODEL,
-                "messages": [
-                    {"role": "system", "content": BEAUTIFICATION_PROMPT},
-                    {"role": "user", "content": content},
-                ],
-                "stream": True,
-            },
-            stream=True,
-        )
-        response.raise_for_status()
-
-        full_response = []
-        buffer = ""
-        Logger.info(f"Starting beautification stream for {report_type}")
-
-        for chunk in response.iter_lines():
-            if chunk:
-                decoded = chunk.decode().replace("data: ", "")
-                if decoded == "[DONE]":
-                    break
-                try:
-                    data = json.loads(decoded)
-                    if "content" in data["choices"][0]["delta"]:
-                        token = data["choices"][0]["delta"]["content"]
-                        buffer += token
-                        if token in ("\n", ".", ":", ","):
-                            Logger.stream_log(f"Beautification: {buffer.strip()}")
-                            full_response.append(buffer)
-                            buffer = ""
-                except json.JSONDecodeError:
-                    continue
-
-        return "".join(full_response)
-    except Exception as e:
-        Logger.error(f"Beautification failed: {str(e)}")
-        return content
-
-
-async def compile_latex_to_pdf(
-    content: str, report_type: str, artist_name_slug: str
-) -> str:
-    """Compile LaTeX to PDF using local MacTeX installation"""
-    try:
-        artist_dir = os.path.join("data", "artists", artist_name_slug)
-        cache_dir = os.path.join(artist_dir, "cache")
-        final_dir = artist_dir
-
-        # Create input hash
-        content_hash = hashlib.sha256(content.encode("utf-8")).hexdigest()[:12]
-        cache_pdf = os.path.join(
-            cache_dir, f"{report_type.replace(' ', '_')}_{content_hash}.pdf"
-        )
-        final_pdf = os.path.join(
-            final_dir, f"{artist_name_slug}_{report_type.replace(' ', '_')}.pdf"
-        )
-
-        # Create directories if needed
-        os.makedirs(cache_dir, exist_ok=True)
-        os.makedirs(final_dir, exist_ok=True)
-
-        # Check cache first
-        if os.path.exists(cache_pdf):
-            Logger.info(f"Using cached PDF from {cache_pdf}")
-            # Copy to final location if needed
-            if not os.path.exists(final_pdf):
-                shutil.copy(cache_pdf, final_pdf)
-            return final_pdf
-
-        # Save LaTeX to cache
-        tex_path = os.path.join(
-            cache_dir, f"{report_type.replace(' ', '_')}_{content_hash}.tex"
-        )
-        with open(tex_path, "w") as f:
-            f.write(content)
-
-        # Compile with pdflatex directly in cache directory
-        compile_attempts = 3
-        for attempt in range(compile_attempts):
-            process = await asyncio.create_subprocess_exec(
-                "pdflatex",
-                "-interaction=nonstopmode",
-                "-halt-on-error",
-                "-output-directory",
-                cache_dir,
-                tex_path,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-            )
-
-            stdout, stderr = await process.communicate()
-
-            if process.returncode != 0:
-                Logger.warning(f"LaTeX compilation attempt {attempt+1} failed")
-                if attempt == compile_attempts - 1:
-                    raise RuntimeError(f"pdflatex failed: {stderr.decode()}")
-                continue
-            break
-
-        # Verify PDF was created
-        if not os.path.exists(cache_pdf):
-            raise RuntimeError("PDF output not generated")
-
-        # Copy to final location without hash
-        shutil.copy(cache_pdf, final_pdf)
-        Logger.success(f"PDF compiled successfully: {final_pdf}")
-        return final_pdf
-
-    except Exception as e:
-        Logger.error(f"PDF compilation failed: {str(e)}")
-        # Save fallback files to cache
-        fallback_tex = os.path.join(
-            cache_dir, f"{report_type.replace(' ', '_')}_FALLBACK.tex"
-        )
-        with open(fallback_tex, "w") as f:
-            f.write(content)
-
-        if "stderr" in locals():
-            fallback_log = os.path.join(
-                cache_dir, f"{report_type.replace(' ', '_')}_FALLBACK.log"
-            )
-            with open(fallback_log, "wb") as f:
-                f.write(stderr)
-
-        Logger.warning(f"Saved fallback files to cache: {cache_dir}")
-        return None
-
-
-async def generate_booking_emails(artist_data: dict, artist_name_slug: str) -> list:
-    """Generate targeted booking emails with streaming"""
-    try:
-        response = requests.post(
-            "https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                "HTTP-Referer": "https://audiokit.ai",
-                "X-Title": "AudioKit",
-            },
-            json={
-                "model": BOOKING_MODEL,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": "You are a music industry professional...",
-                    },
-                    {
-                        "role": "user",
-                        "content": BOOKING_RESEARCH_PROMPT.format(
-                            artist_data=json.dumps(artist_data)
-                        ),
-                    },
-                ],
-                "stream": True,
-            },
-            stream=True,
-        )
-        response.raise_for_status()
-
-        full_response = []
-        buffer = ""
-        Logger.info("Starting booking email research stream")
-
-        for chunk in response.iter_lines():
-            if chunk:
-                decoded = chunk.decode().replace("data: ", "")
-                if decoded == "[DONE]":
-                    break
-                try:
-                    data = json.loads(decoded)
-                    if "content" in data["choices"][0]["delta"]:
-                        token = data["choices"][0]["delta"]["content"]
-                        buffer += token
-                        if token in ("\n", ".", ":", ","):
-                            Logger.stream_log(f"Booking Research: {buffer.strip()}")
-                            full_response.append(buffer)
-                            buffer = ""
-                except json.JSONDecodeError:
-                    continue
-
-        return "".join(full_response)
-    except Exception as e:
-        Logger.error(f"Booking email generation failed: {str(e)}")
-        return "Email generation failed"
 
 
 async def save_emails_to_file(content: str, artist_name_slug: str):
