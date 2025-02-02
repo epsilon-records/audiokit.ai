@@ -1,17 +1,42 @@
-"""Content generators using LlamaIndex knowledge base"""
+"""Content Generation Module.
+
+This module provides AI-powered content generators for creating various marketing
+materials like EPKs, reports, and booking emails. It uses the LlamaIndex knowledge
+base for context-aware generation.
+
+Example:
+    >>> generator = EPKGenerator(artist_id="123", model_name="gpt-4")
+    >>> epk = await generator.generate_epk()
+"""
 
 from typing import Dict, Optional, List
 import httpx
 
-from .knowledge_base import KnowledgeBase
-from .logger import Logger
-from config import cfg
+from audiokit.logger import Logger
+
+from ..ai.knowledge_base import KnowledgeBase
+from ..config import cfg
 
 
 class OpenRouterClient:
-    """Simple client for OpenRouter API"""
+    """Client for OpenRouter API integration.
+
+    Handles communication with OpenRouter's API for AI model access.
+    Supports multiple models and includes error handling for common API issues.
+
+    Args:
+        model_name: Name of the AI model to use
+
+    Raises:
+        ValueError: For various API-related errors (rate limits, auth, etc.)
+    """
 
     def __init__(self, model_name: str):
+        """Initialize the OpenRouter client.
+
+        Args:
+            model_name: Name of the model to use (e.g., "gpt-4", "claude-2")
+        """
         self.model_name = model_name
         self.base_url = f"{cfg.api.openrouter.base_url}/api/v1"
         self.client = httpx.AsyncClient(
@@ -26,7 +51,17 @@ class OpenRouterClient:
         )
 
     async def chat_completion(self, messages: List[Dict[str, str]]) -> str:
-        """Send a chat completion request to OpenRouter"""
+        """Send a chat completion request to OpenRouter.
+
+        Args:
+            messages: List of message dictionaries with role and content
+
+        Returns:
+            Generated content from the AI model
+
+        Raises:
+            ValueError: If API request fails or response is invalid
+        """
         try:
             response = await self.client.post(
                 f"{self.base_url}/chat/completions",
@@ -70,16 +105,38 @@ class OpenRouterClient:
 
 
 class ContentGenerator:
-    """Base class for content generators using knowledge base"""
+    """Base class for AI-powered content generators.
+
+    Provides common functionality for content generation using the knowledge base
+    and AI models. Handles context retrieval, prompt building, and generation.
+
+    Args:
+        artist_id: Unique identifier for the artist
+        model_name: Name of the AI model to use
+    """
 
     def __init__(self, artist_id: str, model_name: str):
+        """Initialize the content generator.
+
+        Args:
+            artist_id: Unique identifier for the artist
+            model_name: Name of the AI model to use
+        """
         self.artist_id = artist_id
         self.model_name = model_name
         self.knowledge_base = KnowledgeBase(artist_id)
         self.client = OpenRouterClient(model_name)
 
     def _build_system_prompt(self, task_description: str, context: str) -> str:
-        """Build system prompt with context"""
+        """Build system prompt with context.
+
+        Args:
+            task_description: Description of the generation task
+            context: Relevant context from knowledge base
+
+        Returns:
+            Formatted system prompt
+        """
         return f"""You are an AI assistant specialized in creating content for music artists.
 
 Task: {task_description}
@@ -101,7 +158,20 @@ Guidelines:
         doc_types: Optional[List[str]] = None,
         top_k: int = 5,
     ) -> str:
-        """Generate content using knowledge base context"""
+        """Generate content using knowledge base context.
+
+        Args:
+            task_description: Description of what to generate
+            query: Query to find relevant context
+            doc_types: Types of documents to search
+            top_k: Number of top results to use
+
+        Returns:
+            Generated content
+
+        Raises:
+            ValueError: If generation fails
+        """
         try:
             # Query knowledge base for relevant context
             kb_response = await self.knowledge_base.query(
@@ -136,10 +206,25 @@ Guidelines:
 
 
 class EPKGenerator(ContentGenerator):
-    """Generates Electronic Press Kits"""
+    """Generator for Electronic Press Kits.
+
+    Creates comprehensive EPKs that include artist background, achievements,
+    press coverage, performance history, and unique selling points.
+
+    Example:
+        >>> generator = EPKGenerator("artist123", "gpt-4")
+        >>> epk = await generator.generate_epk()
+    """
 
     async def generate_epk(self) -> str:
-        """Generate EPK using all available artist information"""
+        """Generate EPK using all available artist information.
+
+        Returns:
+            Generated EPK content
+
+        Raises:
+            ValueError: If generation fails
+        """
         task_description = """Create a comprehensive Electronic Press Kit (EPK) that effectively promotes the artist. 
 Include their background, achievements, press coverage, performance history, and unique selling points."""
 
@@ -162,10 +247,25 @@ Include their background, achievements, press coverage, performance history, and
 
 
 class InternalReportGenerator(ContentGenerator):
-    """Generates Internal Reports"""
+    """Generator for internal analytical reports.
+
+    Creates detailed reports analyzing artist performance, market position,
+    and strategic recommendations based on data-driven insights.
+
+    Example:
+        >>> generator = InternalReportGenerator("artist123", "gpt-4")
+        >>> report = await generator.generate_report()
+    """
 
     async def generate_report(self) -> str:
-        """Generate internal report with analytics and insights"""
+        """Generate internal report with analytics and insights.
+
+        Returns:
+            Generated report content
+
+        Raises:
+            ValueError: If generation fails
+        """
         task_description = """Create a detailed internal report analyzing the artist's performance and potential. 
 Include data-driven insights, market analysis, and strategic recommendations."""
 
@@ -182,10 +282,25 @@ Include data-driven insights, market analysis, and strategic recommendations."""
 
 
 class BookingEmailGenerator(ContentGenerator):
-    """Generates Booking Emails"""
+    """Generator for booking and promotional emails.
+
+    Creates professional emails for venue booking and promotion,
+    highlighting artist achievements and appeal.
+
+    Example:
+        >>> generator = BookingEmailGenerator("artist123", "gpt-4")
+        >>> email = await generator.generate_email()
+    """
 
     async def generate_email(self) -> str:
-        """Generate personalized booking email"""
+        """Generate personalized booking email.
+
+        Returns:
+            Generated email content
+
+        Raises:
+            ValueError: If generation fails
+        """
         task_description = """Create a professional and compelling booking email that highlights 
 the artist's achievements and appeal to venues and promoters."""
 

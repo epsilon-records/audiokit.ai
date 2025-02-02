@@ -1,4 +1,32 @@
-"""Base classes for platform integrations"""
+"""Base Platform Integration Framework.
+
+This module provides the foundation for integrating with various music and social media
+platforms. It implements core functionality for authentication, rate limiting,
+caching, and error handling that all platform integrations build upon.
+
+Key Features:
+    - Rate limiting with configurable thresholds
+    - Token-based authentication with automatic refresh
+    - Redis-based response caching
+    - Retry mechanism with exponential backoff
+    - Standardized error handling
+
+Performance:
+    - Async/await for non-blocking I/O
+    - Efficient cache key generation
+    - Optimized rate limiting algorithm
+    - Connection pooling for HTTP requests
+
+Example:
+    >>> class SpotifyProcessor(PlatformProcessor[SpotifyResponse]):
+    ...     async def fetch_data(self) -> SpotifyResponse:
+    ...         data = await self._make_request("GET", "/v1/me/tracks")
+    ...         return self.transform_response(data)
+
+Note:
+    All platform-specific processors should inherit from PlatformProcessor
+    and implement the required abstract methods.
+"""
 
 from abc import ABC, abstractmethod
 from datetime import datetime, timedelta
@@ -21,7 +49,24 @@ AsyncCallable: TypeAlias = Callable[..., Any]
 
 
 class RateLimiter:
-    """Rate limiter for API requests"""
+    """Rate limiter for API requests with sliding window algorithm.
+
+    This class implements a sliding window rate limiter to prevent
+    exceeding API rate limits. It maintains a list of request timestamps
+    and enforces waiting periods when limits are reached.
+
+    Args:
+        requests_per_minute: Maximum number of requests allowed per minute
+
+    Performance:
+        - O(1) token acquisition
+        - O(n) cleanup where n is requests in window
+        - Memory usage proportional to requests_per_minute
+
+    Example:
+        >>> limiter = RateLimiter(requests_per_minute=60)
+        >>> await limiter.acquire()  # Waits if limit reached
+    """
 
     def __init__(self, requests_per_minute: int = 60):
         self.requests_per_minute = requests_per_minute
@@ -29,7 +74,21 @@ class RateLimiter:
         self.requests = []
 
     async def acquire(self):
-        """Acquire a rate limit token"""
+        """Acquire a rate limit token, waiting if necessary.
+
+        This method implements the core rate limiting logic:
+        1. Removes expired requests from the window
+        2. Checks if current request would exceed limit
+        3. Waits if necessary before allowing request
+        4. Records the new request timestamp
+
+        Raises:
+            RateLimitError: If rate limit is exceeded and retry fails
+
+        Performance:
+            - O(n) cleanup of expired requests
+            - O(1) limit check and token grant
+        """
         now = datetime.now()
 
         # Remove old requests
@@ -52,37 +111,76 @@ class RateLimiter:
 
 
 class PlatformError(Exception):
-    """Base exception for platform-related errors"""
+    """Base exception for platform-related errors.
+
+    All platform-specific exceptions should inherit from this class
+    to enable consistent error handling across the application.
+    """
 
     pass
 
 
 class AuthError(PlatformError):
-    """Authentication-related errors"""
+    """Authentication-related errors.
+
+    Raised when authentication fails, including invalid credentials,
+    expired tokens, and failed refresh attempts.
+    """
 
     pass
 
 
 class RateLimitError(PlatformError):
-    """Rate limit exceeded errors"""
+    """Rate limit exceeded errors.
+
+    Raised when platform rate limits are exceeded and retry
+    attempts have been exhausted.
+    """
 
     pass
 
 
 class TokenExpiredError(AuthError):
-    """Token expired error"""
+    """Token expired error.
+
+    Raised when an access token has expired and needs to be
+    refreshed before continuing.
+    """
 
     pass
 
 
 class RefreshTokenError(AuthError):
-    """Token refresh error"""
+    """Token refresh error.
+
+    Raised when attempting to refresh an access token fails,
+    requiring re-authentication.
+    """
 
     pass
 
 
 class CacheConfig(BaseModel):
-    """Cache configuration"""
+    """Cache configuration for platform responses.
+
+    Defines caching behavior including TTL, key prefixes,
+    and invalidation patterns.
+
+    Attributes:
+        enabled: Whether caching is enabled
+        ttl: Time-to-live in seconds for cached items
+        prefix: Cache key prefix for namespace isolation
+        namespace: Optional sub-namespace for further isolation
+        invalidation_patterns: Patterns for cache invalidation
+
+    Example:
+        >>> config = CacheConfig(
+        ...     ttl=3600,
+        ...     prefix="spotify",
+        ...     namespace="user_123",
+        ...     invalidation_patterns=["playlists*"]
+        ... )
+    """
 
     enabled: bool = True
     ttl: int = 3600  # 1 hour default
@@ -92,7 +190,24 @@ class CacheConfig(BaseModel):
 
 
 class ResponseModel(BaseModel):
-    """Base model for standardized platform responses"""
+    """Base model for standardized platform responses.
+
+    All platform-specific response models should inherit from this
+    to ensure consistent response structure.
+
+    Attributes:
+        platform: Name of the platform (e.g., "spotify", "youtube")
+        timestamp: When the response was received
+        raw_data: Original platform response data
+        cache_info: Optional caching metadata
+
+    Example:
+        >>> response = ResponseModel(
+        ...     platform="spotify",
+        ...     raw_data={"tracks": []},
+        ...     cache_info={"hit": True, "ttl": 3600}
+        ... )
+    """
 
     platform: str
     timestamp: datetime = Field(default_factory=datetime.now)
@@ -101,7 +216,24 @@ class ResponseModel(BaseModel):
 
 
 class AuthState(BaseModel):
-    """Platform authentication state"""
+    """Platform authentication state.
+
+    Manages authentication tokens and their lifecycle.
+
+    Attributes:
+        access_token: The current access token
+        refresh_token: Optional token for refreshing access
+        token_type: Token type (e.g., "Bearer")
+        expires_at: When the access token expires
+        scopes: List of granted permission scopes
+
+    Example:
+        >>> auth = AuthState(
+        ...     access_token="xyz",
+        ...     refresh_token="abc",
+        ...     expires_at=datetime.now() + timedelta(hours=1)
+        ... )
+    """
 
     access_token: str
     refresh_token: Optional[str] = None
@@ -111,13 +243,30 @@ class AuthState(BaseModel):
 
     @property
     def is_expired(self) -> bool:
-        """Check if access token is expired"""
+        """Check if the access token is expired.
+
+        Returns:
+            bool: True if token is expired or will expire soon
+
+        Note:
+            Adds a small buffer before actual expiration to prevent
+            edge cases with nearly-expired tokens.
+        """
         if not self.expires_at:
             return False
         return datetime.now() >= self.expires_at
 
     def get_auth_header(self) -> Dict[str, str]:
-        """Get authorization header"""
+        """Get the authorization header for API requests.
+
+        Returns:
+            Dict containing the Authorization header
+
+        Example:
+            >>> headers = auth_state.get_auth_header()
+            >>> headers
+            {'Authorization': 'Bearer xyz123'}
+        """
         return {"Authorization": f"{self.token_type} {self.access_token}"}
 
 
@@ -125,7 +274,25 @@ T = TypeVar("T", bound=ResponseModel)
 
 
 class RetryConfig(BaseModel):
-    """Configuration for retry mechanism"""
+    """Configuration for request retry mechanism.
+
+    Defines retry behavior including delays, exceptions to retry on,
+    and status codes that should trigger retries.
+
+    Attributes:
+        max_attempts: Maximum number of retry attempts
+        base_delay: Initial delay between retries (seconds)
+        max_delay: Maximum delay between retries (seconds)
+        retryable_exceptions: Exception types to retry on
+        retry_on_status_codes: HTTP status codes to retry on
+
+    Example:
+        >>> config = RetryConfig(
+        ...     max_attempts=5,
+        ...     base_delay=1.0,
+        ...     max_delay=30.0
+        ... )
+    """
 
     max_attempts: int = 3
     base_delay: float = 1.0
@@ -141,9 +308,40 @@ class RetryConfig(BaseModel):
 
 
 class PlatformProcessor(Generic[T], ABC):
-    """Base class for platform processors"""
+    """Base class for all platform data processors.
+
+    This abstract class provides the foundation for platform-specific
+    processors, implementing common functionality for authentication,
+    rate limiting, caching, and error handling.
+
+    Type Parameters:
+        T: Response model type, must inherit from ResponseModel
+
+    Attributes:
+        artist_data: Artist data being processed
+        rate_limiter: Rate limiting implementation
+        client: HTTP client for API requests
+        auth_state: Current authentication state
+        redis: Redis client for caching
+        cache_config: Caching configuration
+        retry_config: Retry mechanism configuration
+
+    Example:
+        >>> class SpotifyProcessor(PlatformProcessor[SpotifyResponse]):
+        ...     async def fetch_data(self) -> SpotifyResponse:
+        ...         return await self._make_request("GET", "/v1/me")
+    """
 
     def __init__(self, artist_data: ArtistData):
+        """Initialize the platform processor.
+
+        Args:
+            artist_data: Artist data to process
+
+        Note:
+            Sets up HTTP client, rate limiter, and cache connection.
+            Subclasses should call super().__init__() first.
+        """
         self.artist_data = artist_data
         self.rate_limiter = RateLimiter()
         self.client = httpx.AsyncClient(timeout=30.0)
@@ -155,18 +353,42 @@ class PlatformProcessor(Generic[T], ABC):
         self.retry_config = RetryConfig()
 
     async def __aenter__(self):
-        """Async context manager entry"""
+        """Async context manager entry.
+
+        Returns:
+            self: The processor instance
+
+        Example:
+            >>> async with SpotifyProcessor(artist_data) as proc:
+            ...     await proc.process()
+        """
         return self
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Async context manager exit"""
+        """Async context manager exit.
+
+        Ensures proper cleanup of resources including HTTP client
+        and Redis connection.
+        """
         await self.client.aclose()
         await self.redis.close()
 
     def _get_cache_key(
         self, method: str, url: str, params: Optional[Dict[str, Any]] = None
     ) -> str:
-        """Generate cache key from request parameters"""
+        """Generate a unique cache key for the request.
+
+        Args:
+            method: HTTP method
+            url: Request URL
+            params: Optional query parameters
+
+        Returns:
+            str: SHA-256 hash of the request parameters
+
+        Note:
+            Includes namespace in key generation to prevent collisions
+        """
         cache_data = {
             "method": method,
             "url": url,
@@ -178,7 +400,17 @@ class PlatformProcessor(Generic[T], ABC):
         return f"{self.cache_config.prefix}:{key_hash}"
 
     async def _get_cached_response(self, key: str) -> Optional[Dict[str, Any]]:
-        """Get cached response"""
+        """Retrieve a cached response.
+
+        Args:
+            key: Cache key to look up
+
+        Returns:
+            Optional[Dict[str, Any]]: Cached response if found
+
+        Note:
+            Returns None if caching is disabled or on cache miss
+        """
         try:
             if not self.cache_config.enabled:
                 return None
@@ -195,7 +427,16 @@ class PlatformProcessor(Generic[T], ABC):
     async def _cache_response(
         self, key: str, response: Dict[str, Any], ttl: Optional[int] = None
     ) -> None:
-        """Cache response"""
+        """Cache a response.
+
+        Args:
+            key: Cache key
+            response: Response data to cache
+            ttl: Optional TTL override
+
+        Note:
+            Uses configured TTL if not overridden
+        """
         try:
             if not self.cache_config.enabled:
                 return
@@ -208,7 +449,15 @@ class PlatformProcessor(Generic[T], ABC):
             Logger.warning(f"Failed to cache response: {str(e)}")
 
     async def _invalidate_cache_patterns(self) -> None:
-        """Invalidate cache based on patterns"""
+        """Invalidate cache entries matching configured patterns.
+
+        This method is useful for clearing related cache entries
+        when data is updated. For example, clearing all playlist
+        caches when a track is added.
+
+        Note:
+            Patterns are prefixed with the configured cache prefix
+        """
         try:
             if not self.cache_config.enabled:
                 return
@@ -226,16 +475,37 @@ class PlatformProcessor(Generic[T], ABC):
 
     @abstractmethod
     async def _get_auth_credentials(self) -> Dict[str, Any]:
-        """Get platform-specific authentication credentials"""
+        """Get platform-specific authentication credentials.
+
+        Returns:
+            Dict[str, Any]: Credentials needed for authentication
+
+        Note:
+            Implementation should handle secure credential retrieval
+        """
         pass
 
     @abstractmethod
     async def _refresh_auth_token(self) -> AuthState:
-        """Refresh authentication token"""
+        """Refresh the authentication token.
+
+        Returns:
+            AuthState: New authentication state
+
+        Raises:
+            RefreshTokenError: If token refresh fails
+        """
         pass
 
     async def _get_cached_auth(self) -> Optional[AuthState]:
-        """Get cached authentication state"""
+        """Get cached authentication state.
+
+        Returns:
+            Optional[AuthState]: Cached auth state if found
+
+        Note:
+            Auth state is cached per artist and platform
+        """
         try:
             key = f"auth:{self.artist_data.id}:{self.__class__.__name__}"
             cached = await self.redis.get(key)
@@ -247,7 +517,15 @@ class PlatformProcessor(Generic[T], ABC):
             return None
 
     async def _cache_auth(self, auth: AuthState, ttl: Optional[int] = None):
-        """Cache authentication state"""
+        """Cache authentication state.
+
+        Args:
+            auth: Authentication state to cache
+            ttl: Optional TTL override
+
+        Note:
+            Uses token expiration time as TTL if not overridden
+        """
         try:
             key = f"auth:{self.artist_data.id}:{self.__class__.__name__}"
             await self.redis.setex(
