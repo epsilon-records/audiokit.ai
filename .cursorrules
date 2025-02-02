@@ -1,3 +1,6 @@
+# AudioKit Development Guidelines
+
+<ai_instruction>
 <!--ai-ignore
 AudioKit Development Guidelines
 Version: 1.0.0
@@ -6,21 +9,23 @@ Author: AudioKit Team
 Purpose: Define development standards and practices for the AudioKit project
 ai-ignore-->
 
-# AudioKit Development Guidelines
+## Version Information
 
-<!--ai-ignore
+Version: 1.0.0
+Last updated: 2024-02-01
+Author: AudioKit Team
+Purpose: Define development standards and practices for the AudioKit project
+
 Open source guidelines are critical for community collaboration
 and maintaining project quality. These standards ensure consistency
 and maintainability across the project.
-ai-ignore-->
 
 ## Open Source Guidelines
 
-<!--ai-ignore
 Licensing and copyright requirements are based on
 open source best practices and legal requirements.
 Critical for project sustainability and adoption.
-ai-ignore-->
+
 ### Licensing and Copyright
 
 - Project is licensed under the MIT License
@@ -28,11 +33,10 @@ ai-ignore-->
 - Include copyright notices in all source files
 - Maintain CONTRIBUTORS.md file
 
-<!--ai-ignore
 Code quality standards ensure maintainability and reliability.
 Based on industry best practices and team experience.
 Documentation is a critical aspect of code quality.
-ai-ignore-->
+
 ### Code Quality
 
 - Comprehensive documentation required
@@ -41,10 +45,9 @@ ai-ignore-->
 - Include type hints and JSDoc comments
 - Write tests for all new features
 
-<!--ai-ignore
 Documentation standards are based on industry best practices
 and ensure maintainability and knowledge transfer.
-ai-ignore-->
+
 ### Code Documentation Standards
 
 1. **Function and Method Documentation**
@@ -142,10 +145,9 @@ ai-ignore-->
    - Scaling considerations
    - Security model
 
-<!--ai-ignore
 Code commenting standards ensure code readability and maintainability.
 Based on industry best practices and team experience with large codebases.
-ai-ignore-->
+
 ### Code Commenting Standards
 
 1. **General Principles**
@@ -261,10 +263,9 @@ ai-ignore-->
     # Maintain this workaround until v2.0 migration
     ```
 
-<!--ai-ignore
 Security guidelines follow OWASP standards and
 industry best practices for protecting sensitive data.
-ai-ignore-->
+
 ### Security
 
 - Never commit API keys or secrets
@@ -273,10 +274,9 @@ ai-ignore-->
 - Regular security audits
 - Follow OWASP guidelines
 
-<!--ai-ignore
 Documentation requirements ensure project accessibility
 and ease of contribution for new team members.
-ai-ignore-->
+
 ### Documentation
 
 - Maintain clear README.md
@@ -286,10 +286,9 @@ ai-ignore-->
 - Keep CHANGELOG.md updated
 - Include contribution guidelines
 
-<!--ai-ignore
 Community guidelines promote a healthy, inclusive
 open source environment. Based on successful OSS projects.
-ai-ignore-->
+
 ### Community
 
 - Be welcoming to contributors
@@ -298,10 +297,9 @@ ai-ignore-->
 - Maintain issue templates
 - Tag issues for new contributors
 
-<!--ai-ignore
 Dependency management is critical for security
 and maintainability. Regular updates required.
-ai-ignore-->
+
 ### Dependencies
 
 - Minimize external dependencies
@@ -310,11 +308,10 @@ ai-ignore-->
 - Use stable versions
 - Consider security implications
 
-<!--ai-ignore
 Monorepo structure follows industry best practices
 for managing complex full-stack applications.
 Last updated: 2024-02-01
-ai-ignore-->
+
 ## Monorepo Structure
 
 ```
@@ -346,10 +343,9 @@ audiokit/
   README.md            # Project documentation
 ```
 
-<!--ai-ignore
 Frontend framework choices are based on performance requirements
 and team expertise. Svelte chosen for its reactivity model.
-ai-ignore-->
+
 ## Core Technical Stack
 
 ### Frontend Framework (apps/web)
@@ -361,10 +357,9 @@ ai-ignore-->
 - Paraglide.js for internationalization
 - Vite for build tooling
 
-<!--ai-ignore
 Backend services are designed for scalability and
 maintainability. Python chosen for ML capabilities.
-ai-ignore-->
+
 ### Backend Services (packages/audiokit)
 
 - Python 3.11+ with Poetry for dependency management
@@ -383,10 +378,9 @@ ai-ignore-->
 - Redis for caching and message queue
 - Docker for containerization
 
-<!--ai-ignore
 Development guidelines ensure consistent code quality
 and maintainable implementations across the project.
-ai-ignore-->
+
 ## Development Guidelines
 
 1. Python Development
@@ -415,8 +409,6 @@ ai-ignore-->
 - Consistent formatting
 - Centralized configuration
 
-<!--ai-ignore
 Note: This file should be reviewed and updated quarterly
 to ensure all guidelines remain current and effective.
-Last review: 2024-02-01
-ai-ignore-->
+Last review: 2024-02-01</ai_instruction>

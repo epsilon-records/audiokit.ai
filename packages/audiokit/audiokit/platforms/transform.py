@@ -5,7 +5,7 @@ from typing import Dict, Any, List, Optional, TypeVar, Generic
 from pydantic import BaseModel, Field, field_validator
 
 from ..logger import Logger
-from config import cfg
+from ..feature_flags import FeatureFlags, Flags
 
 
 class MetricValue(BaseModel):
@@ -36,9 +36,11 @@ class Demographics(BaseModel):
 
     @field_validator("age_groups", "gender")
     @classmethod
-    def validate_distribution(cls, v: Dict[str, float]) -> Dict[str, float]:
+    def validate_distribution(
+        cls, v: Dict[str, float], flags: FeatureFlags
+    ) -> Dict[str, float]:
         """Validate distribution sums to 1"""
-        if cfg.features.advanced_validation:
+        if flags.is_enabled(Flags.ADVANCED_VALIDATION):
             total = sum(v.values())
             if not (0.99 <= total <= 1.01):  # Allow 1% margin of error
                 raise ValueError(f"Distribution must sum to 1.0 (got {total})")
@@ -59,9 +61,7 @@ class ArtistMetrics(BaseModel):
     stream_count: Dict[str, MetricValue] = Field(default_factory=dict)
 
     # Audience metrics (feature flagged)
-    demographics: Optional[Demographics] = (
-        None if cfg.features.demographics_analysis else None
-    )
+    demographics: Optional[Demographics] = None
 
     # Growth metrics (feature flagged)
     follower_growth: Dict[str, float] = Field(default_factory=dict)  # % change
@@ -79,8 +79,9 @@ T = TypeVar("T", bound=BaseModel)
 class DataTransformer(Generic[T]):
     """Base class for platform-specific data transformers"""
 
-    def __init__(self):
+    def __init__(self, user_id: str):
         self.metrics = ArtistMetrics()
+        self.flags = FeatureFlags(user_id)
 
     def transform(self, data: T) -> ArtistMetrics:
         """Transform platform-specific data to standardized format"""
@@ -90,7 +91,7 @@ class DataTransformer(Generic[T]):
         self, current: float, previous: float, min_value: float = 100
     ) -> float:
         """Calculate growth percentage with minimum value threshold"""
-        if not cfg.features.historical_tracking:
+        if not self.flags.is_enabled(Flags.HISTORICAL_TRACKING):
             return 0.0
 
         if previous < min_value:
@@ -107,7 +108,7 @@ class DataTransformer(Generic[T]):
         timestamp: datetime,
     ) -> float:
         """Calculate confidence score for a metric"""
-        if not cfg.features.confidence_scoring:
+        if not self.flags.is_enabled(Flags.CONFIDENCE_SCORING):
             return 1.0
 
         confidence = 1.0
@@ -217,7 +218,7 @@ class DataTransformer(Generic[T]):
                     self.metrics.popularity_score[platform] = metric
 
             # Advanced metrics (feature flagged)
-            elif cfg.features.advanced_validation:
+            elif self.flags.is_enabled(Flags.ADVANCED_VALIDATION):
                 if metric_type == "engagement_rate":
                     self.metrics.engagement_rate[platform] = metric
                 elif metric_type == "post_frequency":
@@ -239,7 +240,7 @@ class DataTransformer(Generic[T]):
         source: str,
     ) -> None:
         """Add demographics data to the standardized format"""
-        if not cfg.features.demographics_analysis:
+        if not self.flags.is_enabled(Flags.DEMOGRAPHICS_ANALYSIS):
             return
 
         try:
@@ -260,7 +261,7 @@ class DataTransformer(Generic[T]):
         previous_metrics: Dict[str, float],
     ) -> None:
         """Add growth metrics to the standardized format"""
-        if not cfg.features.historical_tracking:
+        if not self.flags.is_enabled(Flags.HISTORICAL_TRACKING):
             return
 
         try:

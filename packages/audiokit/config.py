@@ -19,6 +19,17 @@ class Config:
         self.config["api"]["openrouter"]["api_key"] = os.getenv("OPENROUTER_API_KEY")
         self.config["api"]["youtube"]["api_key"] = os.getenv("YOUTUBE_API_KEY")
 
+        # Load Pinecone configuration
+        self.config["vector_store"]["pinecone"]["api_key"] = os.getenv(
+            "PINECONE_API_KEY"
+        )
+        self.config["vector_store"]["pinecone"]["index_name"] = os.getenv(
+            "PINECONE_INDEX_NAME"
+        )
+        self.config["vector_store"]["pinecone"]["environment"] = os.getenv(
+            "PINECONE_ENVIRONMENT"
+        )
+
         # Add database URL from environment
         self.config["database"] = {"url": os.getenv("DATABASE_URL")}
 
@@ -46,14 +57,16 @@ class Config:
 
 
 class ConfigDict:
-    def __init__(self, data):
-        self._data = data
+    """Helper class to allow dot notation access to nested dictionary"""
+
+    def __init__(self, d):
+        self._dict = d
 
     def __getattr__(self, name):
-        if name in self._data:
-            value = self._data[name]
+        if name in self._dict:
+            value = self._dict[name]
             if isinstance(value, dict):
-                return ConfigDict(value)  # Recursively wrap nested dicts
+                return ConfigDict(value)  # Wrap nested dicts
             return value
         raise AttributeError(
             f"'{self.__class__.__name__}' object has no attribute '{name}'"

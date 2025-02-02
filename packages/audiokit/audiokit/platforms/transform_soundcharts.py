@@ -6,7 +6,7 @@ from typing import Dict, Any, List
 from .transform import DataTransformer, ArtistMetrics
 from .soundcharts import SoundchartsResponse
 from ..logger import Logger
-from config import cfg
+from ..feature_flags import Flags
 
 
 class SoundchartsTransformer(DataTransformer[SoundchartsResponse]):
@@ -24,7 +24,7 @@ class SoundchartsTransformer(DataTransformer[SoundchartsResponse]):
                 self._transform_current_stats(data.current_stats, timestamp)
 
             # Process audience data (feature flagged)
-            if cfg.features.demographics_analysis and data.audience:
+            if self.flags.is_enabled(Flags.DEMOGRAPHICS_ANALYSIS) and data.audience:
                 self._transform_audience(data.audience, timestamp)
 
             # Add source
@@ -44,7 +44,7 @@ class SoundchartsTransformer(DataTransformer[SoundchartsResponse]):
             for platform, metrics in stats.items():
                 # Skip competitor analysis if feature is disabled
                 if (
-                    not cfg.features.competitor_analysis
+                    not self.flags.is_enabled(Flags.COMPETITOR_ANALYSIS)
                     and platform == "similar_artists"
                 ):
                     continue
@@ -66,7 +66,7 @@ class SoundchartsTransformer(DataTransformer[SoundchartsResponse]):
         self, audience: Dict[str, Any], timestamp: datetime
     ) -> None:
         """Transform audience demographics data"""
-        if not cfg.features.demographics_analysis:
+        if not self.flags.is_enabled(Flags.DEMOGRAPHICS_ANALYSIS):
             return
 
         try:
@@ -105,7 +105,7 @@ class SoundchartsTransformer(DataTransformer[SoundchartsResponse]):
         platform: str,
     ) -> None:
         """Transform historical data into growth metrics"""
-        if not cfg.features.historical_tracking:
+        if not self.flags.is_enabled(Flags.HISTORICAL_TRACKING):
             return
 
         try:
