@@ -12,6 +12,26 @@ api:
     referer: 'https://audiokit.ai'
     title: 'AudioKit'
 
+features:
+  # Core Features (Always enabled)
+  platform_integration: true
+  knowledge_base: true
+  data_storage: true
+  
+  # Advanced Features (Configurable)
+  confidence_scoring: false      # Metric confidence calculation
+  historical_tracking: false     # Historical data and growth metrics
+  advanced_validation: false     # Extra data validation rules
+  demographics_analysis: false   # Detailed audience demographics
+  competitor_analysis: false     # Similar artists tracking
+
+vector_store:
+  pinecone:
+    api_key: '${PINECONE_API_KEY}'
+    index_name: '${PINECONE_INDEX_NAME}'
+    environment: '${PINECONE_ENVIRONMENT}'
+    dimension: 1536  # Default for text-embedding-ada-002
+
 prompts:
   epk_system: |
     You are an expert in electronic music industry marketing and EPK creation. Using the provided JSON data, generate a comprehensive and visually appealing Electronic Press Kit (EPK) that highlights:
