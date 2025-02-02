@@ -1,6 +1,6 @@
 """Soundcharts platform processor for artist analytics"""
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
 from pydantic import Field
 
@@ -21,6 +21,17 @@ class SoundchartsMetrics(BaseModel):
     metric_type: str
     value: float
     timestamp: datetime
+
+
+class SoundchartsHistoricalData(BaseModel):
+    """Historical data model for tracking changes"""
+
+    current_value: float
+    previous_value: Optional[float] = None
+    change_absolute: Optional[float] = None
+    change_percentage: Optional[float] = None
+    timestamp: datetime
+    previous_timestamp: Optional[datetime] = None
 
 
 class SoundchartsResponse(ResponseModel):
@@ -146,6 +157,83 @@ class SoundchartsProcessor(PlatformProcessor[SoundchartsResponse]):
 
         return metrics
 
+    async def _get_historical_data(
+        self, platform: str, metric_type: str, days: int = 30
+    ) -> List[Dict[str, Any]]:
+        """Get historical data for a specific metric"""
+        try:
+            # Calculate date range
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days)
+
+            # Fetch historical data from Soundcharts
+            response = await self._make_request(
+                "GET",
+                f"{self.base_url}/artist/{self.artist_data.soundcharts_id}/history",
+                params={
+                    "platform": platform,
+                    "metric": metric_type,
+                    "start_date": start_date.isoformat(),
+                    "end_date": end_date.isoformat(),
+                },
+                headers=await self._get_auth_credentials(),
+                auth_required=False,
+            )
+
+            return response.get("object", {}).get("history", [])
+
+        except Exception as e:
+            Logger.error(f"Failed to fetch historical data: {str(e)}")
+            return []
+
+    async def _calculate_metric_changes(
+        self, metrics: List[SoundchartsMetrics]
+    ) -> List[SoundchartsHistoricalData]:
+        """Calculate changes in metrics over time"""
+        historical_data = []
+
+        for metric in metrics:
+            # Get historical data for this metric
+            history = await self._get_historical_data(
+                platform=metric.platform,
+                metric_type=metric.metric_type,
+            )
+
+            # Find previous value
+            previous_value = None
+            previous_timestamp = None
+            if history:
+                # Sort by timestamp descending
+                sorted_history = sorted(
+                    history,
+                    key=lambda x: x.get("timestamp", ""),
+                    reverse=True,
+                )
+                if len(sorted_history) > 1:
+                    previous_value = float(sorted_history[1].get("value", 0))
+                    previous_timestamp = datetime.fromisoformat(
+                        sorted_history[1].get("timestamp")
+                    )
+
+            # Calculate changes
+            change_data = SoundchartsHistoricalData(
+                current_value=metric.value,
+                previous_value=previous_value,
+                timestamp=metric.timestamp,
+                previous_timestamp=previous_timestamp,
+            )
+
+            if previous_value is not None:
+                change_data.change_absolute = metric.value - previous_value
+                if previous_value != 0:
+                    change_data.change_percentage = (
+                        (metric.value - previous_value) / previous_value
+                    ) * 100
+
+            historical_data.append(change_data)
+
+        return historical_data
+
     def transform_response(
         self, response: Dict[str, Any], cache_info: Optional[Dict[str, Any]] = None
     ) -> SoundchartsResponse:
@@ -171,7 +259,7 @@ class SoundchartsProcessor(PlatformProcessor[SoundchartsResponse]):
                 "GET",
                 f"{self.base_url}/artist/{self.artist_data.soundcharts_id}/current-stats",
                 headers=headers,
-                auth_required=False,  # We handle auth headers manually
+                auth_required=False,
             )
 
             # Fetch audience insights
@@ -214,31 +302,52 @@ class SoundchartsProcessor(PlatformProcessor[SoundchartsResponse]):
             if response.current_stats:
                 # Extract and store metrics
                 metrics = self._extract_metrics(response.current_stats)
+
+                # Calculate historical changes
+                historical_data = await self._calculate_metric_changes(metrics)
+
                 await self.doc_processor.process_analytics(
                     platform="soundcharts",
                     analytics_data={
                         "metrics": [m.model_dump() for m in metrics],
+                        "historical_data": [h.model_dump() for h in historical_data],
                         "timestamp": timestamp,
                         "raw_data": response.current_stats,
                     },
                 )
 
-            # Process audience data
+            # Process audience data with historical tracking
             if response.audience:
+                # Get previous audience data
+                prev_audience = await self._get_historical_data(
+                    platform="soundcharts",
+                    metric_type="audience",
+                    days=7,  # Compare with last week
+                )
+
                 await self.doc_processor.process_analytics(
                     platform="soundcharts_audience",
                     analytics_data={
                         "demographics": response.audience,
+                        "historical_data": prev_audience,
                         "timestamp": timestamp,
                     },
                 )
 
-            # Process similar artists
+            # Process similar artists with change tracking
             if response.similar_artists:
+                # Get previous similar artists
+                prev_similar = await self._get_historical_data(
+                    platform="soundcharts",
+                    metric_type="similar_artists",
+                    days=30,  # Monthly comparison
+                )
+
                 await self.doc_processor.process_analytics(
                     platform="soundcharts_similar",
                     analytics_data={
                         "similar_artists": response.similar_artists,
+                        "historical_data": prev_similar,
                         "timestamp": timestamp,
                     },
                 )
