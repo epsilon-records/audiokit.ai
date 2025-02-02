@@ -1,0 +1,6 @@
+graph TD
+    A[Audiokit CLI] --> B[API Gateway / Reverse Proxy]
+    B --> C[Public FastAPI Server]
+    B --> D[Proprietary FastAPI Server]
+    C --> E["audiokit (Open Source Package)"]
+    D --> F["audiokit-ai (Proprietary Package)"]

@@ -1,6 +1,6 @@
 # AudioKit Development Guidelines
 
-<ai_instruction>
+<ai_instruction cmd="sync">
 <!--ai-ignore
 .cursorrules: Automated AI Post-Interaction Tasks
 Version: 1.0.0
