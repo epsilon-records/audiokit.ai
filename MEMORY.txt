@@ -1,0 +1,2 @@
+// Appending new memory record for updated .cursorrules file
+{"timestamp": "2023-10-03T12:00:00Z", "event": "updated_cursorrules", "message": "Updated .cursorrules file with new AudioKit development guidelines (Version: 1.0.0, Last updated: 2025-02-02)"} 
