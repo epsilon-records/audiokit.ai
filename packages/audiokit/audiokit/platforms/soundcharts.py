@@ -2,7 +2,8 @@
 
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional, List
-from pydantic import Field
+from pydantic import BaseModel, Field, field_validator, model_validator
+import re
 
 from .base import (
     PlatformProcessor,
@@ -22,6 +23,47 @@ class SoundchartsMetrics(BaseModel):
     value: float
     timestamp: datetime
 
+    @field_validator("platform")
+    @classmethod
+    def validate_platform(cls, v: str) -> str:
+        """Validate platform name"""
+        valid_platforms = {"spotify", "instagram", "youtube", "facebook", "tiktok"}
+        if v.lower() not in valid_platforms:
+            raise ValueError(f"Invalid platform: {v}. Must be one of {valid_platforms}")
+        return v.lower()
+
+    @field_validator("metric_type")
+    @classmethod
+    def validate_metric_type(cls, v: str) -> str:
+        """Validate metric type"""
+        # Convert to snake_case
+        v = re.sub(r"(?<!^)(?=[A-Z])", "_", v).lower()
+
+        valid_metrics = {
+            "followers",
+            "monthly_listeners",
+            "popularity",
+            "posts",
+            "subscribers",
+            "views",
+            "engagement_rate",
+            "likes",
+            "comments",
+        }
+        if v not in valid_metrics:
+            raise ValueError(
+                f"Invalid metric type: {v}. Must be one of {valid_metrics}"
+            )
+        return v
+
+    @field_validator("value")
+    @classmethod
+    def validate_value(cls, v: float) -> float:
+        """Validate metric value"""
+        if v < 0:
+            raise ValueError("Metric value cannot be negative")
+        return v
+
 
 class SoundchartsHistoricalData(BaseModel):
     """Historical data model for tracking changes"""
@@ -32,6 +74,65 @@ class SoundchartsHistoricalData(BaseModel):
     change_percentage: Optional[float] = None
     timestamp: datetime
     previous_timestamp: Optional[datetime] = None
+
+    @model_validator(mode="after")
+    def validate_changes(self) -> "SoundchartsHistoricalData":
+        """Validate change calculations"""
+        if self.previous_value is not None:
+            # Verify absolute change calculation
+            expected_absolute = self.current_value - self.previous_value
+            if (
+                self.change_absolute is not None
+                and abs(self.change_absolute - expected_absolute) > 0.001
+            ):
+                raise ValueError("Invalid absolute change calculation")
+
+            # Verify percentage change calculation
+            if self.previous_value != 0 and self.change_percentage is not None:
+                expected_percentage = (
+                    (self.current_value - self.previous_value) / self.previous_value
+                ) * 100
+                if abs(self.change_percentage - expected_percentage) > 0.001:
+                    raise ValueError("Invalid percentage change calculation")
+
+        return self
+
+
+class SoundchartsAudience(BaseModel):
+    """Audience demographics validation model"""
+
+    age_distribution: Dict[str, float]
+    gender_distribution: Dict[str, float]
+    top_countries: List[Dict[str, Any]]
+
+    @field_validator("age_distribution")
+    @classmethod
+    def validate_age_distribution(cls, v: Dict[str, float]) -> Dict[str, float]:
+        """Validate age distribution"""
+        total = sum(v.values())
+        if not (0.99 <= total <= 1.01):  # Allow 1% margin of error
+            raise ValueError(f"Age distribution must sum to 1.0 (got {total})")
+        return v
+
+    @field_validator("gender_distribution")
+    @classmethod
+    def validate_gender_distribution(cls, v: Dict[str, float]) -> Dict[str, float]:
+        """Validate gender distribution"""
+        total = sum(v.values())
+        if not (0.99 <= total <= 1.01):  # Allow 1% margin of error
+            raise ValueError(f"Gender distribution must sum to 1.0 (got {total})")
+        return v
+
+    @field_validator("top_countries")
+    @classmethod
+    def validate_top_countries(cls, v: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Validate top countries"""
+        total_share = sum(country.get("share", 0) for country in v)
+        if (
+            total_share > 1.01
+        ):  # Allow exceeding 1.0 as it might not include all countries
+            raise ValueError(f"Country shares exceed 1.0 (got {total_share})")
+        return v
 
 
 class SoundchartsResponse(ResponseModel):
@@ -101,7 +202,7 @@ class SoundchartsResponse(ResponseModel):
             }
         }
 
-    # Additional fields specific to Soundcharts
+    # Additional fields with validation
     current_stats: Dict[str, Dict[str, Any]] = Field(
         default_factory=dict,
         description="Current statistics across different platforms",
@@ -115,6 +216,22 @@ class SoundchartsResponse(ResponseModel):
         description="Similar artists data",
     )
 
+    @model_validator(mode="after")
+    def validate_response(self) -> "SoundchartsResponse":
+        """Validate complete response"""
+        # Validate audience data if present
+        if self.audience:
+            SoundchartsAudience(**self.audience)
+
+        # Validate similar artists
+        for artist in self.similar_artists:
+            if "name" not in artist or "id" not in artist:
+                raise ValueError("Similar artists must have name and id")
+            if "genres" in artist and not isinstance(artist["genres"], list):
+                raise ValueError("Genres must be a list")
+
+        return self
+
 
 class SoundchartsProcessor(PlatformProcessor[SoundchartsResponse]):
     """Processor for Soundcharts platform data"""
@@ -126,6 +243,72 @@ class SoundchartsProcessor(PlatformProcessor[SoundchartsResponse]):
         self.api_key = cfg.soundcharts.api_key
         self.doc_processor = DocumentProcessor(artist_data.id)
 
+    def _clean_metric_name(self, name: str) -> str:
+        """Clean and standardize metric names"""
+        # Convert camelCase or PascalCase to snake_case
+        name = re.sub(r"(?<!^)(?=[A-Z])", "_", name).lower()
+        # Remove special characters
+        name = re.sub(r"[^a-z0-9_]", "", name)
+        return name
+
+    def _clean_metric_value(self, value: Any) -> Optional[float]:
+        """Clean and validate metric values"""
+        if value is None:
+            return None
+
+        try:
+            # Convert to float
+            if isinstance(value, str):
+                # Remove commas and other formatting
+                value = float(re.sub(r"[^\d.-]", "", value))
+            else:
+                value = float(value)
+
+            # Validate range
+            if value < 0:
+                Logger.warning(f"Negative metric value found: {value}, setting to 0")
+                return 0.0
+            if value > 1e12:  # Arbitrary large number check
+                Logger.warning(f"Suspiciously large metric value found: {value}")
+
+            return value
+
+        except (ValueError, TypeError) as e:
+            Logger.warning(f"Failed to clean metric value: {value}, Error: {str(e)}")
+            return None
+
+    def _clean_percentage(self, value: float) -> float:
+        """Clean and validate percentage values"""
+        if value > 1:
+            value = value / 100  # Convert percentage to decimal
+        return max(0.0, min(1.0, value))  # Clamp between 0 and 1
+
+    def _extract_metrics(self, data: Dict[str, Any]) -> List[SoundchartsMetrics]:
+        """Extract standardized metrics from raw data"""
+        metrics = []
+        timestamp = datetime.now()
+
+        # Process platform-specific metrics
+        for platform, stats in data.items():
+            for metric_name, value in stats.items():
+                # Clean metric name and value
+                clean_name = self._clean_metric_name(metric_name)
+                clean_value = self._clean_metric_value(value)
+
+                if clean_value is not None:
+                    try:
+                        metric = SoundchartsMetrics(
+                            platform=platform,
+                            metric_type=clean_name,
+                            value=clean_value,
+                            timestamp=timestamp,
+                        )
+                        metrics.append(metric)
+                    except ValueError as e:
+                        Logger.warning(f"Invalid metric: {str(e)}")
+
+        return metrics
+
     async def _get_auth_credentials(self) -> Dict[str, Any]:
         """Get Soundcharts authentication headers"""
         return {
@@ -136,26 +319,6 @@ class SoundchartsProcessor(PlatformProcessor[SoundchartsResponse]):
     async def _refresh_auth_token(self) -> None:
         """Not used - Soundcharts uses API key authentication"""
         raise NotImplementedError("Soundcharts does not support token refresh")
-
-    def _extract_metrics(self, data: Dict[str, Any]) -> List[SoundchartsMetrics]:
-        """Extract standardized metrics from raw data"""
-        metrics = []
-        timestamp = datetime.now()
-
-        # Process platform-specific metrics
-        for platform, stats in data.items():
-            for metric_name, value in stats.items():
-                if isinstance(value, (int, float)):
-                    metrics.append(
-                        SoundchartsMetrics(
-                            platform=platform,
-                            metric_type=metric_name,
-                            value=float(value),
-                            timestamp=timestamp,
-                        )
-                    )
-
-        return metrics
 
     async def _get_historical_data(
         self, platform: str, metric_type: str, days: int = 30
