@@ -31,6 +31,7 @@ We follow semantic versioning (MAJOR.MINOR.PATCH):
 4. **Sunset**: Removed from service
 
 Example lifecycle:
+
 ```
 v1: Maintenance (Security updates only)
 v2: Active (Current stable version)
@@ -304,4 +305,4 @@ describe('Version Migration', () => {
     });
   });
 });
-``` 
+```

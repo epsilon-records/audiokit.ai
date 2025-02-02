@@ -2,7 +2,7 @@
 default:
     @just --list
 
-# Install all dependencies (both Python and Node.js)
+# Install all dependencies (both Python and Node.js) and setup examples
 install:
     cd packages/audiokit && poetry install
     cd apps/web && bun install
@@ -10,6 +10,10 @@ install:
 # Install dependencies for audiokit package
 audiokit-install:
     cd packages/audiokit && poetry install
+
+# Run the basic usage example
+run-basic-example:
+    cd packages/audiokit && poetry run python examples/basic_usage.py
 
 # Run audiokit pipeline for a specific artist
 audiokit-run artist_id:

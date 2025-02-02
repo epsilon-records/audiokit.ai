@@ -14,7 +14,7 @@ AudioKit Pro extends the open-source AudioKit SDK with advanced AI-powered marke
 
 ```bash
 # Requires valid subscription
-pip install audiokit-pro
+pip install audiokit-ai
 ```
 
 ## Quick Start
@@ -33,8 +33,8 @@ For full documentation and API reference, visit [pro.audiokit.org](https://pro.a
 
 ## Support
 
-For support, please contact support@audiokit.org or visit our [support portal](https://support.audiokit.org).
+For support, please contact <support@audiokit.org> or visit our [support portal](https://support.audiokit.org).
 
 ## License
 
-This is proprietary software. See LICENSE file for details. 
+This is proprietary software. See LICENSE file for details.
