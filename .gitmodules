@@ -7,3 +7,6 @@
 [submodule "markai"]
 	path = markai
 	url = https://github.com/natehouk/markai
+[submodule ".markai/markai"]
+	path = .markai/markai
+	url = https://github.com/natehouk/markai
