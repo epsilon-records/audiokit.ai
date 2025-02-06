@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "ai-coder"
+version = "0.1.0"
+description = "AI-powered coding assistant for automated refactoring and development"
+authors = ["Your Name <your.email@example.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+typer = "^0.9.0"
+rich = "^13.6.0"
+pydantic = "^2.4.0"
+gitpython = "^3.1.40"
+anthropic = "^0.5.0"
+pyyaml = "^6.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-asyncio = "^0.21.0"
+ruff = "^0.1.0"
+
+[tool.poetry.scripts]
+ai-coder = "ai_coder.cli:app"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api" 

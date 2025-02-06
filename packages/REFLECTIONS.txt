@@ -8,6 +8,7 @@ Current Implementation Status
    - Simple audio analysis pipeline implemented
    - Async request handling working as intended
    - Type-safe interfaces for core components
+   - Resilient error handling with partial results
 
 2. Technical Debt Notes:
    - Limited error recovery mechanisms
@@ -20,6 +21,20 @@ Current Implementation Status
    - Type hints used in core interfaces
    - Docstrings need improvement
    - Function length generally acceptable
+
+Architecture Overview
+-------------------
+1. audiokit (Client Package):
+   - Command line interface
+   - Async HTTP client
+   - Error handling and reporting
+   - Configuration management
+
+2. audiokit-ai (Server Package):
+   - FastAPI backend
+   - Audio processing pipeline
+   - Authentication system
+   - Feature extraction
 
 Architectural Decisions
 ----------------------

@@ -34,6 +34,11 @@ High Priority:
    - [x] Implement proper API authentication
    - [x] Add input validation for all endpoints
    - [x] Add basic logging
+   - [x] Fix authentication system
+   - [x] Improve error handling
+   - [ ] Add health check endpoint
+   - [ ] Add proper logging system
+   - [ ] Clean up duplicate code in auth.py
 
 2. Testing Infrastructure
    - [x] Write unit tests for API endpoints
@@ -110,3 +115,24 @@ Notes
 - Both need comprehensive testing
 - Documentation is critical for both packages
 - Security is paramount for server implementation
+
+AI Command Runner Design:
+1. Core Features:
+   - Context management across iterations
+   - File change tracking
+   - Git integration
+   - Change validation
+   - Rollback capability
+
+2. Workflow:
+   - Read task list from TODO.txt
+   - Execute changes iteratively
+   - Validate each change
+   - Commit working changes
+   - Update task status
+
+3. Benefits:
+   - Faster development cycles
+   - Consistent changes
+   - Better context retention
+   - Automated documentation updates
