@@ -44,11 +44,18 @@ class TemporalFeatures(BaseModel):
 
 class AudioAnalysis(BaseModel):
     """Audio analysis results."""
-    sample_rate: int = Field(..., description="Sample rate in Hz")
-    duration: float = Field(..., description="Duration in seconds")
-    channels: int = Field(..., description="Number of audio channels")
-    temporal: Dict[str, float] = Field(default_factory=dict, description="Temporal features")
-    spectral: Dict[str, float] = Field(default_factory=dict, description="Spectral features")
+    sample_rate: Optional[int] = None
+    duration: Optional[float] = None
+    channels: Optional[int] = None
+    
+    spectral: Dict[str, float] = {}
+    temporal: Dict[str, Any] = {}
+    
+    tempo: Optional[float] = None
+    mfcc_features: Optional[List[float]] = None
+    
+    # Track any errors that occurred during processing
+    errors: List[str] = []
 
 class ProcessingParameters(BaseModel):
     """Parameters for audio processing."""

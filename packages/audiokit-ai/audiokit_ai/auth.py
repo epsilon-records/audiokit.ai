@@ -23,21 +23,28 @@ class TokenData(BaseModel):
     key: str
     permissions: list[str]
 
-# Temporary in-memory storage - replace with database in production
-api_keys: dict[str, APIKey] = {}
-
 # API key header
 api_key_header = APIKeyHeader(name="X-API-Key")
 
+# In-memory storage - replace with database in production
+api_keys: dict[str, APIKey] = {}
+
 def init_api_keys(config):
     """Initialize API keys from config."""
-    test_key = config.api_key if hasattr(config, 'api_key') else "test-key"
+    # Get API key from config, fallback to test-key if not present
+    test_key = getattr(config, 'api_key', 'test-key')
+    
+    # Clear existing keys
+    api_keys.clear()
+    
+    # Add the configured key
     api_keys[test_key] = APIKey(
         key=test_key,
-        name="Test Key",
+        name="Default Key",
         enabled=True,
         permissions=["analyze", "process"]
     )
+    return test_key
 
 @router.post("/api-keys", response_model=APIKey)
 async def create_api_key(name: str):
@@ -140,31 +147,3 @@ def verify_permission(permission: str):
             )
         return token
     return verify 
-
-"""Simple authentication for AudioKit AI."""
-from fastapi import HTTPException, Security
-from fastapi.security import APIKeyHeader
-
-api_key_header = APIKeyHeader(name="X-API-Key")
-
-# In memory API keys - replace with database in production
-API_KEYS = {"test-key"}
-
-async def verify_token(api_key: str = Security(api_key_header)) -> str:
-    """Verify API key.
-    
-    Args:
-        api_key: API key from request header
-        
-    Returns:
-        API key if valid
-        
-    Raises:
-        HTTPException: If API key is invalid
-    """
-    if api_key not in API_KEYS:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid API key"
-        )
-    return api_key 
