@@ -1,0 +1,154 @@
+# AudioKit Development Rules
+
+## Core Development Rules
+
+1. Always use best practices
+   - Follow PEP 8 style guide
+   - Use type hints consistently
+   - Write comprehensive docstrings
+   - Keep functions focused and small
+   - Use meaningful variable names
+   - Handle errors gracefully
+   - Write tests for all functionality
+   - Use async/await for I/O operations
+   - Follow SOLID principles
+   - Use dependency injection where appropriate
+   - Use ruff for all formatting and linting (replaces flake8, isort, and black)
+
+2. Always use Poetry for dependency management
+   - Never use setup.py (deprecated)
+   - Maintain pyproject.toml for all configuration
+   - Use poetry.lock for deterministic builds
+   - Specify dependency ranges appropriately
+   - Group dev dependencies separately
+   - Use virtual environments consistently
+   - Run poetry update regularly
+   - Document dependency changes
+
+3. Always use latest stable versions
+   - Python 3.11+ for development
+   - Latest stable versions of dependencies
+   - Regular dependency updates
+   - Security patches prioritized
+   - Maintain compatibility matrix
+   - Document version requirements
+   - Use CI to test multiple versions
+
+## Code Quality Standards
+
+### Testing
+- 100% test coverage for core functionality
+- Integration tests for API endpoints
+- Property-based testing where appropriate
+- Performance benchmarks
+- Security testing
+- Mock external dependencies
+
+### Documentation
+- Clear README files
+- API documentation
+- Usage examples
+- Architecture diagrams
+- Changelog maintenance
+- Inline code comments
+- Type hints and docstrings
+
+### Security
+- Input validation
+- Output sanitization
+- Secure defaults
+- API authentication
+- Rate limiting
+- Audit logging
+- Dependency scanning
+
+### Performance
+- Async operations
+- Resource pooling
+- Caching strategies
+- Memory management
+- Profile critical paths
+- Optimize hot spots
+
+## Development Workflow
+
+### Version Control
+- Meaningful commit messages
+- Feature branches
+- Pull request reviews
+- Version tagging
+- Changelog updates
+- Branch protection
+
+### CI/CD
+- Automated testing
+- Code quality checks
+- Type checking
+- Security scanning
+- Performance testing
+- Automated deployment
+
+### Code Review
+- Style consistency
+- Security review
+- Performance impact
+- Test coverage
+- Documentation
+- Breaking changes
+
+## Maintenance
+
+### Dependencies
+- Regular updates
+- Security patches
+- Compatibility testing
+- Version pinning
+- Dependency audits
+- Update documentation
+
+### Technical Debt
+- Regular refactoring
+- Code cleanup
+- Deprecation handling
+- Legacy support
+- Migration paths
+- Documentation updates
+
+## Environment Setup
+
+### Development
+```bash
+# Create new project
+poetry new project-name
+
+# Install dependencies
+poetry install
+
+# Add dependency
+poetry add package-name
+
+# Add dev dependency
+poetry add --group dev package-name
+
+# Update dependencies
+poetry update
+
+# Run tests
+poetry run pytest
+
+# Format and lint code
+poetry run ruff check .
+poetry run ruff format .
+```
+
+### Production
+```bash
+# Install production dependencies
+poetry install --no-dev
+
+# Build package
+poetry build
+
+# Publish package
+poetry publish
+``` 

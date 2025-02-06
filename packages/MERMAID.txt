@@ -1,0 +1,33 @@
+graph TB
+    subgraph "Client Package"
+        CLI[CLI Tool] --> Client[AudioKit Client]
+        Plugin[Plugin System] --> Client
+        Client -->|HTTP Requests| LB[Load Balancer]
+    end
+
+    subgraph "Backend Service"
+        LB -->|Route| S1[Server Instance 1]
+        LB -->|Route| S2[Server Instance 2]
+        
+        subgraph "Processing Pipeline"
+            S1 & S2 -->|Validate| Models[Data Models]
+            S1 & S2 -->|Process| Engine[Audio Engine]
+            Engine -->|Use| Librosa[Librosa]
+            Engine -->|Use| ML[ML Models]
+        end
+
+        subgraph "Storage Layer" 
+            S1 & S2 -->|Read/Write| DB[(Database)]
+            S1 & S2 -->|Store| Files[(File Storage)]
+        end
+    end
+
+    classDef client fill:#e1f5fe,stroke:#01579b
+    classDef server fill:#f3e5f5,stroke:#4a148c
+    classDef storage fill:#fff3e0,stroke:#e65100
+    classDef processing fill:#e8f5e9,stroke:#1b5e20
+
+    class CLI,Client,Plugin client
+    class S1,S2,LB server
+    class DB,Files storage
+    class Models,Engine,Librosa,ML processing
