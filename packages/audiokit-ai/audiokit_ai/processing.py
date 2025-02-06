@@ -1,63 +1,184 @@
-"""Audio processing functionality for AudioKit AI."""
-from typing import Dict, Any, Tuple, Optional
-import logging
-from pathlib import Path
+"""Audio processing and analysis functionality."""
+import io
+from typing import Tuple, Optional
 import numpy as np
 import librosa
 from fastapi import HTTPException
-from .models import ProcessingParameters
+import soundfile as sf
+from .models import AudioAnalysis, AudioMetadata, SpectralFeatures, TemporalFeatures
+from .errors import ProcessingError
 
-logger = logging.getLogger(__name__)
-
-async def _load_audio(audio_data: bytes) -> Tuple[np.ndarray, int]:
-    """Load audio data into memory.
+async def load_audio(
+    audio_data: bytes,
+    sample_rate: Optional[int] = None
+) -> Tuple[np.ndarray, int]:
+    """Load audio data from bytes.
     
     Args:
         audio_data: Raw audio file bytes
+        sample_rate: Optional target sample rate for resampling
         
     Returns:
         Tuple of (audio_array, sample_rate)
-     
+        
     Raises:
-        ValueError: If audio data is invalid
+        ProcessingError: If audio loading fails
     """
     try:
-        y, sr = librosa.load(audio_data)
-        return y, sr
+        # Load audio using soundfile
+        with io.BytesIO(audio_data) as buf:
+            audio_array, sr = sf.read(buf)
+            
+        # Convert to mono if stereo
+        if len(audio_array.shape) > 1:
+            audio_array = librosa.to_mono(audio_array.T)
+            
+        # Resample if needed
+        if sample_rate and sr != sample_rate:
+            audio_array = librosa.resample(
+                audio_array,
+                orig_sr=sr,
+                target_sr=sample_rate
+            )
+            sr = sample_rate
+            
+        return audio_array, sr
+        
     except Exception as e:
-        logger.error(f"Failed to load audio: {e}")
-        raise ValueError(f"Invalid audio data: {e}")
+        raise ProcessingError(f"Failed to load audio: {str(e)}")
 
-async def analyze_audio(audio_data: bytes) -> Dict[str, Any]:
-    """Analyze audio file and extract properties.
+async def extract_metadata(
+    audio_array: np.ndarray,
+    sample_rate: int,
+    filename: str
+) -> AudioMetadata:
+    """Extract audio metadata.
+    
+    Args:
+        audio_array: Audio signal array
+        sample_rate: Sample rate in Hz
+        filename: Original filename
+        
+    Returns:
+        AudioMetadata object
+    """
+    return AudioMetadata(
+        filename=filename,
+        format=filename.split('.')[-1],
+        duration=float(len(audio_array) / sample_rate),
+        sample_rate=sample_rate,
+        channels=1 if len(audio_array.shape) == 1 else audio_array.shape[1],
+        bit_depth=audio_array.dtype.itemsize * 8
+    )
+
+async def analyze_spectral(
+    audio_array: np.ndarray,
+    sample_rate: int
+) -> SpectralFeatures:
+    """Extract spectral features.
+    
+    Args:
+        audio_array: Audio signal array
+        sample_rate: Sample rate in Hz
+        
+    Returns:
+        SpectralFeatures object
+    """
+    # Calculate spectrogram
+    S = np.abs(librosa.stft(audio_array))
+    
+    return SpectralFeatures(
+        spectral_centroid=float(np.mean(
+            librosa.feature.spectral_centroid(y=audio_array, sr=sample_rate)
+        )),
+        spectral_bandwidth=float(np.mean(
+            librosa.feature.spectral_bandwidth(y=audio_array, sr=sample_rate)
+        )),
+        spectral_rolloff=float(np.mean(
+            librosa.feature.spectral_rolloff(y=audio_array, sr=sample_rate)
+        )),
+        spectral_flatness=float(np.mean(
+            librosa.feature.spectral_flatness(y=audio_array)
+        )),
+        zero_crossing_rate=float(np.mean(
+            librosa.feature.zero_crossing_rate(audio_array)
+        ))
+    )
+
+async def analyze_temporal(
+    audio_array: np.ndarray,
+    sample_rate: int
+) -> TemporalFeatures:
+    """Extract temporal features.
+    
+    Args:
+        audio_array: Audio signal array
+        sample_rate: Sample rate in Hz
+        
+    Returns:
+        TemporalFeatures object
+    """
+    rms = np.sqrt(np.mean(audio_array**2))
+    peak = np.max(np.abs(audio_array))
+    
+    # Estimate tempo
+    onset_env = librosa.onset.onset_strength(y=audio_array, sr=sample_rate)
+    tempo = float(librosa.beat.tempo(onset_envelope=onset_env, sr=sample_rate)[0])
+    
+    return TemporalFeatures(
+        rms_energy=float(rms),
+        peak_amplitude=float(peak),
+        crest_factor=float(peak / rms if rms > 0 else 0),
+        tempo=tempo,
+        onset_rate=float(len(librosa.onset.onset_detect(
+            y=audio_array,
+            sr=sample_rate
+        )) / (len(audio_array) / sample_rate))
+    )
+
+async def analyze_audio(
+    audio_data: bytes,
+    filename: str,
+    sample_rate: Optional[int] = None
+) -> AudioAnalysis:
+    """Analyze audio file and extract features.
     
     Args:
         audio_data: Raw audio file bytes
+        filename: Original filename
+        sample_rate: Optional target sample rate
         
     Returns:
-        Dict containing extracted audio features
+        AudioAnalysis object with extracted features
         
     Raises:
-        HTTPException: If audio data is invalid or processing fails
+        ProcessingError: If analysis fails
     """
     try:
-        y, sr = await _load_audio(audio_data)
+        # Load and preprocess audio
+        audio_array, sr = await load_audio(audio_data, sample_rate)
         
         # Extract features
-        features = {
-            "duration": float(len(y) / sr),
-            "sample_rate": sr,
-            "peak_amplitude": float(np.max(np.abs(y))),
-            "rms_level": float(np.sqrt(np.mean(y**2))),
-            "spectral_centroid": float(np.mean(librosa.feature.spectral_centroid(y=y, sr=sr))),
-            "zero_crossing_rate": float(np.mean(librosa.feature.zero_crossing_rate(y)))
-        }
+        metadata = await extract_metadata(audio_array, sr, filename)
+        spectral = await analyze_spectral(audio_array, sr)
+        temporal = await analyze_temporal(audio_array, sr)
         
-        return features
+        # Calculate MFCCs
+        mfccs = librosa.feature.mfcc(y=audio_array, sr=sr, n_mfcc=13)
+        mfcc_means = np.mean(mfccs, axis=1).tolist()
+        
+        return AudioAnalysis(
+            metadata=metadata,
+            spectral=spectral,
+            temporal=temporal,
+            mfcc=mfcc_means
+        )
         
     except Exception as e:
-        logger.error(f"Analysis failed: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(
+            status_code=400,
+            detail=f"Analysis failed: {str(e)}"
+        )
 
 async def process_audio(
     audio_data: bytes,

@@ -1,129 +1,129 @@
-"""Authentication and authorization for AudioKit AI service."""
-from typing import Optional, Dict
-import time
-import hmac
-import hashlib
-import logging
+"""Authentication and authorization for AudioKit AI."""
+from typing import Optional
 from datetime import datetime, timedelta
-from fastapi import Depends, Header, Request
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-import jwt
+import secrets
+from fastapi import Depends, HTTPException, Security
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 
-from . import errors
-
-logger = logging.getLogger(__name__)
-
-# Configuration (should be moved to environment variables)
-JWT_SECRET = "your-secret-key"  # TODO: Move to env
-JWT_ALGORITHM = "HS256"
-API_KEYS = {
-    "test-key": {
-        "client_id": "test-client",
-        "rate_limit": 100,  # requests per minute
-        "permissions": ["analyze", "generate"]
-    }
-}
+class APIKey(BaseModel):
+    """API key model."""
+    key: str
+    name: str
+    enabled: bool = True
+    rate_limit: int = 60  # requests per minute
+    permissions: list[str] = ["analyze", "process"]
+    created_at: datetime = datetime.utcnow()
 
 class TokenData(BaseModel):
-    """JWT token data."""
-    client_id: str
+    """Token data with permissions."""
+    key: str
     permissions: list[str]
-    exp: datetime
 
-class RateLimit:
+# In-memory store for API keys (replace with database in production)
+api_keys: dict[str, APIKey] = {}
+
+# API key header
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+def create_api_key(name: str, permissions: Optional[list[str]] = None) -> APIKey:
+    """Create new API key.
+    
+    Args:
+        name: Name/description for the key
+        permissions: Optional list of permissions
+        
+    Returns:
+        Created API key
+    """
+    key = secrets.token_urlsafe(32)
+    api_key = APIKey(
+        key=key,
+        name=name,
+        permissions=permissions or ["analyze", "process"]
+    )
+    api_keys[key] = api_key
+    return api_key
+
+class RateLimiter:
     """Rate limiting implementation."""
     def __init__(self):
-        self.requests: Dict[str, list[float]] = {}
-    
-    def check_rate_limit(self, client_id: str, limit: int) -> None:
-        """Check if client has exceeded rate limit.
+        self._requests: dict[str, list[datetime]] = {}
+        
+    def check_rate_limit(self, key: str, limit: int) -> None:
+        """Check if key has exceeded rate limit.
         
         Args:
-            client_id: Client identifier
+            key: API key to check
             limit: Maximum requests per minute
             
         Raises:
-            RateLimitError: If rate limit is exceeded
+            HTTPException: If rate limit exceeded
         """
-        now = time.time()
-        minute_ago = now - 60
+        now = datetime.utcnow()
+        minute_ago = now - timedelta(minutes=1)
         
-        # Initialize or clean old requests
-        if client_id not in self.requests:
-            self.requests[client_id] = []
-        self.requests[client_id] = [t for t in self.requests[client_id] if t > minute_ago]
-        
+        # Clean old requests
+        if key in self._requests:
+            self._requests[key] = [
+                t for t in self._requests[key] 
+                if t > minute_ago
+            ]
+        else:
+            self._requests[key] = []
+            
         # Check limit
-        if len(self.requests[client_id]) >= limit:
-            retry_after = int(60 - (now - self.requests[client_id][0]))
-            raise errors.RateLimitError(retry_after)
+        if len(self._requests[key]) >= limit:
+            retry_after = 60 - int((now - self._requests[key][0]).total_seconds())
+            raise HTTPException(
+                status_code=429,
+                detail="Rate limit exceeded",
+                headers={"Retry-After": str(retry_after)}
+            )
             
         # Add request
-        self.requests[client_id].append(now)
+        self._requests[key].append(now)
 
-rate_limiter = RateLimit()
-security = HTTPBearer()
+# Global rate limiter
+rate_limiter = RateLimiter()
 
 async def verify_api_key(
-    request: Request,
-    credentials: HTTPAuthorizationCredentials = Depends(security)
+    api_key: str = Security(api_key_header)
 ) -> TokenData:
-    """Verify API key and return token data.
+    """Verify API key and rate limit.
     
     Args:
-        request: FastAPI request
-        credentials: Bearer token credentials
+        api_key: API key from request header
         
     Returns:
-        TokenData containing client information
+        Token data with permissions
         
     Raises:
-        InvalidAPIKeyError: If API key is invalid
+        HTTPException: If key is invalid or rate limit exceeded
     """
-    try:
-        api_key = credentials.credentials
-        
-        # Verify API key exists
-        if api_key not in API_KEYS:
-            raise errors.InvalidAPIKeyError()
-            
-        client_data = API_KEYS[api_key]
-        
-        # Check rate limit
-        rate_limiter.check_rate_limit(
-            client_data["client_id"],
-            client_data["rate_limit"]
+    if api_key not in api_keys:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid API key"
         )
         
-        # Create JWT token
-        token_data = TokenData(
-            client_id=client_data["client_id"],
-            permissions=client_data["permissions"],
-            exp=datetime.utcnow() + timedelta(minutes=15)
+    key_data = api_keys[api_key]
+    if not key_data.enabled:
+        raise HTTPException(
+            status_code=401,
+            detail="API key is disabled"
         )
         
-        # Log access
-        logger.info(
-            f"API access: {request.method} {request.url.path}",
-            extra={
-                "client_id": token_data.client_id,
-                "ip": request.client.host
-            }
-        )
-        
-        return token_data
-        
-    except jwt.PyJWTError:
-        raise errors.InvalidAPIKeyError()
-    except errors.RateLimitError as e:
-        raise e
-    except Exception as e:
-        logger.error(f"Authentication error: {e}")
-        raise errors.InvalidAPIKeyError()
+    # Check rate limit
+    rate_limiter.check_rate_limit(api_key, key_data.rate_limit)
+    
+    return TokenData(
+        key=api_key,
+        permissions=key_data.permissions
+    )
 
 def verify_permission(permission: str):
-    """Dependency to verify specific permission.
+    """Create dependency to verify specific permission.
     
     Args:
         permission: Required permission
@@ -131,7 +131,11 @@ def verify_permission(permission: str):
     Returns:
         Dependency function
     """
-    async def verify(token: TokenData = Depends(verify_api_key)) -> None:
+    async def verify(token: TokenData = Depends(verify_api_key)) -> TokenData:
         if permission not in token.permissions:
-            raise errors.InvalidAPIKeyError()
+            raise HTTPException(
+                status_code=403,
+                detail=f"Missing required permission: {permission}"
+            )
+        return token
     return verify 

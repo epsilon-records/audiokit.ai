@@ -1,6 +1,14 @@
 AudioKit Development Guidelines
 =============================
 
+Development Priorities
+--------------------
+1. Implement client and server features in parallel to maintain compatibility
+2. Complete one TODO item from each package before moving to next items
+3. Update documentation as features are implemented
+4. Add tests only when features are stable
+5. Focus on core functionality before optimizations
+
 Code Quality Standards
 --------------------
 1. Follow PEP 8 style guide

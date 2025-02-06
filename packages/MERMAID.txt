@@ -1,7 +1,10 @@
 graph TB
     subgraph "Client Package"
         CLI[CLI Tool] --> Client[AudioKit Client]
+        Config[Configuration] --> Client
         Plugin[Plugin System] --> Client
+        Cache[Local Cache] --> Client
+        Progress[Progress Tracking] --> Client
         Client -->|HTTP Requests| LB[Load Balancer]
     end
 
@@ -9,25 +12,41 @@ graph TB
         LB -->|Route| S1[Server Instance 1]
         LB -->|Route| S2[Server Instance 2]
         
+        subgraph "Authentication"
+            S1 & S2 -->|Verify| Auth[Auth Service]
+            Auth -->|Check| Keys[(API Keys)]
+            Auth -->|Rate Limit| Redis[(Rate Limiter)]
+        end
+        
         subgraph "Processing Pipeline"
             S1 & S2 -->|Validate| Models[Data Models]
-            S1 & S2 -->|Process| Engine[Audio Engine]
+            S1 & S2 -->|Queue| Workers[Worker Pool]
+            Workers -->|Process| Engine[Audio Engine]
             Engine -->|Use| Librosa[Librosa]
-            Engine -->|Use| ML[ML Models]
+            Engine -->|Generate| AI[AI Models]
         end
 
         subgraph "Storage Layer" 
-            S1 & S2 -->|Read/Write| DB[(Database)]
-            S1 & S2 -->|Store| Files[(File Storage)]
+            Workers -->|Read/Write| Cache[(Cache)]
+            Workers -->|Store| Files[(File Storage)]
+            Workers -->|Log| Logs[(Logs)]
+        end
+
+        subgraph "Monitoring"
+            Metrics[Metrics Collector] -->|Track| S1 & S2
+            Metrics -->|Store| Stats[(Statistics)]
+            Health[Health Check] -->|Monitor| S1 & S2
         end
     end
 
     classDef client fill:#e1f5fe,stroke:#01579b
-    classDef server fill:#f3e5f5,stroke:#4a148c
-    classDef storage fill:#fff3e0,stroke:#e65100
+    classDef auth fill:#fff3e0,stroke:#e65100
     classDef processing fill:#e8f5e9,stroke:#1b5e20
+    classDef storage fill:#f3e5f5,stroke:#4a148c
+    classDef monitoring fill:#fce4ec,stroke:#880e4f
 
-    class CLI,Client,Plugin client
-    class S1,S2,LB server
-    class DB,Files storage
-    class Models,Engine,Librosa,ML processing
+    class CLI,Client,Config,Plugin,Cache,Progress client
+    class Auth,Keys,Redis auth
+    class Models,Workers,Engine,Librosa,AI processing
+    class Cache,Files,Logs storage
+    class Metrics,Health,Stats monitoring
