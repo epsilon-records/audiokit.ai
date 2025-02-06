@@ -2,9 +2,12 @@
 from typing import Optional
 from datetime import datetime, timedelta
 import secrets
-from fastapi import Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
+
+# Create router
+router = APIRouter(tags=["auth"])
 
 class APIKey(BaseModel):
     """API key model."""
@@ -20,28 +23,27 @@ class TokenData(BaseModel):
     key: str
     permissions: list[str]
 
-# In-memory store for API keys (replace with database in production)
+# Temporary in-memory storage - replace with database in production
 api_keys: dict[str, APIKey] = {}
 
 # API key header
 api_key_header = APIKeyHeader(name="X-API-Key")
 
-def create_api_key(name: str, permissions: Optional[list[str]] = None) -> APIKey:
-    """Create new API key.
-    
-    Args:
-        name: Name/description for the key
-        permissions: Optional list of permissions
-        
-    Returns:
-        Created API key
-    """
-    key = secrets.token_urlsafe(32)
-    api_key = APIKey(
-        key=key,
-        name=name,
-        permissions=permissions or ["analyze", "process"]
+def init_api_keys(config):
+    """Initialize API keys from config."""
+    test_key = config.api_key if hasattr(config, 'api_key') else "test-key"
+    api_keys[test_key] = APIKey(
+        key=test_key,
+        name="Test Key",
+        enabled=True,
+        permissions=["analyze", "process"]
     )
+
+@router.post("/api-keys", response_model=APIKey)
+async def create_api_key(name: str):
+    """Create a new API key."""
+    key = secrets.token_urlsafe(32)
+    api_key = APIKey(key=key, name=name)
     api_keys[key] = api_key
     return api_key
 
@@ -87,40 +89,39 @@ class RateLimiter:
 # Global rate limiter
 rate_limiter = RateLimiter()
 
-async def verify_api_key(
-    api_key: str = Security(api_key_header)
-) -> TokenData:
-    """Verify API key and rate limit.
+async def verify_token(api_key: str = Security(api_key_header)) -> str:
+    """Verify API token.
     
     Args:
-        api_key: API key from request header
+        api_key: API key from header
         
     Returns:
-        Token data with permissions
+        Verified API key
         
     Raises:
-        HTTPException: If key is invalid or rate limit exceeded
+        HTTPException: If authentication fails
     """
-    if api_key not in api_keys:
+    if not api_key:
         raise HTTPException(
             status_code=401,
-            detail="Invalid API key"
+            detail="API key is required"
         )
-        
-    key_data = api_keys[api_key]
-    if not key_data.enabled:
-        raise HTTPException(
-            status_code=401,
-            detail="API key is disabled"
-        )
-        
-    # Check rate limit
-    rate_limiter.check_rate_limit(api_key, key_data.rate_limit)
     
-    return TokenData(
-        key=api_key,
-        permissions=key_data.permissions
-    )
+    # Check if API key exists in allowed keys
+    if api_key not in api_keys or not api_keys[api_key].enabled:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid or disabled API key"
+        )
+    
+    # If you need to check permissions, do it here
+    # For now, all valid keys have access to all endpoints
+    return api_key
+
+@router.get("/auth/verify")
+async def verify_auth(api_key: str = Depends(verify_token)):
+    """Test endpoint for auth verification."""
+    return {"message": "Authentication successful"}
 
 def verify_permission(permission: str):
     """Create dependency to verify specific permission.
@@ -131,7 +132,7 @@ def verify_permission(permission: str):
     Returns:
         Dependency function
     """
-    async def verify(token: TokenData = Depends(verify_api_key)) -> TokenData:
+    async def verify(token: TokenData = Depends(verify_token)) -> TokenData:
         if permission not in token.permissions:
             raise HTTPException(
                 status_code=403,
@@ -139,3 +140,31 @@ def verify_permission(permission: str):
             )
         return token
     return verify 
+
+"""Simple authentication for AudioKit AI."""
+from fastapi import HTTPException, Security
+from fastapi.security import APIKeyHeader
+
+api_key_header = APIKeyHeader(name="X-API-Key")
+
+# In memory API keys - replace with database in production
+API_KEYS = {"test-key"}
+
+async def verify_token(api_key: str = Security(api_key_header)) -> str:
+    """Verify API key.
+    
+    Args:
+        api_key: API key from request header
+        
+    Returns:
+        API key if valid
+        
+    Raises:
+        HTTPException: If API key is invalid
+    """
+    if api_key not in API_KEYS:
+        raise HTTPException(
+            status_code=401,
+            detail="Invalid API key"
+        )
+    return api_key 

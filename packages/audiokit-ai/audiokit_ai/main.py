@@ -1,175 +1,136 @@
 """FastAPI backend for AudioKit."""
-from typing import Dict, Optional
-from fastapi import FastAPI, File, UploadFile, Header, Depends, HTTPException
+from fastapi import FastAPI, File, UploadFile, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
-import uvicorn
-import io
+from pathlib import Path
+import logging
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import JSONResponse
 
 from . import processing
-from . import generation
-from . import models
-from . import errors
 from . import auth
-from .cache import Cache, CacheConfig
+from . import monitoring
+from .models import AudioAnalysis
+from .config import load_config, ServerConfig
+from .logging import setup_logging
 
-app = FastAPI(
-    title="AudioKit AI",
-    description="Audio processing and analysis API",
-    version="0.1.0"
-)
+# Configure logger
+logger = logging.getLogger(__name__)
 
-# Add CORS middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Add error handlers
-app.add_exception_handler(errors.AudioKitError, errors.error_handler)
-
-# Initialize cache
-cache_config = CacheConfig()
-cache = Cache(cache_config)
-
-@app.post(
-    "/analyze",
-    response_model=models.AudioAnalysis,
-    tags=["Audio Analysis"]
-)
-@cached(ttl=3600, tags=["analysis"])  # Cache analysis results for 1 hour
-async def analyze_audio(
-    file: UploadFile = File(...),
-    sample_rate: Optional[int] = None,
-    token: auth.TokenData = Depends(auth.verify_permission("analyze"))
-) -> models.AudioAnalysis:
-    """Analyze audio file and extract features.
+def create_app(config_path: Path = Path("config.yml")) -> FastAPI:
+    """Create FastAPI application with configuration."""
+    config = load_config(config_path)
     
-    Args:
-        file: Audio file to analyze
-        sample_rate: Optional target sample rate
-        token: API token with permissions
-        
-    Returns:
-        Audio analysis results
-        
-    Raises:
-        HTTPException: If analysis fails
-    """
-    try:
-        contents = await file.read()
-        return await processing.analyze_audio(
-            contents,
-            filename=file.filename,
-            sample_rate=sample_rate
-        )
-    except errors.ProcessingError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    app = FastAPI(
+        title="AudioKit AI",
+        description="Audio analysis API",
+        version="0.1.0"
+    )
 
-@app.post("/generate")
-async def generate_audio(
-    params: generation.GenerationParameters,
-    token: auth.TokenData = Depends(auth.verify_permission("generate"))
-):
-    """Generate audio using AI models."""
-    try:
-        audio_array, sr = await generation.generate_audio(params)
-        return {
-            "audio": audio_array.tolist(),
-            "sample_rate": sr,
-            "duration": len(audio_array) / sr
-        }
-    except Exception as e:
-        raise errors.GenerationError(str(e))
-
-@app.post("/generate/with-style")
-async def generate_with_style(
-    params: generation.GenerationParameters,
-    reference: Optional[UploadFile] = File(None),
-    token: auth.TokenData = Depends(auth.verify_permission("generate"))
-):
-    """Generate audio matching the style of reference audio."""
-    try:
-        reference_data = await reference.read() if reference else None
-        audio_array, sr = await generation.generate_with_style(params, reference_data)
-        return {
-            "audio": audio_array.tolist(),
-            "sample_rate": sr,
-            "duration": len(audio_array) / sr
-        }
-    except ValueError as e:
-        raise errors.InvalidAudioError(str(e))
-    except Exception as e:
-        raise errors.GenerationError(str(e))
-
-@app.post(
-    "/process",
-    tags=["Audio Processing"]
-)
-async def process_audio(
-    file: UploadFile = File(...),
-    params: models.ProcessingParameters,
-    token: auth.TokenData = Depends(auth.verify_permission("process"))
-) -> StreamingResponse:
-    """Process audio file with effects.
+    # Apply configuration
+    app.state.config = config
     
-    Args:
-        file: Audio file to process
-        params: Processing parameters
-        token: API token with permissions
+    # Initialize API keys
+    auth.init_api_keys(config)
+    
+    # CORS middleware
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_methods=["*"],
+        allow_headers=["*"]
+    )
+    
+    # Configure max upload size
+    app.add_middleware(
+        LimitUploadSize,
+        max_upload_size=config.max_file_size
+    )
+    
+    # Setup logging
+    setup_logging()
+    logger.info(f"Starting server with config: {config.json()}")
+
+    # Register routes
+    app.include_router(auth.router)
+    
+    @app.get("/health")
+    async def health_check():
+        """Health check endpoint.
         
-    Returns:
-        Processed audio file
-        
-    Raises:
-        HTTPException: If processing fails
-    """
-    try:
-        contents = await file.read()
-        audio_array, sample_rate = await processing.process_audio(contents, params)
-        
-        # Convert to WAV bytes
-        output = io.BytesIO()
-        processing.save_audio(audio_array, sample_rate, output)
-        output.seek(0)
-        
-        return StreamingResponse(
-            output,
-            media_type="audio/wav",
-            headers={
-                "Content-Disposition": f'attachment; filename="processed_{file.filename}"'
+        Returns:
+            dict: Health status including version and uptime
+        """
+        return {
+            "status": "healthy",
+            "version": app.version,
+            "uptime": monitoring.get_uptime(),
+            "services": {
+                "database": monitoring.check_database_health(),
+                "storage": monitoring.check_storage_health()
             }
-        )
-    except errors.ProcessingError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        }
 
-# Admin endpoints for API key management
-@app.post(
-    "/admin/keys",
-    response_model=auth.APIKey,
-    tags=["Admin"]
-)
-async def create_key(
-    name: str,
-    permissions: Optional[list[str]] = None,
-    token: auth.TokenData = Depends(auth.verify_permission("admin"))
-) -> auth.APIKey:
-    """Create new API key.
-    
-    Args:
-        name: Key name/description
-        permissions: Optional permission list
-        token: Admin API token
-        
-    Returns:
-        Created API key
-    """
-    return auth.create_api_key(name, permissions)
+    @app.post(
+        "/analyze",
+        response_model=AudioAnalysis,
+        tags=["Audio"]
+    )
+    async def analyze_audio(
+        file: UploadFile = File(...),
+        token: str = Depends(auth.verify_token)
+    ) -> AudioAnalysis:
+        """Analyze audio file."""
+        try:
+            # Log incoming request
+            logger.info(f"Analyzing file: {file.filename} ({file.content_type})")
+            
+            # Add MIME type validation
+            allowed_mime_types = ["audio/wav", "audio/mpeg", "audio/ogg", "audio/flac"]
+            if file.content_type not in allowed_mime_types:
+                logger.warning(f"Unsupported MIME type: {file.content_type}")
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Unsupported file type. Allowed types: {', '.join(allowed_mime_types)}"
+                )
+            
+            try:
+                contents = await file.read()
+                logger.debug(f"Read {len(contents)} bytes from file")
+                result = await processing.process_audio(contents)
+                return result
+            except Exception as e:
+                logger.error(f"Processing failed: {str(e)}", exc_info=True)
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Audio processing failed: {str(e)}"
+                )
+            
+        except HTTPException:
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected error: {str(e)}", exc_info=True)
+            raise HTTPException(
+                status_code=500,
+                detail=f"Server error: {str(e)}"
+            )
 
-# Health check endpoint
-@app.get("/health")
-async def health_check() -> dict:
-    """Check API health."""
-    return {"status": "healthy"} 
+    return app
+
+class LimitUploadSize(BaseHTTPMiddleware):
+    def __init__(self, app, max_upload_size: int):
+        super().__init__(app)
+        self.max_upload_size = max_upload_size
+
+    async def dispatch(self, request, call_next):
+        if request.method == "POST":
+            content_length = request.headers.get("content-length")
+            if content_length:
+                content_length = int(content_length)
+                if content_length > self.max_upload_size:
+                    return JSONResponse(
+                        status_code=413,
+                        content={
+                            "detail": f"File too large. Maximum size is {self.max_upload_size/1024/1024:.1f}MB"
+                        }
+                    )
+        return await call_next(request) 

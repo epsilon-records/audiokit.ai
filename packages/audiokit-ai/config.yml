@@ -1,0 +1,22 @@
+# Server Configuration
+host: "0.0.0.0"
+port: 8000
+log_level: "info"
+
+# Security Settings
+api_key: "test-key"  # Default test API key - change in production!
+max_file_size: 209715200  # 200MB
+rate_limit: 60  # Requests per minute per API key
+
+# Redis Settings (optional)
+redis_url: "redis://localhost:6379/0"
+
+# Processing Settings
+allowed_formats:
+  - wav
+  - mp3
+  - ogg
+  - flac
+
+# Development Settings
+debug: false 

@@ -1,5 +1,6 @@
 """Audio processing and analysis functionality."""
 import io
+from pathlib import Path
 from typing import Tuple, Optional
 import numpy as np
 import librosa
@@ -7,6 +8,10 @@ from fastapi import HTTPException
 import soundfile as sf
 from .models import AudioAnalysis, AudioMetadata, SpectralFeatures, TemporalFeatures
 from .errors import ProcessingError
+from .pipeline import ProcessingPipeline, ProcessingStage
+import logging
+
+logger = logging.getLogger(__name__)
 
 async def load_audio(
     audio_data: bytes,
@@ -180,58 +185,101 @@ async def analyze_audio(
             detail=f"Analysis failed: {str(e)}"
         )
 
-async def process_audio(
-    audio_data: bytes,
-    params: ProcessingParameters
-) -> Tuple[np.ndarray, int]:
-    """Process audio with specified parameters.
+# Configure default pipeline stages
+DEFAULT_STAGES = [
+    ProcessingStage(
+        name="amplitude",
+        enabled=True
+    ),
+    ProcessingStage(
+        name="spectral",
+        enabled=True,
+        params={
+            "n_mels": 128,
+            "fmax": 8000
+        }
+    ),
+    ProcessingStage(
+        name="temporal",
+        enabled=True
+    )
+]
+
+async def process_audio(audio_data: bytes) -> AudioAnalysis:
+    """Process audio data and extract features.
     
     Args:
         audio_data: Raw audio file bytes
-        params: Processing parameters
         
     Returns:
-        Tuple of (processed_audio_array, sample_rate)
+        Audio analysis results
         
     Raises:
-        HTTPException: If processing fails
+        Exception: If processing fails
     """
     try:
-        # Load audio
-        y, sr = await _load_audio(audio_data)
+        # Load audio file using soundfile
+        with io.BytesIO(audio_data) as buf:
+            y, sr = sf.read(buf)
+            
+        # Convert to mono if stereo
+        if len(y.shape) > 1:
+            y = librosa.to_mono(y.T)
+            
+        # Basic properties
+        duration = float(len(y) / sr)
         
-        # Apply input gain
-        y = y * params.input_gain
+        # Ensure audio data is valid
+        if len(y) == 0:
+            raise ValueError("Empty audio data")
+            
+        if not np.isfinite(y).all():
+            raise ValueError("Audio data contains invalid values")
+            
+        # Normalize audio if needed
+        if np.abs(y).max() > 1.0:
+            y = librosa.util.normalize(y)
+            
+        # Calculate features
+        spectral = {}
+        try:
+            # Compute spectrogram
+            S = np.abs(librosa.stft(y))
+            
+            if len(S) > 0 and np.any(S > 0):
+                # Spectral features
+                spectral['centroid'] = float(np.mean(librosa.feature.spectral_centroid(y=y, sr=sr)))
+                spectral['bandwidth'] = float(np.mean(librosa.feature.spectral_bandwidth(y=y, sr=sr)))
+                spectral['rolloff'] = float(np.mean(librosa.feature.spectral_rolloff(y=y, sr=sr)))
+            else:
+                spectral['centroid'] = 0.0
+                spectral['bandwidth'] = 0.0
+                spectral['rolloff'] = 0.0
+        except Exception as e:
+            logger.warning(f"Failed to compute spectral features: {e}")
+            spectral['centroid'] = 0.0
+            spectral['bandwidth'] = 0.0
+            spectral['rolloff'] = 0.0
+            
+        # Time-domain features
+        temporal = {
+            'duration': duration,
+            'zero_crossings': int(sum(librosa.zero_crossings(y))),
+            'rms': float(np.sqrt(np.mean(y**2))),
+        }
         
-        # Apply effects
-        for effect in params.effects:
-            if effect == "normalize":
-                y = librosa.util.normalize(y)
-            elif effect == "trim_silence":
-                y, _ = librosa.effects.trim(y)
-            elif effect == "pitch_shift" and "pitch_steps" in params.model_parameters:
-                y = librosa.effects.pitch_shift(
-                    y, 
-                    sr=sr,
-                    n_steps=params.model_parameters["pitch_steps"]
-                )
-            elif effect == "time_stretch" and "stretch_factor" in params.model_parameters:
-                y = librosa.effects.time_stretch(
-                    y,
-                    rate=params.model_parameters["stretch_factor"]
-                )
-        
-        # Apply output gain
-        y = y * params.output_gain
-        
-        # Ensure audio doesn't clip
-        y = np.clip(y, -1.0, 1.0)
-        
-        return y, sr
+        # Return analysis results
+        return AudioAnalysis(
+            sample_rate=sr,
+            duration=duration,
+            channels=1,
+            temporal=temporal,
+            spectral=spectral
+        )
         
     except Exception as e:
-        logger.error(f"Processing failed: {e}")
-        raise HTTPException(status_code=400, detail=str(e))
+        logger.error(f"Audio processing failed: {str(e)}", exc_info=True)
+        raise Exception(f"Audio processing failed: {str(e)}")
 
 async def save_audio(
     audio_array: np.ndarray,

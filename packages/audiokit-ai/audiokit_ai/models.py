@@ -43,23 +43,12 @@ class TemporalFeatures(BaseModel):
     onset_rate: Optional[float] = Field(None, description="Onset rate")
 
 class AudioAnalysis(BaseModel):
-    """Complete audio analysis results."""
-    metadata: AudioMetadata
-    spectral: SpectralFeatures
-    temporal: TemporalFeatures
-    mfcc: Optional[List[float]] = Field(None, description="MFCC coefficients")
-    additional_features: Dict[str, Any] = Field(
-        default_factory=dict,
-        description="Additional analysis features"
-    )
-
-    class Config:
-        """Pydantic config."""
-        json_encoders = {
-            np.ndarray: lambda x: x.tolist(),
-            np.float32: float,
-            np.float64: float
-        }
+    """Audio analysis results."""
+    sample_rate: int = Field(..., description="Sample rate in Hz")
+    duration: float = Field(..., description="Duration in seconds")
+    channels: int = Field(..., description="Number of audio channels")
+    temporal: Dict[str, float] = Field(default_factory=dict, description="Temporal features")
+    spectral: Dict[str, float] = Field(default_factory=dict, description="Spectral features")
 
 class ProcessingParameters(BaseModel):
     """Parameters for audio processing."""
