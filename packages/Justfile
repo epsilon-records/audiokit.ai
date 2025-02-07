@@ -2,10 +2,12 @@
 
 # AI Development Assistant Workflow
 default:
+    #!/usr/bin/env sh
     just --list
 
 # Commit root project changes
 commit:
+    #!/usr/bin/env sh
     git add . && git commit -m "chore(ai): 🤖⚡️ Automated code alchemy in progress" || echo "⚠️ No changes in root project"
 
 # Sync changes with the remote repository
@@ -21,16 +23,19 @@ sync:
 
 # Full AI development workflow
 ai-workflow: commit sync
+    #!/usr/bin/env sh
     echo "🚀 AI development cycle complete! Matrix updated successfully!"
-    echo "01000011 01101111 01100100 01100101 00100000 01100001 01110011 01100011 01100101 01101110 01100100 01100101 01100100 00100001" | xxd -r -p
+    echo "01000011 01101111 01100100 01100101 00100000 01100001 01110011 01100101 01101110 01100100 01100101 01100100 00100001" | xxd -r -p
 
 # Check status of the repository
 status:
+    #!/usr/bin/env sh
     git status
     echo "🔍 Repository status checked"
 
 # Add, commit, and push in one command
 acp:
+    #!/usr/bin/env sh
     just commit
     just sync
     echo "🚀 Changes added, committed, and pushed!"
