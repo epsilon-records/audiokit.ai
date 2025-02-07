@@ -21,21 +21,12 @@ sync:
     git push origin "$BRANCH"
     echo "🌐 Changes synchronized with the remote repository"
 
-# Full AI development workflow
-ai-workflow: commit sync
-    #!/usr/bin/env sh
-    echo "🚀 AI development cycle complete! Matrix updated successfully!"
-    echo "01000011 01101111 01100100 01100101 00100000 01100001 01110011 01100101 01101110 01100100 01100101 01100100 00100001" | xxd -r -p
-
 # Check status of the repository
 status:
-    #!/usr/bin/env sh
     git status
     echo "🔍 Repository status checked"
 
 # Add, commit, and push in one command
-acp:
-    #!/usr/bin/env sh
-    just commit
-    just sync
+acp: commit sync
     echo "🚀 Changes added, committed, and pushed!"
+    echo "436f646520617363656e64656421" | xxd -r -p
