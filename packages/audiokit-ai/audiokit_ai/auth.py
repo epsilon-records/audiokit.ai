@@ -1,10 +1,11 @@
 """Authentication and authorization for AudioKit AI."""
-from typing import Optional
+from typing import Optional, Callable
 from datetime import datetime, timedelta
 import secrets
-from fastapi import APIRouter, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
+from .config import ServerConfig
 
 # Create router
 router = APIRouter(tags=["auth"])
@@ -29,22 +30,44 @@ api_key_header = APIKeyHeader(name="X-API-Key")
 # In-memory storage - replace with database in production
 api_keys: dict[str, APIKey] = {}
 
-def init_api_keys(config):
-    """Initialize API keys from config."""
-    # Get API key from config, fallback to test-key if not present
-    test_key = getattr(config, 'api_key', 'test-key')
-    
-    # Clear existing keys
-    api_keys.clear()
-    
-    # Add the configured key
-    api_keys[test_key] = APIKey(
-        key=test_key,
-        name="Default Key",
-        enabled=True,
-        permissions=["analyze", "process"]
-    )
-    return test_key
+class AuthHandler:
+    def __init__(self, config: ServerConfig):
+        self.valid_keys = set(config.api_keys)
+        self.security = APIKeyHeader(name="X-API-Key")
+        
+        # Common error response
+        self.unauthorized_response = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing API Key",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    def _validate_key(self, key: str) -> bool:
+        """Centralized key validation logic"""
+        return key in self.valid_keys
+
+    def api_key_auth(self, api_key: str = Depends(APIKeyHeader(name="X-API-Key"))) -> str:
+        """Dependency for API key authentication"""
+        if not self._validate_key(api_key):
+            raise self.unauthorized_response
+        return api_key
+
+    def token_auth(self, token: str = Depends(APIKeyHeader(name="Authorization"))) -> str:
+        """Dependency for token-based authentication"""
+        if not self._validate_key(token):
+            raise self.unauthorized_response
+        return token
+
+    def create_scoped_validator(self, required_scope: str) -> Callable:
+        """Factory method for creating scope-specific validators"""
+        def validate_scope(api_key: str = Depends(self.api_key_auth)) -> str:
+            # Implement scope validation logic here
+            return api_key
+        return validate_scope
+
+def init_api_keys(config: ServerConfig) -> AuthHandler:
+    """Initialize authentication system with configuration"""
+    return AuthHandler(config)
 
 @router.post("/api-keys", response_model=APIKey)
 async def create_api_key(name: str):

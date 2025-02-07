@@ -5,6 +5,7 @@ from pathlib import Path
 import logging
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
+from starlette.requests import Request
 
 from . import processing
 from . import auth
@@ -12,6 +13,9 @@ from . import monitoring
 from .models import AudioAnalysis
 from .config import load_config, ServerConfig
 from .logging import setup_logging
+from .routers import health  # Corrected import path
+from .middleware import version_check_middleware
+from .rate_limiting import RedisRateLimiter
 
 # Configure logger
 logger = logging.getLogger(__name__)
@@ -19,11 +23,17 @@ logger = logging.getLogger(__name__)
 def create_app(config_path: Path = Path("config.yml")) -> FastAPI:
     """Create FastAPI application with configuration."""
     config = load_config(config_path)
+    rate_limiter = RedisRateLimiter(config)
+    
+    # Setup logging first
+    setup_logging(config.logging)
     
     app = FastAPI(
         title="AudioKit AI",
         description="Audio analysis API",
-        version="0.1.0"
+        version="0.1.0",
+        docs_url="/docs" if config.enable_docs else None,
+        redoc_url=None
     )
 
     # Apply configuration
@@ -47,12 +57,16 @@ def create_app(config_path: Path = Path("config.yml")) -> FastAPI:
     )
     
     # Setup logging
-    setup_logging()
     logger.info(f"Starting server with config: {config.json()}")
 
     # Register routes
     app.include_router(auth.router)
+    app.include_router(audio.router)
+    app.include_router(health.router)  # This line remains the same
     
+    # Add middleware
+    app.add_middleware(version_check_middleware)
+
     @app.get("/health")
     async def health_check():
         """Health check endpoint.
@@ -113,6 +127,52 @@ def create_app(config_path: Path = Path("config.yml")) -> FastAPI:
                 status_code=500,
                 detail=f"Server error: {str(e)}"
             )
+
+    # Add request logging middleware
+    @app.middleware("http")
+    async def log_requests(request: Request, call_next):
+        logger.info("Request started", extra={
+            "path": request.url.path,
+            "method": request.method,
+            "client": request.client.host if request.client else "unknown"
+        })
+        
+        try:
+            response = await call_next(request)
+        except Exception as e:
+            logger.error("Request failed", exc_info=True, extra={
+                "path": request.url.path,
+                "method": request.method,
+                "error": str(e)
+            })
+            raise
+            
+        logger.info("Request completed", extra={
+            "path": request.url.path,
+            "method": request.method,
+            "status_code": response.status_code
+        })
+        return response
+
+    # Add rate limit middleware
+    @app.middleware("http")
+    async def rate_limit_middleware(request: Request, call_next):
+        if not config.rate_limiting.enabled:
+            return await call_next(request)
+            
+        api_key = request.headers.get("X-API-Key")
+        if not api_key:
+            return await call_next(request)
+            
+        path = request.url.path
+        if not rate_limiter.check_limit(api_key, path):
+            return JSONResponse(
+                status_code=429,
+                content={"detail": "Rate limit exceeded"},
+                headers={"Retry-After": "60"}
+            )
+            
+        return await call_next(request)
 
     return app
 

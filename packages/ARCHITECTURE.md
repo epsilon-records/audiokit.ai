@@ -1,225 +1,129 @@
-AudioKit Architecture
-===================
+# AudioKit Architecture Overview
 
-Overview
---------
-AudioKit consists of two main packages: a public client package for integrating audio processing capabilities into applications, and a private backend service that handles the actual audio processing and AI operations.
+## High-Level Architecture
+```mermaid
+graph TD
+    subgraph Client
+        CLI[CLI Tool] --> Core[Client Core]
+        Core -->|HTTP| Server
+        Config[Configuration] --> Core
+        Cache[Local Cache] --> Core
+    end
 
-1. Client-Server Separation
--------------------------
-### Client Package (Public)
-- Provides high-level API for audio processing
-- Handles request/response lifecycle
-- Manages local caching and configuration
-- Implements plugin system
-- Provides CLI interface
-- Handles progress tracking and reporting
+    subgraph Server
+        API[API Gateway] --> Auth[Authentication]
+        API --> Processor[Audio Processor]
+        API --> Monitor[Monitoring]
+        Auth --> RateLimit[Rate Limiter]
+        Processor --> AI[AI Models]
+        Processor --> Librosa[Audio Analysis]
+        Monitor --> Metrics[Metrics Collector]
+    end
+    
+    classDef client fill:#e1f5fe,stroke:#01579b
+    classDef server fill:#e8f5e9,stroke:#1b5e20
+    class Client client
+    class Server server
+```
 
-### Backend Service (Private)
-- Processes audio analysis and generation requests
-- Manages authentication and authorization
-- Handles resource allocation and scaling
-- Provides monitoring and logging
-- Implements caching and storage strategies
-- Manages worker pools for processing
+## Core Components
 
-2. Authentication Flow
---------------------
-### API Key Management
-- API keys stored securely in database
-- Keys associated with specific permissions
-- Rate limiting per API key
-- Usage tracking and quotas
+### Client Package (`audiokit`)
+| Component          | Responsibility                          | Technology Stack     |
+|---------------------|-----------------------------------------|----------------------|
+| CLI Interface       | User command processing                 | Click, Rich          |
+| API Client          | Server communication                    | HTTPX, Pydantic      |
+| Configuration       | Settings management                     | Pydantic, Dotenv     |
+| Error Handling      | Unified error reporting                 | Custom Exceptions    |
+| Validation          | Input sanitization                      | Pydantic, Typeguard  |
 
-### Request Authentication
-- Bearer token authentication
-- JWT-based session management
-- Permission verification per endpoint
-- Rate limit checking
-- Access logging and auditing
+### AI Server (`audiokit-ai`)
+| Component          | Responsibility                          | Technology Stack     |
+|---------------------|-----------------------------------------|----------------------|
+| API Gateway         | Request routing                         | FastAPI, Uvicorn     |
+| Authentication      | Security controls                       | API Keys, OAuth2     |
+| Audio Processing    | Core analysis pipeline                  | Librosa, Soundfile   |
+| AI Integration       | Model inference                         | PyTorch, ONNX        |
+| Monitoring          | System observability                    | Prometheus, Grafana |
 
-3. Processing Pipeline
---------------------
-### Worker Pool
-- Distributed task processing
-- Load balancing across workers
-- Resource allocation management
-- Priority queue handling
-- Progress tracking
-- Error handling and retries
+## Key Architectural Decisions
 
-### Audio Engine
-- Audio file validation
-- Format conversion
-- Feature extraction
-- Signal processing
-- AI model integration
-- Quality assurance checks
+1. **Protocol Design**
+   - REST over gRPC for simplicity
+   - JSON for request/response bodies
+   - API versioning through URL paths
+   - Standardized error codes (RFC 7807)
 
-4. Storage Architecture
----------------------
-### Caching Layer
-- Request/response caching
-- Processed data caching
-- Cache invalidation strategies
-- Distributed cache management
-- Performance optimization
+2. **Security Model**
+   - API key authentication
+   - Rate limiting per API key
+   - Input validation middleware
+   - HTTPS enforcement
+   - Request signing (future)
 
-### File Storage
-- Raw audio file storage
-- Processed output storage
-- Temporary file management
-- Backup and replication
-- Access control
+3. **Performance Tradeoffs**
+   - Async I/O for network operations
+   - Synchronous CPU-bound processing
+   - In-memory audio processing
+   - Batch processing support
 
-### Logging System
-- Request logging
-- Error tracking
-- Performance metrics
-- Audit trails
-- Debug information
+## Data Flow
 
-5. Progress Tracking
-------------------
-### Client-Side
-- Progress event handling
-- Status updates
-- Time estimation
-- Cancellation support
-- Error reporting
-- UI/CLI progress display
+```mermaid
+sequenceDiagram
+    participant User
+    participant CLI
+    participant Server
+    participant Processor
+    
+    User->>CLI: Upload audio file
+    CLI->>Server: Authenticated request
+    Server->>Processor: Validate & queue
+    Processor->>AI: Process audio
+    AI-->>Processor: Analysis results
+    Processor-->>Server: Formatted response
+    Server-->>CLI: JSON output
+    CLI->>User: Display results
+```
 
-### Server-Side
-- Task progress monitoring
-- Status broadcasting
-- Resource usage tracking
-- Error propagation
-- Client notification system
+## Scalability Approach
 
-6. Plugin System
---------------
-### Architecture
-- Plugin discovery
-- Version management
-- Dependency resolution
-- Configuration handling
-- Lifecycle management
-- Event system
-
-### Integration Points
-- Audio processing hooks
-- Format conversion
-- Analysis extensions
-- Output processing
-- Visualization plugins
-- Custom algorithms
-
-7. Monitoring System
-------------------
-### Metrics Collection
-- Performance metrics
-- Resource usage
-- Error rates
-- API usage statistics
-- Cache hit rates
-- Processing times
-
-### Health Monitoring
-- Service health checks
-- Worker status
-- Resource availability
-- System alerts
-- Auto-recovery
-- Load balancing
-
-Security Considerations
----------------------
-### Authentication
-- API key security
-- Token management
-- Permission system
-- Rate limiting
-- Access control
-
-### Data Protection
-- Input validation
-- Output sanitization
-- Secure storage
-- Data encryption
-- Backup security
-
-### System Security
-- Network security
-- Service isolation
-- Dependency scanning
-- Vulnerability monitoring
-- Security updates
-
-Scalability
-----------
 ### Horizontal Scaling
-- Load balancer configuration
-- Worker pool management
-- Cache distribution
-- Storage replication
-- State management
+- Stateless API endpoints
+- Redis-backed rate limiting
+- Shared nothing architecture
+- Containerized deployment
 
-### Resource Management
-- CPU allocation
-- Memory management
-- Storage optimization
-- Network bandwidth
-- Cache sizing
+### Vertical Optimization
+- Memory-mapped audio processing
+- GPU acceleration for AI models
+- JIT compilation (Numba)
+- Process pooling
 
-Development Guidelines
--------------------
-### Code Organization
-- Clear separation of concerns
-- Consistent coding style
-- Type safety
-- Error handling
-- Documentation
-- Testing requirements
+## Monitoring & Observability
 
-### Development Workflow
-- Version control
-- Code review process
-- Testing procedures
-- Documentation updates
-- Release management
-- Deployment process
+| Aspect              | Tools                                  | Metrics Tracked          |
+|---------------------|----------------------------------------|--------------------------|
+| API Performance     | Prometheus, Grafana                    | Latency, Throughput      |
+| Error Tracking      | Sentry, ELK Stack                      | Error Rates, Types       |
+| Resource Usage      | cAdvisor, Node Exporter                | CPU/Memory, GPU Usage    |
+| Audit Logging       | Loki, Graylog                           | Access Patterns         |
 
-Deployment Architecture
----------------------
-### Production Environment
-- Load balancer setup
-- Multiple server instances
-- Worker configuration
-- Monitoring setup
-- Backup systems
-- Failover handling
+## Future Directions
 
-### Development Environment
-- Local development setup
-- Testing environment
-- Staging system
-- CI/CD pipeline
-- Debug tools
-- Performance profiling
+1. **Extensibility**
+   - Plugin system architecture
+   - Custom processing hooks
+   - Format converter interface
 
-Future Considerations
--------------------
-### Scalability
-- Geographic distribution
-- Multi-region support
-- Enhanced caching
-- Improved load balancing
-- Resource optimization
+2. **Advanced Features**
+   - Real-time audio streaming
+   - Distributed processing
+   - Model versioning A/B testing
 
-### Features
-- Advanced AI models
-- Real-time processing
-- Streaming support
-- Enhanced plugins
-- Additional formats
-- Advanced analytics 
+3. **Ecosystem Integration**
+   - CI/CD pipelines
+   - Terraform deployment
+   - Kubernetes operators
+
+See also: [ROADMAP.md](ROADMAP.md) | [REFLECTIONS.md](REFLECTIONS.md) 

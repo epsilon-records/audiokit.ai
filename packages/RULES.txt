@@ -151,4 +151,37 @@ poetry build
 
 # Publish package
 poetry publish
-``` 
+```
+
+AudioKit Development Standards
+==============================
+
+Code Standards
+--------------
+1. Python 3.10+ type hints required
+2. FastAPI endpoints must include OpenAPI docs
+3. Pydantic models for all I/O
+4. 100% test coverage for security-critical code
+
+Workflow
+--------
+1. Feature branches prefixed with:
+   - feat/ - New functionality
+   - fix/ - Bug repairs
+   - refactor/ - Code improvements
+2. PRs require:
+   - Architecture review
+   - Security assessment
+   - Performance impact analysis
+
+Testing
+-------
+1. Unit tests for all business logic
+2. Integration tests for API endpoints
+3. Benchmark tests for audio processing
+
+Documentation
+-------------
+1. Keep OpenAPI spec updated
+2. Maintain developer quickstart guide
+3. Publish API schema with each release 

@@ -1,0 +1,50 @@
+graph TD
+    subgraph "Client Package (audiokit)"
+        CLI[CLI Tool] --> ClientCore[Client Core]
+        ClientCore --> Config[Configuration]
+        ClientCore --> Cache[Local Cache]
+        ClientCore -->|HTTP| ServerAPI[Server API]
+        style ClientPackage fill:#e1f5fe,stroke:#01579b
+    end
+
+    subgraph "Backend Service (audiokit-ai)"
+        ServerAPI --> Auth[Authentication]
+        Auth -->|Validate| APIKeys[(API Keys)]
+        Auth -->|Track| RateLimiter[(Rate Limiter)]
+        
+        ServerAPI --> Validator[Request Validator]
+        Validator --> Processor[Audio Processor]
+        Processor --> Librosa[Librosa Analysis]
+        Processor --> AIModels[AI Models]
+        
+        Processor -->|Store| FileStorage[(File Storage)]
+        Processor -->|Log| AuditLogs[(Audit Logs)]
+        
+        Monitor[Monitoring] -->|Metrics| Prometheus[(Prometheus)]
+        Monitor -->|Logs| Loki[(Loki)]
+        Monitor -->|Traces| Tempo[(Tempo)]
+        
+        style BackendService fill:#e8f5e9,stroke:#1b5e20
+    end
+
+    subgraph "External Services"
+        Prometheus --> Grafana[Grafana Dashboard]
+        Loki --> LogUI[Log UI]
+        Tempo --> TraceUI[Trace UI]
+        style ExternalServices fill:#f3e5f5,stroke:#4a148c
+    end
+
+    classDef client fill:#e1f5fe,stroke:#01579b
+    classDef server fill:#e8f5e9,stroke:#1b5e20
+    classDef storage fill:#f3e5f5,stroke:#4a148c
+    classDef external fill:#fff3e0,stroke:#e65100
+    
+    class CLI,ClientCore,Config,Cache client
+    class ServerAPI,Auth,Validator,Processor,Librosa,AIModels server
+    class APIKeys,RateLimiter,FileStorage,AuditLogs storage
+    class Prometheus,Loki,Tempo,Grafana,LogUI,TraceUI external
+
+    linkStyle 0 stroke:#01579b
+    linkStyle 1 stroke:#1b5e20
+    linkStyle 2 stroke:#4a148c
+    linkStyle 3 stroke:#e65100

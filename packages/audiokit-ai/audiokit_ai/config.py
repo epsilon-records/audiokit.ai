@@ -3,6 +3,24 @@ from typing import Optional
 import yaml
 from pydantic import BaseModel, Field
 
+class LoggingConfig(BaseModel):
+    level: str = "INFO"
+    directory: str = "logs"
+    max_size: int = 10_000_000  # 10MB
+    backup_count: int = 5
+    console_output: bool = True
+
+class RateLimitConfig(BaseModel):
+    enabled: bool = True
+    redis_url: str = "redis://localhost:6379/0"
+    default_limit: int = Field(60, description="Requests per minute")
+    limits: dict[str, int] = Field(
+        default_factory=lambda: {
+            "/analyze": 30,
+            "/health": 300
+        }
+    )
+
 class ServerConfig(BaseModel):
     """Server configuration model."""
     host: str = Field("0.0.0.0", description="Server host address")
@@ -13,6 +31,8 @@ class ServerConfig(BaseModel):
     rate_limit: int = Field(60, description="Requests per minute per API key")
     redis_url: Optional[str] = Field(None, description="Redis connection URL")
     debug: bool = Field(False, description="Debug mode")
+    logging: LoggingConfig = Field(default_factory=LoggingConfig)
+    rate_limiting: RateLimitConfig = Field(default_factory=RateLimitConfig)
 
 def load_config(config_path: Path = Path("config.yml")) -> ServerConfig:
     """Load configuration from YAML file."""
