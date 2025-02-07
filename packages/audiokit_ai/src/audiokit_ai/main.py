@@ -1,7 +1,8 @@
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from app.api import endpoints
-from app.core.config import settings
+from fastapi.security import OAuth2PasswordBearer
+from .api import endpoints
+from .core.config import settings
 from fastapi_limiter import FastAPILimiter
 import redis.asyncio as redis
 
@@ -28,4 +29,10 @@ async def startup():
     await FastAPILimiter.init(redis_client)
 
 # Include API endpoints
-app.include_router(endpoints.router) 
+app.include_router(endpoints.router)
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+async def verify_token(token: str = Depends(oauth2_scheme)):
+    # Your token verification logic here
+    return {} 

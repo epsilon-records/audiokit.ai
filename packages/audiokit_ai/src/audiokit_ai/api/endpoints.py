@@ -1,7 +1,15 @@
 from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, WebSocket
-from fastapi_limiter.depends import WebSocketRateLimiter
-from app.services import processing
-from app.core.security import verify_token
+try:
+    from fastapi_limiter.depends import WebSocketRateLimiter
+except ImportError:
+    # Fallback for when rate limiting is not available
+    class WebSocketRateLimiter:
+        def __init__(self, *args, **kwargs):
+            pass
+        async def __call__(self, websocket):
+            return True
+from audiokit_ai.services import processing
+from audiokit_ai.core.security import verify_token
 import asyncio
 
 router = APIRouter(prefix="/api")

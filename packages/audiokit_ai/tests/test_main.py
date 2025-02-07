@@ -1,6 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
-from audiokit_ai.main import app
+from audiokit_ai.main import app, verify_token
 import subprocess
 import time
 import httpx

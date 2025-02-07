@@ -94,4 +94,6 @@ def identify_song(file: UploadFile):
 
 def detect_genre(file: UploadFile):
     # Dummy genre classification implementation
-    return "Detected genre result" 
+    return "Detected genre result"
+
+# Add other processing functions here... 
