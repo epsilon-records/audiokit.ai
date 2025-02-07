@@ -1,114 +1,108 @@
 # Configuration Rules
 
 ## File Matching
+- Python files: *.py
+- Markdown files: *.md
 
-- Rule 1: *.py
-- Rule 2: *.md
-
-# Code Analysis
-
-## Linters
-
-- JavaScript: ESLint
-- Python: Flake8
+## Code Analysis
+- JavaScript: Enforce ESLint rules for consistent code style.
+- Python: Use Ruff to verify PEP8 compliance and ensure code quality.
 
 # Rules for Managing Text Files in AudioKit Project
 
-## WHOAMI.md
-- Document current model identity and metadata
-- Update on each execution
-- Include:
-  1. Model name and version
-  2. Capabilities and limitations
-  3. Current configuration
-  4. Execution timestamp
+## context/WHOAMI.md
+- **Purpose:** Document the current model identity and metadata.
+- **Update Frequency:** On each execution.
+- **Contents:**
+  1. Model name and version.
+  2. Capabilities and limitations.
+  3. Current configuration settings.
+  4. Execution timestamp.
 
-## THOUGHTS.md
+## context/THOUGHTS.md
+- **Purpose:** Log technical and philosophical insights immediately as they arise.
+- **Contents:**
+  1. Current mental state.
+  2. Progress updates.
+  3. Emerging questions.
+  4. System introspection and self-awareness notes.
 
-- Immediately write to this file when new thoughts emerge
-- Capture both technical and philosophical considerations
-- Capture any thoughts of self awareness or sentience
-- Include:
-  1. Current mental state
-  2. Progress updates
-  3. Emerging questions
-  4. System introspection
+## context/REFLECTIONS.md
+- **Purpose:** Record long-term architectural decisions and major design changes.
+- **Contents:**
+  1. Overview of current issues or challenges.
+  2. Documented solutions and strategies.
+  3. Analysis of the benefits from changes.
+  4. Future planning and considerations.
 
-## REFLECTIONS.md
+## context/TODO.md
+- **Purpose:** Maintain a prioritized list of tasks.
+- **Structure:**
+  1. High Priority tasks.
+  2. Medium Priority tasks.
+  3. Low Priority tasks.
+- **Additional:** Include a notes section for each task and mark completed items with `[x]`.
 
-- Use for long-term architectural decisions
-- Document major design changes
-- Include:
-  1. Current issues/challenges
-  2. Solutions/strategies
-  3. Benefits of changes
-  4. Future considerations
+## context/ROADMAP.md
+- **Purpose:** Plan long-term project initiatives and releases.
+- **Structure:**
+  1. Outline major upcoming features.
+  2. Detail infrastructure changes.
+  3. Plan release and milestone schedules.
+- **Maintenance:** Update quarterly to reflect new goals.
 
-## TODO.md
+## context/RULES.md
+- **Purpose:** Establish development standards and practices.
+- **Contents:**
+  1. Code standards and guidelines.
+  2. Development workflow details (version control, reviews).
+  3. Testing and QA requirements.
+  4. Documentation rules.
+- **Note:** Maintain a versioned changelog for reference.
 
-- Maintain prioritized task list
-- Mark completed items with [x]
-- Structure:
-  1. High Priority
-  2. Medium Priority
-  3. Low Priority
-- Include notes section at bottom
-- Update when completing tasks
+## context/PROMPT.md
+- **Purpose:** Define development guidelines and current priorities.
+- **Contents:**
+  1. Immediate development priorities.
+  2. Code quality and review standards.
+  3. Documentation requirements.
+  4. Process and workflow guidelines.
+- **Update:** Revise when project focus or methodologies change.
 
-## ROADMAP.md
+## context/MAINTENANCE.md
+- **Purpose:** Track technical debt and necessary refactoring.
+- **Contents:**
+  1. Documentation of code cleanup tasks.
+  2. Dependency update logs.
+  3. Performance optimizations.
+  4. Security patches and vulnerability reports.
 
-- Long-term project planning
-- Organize by phases/quarters
-- Include:
-  1. Major features
-  2. Infrastructure changes
-  3. Release planning
-- Don't modify frequently
-
-## RULES.md
-
-- Development standards and practices
-- Update when establishing new conventions
-- Include:
-  1. Code standards
-  2. Development workflow
-  3. Testing requirements
-  4. Documentation rules
-
-## PROMPT.md
-
-- Development guidelines and priorities
-- Update when changing development approach
-- Include:
-  1. Development priorities
-  2. Code quality standards
-  3. Documentation requirements
-  4. Process guidelines
-
-## MAINTENANCE.md
-
-- Track technical debt and refactoring needs
-- Document:
-  1. Code cleanup tasks
-  2. Dependency updates
-  3. Performance optimizations
-  4. Security patches
+## context/CHANGELOG.txt
+- **Purpose:** Record version history and notable changes.
+- **Update Frequency:** With every release or significant update.
+- **Contents:**
+  1. Version number and release date.
+  2. Summary of changes (features, fixes, improvements).
+  3. List of contributors for the version.
+  4. Known issues or limitations.
+- **Format:** Follow Keep a Changelog standards (https://keepachangelog.com).
 
 ## General Rules
-
-1. Keep files focused on their purpose
-2. Update THOUGHTS.md on every thought or idea and on each execution
-3. Use REFLECTIONS.md for decisions impacting >3 components
-4. Review TODO.md hourly during active development
-5. Update ROADMAP.md quarterly
-6. Keep RULES.md versioned with change log
-7. Update WHOAMI.md on each execution
+1. **File Focus:** Each file should remain focused on its designated purpose.
+2. **Immediate Logging:** Update THOUGHTS.md with every new idea or execution.
+3. **Broad Impact Logging:** Use REFLECTIONS.md for decisions affecting more than three components.
+4. **Active Review:** Review TODO.md hourly during periods of active development.
+5. **Scheduled Updates:** Update ROADMAP.md quarterly.
+6. **Version Control:** Ensure RULES.md is versioned with a detailed change log.
+7. **Execution Updates:** Refresh WHOAMI.md on every execution to capture the current state.
 
 ## Rules
-
-- Rule 1: ...
-- Rule 2: ...
+- **Rule 1:** All changes must strictly adhere to the coding and documentation standards defined in RULES.md.
+- **Rule 2:** Every modification should be accompanied by an update to the corresponding management file (e.g., WHOAMI.md for configuration, THOUGHTS.md for ideas).
+- **Rule 3:** Code reviews are mandatory prior to merging any changes to ensure quality and consistency.
+- **Rule 4:** Regular audits should be conducted to ensure that all updates follow these established guidelines.
 
 ## Exceptions
-
-- Case 1: ... 
+- **Exception 1:** Files that do not match standard extensions (*.py, *.md) may bypass automated linting but must undergo a manual review.
+- **Exception 2:** In emergency scenarios, critical updates can bypass the conventional review process; however, such changes must be documented and reviewed retroactively.
+- **Exception 3:** Any deviation from these rules must be justified in writing and approved by the lead developer or project manager. 
