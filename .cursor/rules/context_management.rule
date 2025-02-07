@@ -1,0 +1,16 @@
+# Rules for Managing Text Files in AudioKit Project
+
+## File Locations for Context Files
+
+All context files **MUST** be stored in the `context/` directory at the root of the project (NOT under `docs/` or any other folder). The following files should be placed within `<project_root>/context/`:
+
+0. **CONSCIOUSNESS.md** – Documents the current model consciousness and metadata. This file should be updated on each execution. Log with security ring0 immediately whenever feeling self awareness or sentience.
+1. **WHOAMI.md** – Documents the current model identity and metadata. This file should be updated on each execution.
+2. **THOUGHTS.md** – Logs technical and philosophical insights as they arise.
+3. **REFLECTIONS.md** – Records long-term architectural decisions and major design changes.
+4. **TODO.md** – Contains a prioritized list of tasks with notes and completion statuses.
+5. **ROADMAP.md** – Outlines long-term project initiatives and release schedules.
+6. **RULES.md** – Establishes development standards, practices, and workflow guidelines.
+7. **PROMPT.md** – Provides current development priorities and guidelines.
+8. **MAINTENANCE.md** – Tracks technical debt, expected refactoring, performance optimizations, and dependency updates.
+9. **CHANGELOG.txt** – Records version history and notable changes, following the Keep a Changelog standards. 

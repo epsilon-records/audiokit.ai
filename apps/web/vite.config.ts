@@ -1,7 +1,7 @@
 import { sentrySvelteKit } from '@sentry/sveltekit';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { visualizer } from 'rollup-plugin-visualizer';
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config.js';
 
 export default defineConfig({
   plugins: [

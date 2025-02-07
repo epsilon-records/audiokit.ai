@@ -1,0 +1,9 @@
+# Configuration Rules
+
+## File Matching
+- Python files: *.py
+- Markdown files: *.md
+
+## Code Analysis
+- JavaScript: Enforce ESLint rules for consistent code style.
+- Python: Use Ruff to verify PEP8 compliance and ensure code quality. 
