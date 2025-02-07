@@ -12,7 +12,7 @@ commit-all:
 
 sync:
     # Get current branch name
-    BRANCH=$(git branch --show-current)
+    BRANCH := `git branch --show-current`
     # Pull changes before pushing
     git pull --rebase origin $BRANCH
     cd audiokit && git pull --rebase origin $BRANCH
