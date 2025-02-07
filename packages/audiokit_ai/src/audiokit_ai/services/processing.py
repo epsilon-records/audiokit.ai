@@ -6,7 +6,9 @@ import whisper
 import faiss
 import openl3
 from google.cloud import speech_v1p1beta1 as speech
+from google.oauth2 import service_account
 import tempfile
+import os
 
 # Initialize DeepFilterNet using the recommended API
 model, df_state, _ = init_df()
@@ -20,7 +22,14 @@ openl3_model = openl3.models.load_audio_embedding_model(
     embedding_size=512  # Size of the embedding vector
 )
 
-client = speech.SpeechClient()
+# Initialize the SpeechClient
+if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
+    credentials = service_account.Credentials.from_service_account_file(
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+    )
+    client = speech.SpeechClient(credentials=credentials)
+else:
+    client = speech.SpeechClient()  # Fallback to ADC
 
 async def save_temp_file(file: UploadFile) -> str:
     """Save an uploaded file to a temporary location"""
