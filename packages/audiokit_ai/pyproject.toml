@@ -3,45 +3,81 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "audiokit-ai"
+name = "audiokit_ai"
 version = "0.1.0"
-description = "Backend for AudioKit-AI Server"
-authors = [
-    { name = "Nathaniel Houk", email = "nate@audiokit.ai" }
-]
 dependencies = [
-    "fastapi",
-    "uvicorn",
-    "celery",
-    "redis",
-    "pydantic",
-    "PyJWT",
-    "fastapi-limiter",
-    "python-multipart",
-    "httpx",
-    "asyncpg",
+    "torch>=2.0.0",
+    "torchaudio>=2.0.0",
+    "deepfilternet>=0.5.6",
+    "demucs>=4.0",
+    "whisper>=1.0",
+    "fastapi>=0.95.0",
+    "uvicorn>=0.21.0",
+    "pytest>=7.0.0",
+    "httpx>=0.23.0",
+    "pytest-asyncio>=0.20.0"
 ]
 
-[tool.uv]
-name = "audiokit-ai"
-version = "0.1.0"
-description = "Backend for AudioKit-AI Server"
-authors = ["Your Name <youremail@example.com>"]
-dependencies = [
-    "fastapi",
-    "uvicorn",
-    "celery",
-    "redis",
-    "pydantic",
-    "PyJWT",
-    "fastapi-limiter",
-    "python-multipart",
-    "httpx",
-    "asyncpg",
+[project.optional-dependencies]
+test = [
+    "pytest",
+    "pytest-cov",
+    "pytest-asyncio",
+    "httpx"
+]
+dev = [
+    "mypy",
+    "ruff"
 ]
 
-[tool.hatch.metadata]
-requires = []
+[tool.hatch.envs.default]
+dependencies = [
+    "pytest",
+    "pytest-cov",
+    "pytest-asyncio",
+    "httpx"
+]
+
+[tool.hatch.envs.test]
+features = ["test"]
+dependencies = [
+    "pytest",
+    "pytest-cov",
+    "pytest-asyncio",
+    "httpx"
+]
+prefer-binary = true
+parallel-install = true
+
+[tool.hatch.envs.dev]
+features = ["dev"]
+dependencies = [
+    "mypy",
+    "ruff"
+]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+addopts = "-v --cov=audiokit_ai --cov-report=term-missing"
+testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/audiokit_ai"]
+packages = ["audiokit_ai"]
+
+[tool.ruff]
+line-length = 88
+select = [
+    "E",  # Pycodestyle errors
+    "F",  # Pyflakes
+    "I",  # Isort
+    "B",  # flake8-bugbear
+    "C",  # flake8-comprehensions
+    "W",  # Pycodestyle warnings
+]
+ignore = [
+    "E203",  # Whitespace before ':'
+]
+format = [
+    "I",  # Isort
+    "W",  # Pycodestyle warnings
+]

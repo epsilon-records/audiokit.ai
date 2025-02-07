@@ -10,7 +10,7 @@ router = APIRouter(prefix="/api")
 @router.post("/denoise", dependencies=[Depends(verify_token)])
 async def denoise_audio(file: UploadFile = File(...)):
     try:
-        result = processing.denoise(file)
+        result = await processing.denoise(file)
         return {"status": "success", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -18,7 +18,7 @@ async def denoise_audio(file: UploadFile = File(...)):
 @router.post("/separate", dependencies=[Depends(verify_token)])
 async def separate_audio(file: UploadFile = File(...)):
     try:
-        result = processing.separate(file)
+        result = await processing.separate(file)
         return {"status": "success", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -34,7 +34,7 @@ async def auto_master_audio(file: UploadFile = File(...)):
 @router.post("/transcribe", dependencies=[Depends(verify_token)])
 async def transcribe_audio(file: UploadFile = File(...)):
     try:
-        result = processing.transcribe(file)
+        result = await processing.transcribe(file)
         return {"status": "success", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
