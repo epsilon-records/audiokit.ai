@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "audiokit-ai"
 version = "0.1.0"
-description = "AI-powered audio processing service"
-authors = ["Your Name <your.email@example.com>"]
+description = "🤖 AudioKit AI: AI-powered audio processing backend service"
+authors = ["Nathaniel Houk <nate@audiokit.ai>"]
+license = "Confidential and Proprietary"
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -10,7 +11,6 @@ fastapi = "^0.104.1"
 uvicorn = "^0.24.0"
 celery = "^5.2.7"
 web3 = "^6.0.0"
-numpy = "1.21.6"
 magenta = "^2.1.4"
 librosa = "0.10.0"
 pydantic = "^2.6.0"

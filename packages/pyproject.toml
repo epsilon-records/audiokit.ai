@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "audiokit-meta"
 version = "0.1.0"
-description = "Meta package for AudioKit ecosystem development"
-authors = ["Your Name <your.email@example.com>"]
+description = "🎛️ AudioKit Meta: The development hub for the AudioKit ecosystem"
+authors = ["Nathaniel Houk <nate@audiokit.ai>"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -14,7 +14,6 @@ audiokit-ai = {path = "audiokit-ai", develop = true}
 pytest = "^7.4.0"
 ipython = "^8.12.0"
 mypy = "^1.4.1"
-black = "^23.3.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
