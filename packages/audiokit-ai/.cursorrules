@@ -1,9 +1,0 @@
-# Code Style Rules (Only one H1 heading)
-
-## Formatting
-- Indent with 2 spaces
-- Max line length 120
-
-## Validation
-- Input sanitization required
-- Schema validation 
