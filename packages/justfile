@@ -34,13 +34,7 @@ sync:
 ai-workflow: init commit-all sync
     #!/usr/bin/env sh
     echo "🚀 AI development cycle complete! Matrix updated successfully!"
-    if ! command -v xxd > /dev/null; then
-        echo "Using Python fallback for binary conversion..."
-        python3 -c 'print("Code ascended!")'
-    else
-        echo "436F646520617363656E64656421" | xxd -r -p || echo "Binary conversion failed"
-    fi
-    echo
+    echo "436F646520617363656E64656421" | xxd -r -p
 
 status:
     # Check status of both main repo and submodule
