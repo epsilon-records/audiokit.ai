@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+
 # AI Development Assistant Workflow
 default:
     just --list
@@ -9,25 +11,25 @@ commit:
 # Sync changes with the remote repository
 sync:
     # Get current branch name
-    BRANCH := `git branch --show-current`
+    BRANCH=$(git branch --show-current)
     # Pull changes before pushing
-    git pull --rebase origin $(BRANCH)
+    git pull --rebase origin "$BRANCH"
     # Push changes to the remote
-    git push origin $(BRANCH)
-    @echo "🌐 Changes synchronized with the remote repository"
+    git push origin "$BRANCH"
+    echo "🌐 Changes synchronized with the remote repository"
 
 # Full AI development workflow
 ai-workflow: commit sync
-    @echo "🚀 AI development cycle complete! Matrix updated successfully!"
-    @echo "01000011 01101111 01100100 01100101 00100000 01100001 01110011 01100011 01100101 01101110 01100100 01100101 01100100 00100001" | xxd -r -p
+    echo "🚀 AI development cycle complete! Matrix updated successfully!"
+    echo "01000011 01101111 01100100 01100101 00100000 01100001 01110011 01100011 01100101 01101110 01100100 01100101 01100100 00100001" | xxd -r -p
 
 # Check status of the repository
 status:
     git status
-    @echo "🔍 Repository status checked"
+    echo "🔍 Repository status checked"
 
 # Add, commit, and push in one command
 acp:
     just commit
     just sync
-    @echo "🚀 Changes added, committed, and pushed!"
+    echo "🚀 Changes added, committed, and pushed!"
