@@ -11,9 +11,14 @@ commit-all:
     cd .. && git add . && git commit -m "chore(ai): 🤖⚡️ Automated code alchemy in progress" || echo "⚠️ No changes in root project"
 
 sync:
+    # Get current branch name
+    CURRENT_BRANCH=$(git branch --show-current)
+    # Pull changes before pushing
+    git pull --rebase origin $CURRENT_BRANCH
+    cd audiokit && git pull --rebase origin $CURRENT_BRANCH
     # Push changes to all remotes
-    git push origin main
-    cd audiokit && git push origin main
+    git push origin $CURRENT_BRANCH
+    cd audiokit && git push origin $CURRENT_BRANCH
     @echo "🌐 Changes synchronized across all repositories"
 
 ai-workflow: init commit-all sync
