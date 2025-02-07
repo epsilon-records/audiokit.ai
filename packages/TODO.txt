@@ -21,8 +21,15 @@ High Priority:
    - [x] Signed plugin verification (RSA signatures)
 
 4. CLI Tool - AI-Powered Features (Sorted by Complexity)
+   # Base Analysis Commands
+   - [ ] analyze spectral (Full audio analysis)
+   - [ ] analyze bpm (Tempo detection)
+   - [ ] analyze key (Musical key detection)
+   - [ ] analyze beats (Beat tracking)
+   - [ ] analyze harmony (Chord progression)
+   - [ ] analyze segments (Structural segmentation)
    - [ ] stems separate (Stem separation)
-   - [ ] track match (Audio fingerprinting) 
+   - [ ] track match (Audio fingerprinting)
    - [ ] analyze loudness (Dynamic range)
    - [ ] check plagiarism (Similarity check)
    - [ ] style transfer (Genre conversion)
@@ -60,6 +67,13 @@ Medium Priority:
 
 Low Priority Extensions (Sorted by Implementation Complexity):
 1. Audio Processing
+   # Core Analysis Endpoints
+   - [ ] Spectral analysis (Librosa) - 1 week
+   - [ ] Tempo detection (Librosa) - 1 week
+   - [ ] Key detection (Krumhansl-Schmuckler) - 2 weeks
+   - [ ] Beat tracking (Madmom) - 2 weeks
+   - [ ] Chord recognition (Crepe) - 3 weeks
+   - [ ] Structure segmentation (Spleeter) - 3 weeks
    - [ ] Stem separation (Demucs) - 2 weeks
    - [ ] Music fingerprinting (Chromaprint) - 2 weeks
    - [ ] Dynamic range analysis (Librosa) - 3 weeks
@@ -83,14 +97,22 @@ Low Priority Extensions (Sorted by Implementation Complexity):
 
 Notes
 -----
+Core Analysis Features:
+1. Spectral: MFCCs, centroid, bandwidth, contrast, rolloff
+2. Temporal: RMS, ZCR, onset detection
+3. Musical: Key, BPM, chords, sections
+4. Comparative: Loudness wars index, dynamic contrast
+
 Implementation Phases:
-1. Core Audio (Weeks 1-4)
+1. Base Analysis (Weeks 1-2)
+   - Spectral, tempo, key, beats
+2. Core Audio (Weeks 3-4)
    - Stem separation, fingerprinting, loudness analysis
-2. ML Foundation (Weeks 5-8)
+3. ML Foundation (Weeks 5-8)
    - Style transfer, melody generation, plagiarism detection  
-3. Business Intelligence (Weeks 9-12)
+4. Business Intelligence (Weeks 9-12)
    - Royalty modeling, trend forecasting, tour planning
-4. Advanced Features (Weeks 13+)
+5. Advanced Features (Weeks 13+)
    - NFT, collaborative features, video generation
 
 Dependency Chain:
