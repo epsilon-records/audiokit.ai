@@ -9,6 +9,7 @@ from google.cloud import speech_v1p1beta1 as speech
 from google.oauth2 import service_account
 import tempfile
 import os
+from audiokit_ai.core.logger import logger
 
 # Initialize DeepFilterNet using the recommended API
 model, df_state, _ = init_df()
@@ -23,13 +24,16 @@ openl3_model = openl3.models.load_audio_embedding_model(
 )
 
 # Initialize the SpeechClient
-if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
-    credentials = service_account.Credentials.from_service_account_file(
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
-    )
-    client = speech.SpeechClient(credentials=credentials)
-else:
-    client = speech.SpeechClient()  # Fallback to ADC
+try:
+    if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
+        credentials = service_account.Credentials.from_service_account_file(
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
+        )
+        client = speech.SpeechClient(credentials=credentials)
+    else:
+        client = speech.SpeechClient()  # Fallback to ADC
+except Exception as e:
+    raise RuntimeError(f"Failed to initialize SpeechClient: {str(e)}")
 
 async def save_temp_file(file: UploadFile) -> str:
     """Save an uploaded file to a temporary location"""
@@ -38,8 +42,10 @@ async def save_temp_file(file: UploadFile) -> str:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_file:
             # Write the uploaded file's content to the temp file
             temp_file.write(await file.read())
+            logger.info(f"Saved temporary file: {temp_file.name}")
             return temp_file.name
     except Exception as e:
+        logger.error(f"Failed to save temporary file: {str(e)}")
         raise RuntimeError(f"Failed to save temporary file: {str(e)}")
 
 async def denoise(file: UploadFile) -> bytes:

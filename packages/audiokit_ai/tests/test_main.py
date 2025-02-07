@@ -4,6 +4,8 @@ from audiokit_ai.main import app, verify_token
 import subprocess
 import time
 import httpx
+from unittest.mock import MagicMock
+from audiokit_ai.core.logger import logger
 
 # Override the token dependency for testing purposes
 app.dependency_overrides[verify_token] = lambda: {}
@@ -51,4 +53,16 @@ def test_live_server(live_server):
         response = httpx.get("http://localhost:8000/")
         assert response.status_code == 404  # No root endpoint, should return 404
     except httpx.ConnectError:
-        pytest.fail("Server failed to start") 
+        pytest.fail("Server failed to start")
+
+@pytest.fixture
+def mock_speech_client():
+    client = MagicMock()
+    client.recognize.return_value = MagicMock(transcript="test transcription")
+    return client 
+
+def test_denoise_audio(test_client):
+    with open("tests/test_audio.wav", "rb") as f:
+        response = test_client.post("/api/denoise", files={"file": f})
+        logger.info(f"Test response: {response.status_code}")
+        assert response.status_code == 200 

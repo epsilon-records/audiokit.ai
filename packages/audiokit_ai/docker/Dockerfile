@@ -2,6 +2,8 @@
 FROM python:3.11-slim as builder
 
 WORKDIR /app
+COPY pyproject.toml .
+RUN pip install '.[test]'
 COPY . .
 
 RUN pip install --upgrade pip && \

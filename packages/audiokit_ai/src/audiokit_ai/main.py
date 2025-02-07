@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, Depends, HTTPException, status
+from fastapi import FastAPI, WebSocket, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from .api import endpoints
@@ -6,6 +6,7 @@ from .core.config import settings
 from fastapi_limiter import FastAPILimiter
 import redis.asyncio as redis
 from dotenv import load_dotenv
+from audiokit_ai.core.logger import logger
 
 app = FastAPI(title="AudioKit-AI Server")
 
@@ -38,4 +39,11 @@ async def verify_token(token: str = Depends(oauth2_scheme)):
     # Your token verification logic here
     return {}
 
-load_dotenv() 
+load_dotenv()
+
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    logger.info(f"Request: {request.method} {request.url}")
+    response = await call_next(request)
+    logger.info(f"Response: {response.status_code}")
+    return response 
