@@ -11,6 +11,9 @@ from typing import Dict, Any
 from pydantic import BaseModel
 from rich.console import Console
 from packaging.version import Version
+import os
+import json
+from datetime import datetime, timedelta
 
 console = Console()
 
@@ -39,8 +42,43 @@ def check_pypi_versions(package: str) -> str:
         console.print(f"[yellow]Warning: Could not check PyPI for {package} - {str(e)}[/]")
         return "unknown"
 
+CVE_CACHE_DIR = ".cve_cache"
+CACHE_EXPIRY_HOURS = 24
+
+def _get_cache_path(package: str) -> str:
+    os.makedirs(CVE_CACHE_DIR, exist_ok=True)
+    return os.path.join(CVE_CACHE_DIR, f"{package}.json")
+
+def _read_cache(package: str) -> dict:
+    cache_path = _get_cache_path(package)
+    try:
+        with open(cache_path, 'r') as f:
+            data = json.load(f)
+            if datetime.fromisoformat(data['timestamp']) > datetime.now() - timedelta(hours=CACHE_EXPIRY_HOURS):
+                return data
+    except (FileNotFoundError, json.JSONDecodeError, KeyError):
+        pass
+    return None
+
+def _write_cache(package: str, cve_data: list):
+    cache_path = _get_cache_path(package)
+    try:
+        with open(cache_path, 'w') as f:
+            json.dump({
+                'timestamp': datetime.now().isoformat(),
+                'cves': cve_data
+            }, f)
+    except IOError as e:
+        console.print(f"[yellow]Warning: Failed to cache {package} - {str(e)}[/]")
+
 def check_security(package: str, version: str) -> str:
-    """Check for known vulnerabilities using NVD database"""
+    """Check for known vulnerabilities using NVD database with caching"""
+    # Check cache first
+    cached = _read_cache(package)
+    if cached:
+        return "\n  ".join(cached['cves']) if cached['cves'] else "No known vulnerabilities (cached)"
+    
+    # Proceed with API call if no cache
     try:
         response = requests.get(
             f"https://services.nvd.nist.gov/rest/json/cves/2.0",
@@ -57,9 +95,12 @@ def check_security(package: str, version: str) -> str:
         for vuln in response.json().get('vulnerabilities', []):
             cve_id = vuln['cve']['id']
             descriptions = [d['value'] for d in vuln['cve']['descriptions'] 
-                           if d['lang'] == 'en']
+                          if d['lang'] == 'en']
             cves.append(f"{cve_id}: {descriptions[0][:60]}..." if descriptions else cve_id)
-            
+        
+        # Update cache
+        _write_cache(package, cves)
+        
         return "\n  ".join(cves) if cves else "No known vulnerabilities"
         
     except Exception as e:
