@@ -131,4 +131,21 @@ class ProcessingParameters(BaseModel):
     model_parameters: dict = Field(
         default_factory=dict, 
         description="ML model parameters"
-    ) 
+    )
+
+class APIErrorResponse(BaseModel):
+    """Standard error response format"""
+    status: str = "error"
+    error_code: str
+    message: str
+    detail: dict | None = None
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "status": "error",
+                "error_code": "validation_error",
+                "message": "Invalid request parameters",
+                "detail": {"field": "audio_file", "issue": "Required field missing"}
+            }
+        } 
