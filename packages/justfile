@@ -2,7 +2,7 @@
 init:
     # Initialize and update submodules
     git submodule update --init --recursive
-    @echo "✅ Submodules initialized and updated"
+    echo "✅ Submodules initialized and updated"
 
 commit-all:
     # Commit audiokit subdirectory changes
@@ -29,15 +29,15 @@ sync:
     git push origin $SUBMODULE_BRANCH
     cd ..
     
-    @echo "🌐 Changes synchronized across all repositories"
+    echo "🌐 Changes synchronized across all repositories"
 
 ai-workflow: init commit-all sync
-    @echo "🚀 AI development cycle complete! Matrix updated successfully!"
-    @echo "01000011 01101111 01100100 01100101 00100000 01100001 01110011 01100011 01100101 01101110 01100100 01100101 01100100 00100001" | xxd -r -p
+    echo "🚀 AI development cycle complete! Matrix updated successfully!"
+    echo "01000011 01101111 01100100 01100101 00100000 01100001 01110011 01100011 01100101 01101110 01100100 01100101 01100100 00100001" | xxd -r -p
 
 status:
     # Check status of both main repo and submodule
     git status
     cd audiokit && git status
     cd ..
-    @echo "🔍 Repository status checked"
+    echo "🔍 Repository status checked"
