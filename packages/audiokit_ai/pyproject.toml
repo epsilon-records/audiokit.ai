@@ -18,6 +18,8 @@ dependencies = [
     "pytest-asyncio>=0.20.0",
     "fastapi-limiter>=0.1.5",
     "redis>=4.5.5",
+    "faiss-cpu>=1.7.3",
+    "openl3>=0.4.2"
 ]
 
 [project.optional-dependencies]
