@@ -10,6 +10,7 @@ commit:
 
 # Sync changes with the remote repository
 sync:
+    #!/usr/bin/env sh
     # Get current branch name
     BRANCH=$(git branch --show-current)
     # Pull changes before pushing
