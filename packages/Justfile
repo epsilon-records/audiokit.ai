@@ -23,10 +23,12 @@ sync:
 
 # Check status of the repository
 status:
+    #!/usr/bin/env sh
     git status
     echo "🔍 Repository status checked"
 
 # Add, commit, and push in one command
 acp: commit sync
+    #!/usr/bin/env sh
     echo "🚀 Changes added, committed, and pushed!"
     echo "436f646520617363656e64656421" | xxd -r -p
