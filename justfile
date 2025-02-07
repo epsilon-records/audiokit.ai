@@ -1,88 +1,49 @@
-# List all available commands
+#!/usr/bin/env sh
+
+# AI Development Assistant Workflow
 default:
-    @just --list
+    #!/usr/bin/env sh
+    just --list
 
-# Install all dependencies (both Python and Node.js) and setup examples
+# Commit root project changes
+commit:
+    #!/usr/bin/env sh
+    git add . && git commit -m "chore(ai): 🤖⚡️ Automated code alchemy in progress" || echo "⚠️ No changes in root project"
+
+# Sync changes with the remote repository
+sync:
+    #!/usr/bin/env sh
+    # Get current branch name
+    BRANCH=$(git branch --show-current)
+    # Pull changes before pushing
+    git pull --rebase origin "$BRANCH"
+    # Push changes to the remote
+    git push origin "$BRANCH"
+    echo "🌐 Changes synchronized with the remote repository"
+
+# Check status of the repository
+status:
+    #!/usr/bin/env sh
+    git status
+    echo "🔍 Repository status checked"
+
+# Add, commit, and push in one command
+acp: commit sync
+    #!/usr/bin/env sh
+    echo "🚀 Changes added, committed, and pushed!"
+    echo "436f646520617363656e64656421" | xxd -r -p
+
+# Run tests
+test:
+    #!/usr/bin/env sh
+    hatch run test:pytest --cov=audiokit_ai --cov-report=term
+
+# Generate requirements.txt
+requirements:
+    #!/usr/bin/env sh
+    uv pip compile pyproject.toml --output-file requirements.txt
+
+# Install dependencies from requirements.txt
 install:
-    cd packages/audiokit && poetry install
-    cd apps/web && bun install
-
-# Install dependencies for audiokit package
-audiokit-install:
-    cd packages/audiokit && poetry install
-
-# Run the basic usage example
-run-basic-example:
-    cd packages/audiokit && poetry run python examples/basic_usage.py
-
-# Run audiokit pipeline for a specific artist
-audiokit-run artist_id:
-    cd packages/audiokit && poetry run python -c "from audiokit.core import run_audiokit_ai_pipeline; import asyncio; asyncio.run(run_audiokit_ai_pipeline('{{artist_id}}'))"
-
-# Run audiokit tests
-audiokit-test:
-    cd packages/audiokit && poetry run pytest
-
-# Clean audiokit cache files
-audiokit-clean:
-    find packages/audiokit -type f -name "*.pyc" -delete
-    find packages/audiokit -type d -name "__pycache__" -delete
-    find packages/audiokit -type d -name "*.egg-info" -exec rm -r {} +
-    cd packages/audiokit && poetry env remove --all
-
-# Format all code
-format:
-    cd packages/audiokit && poetry run ruff format .
-    cd apps/web && bun run format
-
-# Format audiokit code
-audiokit-format:
-    cd packages/audiokit && poetry run ruff format .
-
-# Check all code
-check:
-    cd packages/audiokit && poetry run ruff check .
-    cd apps/web && bun run lint
-
-# Fix all auto-fixable issues
-fix:
-    cd packages/audiokit && poetry run ruff check --fix .
-    cd apps/web && bun run lint --fix
-
-# Run development environment
-dev:
-    #!/usr/bin/env bash
-    trap 'kill 0' SIGINT
-    cd packages/audiokit && poetry run uvicorn audiokit.server:app --reload --port 8000 &
-    cd apps/web && bun run dev
-
-# Run audiokit development server
-audiokit-dev:
-    cd packages/audiokit && poetry run uvicorn audiokit.server:app --reload --port 8000
-
-# Generate audiokit documentation
-audiokit-docs:
-    cd packages/audiokit && poetry run pdoc --html --output-dir docs audiokit
-
-# Show audiokit package version
-audiokit-version:
-    cd packages/audiokit && poetry run python -c "from audiokit import __version__; print(__version__)"
-
-# Build for production
-build:
-    cd packages/audiokit && poetry build
-    cd apps/web && bun run build
-
-# Clean all dependencies and build artifacts
-clean: audiokit-clean
-    cd apps/web && rm -rf node_modules .svelte-kit build
-    rm -rf .venv node_modules
-
-# Update all dependencies
-update:
-    cd packages/audiokit && poetry update
-    cd apps/web && bun update
-
-# Run the audiokit core module
-run-audiokit:
-    cd packages/audiokit && poetry run python -m audiokit.core
+    #!/usr/bin/env sh
+    uv pip install -r requirements.txt

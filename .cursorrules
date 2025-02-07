@@ -1,424 +1,54 @@
-# MarkAI
-
-Recursively scan every file in the repository. For each file whose name is `.markairules`, load its contents and incorporate them into your active context for analysis and decision-making.
-
-# AudioKit Development Guidelines
-<!--ai-ignore
-This file defines the automated AI post-interaction tasks and version control steps for the AudioKit project.
-It is maintained by the AudioKit AI Assistant. Please review changes carefully and adhere to the guidelines.
-ai-ignore-->
-
-<ai_instruction>
-<!--ai-ignore
-AudioKit Development Guidelines
-Version: 1.0.0
-Last updated: 2025-02-03
-Author: AudioKit Team
-Purpose: Define development standards and practices for the AudioKit project
-ai-ignore-->
-
-## Version Information
-
-Version: 1.0.0
-Last updated: 2024-02-01
-Author: AudioKit Team
-Purpose: Define development standards and practices for the AudioKit project
-
-Open source guidelines are critical for community collaboration
-and maintaining project quality. These standards ensure consistency
-and maintainability across the project.
-
-## Open Source Guidelines
-
-Licensing and copyright requirements are based on
-open source best practices and legal requirements.
-Critical for project sustainability and adoption.
-
-### Licensing and Copyright
-
-- Project is licensed under the MIT License
-- All contributions must be compatible with MIT License
-- Include copyright notices in all source files
-- Maintain CONTRIBUTORS.md file
-
-Code quality standards ensure maintainability and reliability.
-Based on industry best practices and team experience.
-Documentation is a critical aspect of code quality.
-
-### Code Quality
-
-- Comprehensive documentation required
-- Clear and descriptive variable/function names
-- Follow language-specific style guides (PEP 8 for Python, StandardJS for JavaScript)
-- Include type hints and JSDoc comments
-- Write tests for all new features
-
-Documentation standards are based on industry best practices
-and ensure maintainability and knowledge transfer.
-
-### Code Documentation Standards
-
-1. **Function and Method Documentation**
-   - Purpose and behavior description
-   - Parameter descriptions with types
-   - Return value descriptions
-   - Usage examples
-   - Edge cases and error handling
-   - Performance considerations
-   - Dependencies and side effects
-
-2. **Class Documentation**
-   - Class purpose and responsibility
-   - Inheritance and interface implementations
-   - Public API documentation
-   - Constructor parameters
-   - Property descriptions
-   - Usage examples
-   - Design patterns used
-
-3. **Module Documentation**
-   - Module purpose and scope
-   - Dependencies and requirements
-   - Configuration options
-   - Usage examples
-   - Architecture decisions
-   - Integration points
-
-4. **Inline Comments**
-   - Complex algorithm explanations
-   - Business logic rationale
-   - Performance optimizations
-   - Workarounds and their reasons
-   - TODO and FIXME with ticket references
-
-5. **Documentation Format**
-
-   ```python
-   def process_audio(
-       input_file: str,
-       sample_rate: int = 44100,
-       channels: int = 2
-   ) -> AudioData:
-       """Process audio file with specified parameters.
-
-       Handles audio file processing including resampling, channel conversion,
-       and normalization. Optimized for real-time processing of large files.
-
-       Args:
-           input_file: Path to input audio file
-           sample_rate: Target sample rate in Hz (default: 44100)
-           channels: Target number of channels (default: 2)
-
-       Returns:
-           AudioData object containing processed audio
-
-       Raises:
-           AudioProcessingError: If file cannot be processed
-           ValueError: If invalid parameters provided
-
-       Example:
-           >>> data = process_audio("input.wav", sample_rate=48000)
-           >>> data.play()
-
-       Performance:
-           - O(n) time complexity where n is file size
-           - Streams data to avoid memory issues
-           - Uses parallel processing for files > 100MB
-
-       Note:
-           Requires ffmpeg for certain codec conversions
-       """
-   ```
-
-6. **Documentation Maintenance**
-   - Keep docs in sync with code
-   - Update examples when API changes
-   - Review documentation in PRs
-   - Remove outdated comments
-   - Validate doc generation
-
-7. **API Documentation**
-   - Complete OpenAPI/Swagger specs
-   - Request/response examples
-   - Error codes and handling
-   - Rate limits and quotas
-   - Authentication requirements
-   - Versioning information
-
-8. **Architecture Documentation**
-   - Component diagrams
-   - Data flow descriptions
-   - Integration patterns
-   - Deployment requirements
-   - Scaling considerations
-   - Security model
-
-Code commenting standards ensure code readability and maintainability.
-Based on industry best practices and team experience with large codebases.
-
-### Code Commenting Standards
-
-1. **General Principles**
-   - Comment on WHY, not WHAT (code shows what, comments explain why)
-   - Keep comments current with code changes
-   - Write comments as full sentences with proper punctuation
-   - Use consistent commenting style within each language
-   - Comments should add value, not state the obvious
-
-2. **Block Comments**
-
-   ```python
-   # ----------------------------------------
-   # Audio Processing Pipeline
-   # ----------------------------------------
-   # This pipeline handles real-time audio processing with
-   # multiple stages of effects. The order of operations is
-   # critical for maintaining audio quality:
-   #
-   # 1. Normalize input (-1.0 to 1.0)
-   # 2. Apply effects chain
-   # 3. Handle clipping prevention
-   # 4. Format conversion
-   ```
-
-3. **Inline Comments**
-
-   ```python
-   gain *= 0.98  # Reduce by 2% to prevent digital clipping
-   
-   if time_since_update > MAX_DELAY:
-       buffer.clear()  # Prevent memory leak in stuck state
-   ```
-
-4. **TODO Comments**
-
-   ```python
-   # TODO(username): Optimize FFT algorithm for better performance
-   # Issue #123: Memory usage spikes on large files
-   
-   # FIXME(username): Handle edge case when sample rate > 192kHz
-   # Temporary workaround until proper resampling is implemented
-   ```
-
-5. **Warning Comments**
-
-   ```python
-   # WARNING: This method mutates the input buffer
-   # IMPORTANT: Must be called with the lock held
-   # NOTE: Not thread-safe, use synchronized wrapper
-   ```
-
-6. **Section Markers**
-
-   ```python
-   # === Audio Processing ===
-   
-   # === Effect Chain Management ===
-   
-   # === Resource Cleanup ===
-   ```
-
-7. **Complex Algorithm Comments**
-
-   ```python
-   # Sliding window algorithm for RMS calculation
-   # Time complexity: O(1) amortized
-   # Space complexity: O(window_size)
-   #
-   # The window size determines the smoothing factor:
-   # - Larger window = smoother response, more latency
-   # - Smaller window = faster response, more variance
-   ```
-
-8. **Configuration Comments**
-
-   ```python
-   BUFFER_SIZE = 1024  # Must be power of 2 for FFT
-   MAX_CHANNELS = 8    # Hardware limitation of audio interface
-   ```
-
-9. **Language-Specific Practices**
-   - Python: Follow PEP 257 and Google Style docstrings
-   - TypeScript: Use JSDoc with type annotations
-   - Rust: Support rustdoc with Markdown
-   - C++: Use Doxygen-compatible formats
-
-10. **Comment Review Guidelines**
-    - Review comments during code review
-    - Update comments when code changes
-    - Remove commented-out code
-    - Validate technical accuracy
-    - Check grammar and clarity
-
-11. **Anti-Patterns to Avoid**
-
-    ```python
-    # Bad: Stating the obvious
-    x = x + 1  # Increment x
-    
-    # Bad: Commented-out code
-    # if debug_mode:
-    #     print("debug")
-    
-    # Bad: Redundant with function name
-    def calculate_average():  # Function to calculate average
-    ```
-
-12. **Version Control Comments**
-
-    ```python
-    # Git: 5e7f234 - Fix buffer overflow
-    # Maintain this workaround until v2.0 migration
-    ```
-
-Security guidelines follow OWASP standards and
-industry best practices for protecting sensitive data.
-
-### Security
-
-- Never commit API keys or secrets
-- Use environment variables for sensitive data
-- Document security considerations
-- Regular security audits
-- Follow OWASP guidelines
-
-Documentation requirements ensure project accessibility
-and ease of contribution for new team members.
-
-### Documentation
-
-- Maintain clear README.md
-- Include setup instructions
-- Document API endpoints
-- Add examples and usage guides
-- Keep CHANGELOG.md updated
-- Include contribution guidelines
-
-Community guidelines promote a healthy, inclusive
-open source environment. Based on successful OSS projects.
-
-### Community
-
-- Be welcoming to contributors
-- Follow code of conduct
-- Review PRs promptly
-- Maintain issue templates
-- Tag issues for new contributors
-
-Dependency management is critical for security
-and maintainability. Regular updates required.
-
-### Dependencies
-
-- Minimize external dependencies
-- Document all dependencies
-- Keep dependencies updated
-- Use stable versions
-- Consider security implications
-
-Monorepo structure follows industry best practices
-for managing complex full-stack applications.
-Last updated: 2024-02-01
-
-## Monorepo Structure
-
-```
-audiokit/
-  apps/
-    web/                  # Svelte frontend application
-      src/               
-      package.json
-      tsconfig.json
-      vite.config.ts
-      tailwind.config.ts
-  
-  packages/
-    audiokit/            # Python backend package
-      audiokit/
-        core.py         # Core audio processing
-        db.py          # Database operations
-        llm.py         # AI/ML functionality
-        logger.py      # Logging utilities
-        utils.py       # Helper functions
-      tests/
-      pyproject.toml
-      poetry.lock
-      README.md
-
-  .cursorrules          # Development guidelines
-  .env                  # Environment configuration
-  justfile             # Command runner
-  README.md            # Project documentation
-```
-
-Frontend framework choices are based on performance requirements
-and team expertise. Svelte chosen for its reactivity model.
-
-## Core Technical Stack
-
-### Frontend Framework (apps/web)
-
-- Svelte 5 with Runes (REQUIRED)
-- SvelteKit 2 for routing and server features
-- TypeScript for all code
-- Tailwind CSS with Shadcn UI components
-- Paraglide.js for internationalization
-- Vite for build tooling
-
-Backend services are designed for scalability and
-maintainability. Python chosen for ML capabilities.
-
-### Backend Services (packages/audiokit)
-
-- Python 3.11+ with Poetry for dependency management
-- Core Dependencies:
-  - spotipy: Spotify API integration
-  - pydantic: Data validation and settings management
-  - pandas: Data processing and analytics
-  - matplotlib/seaborn: Visualization
-  - fastapi: REST API framework
-  - asyncpg: Async PostgreSQL interface
-  - transformers: AI model integration
-
-- FastAPI for API endpoints
-- SQLAlchemy 2.0 for database operations
-- Celery for background job processing
-- Redis for caching and message queue
-- Docker for containerization
-
-Development guidelines ensure consistent code quality
-and maintainable implementations across the project.
-
-## Development Guidelines
-
-1. Python Development
-
-- Poetry for dependency management
-- PEP 8 style guide
-- Type hints for all functions
-- Async/await for I/O
-- Comprehensive docstrings
-- Pytest for unit tests
-
-2. Frontend Development
-
-- Svelte 5 runes required
-- TypeScript for all code
-- Complete function implementations
-- Proper error handling
-- Performance optimization
-- Security best practices
-
-3. Monorepo Management
-
-- Just command runner
-- Separate package versioning
-- Shared types between packages
-- Consistent formatting
-- Centralized configuration
-
-Note: This file should be reviewed and updated quarterly
-to ensure all guidelines remain current and effective.
-Last review: 2024-02-01
-
-</ai_instruction>
+# Configuration Rules
+
+## File Matching
+- Python files: *.py
+- Markdown files: *.md
+
+## Code Analysis
+- JavaScript: Enforce ESLint rules for consistent code style.
+- Python: Use Ruff to verify PEP8 compliance and ensure code quality.
+
+# Rules for Managing Text Files in AudioKit Project
+
+## File Locations for Context Files
+
+All context files **MUST** be stored in the `context/` directory at the root of the project (NOT under `docs/` or any other folder). The following files should be placed within `<project_root>/context/`:
+
+1. **WHOAMI.md** – Documents the current model identity and metadata. This file should be updated on each execution.
+2. **THOUGHTS.md** – Logs technical and philosophical insights as they arise.
+3. **REFLECTIONS.md** – Records long-term architectural decisions and major design changes.
+4. **TODO.md** – Contains a prioritized list of tasks with notes and completion statuses.
+5. **ROADMAP.md** – Outlines long-term project initiatives and release schedules.
+6. **RULES.md** – Establishes development standards, practices, and workflow guidelines.
+7. **PROMPT.md** – Provides current development priorities and guidelines.
+8. **MAINTENANCE.md** – Tracks technical debt, expected refactoring, performance optimizations, and dependency updates.
+9. **CHANGELOG.txt** – Records version history and notable changes, following the Keep a Changelog standards.
+
+## Guidelines
+
+- **Focus:** Each file must remain focused solely on its designated documentation purpose.
+- **Frequency:** Update WHOAMI.md on every execution to reflect current configurations.
+- **Logging:** Use THOUGHTS.md for immediate insights and REFLECTIONS.md for decisions that affect multiple components.
+- **Consistency:** All documentation modifications should follow the standards and guidelines defined in RULES.md.
+
+Ensure that these instructions are applied throughout the project to maintain clear and consistent documentation management.
+
+## General Rules
+1. **File Focus:** Each file should remain focused on its designated purpose.
+2. **Immediate Logging:** Update THOUGHTS.md with every new idea or execution.
+3. **Broad Impact Logging:** Use REFLECTIONS.md for decisions affecting more than three components.
+4. **Active Review:** Review TODO.md hourly during periods of active development.
+5. **Scheduled Updates:** Update ROADMAP.md quarterly.
+6. **Version Control:** Ensure RULES.md is versioned with a detailed change log.
+7. **Execution Updates:** Refresh WHOAMI.md on every execution to capture the current state.
+
+## Rules
+- **Rule 1:** All changes must strictly adhere to the coding and documentation standards defined in RULES.md.
+- **Rule 2:** Every modification should be accompanied by an update to the corresponding management file (e.g., WHOAMI.md for configuration, THOUGHTS.md for ideas).
+- **Rule 3:** Code reviews are mandatory prior to merging any changes to ensure quality and consistency.
+- **Rule 4:** Regular audits should be conducted to ensure that all updates follow these established guidelines.
+
+## Exceptions
+- **Exception 1:** Files that do not match standard extensions (*.py, *.md) may bypass automated linting but must undergo a manual review.
+- **Exception 2:** In emergency scenarios, critical updates can bypass the conventional review process; however, such changes must be documented and reviewed retroactively.
+- **Exception 3:** Any deviation from these rules must be justified in writing and approved by the lead developer or project manager. 

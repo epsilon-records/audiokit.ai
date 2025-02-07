@@ -51,3 +51,8 @@ pattern = "^\\s*__version__\\s*=\\s*[\"'](?P<version>[^\"']+)[\"']"
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.ruff]
+   line-length = 88
+   select = ["E", "F", "W", "B", "R"]
+   ignore = []

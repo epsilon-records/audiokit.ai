@@ -1,0 +1,125 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  validate_context:
+    name: Validate Context Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Run Context Files Validation
+        run: python3 scripts/validate_context_files.py
+
+  lint_js:
+    name: Lint JavaScript
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install Dependencies
+        run: npm ci
+      - name: Run ESLint
+        run: npm run lint
+
+  lint_python:
+    name: Lint Python with Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: Install Python Dependencies
+        run: pip install ruff
+      - name: Run Ruff
+        run: ruff .
+
+  test:
+    name: Run Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+      - name: Install Test Dependencies
+        run: pip install pytest
+      - name: Run Tests
+        run: pytest --maxfail=1 --disable-warnings -q
+
+  build:
+    name: Build and Package
+    runs-on: ubuntu-latest
+    needs: [validate_context, lint_js, lint_python, test]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+      - name: Build Package
+        run: |
+          echo "Building the project..."
+          # Insert your build commands here (e.g., compiling, bundling, etc.)
+      - name: Package Artifacts
+        run: |
+          mkdir -p dist
+          echo "Package contents" > dist/package.txt
+
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        language: [python, javascript]
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set Up and Run Linting
+        run: |
+          if [ "${{ matrix.language }}" = "javascript" ]; then
+            echo "Installing Node dependencies and running ESLint..."
+            # Install Node dependencies (ensure package.json exists)
+            npm install
+            # Run ESLint across all JavaScript files
+            npx eslint .
+          elif [ "${{ matrix.language }}" = "python" ]; then
+            echo "Installing Python dependencies and running Ruff..."
+            # Install Ruff for Python linting
+            pip install ruff
+            # Run Ruff on the codebase
+            ruff .
+          fi
+
+  docs:
+    name: Verify Context Documentation Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Check Context Directory and Files
+        run: |
+          if [ ! -d "./context" ]; then
+            echo "Error: 'context' directory not found!"
+            exit 1
+          fi
+          required_files=(WHOAMI.md THOUGHTS.md REFLECTIONS.md TODO.md ROADMAP.md RULES.md PROMPT.md MAINTENANCE.md CHANGELOG.txt)
+          for file in "${required_files[@]}"; do
+            if [ ! -f "./context/$file" ]; then
+              echo "Error: $file is missing from the context directory!"
+              exit 1
+            fi
+          done 
