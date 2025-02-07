@@ -30,8 +30,8 @@ RUN pip install --upgrade pip
 # Install Hatchling (required for building using your pyproject.toml)
 RUN pip install hatchling
 
-# Install your project in editable mode along with test extras.
-RUN pip install -e '.[test]'
+# Install your project (non-editably) along with test extras.
+RUN pip install '.[test]'
 
 # Expose the port if you plan to run your FastAPI app (adjust port as needed).
 EXPOSE 8000
