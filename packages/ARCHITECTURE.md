@@ -67,6 +67,36 @@ graph TD
 - ELK for logging
 - AlertManager for notifications
 
+- Prometheus metrics now include:
+  - `audiokit_batch_jobs_total`
+  - `audiokit_batch_processing_time`
+  - `audiokit_parallel_workers`
+  
+- Grafana dashboards track:
+  + Batch success/failure rates
+  + Parallel processing efficiency
+  + Retry attempt distributions
++  - Real-time job queue depth
++  - Error rate trends
++  - Resource utilization correlations
+
+## Alerting Rules
+
+```yaml
+groups:
+- name: AudioKit Alerts
+  rules:
+  - alert: HighErrorRate
+    expr: rate(audiokit_requests_total{status=~"5.."}[5m]) > 0.1
+    for: 10m
+    
+  - alert: JobQueueBacklog
+    expr: audiokit_queued_jobs > 1000
+    
+  - alert: HighCPUUsage
+    expr: 100 - (avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 90
+```
+
 ## Key Architectural Decisions
 
 1. **Protocol Design**
@@ -133,17 +163,8 @@ sequenceDiagram
 ## Future Directions
 
 1. **Extensibility**
-   - Plugin system architecture
-   | Module       | Responsibility          |
-   |--------------|-------------------------|
-   | AudioKitCore | Shared utilities        |
-
-   | Component    | Description             |
-   |--------------|-------------------------|
-   | FastAPI      | REST endpoint handling |
-
-   - Custom processing hooks
-   - Format converter interface
+   - Client-only extensibility model
+   - Sandboxed plugin execution
 
 2. **Advanced Features**
    - Real-time audio streaming
@@ -155,4 +176,79 @@ sequenceDiagram
    - Terraform deployment
    - Kubernetes operators
 
-See also: [ROADMAP.md](ROADMAP.md) | [REFLECTIONS.md](REFLECTIONS.md) 
+See also: [ROADMAP.md](ROADMAP.md) | [REFLECTIONS.md](REFLECTIONS.md)
+
+## Security Model
+
+### Key Management
+```mermaid
+graph LR
+    KeyGen[Key Generation] -->|Every 90 days| KeyStore
+    KeyStore -->|Active Key| Encryption
+    KeyStore -->|Previous Keys| Decryption
+    KeyStore -->|Expired Keys| Rotation[Key Rotation]
+    Rotation -->|Archive| KeyHistory
+```
+
+Features:
+- Automatic 90-day key rotation
+- MultiFernet encryption for backward compatibility
+- Cryptographic erasure of expired keys
+- Audit logging for key lifecycle events
+
+### Authentication Flow
+```mermaid
+sequenceDiagram
+    Client->>+AuthService: Request with API Key
+    AuthService->>KeyStore: Validate Key
+    KeyStore-->>AuthService: Key Status
+    AuthService->>Crypto: Decrypt Token
+    Crypto-->>AuthService: Decrypted Claims
+    AuthService-->>Client: Authentication Result
+```
+
+## Plugin Security Architecture
+
+```mermaid
+graph TD
+    Plugin -->|Loaded| Validator[Security Validator]
+    Validator -->|AST Check| ImportCheck[Import Whitelist]
+    Validator -->|Verify| SignatureCheck[Digital Signature]
+    Validator -->|Validate| Checksum[File Integrity]
+    Validator -->|Sandbox| Execution[Restricted Environment]
+    Execution -->|Approved| Registration[Command Registration]
+```
+
+Security Layers:
+1. **Code Analysis**: Static AST validation
+2. **Cryptographic Signatures**: RSA-PSS with SHA-256
+3. **Import Whitelisting**: Limited stdlib access
+4. **File Integrity**: SHA-256 checksums
+5. **Execution Sandbox**: Restricted Python environment
+
+## Updated Component Diagram
+
+```mermaid
+graph TD
+    subgraph Client
+        CLI --> PluginManager
+        PluginManager -->|Validates| Security[Security Module]
+        PluginManager -->|Loads| PluginA[Analysis Plugins]
+        PluginManager -->|Loads| PluginB[Format Plugins]
+    end
+    
+    subgraph Server
+        AuthService --> KeyStore
+        KeyStore -->|Manages| EncryptionKeys
+        AuthService -->|Uses| Crypto[MultiFernet]
+    end
+```
+
+Key updates:
+- Added plugin security architecture details
+- Documented key rotation implementation
+- Updated component relationships
+- Clarified cryptographic practices
+- Added sequence diagrams for security flows
+
+The documentation now accurately reflects the current security architecture and key management practices. 

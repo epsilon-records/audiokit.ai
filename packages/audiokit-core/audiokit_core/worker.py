@@ -7,6 +7,7 @@ import uuid
 from pydantic import BaseModel, Field
 from .storage import JobStorage, RedisJobStorage
 from .metrics import WorkerMetrics
+import psutil
 
 class JobStatus(str, Enum):
     """Job status states."""
@@ -29,20 +30,34 @@ class Job(BaseModel):
 class WorkerPool:
     """Pool of worker tasks."""
     
-    def __init__(self, num_workers: int = 5, storage: JobStorage = None):
-        """Initialize worker pool.
-        
-        Args:
-            num_workers: Number of worker tasks
-            storage: Job storage implementation
-        """
-        self.num_workers = num_workers
-        self.queue: asyncio.Queue[tuple[Job, Callable[..., Awaitable]]] = asyncio.Queue()
-        self.jobs: dict[str, Job] = {}
-        self._workers: list[asyncio.Task] = []
-        self.maintenance_log = []  # Track worker health
-        self.storage = storage or RedisJobStorage()
-        self.metrics = WorkerMetrics()
+    def __init__(self, max_workers: int = 4):
+        self.queue = asyncio.Queue()
+        self.workers = [
+            asyncio.create_task(self._parallel_worker())
+            for _ in range(max_workers)
+        ]
+
+    async def _parallel_worker(self):
+        """Worker handling multiple jobs concurrently"""
+        while True:
+            job, func = await self.queue.get()
+            async with asyncio.TaskGroup() as tg:
+                tg.create_task(self._process_job(job, func))
+            self.queue.task_done()
+
+    async def _process_job(self, job, func):
+        """Process individual job with resource limits"""
+        try:
+            # Set CPU affinity
+            psutil.Process().cpu_affinity([len(self.workers) % psutil.cpu_count()])
+            
+            # Process with timeout
+            await asyncio.wait_for(
+                func(job),
+                timeout=JOB_TIMEOUT
+            )
+        except Exception as e:
+            logger.error(f"Job failed: {str(e)}")
         
     async def start(self):
         """Start worker tasks."""

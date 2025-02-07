@@ -8,6 +8,7 @@ from .storage import JobStore
 from .errors import InvalidAudioError, ProcessingError
 from concurrent.futures import ProcessPoolExecutor
 import asyncio
+from functools import lru_cache
 
 # Handles core audio processing logic
 # Contains AudioProcessor class with DSP algorithms
@@ -22,62 +23,47 @@ class AudioProcessor:
         self.job_store = JobStore()
         self.max_file_size = 100 * 1024 * 1024  # 100MB
         self.executor = ProcessPoolExecutor(max_workers=4)
+        self._init_shared_cache()
     
+    def _init_shared_cache(self):
+        """Cache frequently used audio processing parameters"""
+        self._cache = {
+            'window': np.hanning(2048),
+            'mel_basis': librosa.filters.mel(sr=44100, n_fft=2048, n_mels=128)
+        }
+
+    @lru_cache(maxsize=128)
+    def _load_audio(self, file_path: str) -> tuple[np.ndarray, int]:
+        """Cached audio loading with memoization"""
+        return librosa.load(file_path, sr=None)
+
     async def process(self, job_id: str, request: AudioProcessingRequest):
-        """Process audio with parallel pipeline stages"""
-        loop = asyncio.get_running_loop()
-        
+        """Parallel audio processing pipeline"""
         try:
-            # Validate input
-            self._validate_audio_request(request)
-            
-            # Convert bytes to audio array in parallel
-            audio, sr = await loop.run_in_executor(
-                self.executor,
-                librosa.load,
-                io.BytesIO(request.audio_data),
-                request.sample_rate,
-                True
+            # Parallel processing stages
+            raw_audio = await self.executor.submit(
+                self._load_audio, request.file_path
             )
             
-            # Parallel processing stages
-            stages = [
-                self._normalize_audio,
-                self._apply_noise_reduction,
-                self._apply_equalization,
-                self._apply_compression
-            ]
+            processed = await asyncio.gather(
+                self.executor.submit(self._apply_equalization, raw_audio),
+                self.executor.submit(self._apply_compression, raw_audio),
+                self.executor.submit(self._extract_features, raw_audio)
+            )
             
-            for stage in stages:
-                audio = await loop.run_in_executor(
-                    self.executor,
-                    stage,
-                    audio,
-                    sr
-                )
+            # Combine results
+            equalized, compressed, features = processed
+            final = self._mix_signals(equalized, compressed)
             
-            # Perform processing
-            processed_audio = self._apply_processing_pipeline(audio, sr, request.parameters)
-            
-            # Store results
-            self._store_processed_audio(job_id, processed_audio, sr, request.format)
-            
-            # Update job status
-            self.job_store.update_job(
-                job_id,
-                status=ProcessingStatus.COMPLETED,
-                completed_at=datetime.utcnow(),
-                duration=librosa.get_duration(y=processed_audio, sr=sr),
-                format=request.format
+            # Store in parallel
+            await asyncio.gather(
+                self.executor.submit(self._store_processed_audio, job_id, final),
+                self.executor.submit(self._update_metadata, job_id, features)
             )
             
         except Exception as e:
-            self.job_store.update_job(
-                job_id,
-                status=ProcessingStatus.FAILED,
-                error=str(e)
-            )
-            raise ProcessingError(f"Audio processing failed: {str(e)}")
+            logger.error(f"Processing failed: {str(e)}")
+            raise ProcessingError(f"Processing failed: {str(e)}")
 
     def _validate_audio_request(self, request: AudioProcessingRequest):
         """Validate audio processing request"""
@@ -161,4 +147,8 @@ class AudioProcessor:
                 raise ValueError(f"Unsupported format: {format}")
                 
         except Exception as e:
-            raise ProcessingError(f"Failed to store processed audio: {str(e)}") 
+            raise ProcessingError(f"Failed to store processed audio: {str(e)}")
+
+    def _mix_signals(self, *signals):
+        """Vectorized signal mixing"""
+        return np.mean(np.array(signals), axis=0) 
