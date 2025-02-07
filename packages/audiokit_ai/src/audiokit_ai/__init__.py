@@ -1,1 +1,1 @@
-__version__ = "0.1.0"  # Strict SemVer format 
+__version__ = "0.1.0"  # Must match the regex pattern 

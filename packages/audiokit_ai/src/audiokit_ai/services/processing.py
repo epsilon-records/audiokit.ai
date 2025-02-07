@@ -1,23 +1,16 @@
 from fastapi import UploadFile
-import io
-import numpy as np
-import torch
 import torchaudio
-from deepfilternet import DeepFilterNet
+from df import enhance, init_df
 from demucs import separate
 import whisper
-from riffusion import RiffusionPipeline
 import faiss
 import openl3
 from google.cloud import speech_v1p1beta1 as speech
 import tempfile
-import os
 
-# Initialize models
-deepfilternet = DeepFilterNet()
+# Initialize DeepFilterNet using the recommended API
+model, df_state, _ = init_df()
 whisper_model = whisper.load_model("base")
-
-riffusion_pipeline = RiffusionPipeline()
 
 # Initialize FAISS index and OpenL3 model
 index = faiss.IndexFlatL2(512)
@@ -43,7 +36,7 @@ async def denoise(file: UploadFile) -> bytes:
         audio = await file.read()
         
         # Process with DeepFilterNet
-        processed = deepfilternet.process(audio)
+        processed = enhance(model, df_state, audio)
         
         return processed
     except Exception as e:
@@ -93,12 +86,8 @@ def midi_to_audio(file: UploadFile):
     return "Converted MIDI to audio result"
 
 async def generate_music(prompt: str) -> bytes:
-    """Generate music from a text prompt"""
-    try:
-        audio = riffusion_pipeline.generate(prompt)
-        return audio
-    except Exception as e:
-        raise RuntimeError(f"Music generation failed: {str(e)}")
+    """Generate music from a text prompt (functionality removed: riffusion is no longer maintained)"""
+    raise NotImplementedError("Music generation is not available as riffusion is no longer maintained.")
 
 async def search_by_sound(file: UploadFile) -> list:
     """Search for similar sounds"""
