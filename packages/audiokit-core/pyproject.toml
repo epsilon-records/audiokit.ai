@@ -6,8 +6,11 @@ authors = ["Your Name <your.email@example.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-pydantic = "^2.6.0"
+python = "^3.11"
+pydantic-settings = "^2.2.1"
+librosa = "^0.10.0"
+madmom = "^0.16.1"
+chromaprint = "^1.5.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

@@ -87,4 +87,36 @@ async def analyze_bpm(
             "duration": librosa.get_duration(y=y, sr=sr)
         }
     except Exception as e:
-        raise HTTPException(500, f"BPM analysis failed: {str(e)}") 
+        raise HTTPException(500, f"BPM analysis failed: {str(e)}")
+
+@router.post("/api/v1/analyze/key")
+async def detect_key(
+    audio_file: UploadFile = File(...),
+    method: str = Query("krumhansl", enum=["krumhansl", "temperley"])
+):
+    """Detect musical key using chroma features"""
+    try:
+        y, sr = librosa.load(io.BytesIO(await audio_file.read()), sr=None)
+        chroma = librosa.feature.chroma_cqt(y=y, sr=sr)
+        
+        if method == "temperley":
+            key_profile = librosa.sequence.temperley_chroma_profile(sr)
+        else:
+            key_profile = librosa.sequence.chroma_viterbi(sr)
+            
+        key_scores = np.dot(key_profile, chroma.mean(axis=1))
+        key_index = np.argmax(key_scores)
+        
+        keys = ["C", "C#", "D", "D#", "E", "F", 
+                "F#", "G", "G#", "A", "A#", "B"]
+        mode = "major" if key_index < 12 else "minor"
+        key = keys[key_index % 12]
+        
+        return {
+            "status": "success",
+            "key": f"{key} {mode}",
+            "confidence": float(key_scores[key_index]),
+            "method": method
+        }
+    except Exception as e:
+        raise HTTPException(500, f"Key detection failed: {str(e)}") 

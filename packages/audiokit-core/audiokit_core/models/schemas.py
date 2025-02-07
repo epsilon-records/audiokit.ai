@@ -141,7 +141,7 @@ class APIErrorResponse(BaseModel):
     detail: dict | None = None
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "status": "error",
                 "error_code": "validation_error",
