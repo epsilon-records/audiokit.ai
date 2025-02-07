@@ -10,7 +10,7 @@ dependencies = [
     "torchaudio>=2.0.0",
     "deepfilternet>=0.5.6",
     "demucs>=4.0",
-    "whisper>=1.0",
+    "whisper @ git+https://github.com/openai/whisper.git@main",
     "fastapi>=0.95.0",
     "uvicorn>=0.21.0",
     "pytest>=7.0.0",
@@ -34,6 +34,7 @@ test = [
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 addopts = "-v --cov=audiokit_ai --cov-report=term-missing"
 testpaths = ["tests"]
 
@@ -46,3 +47,6 @@ parallel-install = true
 source = "regex"
 path = "src/audiokit_ai/__init__.py"
 pattern = "^\\s*__version__\\s*=\\s*[\"'](?P<version>[^\"']+)[\"']"
+
+[tool.hatch.metadata]
+allow-direct-references = true
