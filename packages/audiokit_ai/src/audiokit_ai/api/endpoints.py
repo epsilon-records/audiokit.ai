@@ -1,6 +1,8 @@
-from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
+from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, WebSocket
+from fastapi_limiter.depends import WebSocketRateLimiter
 from app.services import processing
 from app.core.security import verify_token
+import asyncio
 
 router = APIRouter(prefix="/api")
 
@@ -89,10 +91,12 @@ async def detect_genre(file: UploadFile = File(...)):
 @router.websocket("/ws/stream")
 async def audio_stream(websocket: WebSocket):
     await websocket.accept()
+    rate_limiter = WebSocketRateLimiter(times=100, seconds=60)
     try:
         while True:
-            data = await websocket.receive_bytes()
-            # Here you can integrate real-time processing logic.
-            await websocket.send_bytes(data)
-    except Exception:
-        await websocket.close() 
+            await rate_limiter(websocket)
+            audio_chunk = await websocket.receive_bytes()
+            processed = await processing.denoise(audio_chunk)
+            await websocket.send_bytes(processed)
+    except Exception as e:
+        await websocket.close(code=1011, reason=str(e)) 

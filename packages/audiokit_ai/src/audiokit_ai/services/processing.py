@@ -1,20 +1,27 @@
+from .banana_client import BananaClient
 from fastapi import UploadFile
+import io
 
-def denoise(file: UploadFile):
-    # Dummy implementation using DeepFilterNet in a real scenario
-    return "Denoised audio result"
+banana = BananaClient()
 
-def separate(file: UploadFile):
-    # Dummy implementation using Demucs-based separation
-    return "Separated audio tracks result"
+async def denoise(file: UploadFile) -> bytes:
+    """Noise reduction using DeepFilterNet"""
+    audio = await file.read()
+    return await banana.process_audio(audio, {"operation": "denoise"})
 
-def auto_master(file: UploadFile):
+async def separate(file: UploadFile) -> dict:
+    """Source separation using Demucs"""
+    audio = await file.read()
+    return await banana.process_audio(audio, {"operation": "separate"})
+
+async def auto_master(file: UploadFile):
     # Dummy implementation using DSPNet + U-Net mastering
     return "Auto mastered audio result"
 
-def transcribe(file: UploadFile):
-    # Dummy implementation using OpenAI Whisper
-    return "Transcription result"
+async def transcribe(file: UploadFile) -> str:
+    """Speech-to-text using Whisper"""
+    audio = await file.read()
+    return await banana.transcribe(audio)
 
 def clone_voice(file: UploadFile):
     # Dummy implementation using Tacotron2 + VITS

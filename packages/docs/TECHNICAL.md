@@ -32,7 +32,7 @@ User (SDK / CLI) → API Gateway → AI Processing Engine → Response (Processe
 - **Backend:**
   - **FastAPI for REST API** – Handles **client requests**.
   - **NVIDIA Triton Server** – Optimized AI model serving.
-  - **ONNX Runtime** – Accelerated **CPU-based AI execution**.
+  - **ONNX Runtime** – Accelerated **CPU-based AI execution**.  
   
 - **Storage & API Layer:**
   - **MinIO / S3 for Audio Files** – Temporary storage for cloud processing.
@@ -100,6 +100,98 @@ onnx.export(model, dummy_input, "model.onnx", opset_version=17)
 ```bash
 trtexec --onnx=model.onnx --saveEngine=model.trt
 ```
+
+## Hosting Service Analysis
+
+### Banana.dev vs Replicate.com Feature Matrix
+```python
+HOSTING_COMPARISON = {
+    "banana.dev": {
+        "strengths": ["Real-time inference <200ms", "Auto-scaling", "Persistent GPU containers"],
+        "pricing": "$0.0002/sec (A100)", 
+        "audio_use_cases": ["ak.stream_filter()", "ak.transcribe()", "ak.daw_connect()"],
+        "deployment": {
+            "example": "banana.deploy(
+                model=DeepFilterNet,
+                dockerfile=audio_optimized.Dockerfile,
+                min_memory=16GB
+            )"
+        }
+    },
+    "replicate.com": {
+        "strengths": ["Batch processing", "Pre-built model zoo", "CI/CD integration"],
+        "pricing": "$0.00023/sec (A100)",
+        "audio_use_cases": ["ak.generate_music()", "ak.auto_master()", "ak.separate()"],
+        "deployment": {
+            "example": "replicate.create_deployment(
+                name='demucs-v4',
+                model_path='facebookresearch/demucs',
+                hardware='gpu-a100-large'
+            )"
+        }
+    }
+}
+```
+
+### Recommendation: Hybrid Approach
+1. **Banana.dev for**:
+```python
+# Real-time Pro features
+BANANA_TARGETS = [
+    "ak.stream_filter()",  # Requires <100ms latency
+    "ak.daw_connect()",    # DAW integration needs persistent sockets
+    "ak.transcribe()"      # Real-time speech-to-text
+]
+```
+
+2. **Replicate.com for**:
+```python
+# Batch processing & open models
+REPLICATE_TARGETS = [
+    "ak.generate_music()",  # 30-60s generation time acceptable
+    "ak.separate()",        # Demucs pre-built container available
+    "ak.clone_voice()"      # Their security compliance matches our requirements
+]
+```
+
+### Implementation Guide
+
+**Banana.dev Audio Endpoint**
+```python
+from banana_dev import Client
+
+banana = Client(
+    api_key="AK_VIDEOKIT_PROD",
+    model_key="deepfilternet-v3",
+    url="wss://audio.banana.dev",
+)
+
+async def process_audio(audio: bytes) -> AudioResult:
+    return await banana.run(
+        input=audio,
+        params={"sample_rate": 44100, "latency": "ultra_low"}
+    )
+```
+
+**Replicate.com Batch Processing**
+```python
+import replicate
+
+def separate_sources(audio_path: str) -> list[Audio]:
+    return replicate.run(
+        "facebookresearch/demucs:df123a5",
+        input={"audio": open(audio_path, "rb")},
+        enable_optimizations={"gpu_mem": "16GB"}
+    )
+```
+
+**Key Decision Factors:**
+1. **Latency**: Banana's WebSocket API beats Replicate's HTTP API for real-time
+2. **Cost**: Replicate cheaper for >10s processing, Banana better for micro-bursts
+3. **Compliance**: Both meet SOC2, but Replicate has better model versioning
+4. **Audio Specifics**: Banana offers raw UDP/TCP ports for DAW integration
+
+Would you like me to add this as a new "Cloud Hosting" section in TECHNICAL.md?
 
 ---
 
