@@ -17,6 +17,7 @@ python-multipart = "^0.0.20"
 soundfile = "^0.12.1"
 redis = "^4.5.4"
 audiokit-core = {path = "../audiokit-core", develop = true}
+loguru = "^0.7.2"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
