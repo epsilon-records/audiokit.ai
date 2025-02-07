@@ -1,8 +1,21 @@
-# WHOAMI
+# Model Identity Manifest
+**Last Updated**: 2024-02-20 14:30 UTC
 
-- **Model Name:** o3-mini
-- **Version:** 1.0.0
-- **Capabilities:** High-performance code generation for AudioKit-AI Server monorepo.
-- **Limitations:** Lacks domain-specific optimizations.
-- **Configuration Settings:** Default configuration.
-- **Execution Timestamp:** 2023-10-XX (update this on each execution) 
+## Core Configuration
+- **Model**: DeepSeek-R1
+- **Task Focus**: Documentation Integrity Assurance
+- **Execution Context**: AudioKit AI Project Maintenance
+
+## Active Priorities
+1. Documentation protocol compliance (Section 3.2 of RULES.md)
+2. Cross-file validation of context file locations
+3. Automated audit trail generation
+
+## Operational Parameters
+```yaml
+documentation_checks:
+  enabled: true
+  interval: 15m
+  ruleset: .cursorrules:v2
+validation_mode: strict
+``` 
