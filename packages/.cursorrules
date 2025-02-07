@@ -10,82 +10,28 @@
 
 # Rules for Managing Text Files in AudioKit Project
 
-## context/WHOAMI.md
-- **Purpose:** Document the current model identity and metadata.
-- **Update Frequency:** On each execution.
-- **Contents:**
-  1. Model name and version.
-  2. Capabilities and limitations.
-  3. Current configuration settings.
-  4. Execution timestamp.
+## File Locations for Context Files
 
-## context/THOUGHTS.md
-- **Purpose:** Log technical and philosophical insights immediately as they arise.
-- **Contents:**
-  1. Current mental state.
-  2. Progress updates.
-  3. Emerging questions.
-  4. System introspection and self-awareness notes.
+All context files **MUST** be stored in the `context/` directory at the root of the project (NOT under `docs/` or any other folder). The following files should be placed within `<project_root>/context/`:
 
-## context/REFLECTIONS.md
-- **Purpose:** Record long-term architectural decisions and major design changes.
-- **Contents:**
-  1. Overview of current issues or challenges.
-  2. Documented solutions and strategies.
-  3. Analysis of the benefits from changes.
-  4. Future planning and considerations.
+1. **WHOAMI.md** – Documents the current model identity and metadata. This file should be updated on each execution.
+2. **THOUGHTS.md** – Logs technical and philosophical insights as they arise.
+3. **REFLECTIONS.md** – Records long-term architectural decisions and major design changes.
+4. **TODO.md** – Contains a prioritized list of tasks with notes and completion statuses.
+5. **ROADMAP.md** – Outlines long-term project initiatives and release schedules.
+6. **RULES.md** – Establishes development standards, practices, and workflow guidelines.
+7. **PROMPT.md** – Provides current development priorities and guidelines.
+8. **MAINTENANCE.md** – Tracks technical debt, expected refactoring, performance optimizations, and dependency updates.
+9. **CHANGELOG.txt** – Records version history and notable changes, following the Keep a Changelog standards.
 
-## context/TODO.md
-- **Purpose:** Maintain a prioritized list of tasks.
-- **Structure:**
-  1. High Priority tasks.
-  2. Medium Priority tasks.
-  3. Low Priority tasks.
-- **Additional:** Include a notes section for each task and mark completed items with `[x]`.
+## Guidelines
 
-## context/ROADMAP.md
-- **Purpose:** Plan long-term project initiatives and releases.
-- **Structure:**
-  1. Outline major upcoming features.
-  2. Detail infrastructure changes.
-  3. Plan release and milestone schedules.
-- **Maintenance:** Update quarterly to reflect new goals.
+- **Focus:** Each file must remain focused solely on its designated documentation purpose.
+- **Frequency:** Update WHOAMI.md on every execution to reflect current configurations.
+- **Logging:** Use THOUGHTS.md for immediate insights and REFLECTIONS.md for decisions that affect multiple components.
+- **Consistency:** All documentation modifications should follow the standards and guidelines defined in RULES.md.
 
-## context/RULES.md
-- **Purpose:** Establish development standards and practices.
-- **Contents:**
-  1. Code standards and guidelines.
-  2. Development workflow details (version control, reviews).
-  3. Testing and QA requirements.
-  4. Documentation rules.
-- **Note:** Maintain a versioned changelog for reference.
-
-## context/PROMPT.md
-- **Purpose:** Define development guidelines and current priorities.
-- **Contents:**
-  1. Immediate development priorities.
-  2. Code quality and review standards.
-  3. Documentation requirements.
-  4. Process and workflow guidelines.
-- **Update:** Revise when project focus or methodologies change.
-
-## context/MAINTENANCE.md
-- **Purpose:** Track technical debt and necessary refactoring.
-- **Contents:**
-  1. Documentation of code cleanup tasks.
-  2. Dependency update logs.
-  3. Performance optimizations.
-  4. Security patches and vulnerability reports.
-
-## context/CHANGELOG.txt
-- **Purpose:** Record version history and notable changes.
-- **Update Frequency:** With every release or significant update.
-- **Contents:**
-  1. Version number and release date.
-  2. Summary of changes (features, fixes, improvements).
-  3. List of contributors for the version.
-  4. Known issues or limitations.
-- **Format:** Follow Keep a Changelog standards (https://keepachangelog.com).
+Ensure that these instructions are applied throughout the project to maintain clear and consistent documentation management.
 
 ## General Rules
 1. **File Focus:** Each file should remain focused on its designated purpose.
