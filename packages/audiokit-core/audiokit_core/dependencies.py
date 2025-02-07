@@ -44,6 +44,8 @@ def check_pypi_versions(package: str) -> str:
 
 CVE_CACHE_DIR = ".cve_cache"
 CACHE_EXPIRY_HOURS = 24
+MAX_CACHE_SIZE_MB = 100  # 100MB max cache size
+MAX_CACHE_FILES = 200    # Max number of cache files to retain
 
 def _get_cache_path(package: str) -> str:
     os.makedirs(CVE_CACHE_DIR, exist_ok=True)
@@ -60,6 +62,39 @@ def _read_cache(package: str) -> dict:
         pass
     return None
 
+def _clean_cache():
+    """Enforce cache size limits by removing oldest files"""
+    try:
+        # Get all cache files with timestamps
+        files = []
+        for f in os.listdir(CVE_CACHE_DIR):
+            path = os.path.join(CVE_CACHE_DIR, f)
+            if f.endswith('.json'):
+                files.append((path, os.path.getmtime(path)))
+        
+        # Check size limits
+        total_size = sum(os.path.getsize(f[0]) for f in files) / (1024*1024)
+        if total_size < MAX_CACHE_SIZE_MB and len(files) < MAX_CACHE_FILES:
+            return
+        
+        # Sort by modification time (oldest first)
+        files.sort(key=lambda x: x[1])
+        
+        # Remove oldest files until under limits
+        removed = 0
+        for path, _ in files:
+            if total_size >= MAX_CACHE_SIZE_MB or len(files)-removed > MAX_CACHE_FILES:
+                os.remove(path)
+                total_size -= os.path.getsize(path)/(1024*1024)
+                removed += 1
+            else:
+                break
+                
+        console.print(f"[yellow]Cleaned {removed} old cache files[/]")
+        
+    except Exception as e:
+        console.print(f"[red]Cache cleanup failed: {str(e)}[/]")
+
 def _write_cache(package: str, cve_data: list):
     cache_path = _get_cache_path(package)
     try:
@@ -68,6 +103,7 @@ def _write_cache(package: str, cve_data: list):
                 'timestamp': datetime.now().isoformat(),
                 'cves': cve_data
             }, f)
+        _clean_cache()  # Enforce size limits after write
     except IOError as e:
         console.print(f"[yellow]Warning: Failed to cache {package} - {str(e)}[/]")
 

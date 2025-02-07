@@ -79,3 +79,41 @@ Security Patches
 - ⚠️ No cache invalidation beyond time expiry
 - ⚠️ Not thread-safe for concurrent access
 - ⚠️ No cache size management 
+
+## 2024-02-25: Cache Size Management
+
+### New Features
+- 100MB max cache size
+- 200 file limit
+- Automatic cleanup during writes
+- Least-recently-used removal
+
+### Technical Debt
+- ⚠️ No cache compression
+- ⚠️ Static size limits
+- ⚠️ No per-package size quotas 
+
+## 2024-02-26: Upload Limits
+
+### Configuration Changes
+- Set max upload size to 200MB
+- Enforced on both server and CLI
+- Added validation checks
+
+### Technical Debt
+- ⚠️ No chunked upload support
+- ⚠️ Hardcoded limit
+- ⚠️ No format-specific size limits 
+
+## 2024-02-27: CLI Architecture
+
+### Design Decisions
+- Enforced client-server separation
+- Removed all local processing
+- Simplified CLI to pure API client
+- Added strict input validation
+
+### Technical Debt
+- ⚠️ No client-side caching
+- ⚠️ Limited error recovery
+- ⚠️ Basic retry mechanism 

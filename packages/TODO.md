@@ -172,7 +172,10 @@ Key Technology
 - [x] Implement dependency version monitoring system
 - [x] Add CVE database integration for security checks
 - [x] Implement CVE caching system
-- [ ] Add cache size management
+- [x] Add cache size management
+- [x] Implement adaptive cache sizing
+- [x] Set 200MB upload limit
+- [ ] Implement chunked upload support
 
 # Medium Priority
 - [ ] Set up scheduled dependency checks (cron job)
@@ -180,6 +183,10 @@ Key Technology
 - [ ] Verify meta package installation in CI/CD
 - [ ] Implement cache invalidation strategies
 - [ ] Add thread safety for cache access
+- [ ] Add cache compression
+- [ ] Implement per-package cache quotas
+- [ ] Add format-specific size limits
+- [ ] Document upload validation rules
 
 # Low Priority
 - [ ] Support multiple CVE databases

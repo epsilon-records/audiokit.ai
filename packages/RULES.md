@@ -226,4 +226,28 @@ Documentation
 4. Cryptography
    - Use Fernet for sensitive data
    - TLS 1.3 required
-   - Secrets in environment vars 
+   - Secrets in environment vars
+
+### File Uploads
+- Max size: 200MB
+- Allowed formats: WAV, FLAC, MP3, OGG
+- Virus scanning required
+- Temporary storage only
+
+## CLI Development Standards
+
+### Architecture
+1. CLI acts as a thin client
+2. No local processing of audio files
+3. All operations delegated to server
+4. Only handles:
+   - File uploads
+   - API requests
+   - Response display
+5. Strict 200MB upload limit
+
+### Error Handling
+1. Validate inputs before API calls
+2. Handle server errors gracefully
+3. Provide clear error messages
+4. Maintain consistent error codes 

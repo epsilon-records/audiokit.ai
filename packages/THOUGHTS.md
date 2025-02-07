@@ -34,3 +34,19 @@
 4. Improve audio validation
 5. Add resource monitoring
 6. Strengthen testing coverage
+
+### 2024-02-27: CLI Design Philosophy
+
+The CLI should remain a simple interface to the server's capabilities. 
+By removing all local processing, we:
+
+1. Centralize logic in the server
+2. Reduce client complexity
+3. Ensure consistent behavior
+4. Simplify maintenance
+5. Enable easier updates
+
+Future considerations:
+- Add client-side caching for API responses
+- Implement retry logic for failed requests
+- Add progress indicators for long operations
