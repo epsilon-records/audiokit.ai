@@ -9,7 +9,7 @@ license = "MIT"
 python = ">=3.10,<3.11"
 pydantic-settings = "^2.0.3"
 pydantic = "^2.0.0"
-madmom = "^0.16.1"
+madmom = "^0.15.1"
 pyacoustid = "^1.2.2"
 packaging = "^23.2"
 
