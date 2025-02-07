@@ -5,7 +5,7 @@ description = "🎛️ AudioKit Meta: The development hub for the AudioKit ecosy
 authors = ["Nathaniel Houk <nate@audiokit.ai>"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.11"
 audiokit-core = {path = "audiokit-core", develop = true}
 audiokit = {path = "audiokit", develop = true}
 audiokit-ai = {path = "audiokit-ai", develop = true}

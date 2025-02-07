@@ -6,7 +6,7 @@ authors = ["Nathaniel Houk <nate@audiokit.ai>"]
 license = "Confidential and Proprietary"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10,<3.11"
 fastapi = "^0.104.1"
 uvicorn = "^0.24.0"
 celery = "^5.2.7"
