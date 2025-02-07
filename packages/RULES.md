@@ -107,6 +107,13 @@
 - Documentation
 - Breaking changes
 
+### Multi-Project Management
+1. Use root `pyproject.toml` for global dependencies
+2. Run `poetry install` from root directory
+3. Subprojects maintain independent versioning
+4. Shared dev tools configured at root level
+5. Cross-project testing enabled through meta package
+
 ## Maintenance
 
 ### Dependencies

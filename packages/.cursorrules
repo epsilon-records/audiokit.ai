@@ -14,6 +14,15 @@
 
 # Rules for Managing Text Files in AudioKit Project
 
+## WHOAMI.md
+- Document current model identity and metadata
+- Update on each execution
+- Include:
+  1. Model name and version
+  2. Capabilities and limitations
+  3. Current configuration
+  4. Execution timestamp
+
 ## THOUGHTS.md
 
 - Immediately write to this file when new thoughts emerge
@@ -88,11 +97,12 @@
 ## General Rules
 
 1. Keep files focused on their purpose
-2. Update THOUGHTS.md on every thought or idea
+2. Update THOUGHTS.md on every thought or idea and on each execution
 3. Use REFLECTIONS.md for decisions impacting >3 components
 4. Review TODO.md hourly during active development
 5. Update ROADMAP.md quarterly
 6. Keep RULES.md versioned with change log
+7. Update WHOAMI.md on each execution
 
 ## Rules
 

@@ -1,0 +1,97 @@
+"""
+Dependency monitoring system that checks for:
+- Available updates
+- Security vulnerabilities
+- Compatibility issues
+"""
+
+import subprocess
+import requests
+from typing import Dict, Any
+from pydantic import BaseModel
+from rich.console import Console
+from packaging.version import Version
+
+console = Console()
+
+class DependencyStatus(BaseModel):
+    current_version: str
+    latest_version: str
+    security_status: str
+    compatibility_risk: bool
+
+def get_installed_dependencies() -> Dict[str, str]:
+    """Get currently installed dependencies using Poetry"""
+    result = subprocess.run(['poetry', 'show'], capture_output=True, text=True)
+    deps = {}
+    for line in result.stdout.split('\n'):
+        if ' ' in line:
+            pkg, version = line.split(' ', 1)
+            deps[pkg] = version.strip()
+    return deps
+
+def check_pypi_versions(package: str) -> str:
+    """Check PyPI for latest version"""
+    try:
+        response = requests.get(f'https://pypi.org/pypi/{package}/json', timeout=3)
+        return response.json()['info']['version']
+    except Exception as e:
+        console.print(f"[yellow]Warning: Could not check PyPI for {package} - {str(e)}[/]")
+        return "unknown"
+
+def check_security(package: str, version: str) -> str:
+    """Check for known vulnerabilities using NVD database"""
+    try:
+        response = requests.get(
+            f"https://services.nvd.nist.gov/rest/json/cves/2.0",
+            params={
+                'keywordSearch': package,
+                'versionStart': f'={version}',
+                'versionStartType': 'including'
+            },
+            timeout=5
+        )
+        response.raise_for_status()
+        
+        cves = []
+        for vuln in response.json().get('vulnerabilities', []):
+            cve_id = vuln['cve']['id']
+            descriptions = [d['value'] for d in vuln['cve']['descriptions'] 
+                           if d['lang'] == 'en']
+            cves.append(f"{cve_id}: {descriptions[0][:60]}..." if descriptions else cve_id)
+            
+        return "\n  ".join(cves) if cves else "No known vulnerabilities"
+        
+    except Exception as e:
+        console.print(f"[red]Security check failed for {package}: {str(e)}[/]")
+        return "Unknown security status"
+
+def monitor_dependencies():
+    """Main monitoring function"""
+    deps = get_installed_dependencies()
+    status_report = {}
+    
+    for pkg, version in deps.items():
+        latest = check_pypi_versions(pkg)
+        security = check_security(pkg, version)
+        
+        status_report[pkg] = DependencyStatus(
+            current_version=version,
+            latest_version=latest,
+            security_status=security,
+            compatibility_risk=False  # TODO: Implement compatibility checks
+        )
+    
+    return status_report
+
+def print_status_report(report: Dict[str, DependencyStatus]):
+    """Display results using Rich"""
+    console.print("\n[bold]Dependency Status Report[/]")
+    for pkg, status in report.items():
+        version_color = "green" if status.current_version == status.latest_version else "yellow"
+        security_color = "green" if "No known" in status.security_status else "red"
+        
+        console.print(
+            f"[bold]{pkg}[/] {status.current_version} → [{version_color}]{status.latest_version}[/]"
+            f"\n  Security: [{security_color}]{status.security_status}[/]"
+        ) 
