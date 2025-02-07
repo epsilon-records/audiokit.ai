@@ -1,0 +1,44 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "audiokit-ai"
+version = "0.1.0"
+description = "Backend for AudioKit-AI Server"
+authors = [
+    { name = "Nathaniel Houk", email = "nate@audiokit.ai" }
+]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "celery",
+    "redis",
+    "pydantic",
+    "PyJWT",
+    "fastapi-limiter",
+    "python-multipart",
+    "httpx",
+    "asyncpg",
+]
+
+[tool.uv]
+name = "audiokit-ai"
+version = "0.1.0"
+description = "Backend for AudioKit-AI Server"
+authors = ["Your Name <youremail@example.com>"]
+dependencies = [
+    "fastapi",
+    "uvicorn",
+    "celery",
+    "redis",
+    "pydantic",
+    "PyJWT",
+    "fastapi-limiter",
+    "python-multipart",
+    "httpx",
+    "asyncpg",
+]
+
+[tool.hatch.metadata]
+requires = []
