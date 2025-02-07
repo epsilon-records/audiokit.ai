@@ -19,7 +19,9 @@ dependencies = [
     "fastapi-limiter>=0.1.5",
     "redis>=4.5.5",
     "faiss-cpu>=1.7.3",
-    "openl3>=0.4.2"
+    "openl3>=0.4.2",
+    "google-cloud-speech>=2.16.0",
+    "python-dotenv>=1.0.0"
 ]
 
 [project.optional-dependencies]
