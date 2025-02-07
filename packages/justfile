@@ -12,11 +12,23 @@ commit-all:
 
 sync:
     #!/usr/bin/env sh
-    BRANCH=`git branch --show-current`
-    git pull --rebase origin $BRANCH
-    cd audiokit && git pull --rebase origin $BRANCH
-    git push origin $BRANCH
-    cd audiokit && git push origin $BRANCH
+    # Get current branch for root repo
+    ROOT_BRANCH=`git branch --show-current`
+    # Get current branch for submodule
+    cd audiokit
+    SUBMODULE_BRANCH=`git branch --show-current`
+    cd ..
+    
+    # Sync root repository
+    git pull --rebase origin $ROOT_BRANCH
+    git push origin $ROOT_BRANCH
+    
+    # Sync submodule
+    cd audiokit
+    git pull --rebase origin $SUBMODULE_BRANCH
+    git push origin $SUBMODULE_BRANCH
+    cd ..
+    
     @echo "🌐 Changes synchronized across all repositories"
 
 ai-workflow: init commit-all sync
