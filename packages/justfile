@@ -35,6 +35,7 @@ ai-workflow: init commit-all sync
     #!/usr/bin/env sh
     echo "🚀 AI development cycle complete! Matrix updated successfully!"
     echo "01000011 01101111 01100100 01100101 00100000 01100001 01110011 01100011 01100101 01101110 01100100 01100101 01100100 00100001" | xxd -r -p
+    echo
 
 status:
     # Check status of both main repo and submodule
