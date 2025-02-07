@@ -5,8 +5,9 @@
 ```mermaid
 graph TD
     subgraph Client
-        CLI[CLI Tool] --> Core[Client Core]
-        Core -->|HTTP| Server
+        CLI[Core CLI] --> PluginMgr[Plugin Manager]
+        PluginMgr --> AIPlugin[AI Client Plugin]
+        AIPlugin -->|HTTP| Server
         Config[Configuration] --> Core
         Cache[Local Cache] --> Core
     end
@@ -252,3 +253,14 @@ Key updates:
 - Added sequence diagrams for security flows
 
 The documentation now accurately reflects the current security architecture and key management practices. 
+
+## Component Relationships
+
+```mermaid
+graph TD
+    subgraph Client
+        CLI[Core CLI] --> PluginMgr[Plugin Manager]
+        PluginMgr --> AIPlugin[AI Client Plugin]
+        AIPlugin -->|HTTP| Server
+    end
+``` 
