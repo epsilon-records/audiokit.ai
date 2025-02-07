@@ -65,6 +65,15 @@ class RateLimitError(AudioKitError):
             extra={"retry_after": retry_after}
         )
 
+class RateLimitExceededError(AudioKitError):
+    def __init__(self, retry_after: int):
+        super().__init__(
+            status_code=429,
+            detail="Rate limit exceeded",
+            error_code="RATE_LIMITED",
+            extra={"retry_after": retry_after}
+        )
+
 async def error_handler(request: Request, exc: AudioKitError) -> JSONResponse:
     """Global error handler for AudioKit errors."""
     logger.error(

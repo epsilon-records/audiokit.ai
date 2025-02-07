@@ -5,6 +5,8 @@ from datetime import datetime
 from enum import Enum
 import uuid
 from pydantic import BaseModel, Field
+from .storage import JobStorage, RedisJobStorage
+from .metrics import WorkerMetrics
 
 class JobStatus(str, Enum):
     """Job status states."""
@@ -27,16 +29,20 @@ class Job(BaseModel):
 class WorkerPool:
     """Pool of worker tasks."""
     
-    def __init__(self, num_workers: int = 5):
+    def __init__(self, num_workers: int = 5, storage: JobStorage = None):
         """Initialize worker pool.
         
         Args:
             num_workers: Number of worker tasks
+            storage: Job storage implementation
         """
         self.num_workers = num_workers
         self.queue: asyncio.Queue[tuple[Job, Callable[..., Awaitable]]] = asyncio.Queue()
         self.jobs: dict[str, Job] = {}
         self._workers: list[asyncio.Task] = []
+        self.maintenance_log = []  # Track worker health
+        self.storage = storage or RedisJobStorage()
+        self.metrics = WorkerMetrics()
         
     async def start(self):
         """Start worker tasks."""
@@ -60,7 +66,7 @@ class WorkerPool:
         *args,
         **kwargs
     ) -> Job:
-        """Submit job to queue.
+        """Submit job to queue with persistent storage.
         
         Args:
             func: Async function to execute
@@ -70,11 +76,13 @@ class WorkerPool:
         Returns:
             Created job
         """
+        job = Job()
+        await self.storage.save_job(job)
+        
         # Create bound function with args
         bound_func = lambda: func(*args, **kwargs)
         
         # Create and queue job
-        job = Job()
         self.jobs[job.id] = job
         await self.queue.put((job, bound_func))
         
@@ -99,26 +107,49 @@ class WorkerPool:
                 job, func = await self.queue.get()
                 
                 try:
+                    # Add maintenance logging
+                    self.maintenance_log.append({
+                        "timestamp": datetime.utcnow(),
+                        "job": job.id,
+                        "status": "started"
+                    })
+                    
                     # Update job status
-                    job.status = JobStatus.RUNNING
+                    await self.storage.update_job(job.id, {"status": JobStatus.RUNNING})
                     job.started_at = datetime.utcnow()
                     
                     # Execute job
                     job.result = await func()
                     
                     # Mark complete
-                    job.status = JobStatus.COMPLETE
+                    await self.storage.update_job(job.id, {"status": JobStatus.COMPLETE})
                     job.completed_at = datetime.utcnow()
                     job.progress = 100.0
                     
                 except Exception as e:
                     # Handle failure
-                    job.status = JobStatus.FAILED
+                    await self.storage.update_job(job.id, {
+                        "status": JobStatus.FAILED,
+                        "error": str(e)
+                    })
                     job.completed_at = datetime.utcnow()
-                    job.error = str(e)
+                    job.error = f"{type(e).__name__}: {str(e)}"
+                    
+                    # Critical failure handling
+                    if isinstance(e, (MemoryError, SystemError)):
+                        self.maintenance_log.append({
+                            "timestamp": datetime.utcnow(),
+                            "event": "fatal_error",
+                            "error": str(e)
+                        })
+                        await self.stop()
+                        raise
+                    
+                    self.metrics.log_error(e)
                     
                 finally:
                     self.queue.task_done()
+                    self.jobs[job.id] = job
                     
         except asyncio.CancelledError:
             pass 

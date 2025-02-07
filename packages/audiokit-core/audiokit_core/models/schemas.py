@@ -2,6 +2,8 @@ from pydantic import BaseModel, Field, validator
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 from enum import Enum
+import io
+import librosa
 
 class ProcessingStatus(str, Enum):
     PENDING = "pending"
@@ -33,8 +35,17 @@ class AudioProcessingRequest(BaseModel):
     """Request schema for audio processing"""
     audio_data: bytes = Field(..., description="Raw audio bytes")
     format: AudioFormat = Field(..., description="Audio format specification")
-    sample_rate: int = Field(44100, description="Sample rate in Hz")
-    parameters: dict = Field({}, description="Processing parameters")
+    sample_rate: int = Field(44100, gt=8000, le=192000, description="Sample rate in Hz")
+    parameters: dict = Field(default_factory=dict, description="Processing parameters")
+
+    @validator('audio_data')
+    def validate_audio_length(cls, v):
+        max_duration = 300  # 5 minutes
+        with io.BytesIO(v) as audio_file:
+            duration = librosa.get_duration(path=audio_file)
+            if duration > max_duration:
+                raise ValueError(f"Audio exceeds maximum duration of {max_duration} seconds")
+        return v
 
 class ProcessedAudioResponse(BaseModel):
     """Response schema for processed audio"""

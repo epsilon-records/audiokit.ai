@@ -1,19 +1,15 @@
 """FastAPI backend for AudioKit."""
-from fastapi import FastAPI, File, UploadFile, Depends, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from pathlib import Path
 import logging
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-from starlette.requests import Request
 
 from . import processing
 from . import auth
-from audiokit_core.models.schemas import AnalysisResult
-from .config import ServerConfig
-from .logging import setup_logging
-from .routers import health  # Corrected import path
 from audiokit_core.config import load_config, AudioKitConfig
+from audiokit_core.logging import setup_logging
+from audiokit_core.routers import health
 
 # Configure logger
 logger = logging.getLogger(__name__)

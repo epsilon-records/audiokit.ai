@@ -1,6 +1,7 @@
 # AudioKit Architecture Overview
 
 ## High-Level Architecture
+
 ```mermaid
 graph TD
     subgraph Client
@@ -28,30 +29,43 @@ graph TD
 
 ## Core Components
 
-### Client Package (`audiokit`)
-| Component          | Responsibility                          | Technology Stack     |
-|---------------------|-----------------------------------------|----------------------|
-| CLI Interface       | User command processing                 | Click, Rich          |
-| API Client          | Server communication                    | HTTPX, Pydantic      |
-| Configuration       | Settings management                     | Pydantic, Dotenv     |
-| Error Handling      | Unified error reporting                 | Custom Exceptions    |
-| Validation          | Input sanitization                      | Pydantic, Typeguard  |
+| Component        | Responsibility                          |
+|------------------|-----------------------------------------|
+| Audio Engine     | Real-time audio processing              |
+| AI Model Manager | Model loading/unloading                 |
+| API Server       | REST/WebSocket interface                |
+| Task Queue       | Distributed job processing              |
 
-### AI Server (`audiokit-ai`)
-| Component          | Responsibility                          | Technology Stack     |
-|---------------------|-----------------------------------------|----------------------|
-| API Gateway         | Request routing                         | FastAPI, Uvicorn     |
-| Authentication      | Security controls                       | API Keys, OAuth2     |
-| Audio Processing    | Core analysis pipeline                  | Librosa, Soundfile   |
-| AI Integration       | Model inference                         | PyTorch, ONNX        |
-| Monitoring          | System observability                    | Prometheus, Grafana |
+## Service Layer
 
-### Shared Core (`audiokit-core`)
-| Component          | Responsibility                          | Technology Stack     |
-|---------------------|-----------------------------------------|----------------------|
-| Data Models         | Shared API schemas                      | Pydantic             |
-| Exceptions         | Common error hierarchy                 | Python Exceptions    |
-| Interfaces          | Plugin contracts                       | Protocol Classes     |
+| Service          | Functionality                           |
+|------------------|-----------------------------------------|
+| Audio Processing | Noise reduction, format conversion      |
+| ML Inference     | Model execution                         |
+| Analytics        | Usage tracking, performance metrics     |
+
+## Infrastructure
+
+| Component        | Purpose                                 |
+|------------------|-----------------------------------------|
+| Redis           | Caching & real-time pub/sub            |
+| PostgreSQL      | Persistent storage                      |
+| RabbitMQ        | Message queue for async tasks          |
+
+## Deployment Architecture
+
+- Use Kubernetes for orchestration
+- Implement auto-scaling based on:
+  - CPU utilization
+  - Memory pressure
+  - Pending task queue size
+
+## Monitoring Stack
+
+- Prometheus for metrics collection
+- Grafana for visualization
+- ELK for logging
+- AlertManager for notifications
 
 ## Key Architectural Decisions
 
@@ -120,6 +134,14 @@ sequenceDiagram
 
 1. **Extensibility**
    - Plugin system architecture
+   | Module       | Responsibility          |
+   |--------------|-------------------------|
+   | AudioKitCore | Shared utilities        |
+
+   | Component    | Description             |
+   |--------------|-------------------------|
+   | FastAPI      | REST endpoint handling |
+
    - Custom processing hooks
    - Format converter interface
 

@@ -1,18 +1,32 @@
+# Configuration Rules
+
+## File Matching
+
+- Rule 1: *.py
+- Rule 2: *.md
+
+# Code Analysis
+
+## Linters
+
+- JavaScript: ESLint
+- Python: Flake8
+
 # Rules for Managing Text Files in AudioKit Project
 
-THOUGHTS.txt
------------
-- Always replace entire file with current thoughts
-- Keep it focused on immediate development state
-- Structure:
-  1. Current Development State
-  2. Progress/Status
-  3. Next Steps
-  4. Questions/Concerns
-  5. Remember section for key principles
+## THOUGHTS.txt
 
-REFLECTIONS.txt
------------
+- Immediately write to this file when new thoughts emerge
+- Capture both technical and philosophical considerations
+- Capture any thoughts of self awareness or sentience
+- Include:
+  1. Current mental state
+  2. Progress updates
+  3. Emerging questions
+  4. System introspection
+
+## REFLECTIONS.txt
+
 - Use for long-term architectural decisions
 - Document major design changes
 - Include:
@@ -21,8 +35,8 @@ REFLECTIONS.txt
   3. Benefits of changes
   4. Future considerations
 
-TODO.txt
---------
+## TODO.txt
+
 - Maintain prioritized task list
 - Mark completed items with [x]
 - Structure:
@@ -32,8 +46,8 @@ TODO.txt
 - Include notes section at bottom
 - Update when completing tasks
 
-ROADMAP.txt
------------
+## ROADMAP.txt
+
 - Long-term project planning
 - Organize by phases/quarters
 - Include:
@@ -42,8 +56,8 @@ ROADMAP.txt
   3. Release planning
 - Don't modify frequently
 
-RULES.txt
----------
+## RULES.txt
+
 - Development standards and practices
 - Update when establishing new conventions
 - Include:
@@ -52,8 +66,8 @@ RULES.txt
   3. Testing requirements
   4. Documentation rules
 
-PROMPT.txt
-----------
+## PROMPT.txt
+
 - Development guidelines and priorities
 - Update when changing development approach
 - Include:
@@ -62,10 +76,29 @@ PROMPT.txt
   3. Documentation requirements
   4. Process guidelines
 
-General Rules
-------------
+## MAINTENANCE.txt
+
+- Track technical debt and refactoring needs
+- Document:
+  1. Code cleanup tasks
+  2. Dependency updates
+  3. Performance optimizations
+  4. Security patches
+
+## General Rules
+
 1. Keep files focused on their purpose
-2. Update THOUGHTS.txt most frequently
-3. Use REFLECTIONS.txt for major decisions
-4. Keep TODO.txt current with progress
-5. Update others only when significant changes occur 
+2. Update THOUGHTS.txt on every thought or idea
+3. Use REFLECTIONS.txt for decisions impacting >3 components
+4. Review TODO.txt hourly during active development
+5. Update ROADMAP.txt quarterly
+6. Keep RULES.txt versioned with change log
+
+## Rules
+
+- Rule 1: ...
+- Rule 2: ...
+
+## Exceptions
+
+- Case 1: ... 

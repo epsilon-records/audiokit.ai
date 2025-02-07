@@ -3,11 +3,20 @@ AudioKit Development Guidelines
 
 Development Priorities
 --------------------
-1. Focus on core functionality first
-2. Defer optimizations until basic features are stable
-3. Postpone testing infrastructure until v1.0 release
-4. Keep architecture simple and modular
-5. Implement features in small, incremental steps
+1. Security Foundation
+   - API key rotation system
+   - Request validation middleware
+   - Security headers enforcement
+
+2. Core Reliability
+   - Retry/backoff mechanisms
+   - Circuit breaker pattern
+   - Graceful degradation
+
+3. Observability
+   - Structured logging
+   - Request tracing
+   - Health checks
 
 Code Quality Standards
 --------------------
@@ -33,11 +42,11 @@ Documentation Requirements
 
 Deferred Items
 ------------
-1. Testing Infrastructure:
-   - Unit tests
-   - Integration tests
-   - Performance benchmarks
-   - Security tests
+Testing Infrastructure (until v0.9):
+- Unit test coverage
+- Integration tests
+- Load testing
+- Security audits
 
 2. Optimizations:
    - Request batching

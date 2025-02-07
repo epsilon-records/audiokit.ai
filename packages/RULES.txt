@@ -1,5 +1,16 @@
 # AudioKit Development Rules
 
+## Version History
+1.1.0 - 2024-03-15
+- Added Redis-backed rate limiting
+- Enforced request validation middleware
+- Standardized error responses
+
+1.0.0 - 2024-01-01
+- Initial ruleset established
+- PEP8 compliance enforced
+- Poetry dependency management required
+
 ## Core Development Rules
 
 1. Always use best practices
@@ -184,4 +195,28 @@ Documentation
 -------------
 1. Keep OpenAPI spec updated
 2. Maintain developer quickstart guide
-3. Publish API schema with each release 
+3. Publish API schema with each release
+
+## Security Standards
+1. Authentication
+   - API keys must be hashed in storage
+   - Key rotation every 90 days
+   - Rate limiting per key/IP
+   - Minimum key length 32 chars
+
+2. Input Validation
+   - Validate all API inputs
+   - Use Pydantic models
+   - File size limits enforced
+   - Content type verification
+
+3. Error Handling
+   - Never expose stack traces
+   - Standard error codes
+   - Audit security-related errors
+   - Use structured error responses
+
+4. Cryptography
+   - Use Fernet for sensitive data
+   - TLS 1.3 required
+   - Secrets in environment vars 

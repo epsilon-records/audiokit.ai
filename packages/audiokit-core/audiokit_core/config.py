@@ -1,5 +1,12 @@
 from pydantic import BaseSettings, Field
 from pathlib import Path
+from pydantic import BaseModel
+
+class BaseConfig(BaseSettings):
+    """Shared base configuration"""
+    debug: bool = False
+    log_level: str = "info"
+    # ... common fields
 
 class AudioKitConfig(BaseSettings):
     host: str = Field("127.0.0.1", env="AUDIOKIT_HOST")
@@ -15,3 +22,8 @@ def load_config(config_path: Path = Path("config.yml")) -> AudioKitConfig:
     """Load configuration from YAML file with environment overrides"""
     # Implementation would parse YAML and merge with environment variables
     return AudioKitConfig()  # Simplified for example 
+
+class ServerConfig(BaseModel):
+    """Server configuration."""
+    api_keys: list[str] = []
+    # ... rest of the server config 
