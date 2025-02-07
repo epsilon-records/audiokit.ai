@@ -1,5 +1,5 @@
 from fastapi import APIRouter, UploadFile, Depends
-from ..models import AudioAnalysis
+from audiokit_core.models.schemas import AudioAnalysis
 from ..auth import AuthHandler
 
 router = APIRouter()

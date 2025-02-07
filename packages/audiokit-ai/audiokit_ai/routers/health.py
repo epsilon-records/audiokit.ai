@@ -1,22 +1,16 @@
 from fastapi import APIRouter
-from pydantic import BaseModel
-import time
-from typing import Literal
-from .. import __version__
+from datetime import datetime
+from audiokit_core.models.schemas import HealthCheckResponse
+from ..storage.jobs import job_store
 
 router = APIRouter()
+START_TIME = datetime.utcnow()
 
-start_time = time.time()
-
-class HealthCheck(BaseModel):
-    status: Literal["OK", "ERROR"]
-    version: str
-    uptime: float
-
-@router.get("/health", response_model=HealthCheck, tags=["health"])
+@router.get("/health", response_model=HealthCheckResponse)
 async def health_check():
-    return HealthCheck(
-        status="OK",
-        version=__version__,
-        uptime=time.time() - start_time
+    return HealthCheckResponse(
+        status="ok",
+        version="1.0.0",
+        uptime=(datetime.utcnow() - START_TIME).total_seconds(),
+        active_jobs=sum(1 for j in job_store.jobs.values() if j["status"] in ["pending", "processing"])
     ) 

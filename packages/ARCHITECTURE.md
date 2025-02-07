@@ -46,6 +46,13 @@ graph TD
 | AI Integration       | Model inference                         | PyTorch, ONNX        |
 | Monitoring          | System observability                    | Prometheus, Grafana |
 
+### Shared Core (`audiokit-core`)
+| Component          | Responsibility                          | Technology Stack     |
+|---------------------|-----------------------------------------|----------------------|
+| Data Models         | Shared API schemas                      | Pydantic             |
+| Exceptions         | Common error hierarchy                 | Python Exceptions    |
+| Interfaces          | Plugin contracts                       | Protocol Classes     |
+
 ## Key Architectural Decisions
 
 1. **Protocol Design**

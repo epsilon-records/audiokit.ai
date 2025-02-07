@@ -5,16 +5,18 @@ description = "AI-powered audio processing service"
 authors = ["Your Name <your.email@example.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.8"
 fastapi = "^0.104.0"
 uvicorn = "^0.23.0"
 librosa = "0.10.0"
 numpy = "^1.24.0"
-pydantic = "^2.4.0"
+pydantic = "^2.6.0"
 psutil = "^5.9.0"
 pyyaml = "^6.0.2"
 python-multipart = "^0.0.20"
 soundfile = "^0.12.1"
+redis = "^4.5.4"
+audiokit-core = {path = "../audiokit-core", develop = true}
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
