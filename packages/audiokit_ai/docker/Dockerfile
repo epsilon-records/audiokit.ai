@@ -30,9 +30,6 @@ RUN pip install --upgrade pip
 # Install Hatchling (required for building using your pyproject.toml)
 RUN pip install hatchling
 
-# Pre-install Whisper directly from GitHub to satisfy the direct reference dependency.
-RUN pip install git+https://github.com/openai/whisper.git
-
 # Now install your project (non-editably) along with test extras.
 RUN pip install '.[test]'
 
