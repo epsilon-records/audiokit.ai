@@ -5,6 +5,7 @@ from .api import endpoints
 from .core.config import settings
 from fastapi_limiter import FastAPILimiter
 import redis.asyncio as redis
+from dotenv import load_dotenv
 
 app = FastAPI(title="AudioKit-AI Server")
 
@@ -35,4 +36,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 async def verify_token(token: str = Depends(oauth2_scheme)):
     # Your token verification logic here
-    return {} 
+    return {}
+
+load_dotenv() 
