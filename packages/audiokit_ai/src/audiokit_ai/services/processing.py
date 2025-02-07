@@ -14,7 +14,11 @@ whisper_model = whisper.load_model("base")
 
 # Initialize FAISS index and OpenL3 model
 index = faiss.IndexFlatL2(512)
-openl3_model = openl3.models.load_audio_embedding_model()
+openl3_model = openl3.models.load_audio_embedding_model(
+    input_repr="mel256",  # Mel-spectrogram with 256 bins
+    content_type="music",  # Use "music" for music-related tasks
+    embedding_size=512  # Size of the embedding vector
+)
 
 client = speech.SpeechClient()
 
