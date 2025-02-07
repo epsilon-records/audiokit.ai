@@ -26,7 +26,7 @@ async def denoise_audio(file: UploadFile = File(...)):
 @router.post("/separate", dependencies=[Depends(verify_token)])
 async def separate_audio(file: UploadFile = File(...)):
     try:
-        result = await processing.separate(file)
+        result = await processing.separate_audio(file)
         return {"status": "success", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
