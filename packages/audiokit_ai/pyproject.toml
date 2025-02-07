@@ -5,6 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "audiokit_ai"
 version = "0.1.0"
+dynamic = ["version"]
 dependencies = [
     "torch>=2.0.0",
     "torchaudio>=2.0.0",
@@ -86,3 +87,7 @@ format = [
     "I",  # Isort
     "W",  # Pycodestyle warnings
 ]
+
+[tool.hatch.version]
+source = "module"
+path = "src/audiokit_ai/__init__.py"

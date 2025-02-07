@@ -32,3 +32,18 @@ acp: commit sync
     #!/usr/bin/env sh
     echo "🚀 Changes added, committed, and pushed!"
     echo "436f646520617363656e64656421" | xxd -r -p
+
+# Run tests
+test:
+    #!/usr/bin/env sh
+    hatch run test:pytest --cov=audiokit_ai --cov-report=term
+
+# Generate requirements.txt
+requirements:
+    #!/usr/bin/env sh
+    uv pip compile pyproject.toml --output-file requirements.txt
+
+# Install dependencies from requirements.txt
+install:
+    #!/usr/bin/env sh
+    uv pip install -r requirements.txt
