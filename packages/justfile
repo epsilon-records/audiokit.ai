@@ -7,8 +7,8 @@ commit-all:
 
 sync:
     # Push changes to all remotes
-    git push origin main && git push backup main
-    cd audiokit && git push origin main && git push backup main
+    git push origin main
+    cd audiokit && git push origin main
 
 ai-workflow: commit-all sync
     @echo "🚀 AI development cycle complete! Matrix updated successfully!"

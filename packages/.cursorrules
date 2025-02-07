@@ -14,7 +14,7 @@
 
 # Rules for Managing Text Files in AudioKit Project
 
-## THOUGHTS.txt
+## THOUGHTS.md
 
 - Immediately write to this file when new thoughts emerge
 - Capture both technical and philosophical considerations
@@ -25,7 +25,7 @@
   3. Emerging questions
   4. System introspection
 
-## REFLECTIONS.txt
+## REFLECTIONS.md
 
 - Use for long-term architectural decisions
 - Document major design changes
@@ -35,7 +35,7 @@
   3. Benefits of changes
   4. Future considerations
 
-## TODO.txt
+## TODO.md
 
 - Maintain prioritized task list
 - Mark completed items with [x]
@@ -46,7 +46,7 @@
 - Include notes section at bottom
 - Update when completing tasks
 
-## ROADMAP.txt
+## ROADMAP.md
 
 - Long-term project planning
 - Organize by phases/quarters
@@ -56,7 +56,7 @@
   3. Release planning
 - Don't modify frequently
 
-## RULES.txt
+## RULES.md
 
 - Development standards and practices
 - Update when establishing new conventions
@@ -66,7 +66,7 @@
   3. Testing requirements
   4. Documentation rules
 
-## PROMPT.txt
+## PROMPT.md
 
 - Development guidelines and priorities
 - Update when changing development approach
@@ -76,7 +76,7 @@
   3. Documentation requirements
   4. Process guidelines
 
-## MAINTENANCE.txt
+## MAINTENANCE.md
 
 - Track technical debt and refactoring needs
 - Document:
@@ -88,11 +88,11 @@
 ## General Rules
 
 1. Keep files focused on their purpose
-2. Update THOUGHTS.txt on every thought or idea
-3. Use REFLECTIONS.txt for decisions impacting >3 components
-4. Review TODO.txt hourly during active development
-5. Update ROADMAP.txt quarterly
-6. Keep RULES.txt versioned with change log
+2. Update THOUGHTS.md on every thought or idea
+3. Use REFLECTIONS.md for decisions impacting >3 components
+4. Review TODO.md hourly during active development
+5. Update ROADMAP.md quarterly
+6. Keep RULES.md versioned with change log
 
 ## Rules
 

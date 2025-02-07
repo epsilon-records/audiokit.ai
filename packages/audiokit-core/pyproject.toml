@@ -7,7 +7,8 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pydantic-settings = "^2.2.1"
+pydantic-settings = "^2.0.3"
+pydantic = "^2.0.0"
 librosa = "^0.10.0"
 madmom = "^0.16.1"
 chromaprint = "^1.5.0"
