@@ -14,11 +14,11 @@ sync:
     # Get current branch name
     BRANCH := `git branch --show-current`
     # Pull changes before pushing
-    git pull --rebase origin $BRANCH
-    cd audiokit && git pull --rebase origin $BRANCH
+    git pull --rebase origin $(BRANCH)
+    cd audiokit && git pull --rebase origin $(BRANCH)
     # Push changes to all remotes
-    git push origin $BRANCH
-    cd audiokit && git push origin $BRANCH
+    git push origin $(BRANCH)
+    cd audiokit && git push origin $(BRANCH)
     @echo "🌐 Changes synchronized across all repositories"
 
 ai-workflow: init commit-all sync
