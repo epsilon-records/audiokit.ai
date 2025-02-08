@@ -1,0 +1,13 @@
+{
+  "crons": [
+    {
+      "path": "/api/enrich-data",
+      "schedule": "*/5 * * * *"
+    }
+  ],
+  "functions": {
+    "api/enrich-data/*.js": {
+      "maxDuration": 60
+    }
+  }
+}

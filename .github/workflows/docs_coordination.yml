@@ -1,0 +1,121 @@
+name: Documentation Coordination
+
+on:
+  workflow_dispatch:  # Manual trigger
+  schedule:
+    - cron: '0 0 * * 0'  # Weekly on Sunday
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'packages/*/README.md'
+      - 'packages/*/DEVELOPER.md'
+      - 'packages/*/CHANGELOG.md'
+      - 'packages/*/CONTRIBUTING.md'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs*.yml'
+      - 'context/**'
+
+jobs:
+  coordinate:
+    name: Coordinate Documentation Updates
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check Documentation State
+        id: check_docs
+        run: |
+          # Check if LLM regeneration is needed
+          if [[ $(find packages -name "README.md" -mtime +7 -print) ]]; then
+            echo "needs_llm=true" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check if templates need updating
+          if [[ $(find docs/templates -mtime +7 -print) ]]; then
+            echo "needs_templates=true" >> $GITHUB_OUTPUT
+          fi
+          
+          # Check if content validation is needed
+          if [[ $(find context -name "*.md" -mtime +1 -print) ]]; then
+            echo "needs_validation=true" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Trigger LLM Documentation Update
+        if: steps.check_docs.outputs.needs_llm == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docs_templates.yml',
+              ref: 'main'
+            });
+      
+      - name: Trigger Template Update
+        if: steps.check_docs.outputs.needs_templates == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docs_templates.yml',
+              ref: 'main'
+            });
+      
+      - name: Trigger Content Validation
+        if: steps.check_docs.outputs.needs_validation == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'lint_docs.yml',
+              ref: 'main'
+            });
+      
+      - name: Wait for Other Workflows
+        run: sleep 60  # Wait for other workflows to start
+      
+      - name: Trigger Documentation Build
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'docs.yml',
+              ref: 'main'
+            });
+      
+  notify:
+    name: Notify on Failure
+    needs: coordinate
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const run_id = context.runId;
+            
+            const message = `Documentation coordination failed!
+            
+            Workflow: [View Run](https://github.com/${owner}/${repo}/actions/runs/${run_id})
+            
+            Please check the workflow logs for details.`;
+            
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title: '📚 Documentation Coordination Failed',
+              body: message,
+              labels: ['documentation', 'coordination-failed']
+            }); 

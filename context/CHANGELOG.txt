@@ -1,0 +1,25 @@
+# CHANGELOG
+
+All notable changes to this project will be documented here.
+
+## [Unreleased]
+
+### Added
+- Initial endpoints for audio processing.
+- CLI and SDK client for interacting with the backend.
+- Implemented new documentation system for context files.
+- Integrated CI/CD validation for context files.
+- Updated WHOAMI.md, THOUGHTS.md, REFLECTIONS.md, and PROMPT.md.
+- Added initial updates for TODO.md, ROADMAP.md, RULES.md, and MAINTENANCE.md.
+
+### Fixed
+- N/A
+
+### Changed
+- N/A
+
+## [0.1.0] - 2023-10-XX
+### Added
+- Basic monorepo structure for AudioKit-AI backend and AudioKit SDK.
+- CI/CD configuration via GitHub Actions.
+- Terraform scripts for GCP infrastructure. 

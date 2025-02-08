@@ -1,0 +1,168 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs.yml'
+      - 'context/**'  # Include context files
+  pull_request:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - 'mkdocs.yml'
+      - '.github/workflows/docs.yml'
+      - 'context/**'  # Include context files
+  release:
+    types: [published]
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  validate:
+    name: Validate Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r docs/requirements.txt
+          
+      - name: Validate context files
+        run: python3 scripts/validate_content_quality.py
+      
+      - name: Run documentation tests
+        run: python docs/testing/run_doc_tests.py
+      
+      - name: Check links
+        uses: gaurav-nelson/github-action-markdown-link-check@v1
+        with:
+          use-quiet-mode: 'yes'
+          use-verbose-mode: 'no'
+          config-file: '.github/workflows/mlc_config.json'
+          folder-path: 'docs,context'  # Check both docs and context directories
+          
+  build:
+    name: Build Documentation
+    needs: validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r docs/requirements.txt
+          
+      - name: Set up Git user
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+      - name: Generate context documentation
+        run: python3 scripts/generate_context_docs.py
+      
+      - name: Build documentation
+        run: python docs/build.py
+      
+      - name: Upload documentation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation
+          path: site/
+          retention-days: 30
+          
+  deploy:
+    name: Deploy Documentation
+    needs: build
+    runs-on: ubuntu-latest
+    # Only deploy on push to main, releases, or manual triggers
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' || github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download documentation artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: documentation
+          path: site
+          
+      - name: Set version
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            echo "VERSION=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "VERSION=latest" >> $GITHUB_ENV
+          else
+            echo "VERSION=preview" >> $GITHUB_ENV
+          fi
+      
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          destination_dir: ${{ env.VERSION }}
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'docs: update ${{ env.VERSION }} documentation'
+          
+      # For releases, also update latest
+      - name: Update latest documentation
+        if: github.event_name == 'release'
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./site
+          destination_dir: latest
+          force_orphan: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          commit_message: 'docs: update latest documentation'
+
+  notify:
+    name: Notify on Failure
+    needs: [validate, build, deploy]
+    if: failure()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send notification
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { repo, owner } = context.repo;
+            const run_id = context.runId;
+            
+            const message = `Documentation workflow failed!
+            
+            Workflow: [View Run](https://github.com/${owner}/${repo}/actions/runs/${run_id})`;
+            
+            await github.rest.issues.create({
+              owner,
+              repo,
+              title: '📚 Documentation Build Failed',
+              body: message,
+              labels: ['documentation', 'failed-build']
+            }); 

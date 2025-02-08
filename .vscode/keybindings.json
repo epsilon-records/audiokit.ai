@@ -1,0 +1,7 @@
+[
+    {
+        "key": "ctrl+alt+s",
+        "command": "cursor.runSaveCommand",
+        "when": "editorTextFocus"
+    }
+]

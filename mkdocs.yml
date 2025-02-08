@@ -1,0 +1,205 @@
+site_name: AudioKit
+site_description: Audio Processing and AI Tools
+repo_url: https://github.com/epsilon-records/audiokit
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+    - header.autohide
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: AUDIOKIT.md
+  - Getting Started:
+    - Quick Start: getting-started/QUICKSTART.md
+    - Installation: getting-started/INSTALLATION.md
+    - First Steps: getting-started/FIRST_STEPS.md
+    
+  - User Guide:
+    - Overview: user-guide/OVERVIEW.md
+    - Audio Processing: user-guide/AUDIO_PROCESSING.md
+    - AI Features: user-guide/AI_FEATURES.md
+    - DAW Integration: user-guide/DAW_INTEGRATION.md
+    
+  - Technical Documentation:
+    - Architecture: technical/ARCHITECTURE.md
+    - Audio Processing Guide: technical/AUDIO_PROCESSING_GUIDE.md
+    - SDK Reference: technical/SDK.md
+    - API Reference: technical/API.md
+    - Features: technical/FEATURES.md
+    
+  - API Reference:
+    - Overview: api/OVERVIEW.md
+    - Audio:
+      - Buffer: api/audio/BUFFER.md
+      - Effects: api/effects/EFFECTS.md
+      - Analysis: api/analysis/ANALYSIS.md
+    - AI:
+      - Models: api/ai/MODELS.md
+      - Training: api/ai/TRAINING.md
+    
+  - Examples:
+    - Overview: examples/EXAMPLES.md
+    - Audio Processing:
+      - Overview: examples/audio_processing/EXAMPLES.md
+      - Plugin Example: examples/audio_processing/PLUGIN_EXAMPLE.md
+      - DAW Example: examples/audio_processing/DAW_EXAMPLE.md
+      - Real-time Example: examples/audio_processing/REALTIME_EXAMPLE.md
+    - AI Models: examples/ai_models/EXAMPLES.md
+    - Integration: examples/integration/EXAMPLES.md
+    
+  - Deployment:
+    - Overview: deployment/OVERVIEW.md
+    - GKE Setup: deployment/GKE.md
+    - Terraform: deployment/TERRAFORM.md
+    - CI/CD: deployment/CICD.md
+    - Packaging: deployment/PACKAGING.md
+    
+  - Development:
+    - Contributing: development/CONTRIBUTING.md
+    - Code Style: development/CODE_STYLE.md
+    - Testing: development/TESTING.md
+    - Documentation: development/DOCUMENTATION.md
+    
+  - System Context:
+    - Overview: context/OVERVIEW.md
+    - System Identity: context/WHOAMI.md
+    - Current State: context/THOUGHTS.md
+    - Architecture: context/REFLECTIONS.md
+    - Planning: 
+      - Tasks: context/TODO.md
+      - Roadmap: context/ROADMAP.md
+    - Process:
+      - Rules: context/RULES.md
+      - Guidelines: context/PROMPT.md
+    - Operations:
+      - Maintenance: context/MAINTENANCE.md
+      - Changelog: context/CHANGELOG.txt
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_category_heading: true
+            show_bases: true
+            group_by_category: true
+            docstring_style: google
+            docstring_section_style: spacy
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+  - social:
+      cards_layout: default
+  - tags:
+      tags_file: tags.md
+  - pdf-export:
+      combined: true
+      combined_output_path: pdf/audiokit-documentation.pdf
+  - redirects:
+      redirect_maps:
+        'old/sdk.md': 'technical/SDK.md'
+        'old/api.md': 'technical/API.md'
+        'technical/audio-processing-guide.md': 'technical/AUDIO_PROCESSING_GUIDE.md'
+        'development/documentation.md': 'development/DOCUMENTATION.md'
+        'development/code-style.md': 'development/CODE_STYLE.md'
+        'development/testing.md': 'development/TESTING.md'
+        'getting-started/quickstart.md': 'getting-started/QUICKSTART.md'
+        'user-guide/overview.md': 'user-guide/OVERVIEW.md'
+        'user-guide/audio-processing.md': 'user-guide/AUDIO_PROCESSING.md'
+        'user-guide/ai-features.md': 'user-guide/AI_FEATURES.md'
+        'user-guide/daw-integration.md': 'user-guide/DAW_INTEGRATION.md'
+        'deployment/overview.md': 'deployment/OVERVIEW.md'
+        'deployment/gke.md': 'deployment/GKE.md'
+        'deployment/terraform.md': 'deployment/TERRAFORM.md'
+        'deployment/cicd.md': 'deployment/CICD.md'
+        'deployment/packaging.md': 'deployment/PACKAGING.md'
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - meta
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      use_pygments: true
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/yourusername/audiokit
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/audiokit
+  version:
+    provider: mike
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: 日本語
+      link: /ja/
+      lang: ja
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js 
