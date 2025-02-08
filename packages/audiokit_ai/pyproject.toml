@@ -28,6 +28,11 @@ dependencies = [
     "openai",
     "soundfile",
     "pytest>=8.3.4",
+    "gunicorn",
+    "uvicorn>=0.22.0",
+    "fastapi>=0.115.8",
+    "torch>=1.13.0",
+    "torchaudio>=0.13.0",
 ]
 
 [project.optional-dependencies]

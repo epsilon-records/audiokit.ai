@@ -1,0 +1,50 @@
+# Exclude version control files
+.git
+.gitignore
+.gitmodules
+
+# Exclude Python caches & compiled files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+*$py.class
+
+# Exclude virtual environment directories
+.env
+.venv
+venv
+ENV
+env
+env.bak
+venv.bak
+
+# Exclude build artifacts
+build/
+dist/
+*.egg-info/
+
+# Exclude dependency directories (commonly large)
+node_modules/
+
+# Exclude SvelteKit and other frontend build artifacts
+.svelte-kit/
+.output/
+.vercel/
+.netlify/
+
+# Exclude log files
+*.log
+logs/
+
+# Exclude temporary files and directories
+tmp/
+temp/
+
+# Exclude IDE/editor configuration directories
+.vscode/
+.idea/
+
+# Exclude Docker Compose files if not needed in the context
+docker-compose*.yml
+.aider* 

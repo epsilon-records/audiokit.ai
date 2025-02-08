@@ -62,8 +62,8 @@ debug
 .local
 .temp
 
-# Python cache
-**/__pycache__/
+# Python caches: ignore __pycache__ directories recursively in all subdirectories
+**/__pycache__/**
 *.py[cod]
 *$py.class
 

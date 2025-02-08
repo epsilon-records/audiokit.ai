@@ -24,7 +24,6 @@ audiokit/
         utils.py       # Helper functions
       tests/
       pyproject.toml
-      poetry.lock
       README.md
 
   .cursorrules          # Development guidelines
