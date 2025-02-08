@@ -49,6 +49,58 @@
    - Predictive asset loading
    - Memory pressure monitoring
 
+## AudioNode Architecture Deep Dive
+
+### Core Concepts
+
+1. **Node Types**
+   - **Source Nodes**: Generate or input audio (microphone, file, oscillator)
+   - **Processing Nodes**: Transform audio (effects, filters, analyzers)
+   - **Destination Nodes**: Output audio (speakers, recording, streaming)
+   - **Utility Nodes**: Routing, mixing, splitting signals
+
+2. **Node Properties**
+
+   ```typescript
+   interface AudioNode {
+     inputs: AudioInput[];      // Audio input connections
+     outputs: AudioOutput[];    // Audio output connections
+     parameters: Parameter[];   // Controllable parameters
+     bypass: boolean;          // Bypass processing
+     latency: number;         // Processing latency in ms
+     processingMode: 'realtime' | 'offline';
+   }
+   ```
+
+3. **Connection Model**
+
+   ```mermaid
+   graph LR
+   A[Output] -->|AudioBuffer| B[Input]
+   B -->|Parameters| C[Process]
+   C -->|AudioBuffer| D[Output]
+   ```
+
+### Processing Strategies
+
+1. **Real-time Processing**
+   - Buffer size: 128-1024 samples
+   - Processing deadline: ~3ms @ 44.1kHz
+   - Zero-copy buffer transfers
+   - SIMD optimization via WebAssembly
+
+2. **Parameter Automation**
+   - Sample-accurate timing
+   - Smooth parameter interpolation
+   - Event-based updates
+   - Timeline-based automation
+
+3. **Graph Operations**
+   - Dynamic node insertion/removal
+   - Automatic latency compensation
+   - Feedback loop detection
+   - Graph validation
+
 ## Immediate Focus Areas
 
 1. **Core Infrastructure**
