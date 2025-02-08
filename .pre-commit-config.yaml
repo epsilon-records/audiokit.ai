@@ -1,0 +1,8 @@
+- repo: local
+  hooks:
+    - id: copyright-check
+      name: Check copyright headers
+      entry: python scripts/update_copyright.py --check
+      language: python
+      types: [python]
+      pass_filenames: false 

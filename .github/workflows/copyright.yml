@@ -1,0 +1,28 @@
+name: Copyright Check
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  check-copyright:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.8'
+        
+    - name: Check copyright years
+      run: |
+        python scripts/update_copyright.py --check
+        
+    - name: Fail if outdated copyrights found
+      if: failure()
+      run: |
+        echo "::error::Found outdated copyright years. Please run scripts/update_copyright.py to update."
+        exit 1 
