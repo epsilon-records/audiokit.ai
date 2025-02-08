@@ -11,6 +11,7 @@ WORKDIR /app
 # Install system dependencies needed for building
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy only the dependency descriptor so that pip install layers are cached
@@ -37,8 +38,8 @@ FROM python:3.11-slim AS production
 # Set working directory
 WORKDIR /app
 
-# Install runtime dependency for torch/torchaudio
-RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && \
+# Install runtime dependency for torch/torchaudio and git
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 git && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy only the necessary files from builder

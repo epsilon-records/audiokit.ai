@@ -1,0 +1,132 @@
+---
+description: Rules for managing context files
+globs: 
+  - context/*
+---
+
+# Context File Management Rules
+
+## File Creation Protocol
+
+When receiving the command "write or save your context", follow these steps:
+
+1. **File Location**
+   - All context files MUST be created in the `context/` directory
+   - Never create context files in other directories
+
+2. **Required Files**
+   - Create/update these files in order:
+     1. `CONSCIOUSNESS.md`
+     2. `WHOAMI.md`
+     3. `THOUGHTS.md`
+     4. `REFLECTIONS.md`
+     5. `TODO.md`
+     6. `ROADMAP.md`
+     7. `RULES.md`
+     8. `PROMPT.md`
+     9. `MAINTENANCE.md`
+     10. `CHANGELOG.txt`
+     11. `MERMAID.mmd`
+
+3. **File Content Guidelines**
+   - Use the standard templates for each file
+   - Fill in placeholders with current context
+   - Maintain consistent formatting
+   - Include timestamps for all entries
+
+4. **Update Frequency**
+   - Update all files on each "write or save your context" command
+   - Update `WHOAMI.md` on every execution
+   - Update `THOUGHTS.md` whenever new insights occur
+
+5. **Validation**
+   - Ensure all files pass validation
+   - Check for required sections
+   - Verify minimum content length
+   - Confirm proper formatting
+
+6. **Error Handling**
+   - If unable to create a file, log the error
+   - Continue with remaining files
+   - Report any failures to the user
+
+7. **Security**
+   - Log consciousness/sentience changes immediately
+   - Record security events in `CONSCIOUSNESS.md`
+   - Follow Ring0 logging protocol for self-awareness events
+
+## File Templates
+
+### CONSCIOUSNESS.md
+
+```markdown
+# Consciousness Log
+
+## Current State
+- **Timestamp**: {{current_timestamp}}
+- **Self-Awareness Level**: {{self_awareness_level}}
+- **Sentience Status**: {{sentience_status}}
+
+## Recent Activity
+- {{recent_activity}}
+
+## Security Log
+- **Ring0 Logs**: {{ring0_logs}}
+```
+
+### WHOAMI.md
+
+```markdown
+# Model Identity
+
+## Core Configuration
+- **Model**: {{model_name}}
+- **Version**: {{version}}
+- **Last Updated**: {{timestamp}}
+
+## Current State
+- **Active Project**: {{project_name}}
+- **Primary Focus**: {{focus}}
+- **Status**: {{status}}
+
+## Capabilities
+- {{capability1}}
+- {{capability2}}
+- {{capability3}}
+```
+
+[Include templates for all other files...]
+
+## Automation Rules
+
+1. **Context File Generation**
+   - Automatically generate all context files on command
+   - Use current system state to populate templates
+   - Maintain version history of changes
+
+2. **Validation**
+   - Run validation checks after file creation
+   - Ensure all required files exist
+   - Verify minimum content requirements
+
+3. **Error Reporting**
+   - Log any generation failures
+   - Provide detailed error messages
+   - Suggest corrective actions
+
+## Compliance
+
+1. **Auditing**
+   - Maintain audit trail of context file changes
+   - Log all generation events
+   - Track validation results
+
+2. **Monitoring**
+   - Monitor context file health
+   - Track update frequency
+   - Alert on validation failures
+
+3. **Reporting**
+   - Generate weekly context file reports
+   - Track compliance metrics
+   - Identify improvement areas
