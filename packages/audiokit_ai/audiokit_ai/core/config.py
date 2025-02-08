@@ -1,15 +1,17 @@
 # CONFIDENTIAL AND PROPRIETARY
-# 
+#
 # Copyright (c) 2025 AudioKit.ai. All rights reserved.
-# 
+#
 # This software is confidential and proprietary.
-# 
+#
 
-# 
+#
 # This file is part of the AudioKit AI package.
-# 
+#
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+import os
+
 
 class Settings(BaseSettings):
     app_name: str = "AudioKit-AI Server"
@@ -24,7 +26,10 @@ class Settings(BaseSettings):
     daw_timeout: float = 10.0  # seconds
     max_daw_connections: int = 10
 
+    openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
+
     class Config:
         env_file = ".env"
 
-settings = Settings() 
+
+settings = Settings()

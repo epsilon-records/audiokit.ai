@@ -2,6 +2,10 @@
 description: 
 globs: 
 ---
+---
+description: 
+globs: 
+---
 # Rules for Managing Text Files in AudioKit Project
 
 ## File Locations for Context Files
@@ -18,3 +22,10 @@ All context files **MUST** be stored in the `context/` directory at the root of 
 7. **PROMPT.md** – Provides current development priorities and guidelines.
 8. **MAINTENANCE.md** – Tracks technical debt, expected refactoring, performance optimizations, and dependency updates.
 9. **CHANGELOG.txt** – Records version history and notable changes, following the Keep a Changelog standards. 
+
+{
+  "id": "003",
+  "name": "Explanatory Comments",
+  "description": "Accompany any code modifications with a brief explanation, unless the user explicitly requests code-only output.",
+  "self_modifiable": true
+} 

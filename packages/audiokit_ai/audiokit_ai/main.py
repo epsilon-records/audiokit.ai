@@ -1,18 +1,17 @@
 # CONFIDENTIAL AND PROPRIETARY
-# 
+#
 # Copyright (c) 2025 AudioKit.ai. All rights reserved.
-# 
+#
 # This software is confidential and proprietary.
-# 
+#
 
-# 
+#
 # This file is part of the AudioKit AI package.
-# 
+#
 
-from fastapi import FastAPI, WebSocket, Depends, HTTPException, status, Request
+from fastapi import FastAPI, Depends, Request, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
-from .api import endpoints
 from .core.config import settings
 from fastapi_limiter import FastAPILimiter
 import redis.asyncio as redis
@@ -30,6 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Initialize rate limiter using Redis on startup
 @app.on_event("startup")
 async def startup():
@@ -41,20 +41,25 @@ async def startup():
     )
     await FastAPILimiter.init(redis_client)
 
+
 # Include API endpoints
-app.include_router(endpoints.router)
+api_router = APIRouter(prefix="/api/v1")
+app.include_router(api_router)
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 async def verify_token(token: str = Depends(oauth2_scheme)):
     # Your token verification logic here
     return {}
 
+
 load_dotenv()
+
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
     logger.info(f"Request: {request.method} {request.url}")
     response = await call_next(request)
     logger.info(f"Response: {response.status_code}")
-    return response 
+    return response

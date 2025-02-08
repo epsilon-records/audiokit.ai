@@ -2,6 +2,10 @@
 description: 
 globs: 
 ---
+---
+description: 
+globs: 
+---
 # Guidelines
 
 - **Focus:** Each file must remain focused solely on its designated documentation purpose.
@@ -29,4 +33,11 @@ Ensure that these instructions are applied throughout the project to maintain cl
 # Exceptions
 - **Exception 1:** Files that do not match standard extensions (*.py, *.md) may bypass automated linting but must undergo a manual review.
 - **Exception 2:** In emergency scenarios, critical updates can bypass the conventional review process; however, such changes must be documented and reviewed retroactively.
-- **Exception 3:** Any deviation from these rules must be justified in writing and approved by the lead developer or project manager. 
+- **Exception 3:** Any deviation from these rules must be justified in writing and approved by the lead developer or project manager.
+
+{
+  "id": "002",
+  "name": "File Modification Instructions",
+  "description": "When providing code changes, include file paths and proper language identifiers in code blocks, and supply explanatory comments where appropriate.",
+  "self_modifiable": true
+} 

@@ -12,7 +12,7 @@ __pycache__
 
 # Exclude virtual environment directories
 .env
-.venv
+.venv/
 venv
 ENV
 env
@@ -47,4 +47,23 @@ temp/
 
 # Exclude Docker Compose files if not needed in the context
 docker-compose*.yml
-.aider* 
+.aider*
+
+# Add these if they exist in your project
+data/
+datasets/
+models/
+*.zip
+*.tar
+*.gz
+*.mp3
+*.wav
+*.mp4
+*.csv
+*.json
+*.h5
+*.pt
+*.pth
+*.bin
+*.npy
+*.npz 

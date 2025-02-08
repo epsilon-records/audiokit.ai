@@ -2,12 +2,15 @@
 description: 
 globs: 
 ---
-# Configuration Rules
-
-## File Matching
-- Python files: *.py
-- Markdown files: *.md
-
-## Code Analysis
-- JavaScript: Enforce ESLint rules for consistent code style.
-- Python: Use Ruff to verify PEP8 compliance and ensure code quality. 
+{
+  "id": "004",
+  "name": "Code Block Integrity",
+  "description": "Ensure that the code blocks have the appropriate language tags and file path metadata when updating existing files.",
+  "self_modifiable": true,
+  "global_configuration": {
+    "selfModification": {
+      "allowed": true,
+      "instructions": "These structured .mdc rules can be modified by editing the individual rule files in the .cursor/rules/ directory as needed."
+    }
+  }
+}
