@@ -22,17 +22,27 @@ classifiers = [
     "Topic :: Multimedia :: Sound/Audio",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
+dependencies = [
+    "pathspec>=0.11.0",  # For gitignore support
+]
 
 [tool.hatch.build]
+# Don't include any packages in the root
 packages = []
-exclude = [
-    "packages/*",
+
+[tool.hatch.build.targets.wheel]
+# Specify package locations
+packages = [
+    "packages/audiokit/audiokit",
+    "packages/audiokit_ai/audiokit_ai",
 ]
 
 [tool.hatch.workspace]
+# Define workspaces
+allow-direct-references = true
 packages = [
+    "packages/audiokit",
     "packages/audiokit_ai",
-    "packages/audiokit_api",
 ]
 
 # Ruff configuration

@@ -1,0 +1,1297 @@
+{
+  "timestamp": "2025-02-08T02:11:16.455108",
+  "issues": {
+    "missing_headers": [
+      {
+        "file": "/opt/src/audiokit.ai/mkdocs.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.417826"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/netlify.toml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.417975"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.pre-commit-config.yaml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.418011"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/pyproject.toml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.418045"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/README.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.418184"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/WHOAMI.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.418320"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/PROMPT.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.418542"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/AUDIO_NODES.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.418667"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/TODO.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.418786"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/REFLECTIONS.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.418907"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/THOUGHTS.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.419063"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/ROADMAP.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.419180"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/RULES.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.419299"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/MAINTENANCE.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.419420"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/context/API/AUDIO_NODE_API.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.419556"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/GKE.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.419703"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/PACKAGING.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.419906"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/CICD.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.420117"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/SDK.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.420371"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/TERRAFORM.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.420502"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/DEPLOYMENT.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.420616"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/BOOTSTRAP.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.420730"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/FEATURES.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.420881"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/TECHNICAL.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.421033"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/bootstrap/DAW_PROTOCOL.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.421120"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/AUDIOKIT.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.421231"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/VISION.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.421419"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/user-guide/DAW_INTEGRATION.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.421681"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/user-guide/OVERVIEW.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.421794"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/user-guide/AUDIO_PROCESSING.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.422293"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/user-guide/AI_FEATURES.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.422343"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/development/TESTING.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.422393"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/development/CODE_STYLE.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.422438"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/development/CONTRIBUTING.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.422484"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/development/DOCUMENTATION.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.422530"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/getting-started/QUICKSTART.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.422782"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/getting-started/FIRST_STEPS.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.422832"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/getting-started/INSTALLATION.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.422882"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/deployment/GKE.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.423163"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/deployment/OVERVIEW.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.423394"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/deployment/PACKAGING.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.423505"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/deployment/CICD.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.423558"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/deployment/TERRAFORM.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.423673"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/examples/audio_processing/EXAMPLES.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.423879"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/examples/audio_processing/REALTIME_EXAMPLE.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.424066"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/examples/audio_processing/PLUGIN_EXAMPLE.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.424173"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/examples/audio_processing/DAW_EXAMPLE.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.424317"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/api/analysis/ANALYSIS.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.424434"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/api/audio/BUFFER.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.424572"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/api/effects/EFFECTS.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.424697"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/technical/AUDIO_PROCESSING_GUIDE.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.424752"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/technical/ARCHITECTURE.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.424975"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/technical/API.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.425023"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/technical/SDK.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.425229"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/docs/technical/FEATURES.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.425400"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/examples/sonic_pi_example.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.425515"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/generate_docs.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.425747"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/update_copyright.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.425782"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/validate_content_quality.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.425987"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/initialize_templates.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.426189"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/cleanup_expired_bypasses.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.426386"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/create_emergency_bypass.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.426575"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/reorganize_docs.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.426832"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/check_doc_links.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.427013"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/template_manager.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.427234"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/generate_api_docs.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.427441"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/validate_context_files.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.427568"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/generate_context_docs.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.427787"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/fix_context_files.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.427910"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/scripts/install_cleanup_cron.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.428043"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/pyproject.toml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.428072"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/DEVELOPER.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.428291"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/README.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.428508"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/setup.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.428596"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/tests/conftest.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.428697"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/tests/test_sonic_pi_nodes.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.428863"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/tests/test_main.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.428975"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/__init__.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.429220"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/main.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.429340"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/core/config.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.429458"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/core/security.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.429574"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/core/__init__.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.429742"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/core/logger.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.429993"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/source.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.430175"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/base.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.430284"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/sonic_pi_capture.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.430399"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/oscillator.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.430568"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/file.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.430745"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/sonic_pi.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.430889"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/microphone.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.431029"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/models/audio_job.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.431159"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/api/__init__.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.431280"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/api/endpoints.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.431425"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/services/__init__.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.431691"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/services/daw_integration.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.431919"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/services/processing.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.432061"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/helm/deployment.yaml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.432192"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit/pyproject.toml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.432298"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit/tests/test_client.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.432372"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit/audiokit/client.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.432448"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/FUNDING.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.432566"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/labeler.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.432681"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/dependabot.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.432921"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/workflows/lint_python.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.433101"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/workflows/lint_docs.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.433318"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/workflows/validate_context_files.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.433527"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/workflows/docs.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.433751"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/workflows/docs_templates.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.433970"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/workflows/copyright.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.434000"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/workflows/lint_js.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.434207"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/workflows/docs_coordination.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.434389"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/workflows/ci.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.434514"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/ISSUE_TEMPLATE/feature_request.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.434636"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/.github/ISSUE_TEMPLATE/bug_report.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.434756"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/svelte.config.js",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.435016"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/lint-staged.config.js",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.435132"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/__init__.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.435157"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/README.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.435288"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/tailwind.config.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.435477"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/browserstack.yml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.435610"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/playwright.config.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.435711"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/drizzle.config.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.435772"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/vite.config.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.435887"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/postcss.config.js",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.436081"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/.storybook/preview.js",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.436148"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/.storybook/main.js",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.436275"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/api/enrich-data/index.js",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.436349"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/app.d.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.436411"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/app.css",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.436541"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/hooks.client.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.437088"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/hooks.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.437138"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/stories/page.css",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.437384"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/stories/button.css",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.437500"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/stories/header.css",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.437938"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/utils.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.438079"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/types.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.438217"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.438366"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/types/typewriter-effect.d.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.438562"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/types/faq.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.438757"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/types/analytics.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.438812"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/types/dashboard.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.438865"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/types/artist.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.438918"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/types/track.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.438975"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/config/clerk.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.439118"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/stores/audioStore.svelte.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.439278"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/stripe.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.439403"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/enrich.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.439903"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/auth.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.440074"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/enrichers/musicfetch.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.440236"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/enrichers/hubspot.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.440417"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/enrichers/soundcharts.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.440736"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/integrations/base.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.440789"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/integrations/musicfetch.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.440917"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/integrations/hubspot.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441058"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/server/integrations/soundcharts.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441213"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/utils/validation.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441263"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/utils/sanitize.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441369"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/utils/logger.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441506"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/utils/format.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441624"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/utils/cache.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441790"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/utils/services.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441844"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/schemas/artist.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441904"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/schemas/release.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.441954"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/styles/tiptap.css",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.442005"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/og-image.tsx",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.442186"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/tabs/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.442294"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/calendar/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.442416"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/card/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.442534"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/input/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.442768"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/alert/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.443058"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/label/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.443247"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/slider/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.443708"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/popover/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.443773"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/textarea/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.443822"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/button/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.443870"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/select/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.443916"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/ui/badge/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.443961"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/date-range-picker/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.444068"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/components/charts/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.444173"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/db/schema.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.444286"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/db/index.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.444409"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/api/openrouter.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.444435"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/data/faq-data.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.444584"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/lib/data/countries.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.444669"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/+layout.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.444825"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.444873"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/releases/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.445130"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/releases/[slug]/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.445273"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/landing/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.445547"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/upgrade/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.446009"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/contact/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.446134"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/tests/auth.test.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.446186"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/tests/sitemap.test.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.446230"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/tests/public-routes.test.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.446274"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/admin/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.446377"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/docs/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.446481"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.446583"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/+layout.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.446696"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/releases/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447170"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/tools/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447310"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/tracks/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447358"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/reload/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447404"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/reload/+page.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447447"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/profile/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447567"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/team/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447631"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/account/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447738"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/create/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447858"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/dashboard/analytics/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447903"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/support/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447949"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/api/create-checkout-session/+server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.447996"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/api/create-portal-session/+server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448040"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/api/verify-session/+server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448085"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/api/og/+server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448134"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/api/stripe/create-portal-session/+server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448179"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/sitemap.xml/+server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448223"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/artists/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448266"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/artists/[slug]/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448310"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/robots.txt/+server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448371"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/newsletter/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448453"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/pricing/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448503"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/src/routes/demos/+page.server.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448551"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/drizzle/schema.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448690"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/apps/web/drizzle/relations.ts",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.448822"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/reports/copyright/copyright_report_20250208_020653.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.451035"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/pyproject.toml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.453807"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/DEVELOPER.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.453878"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/README.md",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.453957"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/setup.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.453992"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/tests/conftest.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454046"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/tests/test_sonic_pi_nodes.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454107"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/tests/test_main.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454143"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/__init__.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454200"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/main.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454243"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/core/config.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454285"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/core/security.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454330"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/core/__init__.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454390"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/core/logger.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454432"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/source.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454488"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/base.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454535"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/sonic_pi_capture.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454573"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/oscillator.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454623"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/file.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454662"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/sonic_pi.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454732"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/nodes/sources/microphone.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454770"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/models/audio_job.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454796"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/api/__init__.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454841"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/api/endpoints.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454894"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/services/__init__.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454941"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/services/daw_integration.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.454970"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/audiokit_ai/services/processing.py",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.455003"
+      },
+      {
+        "file": "/opt/src/audiokit.ai/packages/audiokit_ai/helm/deployment.yaml",
+        "details": "Missing or invalid copyright header",
+        "timestamp": "2025-02-08T02:11:16.455049"
+      }
+    ],
+    "outdated_years": [],
+    "wrong_license": [],
+    "style_violations": []
+  },
+  "statistics": {
+    "total_files": 251,
+    "files_with_issues": 0,
+    "files_by_package": {
+      "root": 224,
+      "audiokit_ai": 27
+    },
+    "files_by_license": {
+      "proprietary": 224,
+      "mit": 27
+    },
+    "files_by_type": {
+      ".yml": 14,
+      ".toml": 5,
+      ".yaml": 3,
+      ".md": 59,
+      ".py": 64,
+      ".js": 6,
+      ".ts": 94,
+      ".css": 5,
+      ".tsx": 1
+    }
+  },
+  "summary": {
+    "total_issues": 251,
+    "issue_types": {
+      "missing_headers": 251,
+      "outdated_years": 0,
+      "wrong_license": 0,
+      "style_violations": 0
+    }
+  }
+}

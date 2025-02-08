@@ -1,8 +1,25 @@
-- repo: local
-  hooks:
-    - id: copyright-check
-      name: Check copyright headers
-      entry: python scripts/update_copyright.py --check
-      language: python
-      types: [python]
-      pass_filenames: false 
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: v0.1.11
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: local
+    hooks:
+      - id: copyright-check
+        name: Check copyright headers
+        entry: python scripts/update_copyright.py --check
+        language: python
+        types_or: [python, javascript, typescript, yaml, markdown]
+        pass_filenames: false
+        stages: [commit, push, manual] 
