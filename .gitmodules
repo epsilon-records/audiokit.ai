@@ -1,3 +1,0 @@
-[submodule "packages/audiokit"]
-	path = packages/audiokit
-	url = https://github.com/epsilon-records/audiokit.git
