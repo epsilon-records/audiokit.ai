@@ -10,6 +10,10 @@ import os
 import sys
 import re
 from openai import OpenAI
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Documentation validation rules
 DOC_RULES = {
@@ -362,8 +366,10 @@ def generate_contributing(client, package_path):
 
 
 def main():
+    # Check for API key in environment after loading .env
     if not os.getenv("OPENAI_API_KEY"):
         print("Error: OPENAI_API_KEY environment variable not set")
+        print("Please set it in your environment or .env file")
         sys.exit(1)
 
     client = OpenAI()

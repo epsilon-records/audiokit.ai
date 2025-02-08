@@ -14,6 +14,10 @@ import sys
 import re
 import logging
 from datetime import datetime
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(

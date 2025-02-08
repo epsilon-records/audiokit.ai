@@ -24,49 +24,54 @@ logging.basicConfig(
 # Documentation structure
 DOC_STRUCTURE = {
     "getting-started": {
-        "quickstart.md": "Quick start guide for AudioKit",
-        "installation.md": "Installation instructions",
-        "first-steps.md": "First steps with AudioKit",
+        "QUICKSTART.md": "Quick start guide for AudioKit",
+        "INSTALLATION.md": "Installation instructions",
+        "FIRST_STEPS.md": "First steps with AudioKit",
     },
     "user-guide": {
-        "overview.md": "Overview of AudioKit features",
-        "audio-processing.md": "Audio processing capabilities",
-        "ai-features.md": "AI and machine learning features",
-        "daw-integration.md": "DAW integration guide",
+        "OVERVIEW.md": "Overview of AudioKit features",
+        "AUDIO_PROCESSING.md": "Audio processing capabilities",
+        "AI_FEATURES.md": "AI and machine learning features",
+        "DAW_INTEGRATION.md": "DAW integration guide",
     },
     "technical": {
-        "architecture.md": "System architecture documentation",
-        "sdk.md": "SDK documentation",
-        "api.md": "API reference",
-        "features.md": "Detailed feature specifications",
+        "ARCHITECTURE.md": "System architecture documentation",
+        "AUDIO_PROCESSING_GUIDE.md": "Comprehensive audio processing guide",
+        "SDK.md": "SDK documentation",
+        "API.md": "API reference",
+        "FEATURES.md": "Detailed feature specifications",
     },
     "deployment": {
-        "overview.md": "Deployment overview",
-        "gke.md": "Google Kubernetes Engine setup",
-        "terraform.md": "Terraform configuration",
-        "cicd.md": "CI/CD pipeline documentation",
-        "packaging.md": "Package and release process",
+        "OVERVIEW.md": "Deployment overview",
+        "GKE.md": "Google Kubernetes Engine setup",
+        "TERRAFORM.md": "Terraform configuration",
+        "CICD.md": "CI/CD pipeline documentation",
+        "PACKAGING.md": "Package and release process",
     },
     "development": {
-        "contributing.md": "Contributing guidelines",
-        "code-style.md": "Code style guidelines",
-        "testing.md": "Testing procedures",
-        "documentation.md": "Documentation guidelines",
+        "DOCUMENTATION.md": "Documentation guidelines",
+        "CODE_STYLE.md": "Code style guidelines",
+        "TESTING.md": "Testing procedures",
+        "CONTRIBUTING.md": "Contributing guidelines",
     },
 }
 
 # File mappings from old to new structure
 FILE_MAPPINGS = {
-    "SDK.md": "technical/sdk.md",
-    "FEATURES.md": "technical/features.md",
-    "GKE.md": "deployment/gke.md",
-    "TERRAFORM.md": "deployment/terraform.md",
-    "PACKAGING.md": "deployment/packaging.md",
-    "CICD.md": "deployment/cicd.md",
-    "DEPLOYMENT.md": "deployment/overview.md",
-    "DAW_PROTOCOL.md": "user-guide/daw-integration.md",
-    "TECHNICAL.md": "technical/architecture.md",
-    "BOOTSTRAP.md": "getting-started/quickstart.md",
+    "SDK.md": "technical/SDK.md",
+    "FEATURES.md": "technical/FEATURES.md",
+    "GKE.md": "deployment/GKE.md",
+    "TERRAFORM.md": "deployment/TERRAFORM.md",
+    "PACKAGING.md": "deployment/PACKAGING.md",
+    "CICD.md": "deployment/CICD.md",
+    "DEPLOYMENT.md": "deployment/OVERVIEW.md",
+    "DAW_PROTOCOL.md": "user-guide/DAW_INTEGRATION.md",
+    "TECHNICAL.md": "technical/ARCHITECTURE.md",
+    "BOOTSTRAP.md": "getting-started/QUICKSTART.md",
+    "audio-processing-guide.md": "technical/AUDIO_PROCESSING_GUIDE.md",
+    "documentation.md": "development/DOCUMENTATION.md",
+    "code-style.md": "development/CODE_STYLE.md",
+    "testing.md": "development/TESTING.md",
 }
 
 
@@ -132,10 +137,10 @@ Welcome to the AudioKit documentation. This guide will help you get started with
 
 ## Quick Links
 
-- [Quick Start Guide](getting-started/quickstart.md)
-- [User Guide](user-guide/overview.md)
-- [API Reference](technical/api.md)
-- [Contributing](development/contributing.md)
+- [Quick Start Guide](getting-started/QUICKSTART.md)
+- [User Guide](user-guide/OVERVIEW.md)
+- [API Reference](technical/API.md)
+- [Contributing](development/CONTRIBUTING.md)
 
 ## Features
 
@@ -149,7 +154,7 @@ AudioKit provides powerful tools for:
 ## Getting Help
 
 - [GitHub Issues](https://github.com/yourusername/audiokit/issues)
-- [Documentation](development/documentation.md)
+- [Documentation](development/DOCUMENTATION.md)
 - [Community Support](https://discord.gg/audiokit)
 
 ## License

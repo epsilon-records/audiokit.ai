@@ -14,6 +14,10 @@ import sys
 import logging
 import importlib
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(
