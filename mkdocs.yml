@@ -1,6 +1,6 @@
 site_name: AudioKit
 site_description: Audio Processing and AI Tools
-repo_url: https://github.com/yourusername/audiokit
+repo_url: https://github.com/epsilon-records/audiokit
 theme:
   name: material
   features:
