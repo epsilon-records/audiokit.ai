@@ -13,17 +13,20 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     && rm -rf /var/lib/apt/lists/*
 
-# Instead of copying a pre-created requirements.txt, copy pyproject.toml
-# and generate requirements.txt using uv.
-COPY packages/audiokit_ai/pyproject.toml ./pyproject.toml
-RUN pip install --upgrade pip && \
-    pip install uv && \
-    uv pip compile pyproject.toml --output-file requirements.txt && \
-    pip install -r requirements.txt
+# Copy only the dependency descriptor so that pip install layers are cached
+COPY pyproject.toml ./pyproject.toml
 
-# Copy the rest of the application code
-COPY . .
-RUN pip install packages/audiokit_ai  # Install the local package non-editably for production use
+# Upgrade pip, install uv, compile requirements and install them
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir uv && \
+    uv pip compile pyproject.toml --output-file requirements.txt && \
+    pip install --no-cache-dir -r requirements.txt
+
+# Copy the rest of the application code (this layer will be rebuilt only when the code changes)
+COPY .. .
+
+# Install the local package (if code inside packages/audiokit_ai has changed, this layer will update)
+RUN pip install --no-cache-dir .
 
 # -------- Stage 2: Production --------
 FROM python:3.11-slim AS production
@@ -31,11 +34,11 @@ FROM python:3.11-slim AS production
 # Set working directory
 WORKDIR /app
 
-# Add the libgomp1 package to provide libgomp.so.1 for torch/torchaudio
-RUN apt-get update && apt-get install -y libgomp1 && rm -rf /var/lib/apt/lists/*
+# Install runtime dependency for torch/torchaudio
+RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 && \
+    rm -rf /var/lib/apt/lists/*
 
-# Copy the installed dependencies and application files from the builder stage.
-# This step ensures the final image does not include build dependencies.
+# Copy only the necessary files from builder; this does not include the build dependencies
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /app /app
 
