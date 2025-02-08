@@ -19,7 +19,7 @@ env.bak/
 venv.bak/
 
 # Pytest and coverage reports
-.pytest_cache/
+**/__pycache__/**
 .coverage
 htmlcov/
 
