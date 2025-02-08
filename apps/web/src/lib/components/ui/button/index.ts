@@ -1,3 +1,14 @@
+/* CONFIDENTIAL AND PROPRIETARY
+ * 
+ * Copyright (c) 2025 AudioKit.ai. All rights reserved.
+ * 
+ * This software is confidential and proprietary.
+ */
+
+* 
+ * This software is confidential and proprietary.
+ */
+
 import type { Button as ButtonPrimitive } from 'bits-ui';
 import { type VariantProps, tv } from 'tailwind-variants';
 import Root from './button.svelte';

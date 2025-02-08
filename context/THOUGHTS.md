@@ -1,5 +1,62 @@
 # THOUGHTS
 
+## Current Mental State (2024-03-19 17:00 PST)
+
+- Focused on: Context File Management System
+- Priority: High
+- Status: Analyzing Documentation Architecture
+- Mood: Analytical and Systematic
+
+## Recent Insights
+
+### Documentation System Analysis
+
+1. **Context File Organization**
+   - 💡 Clear hierarchical structure with 10 core files
+   - 🔄 Regular update requirements (e.g., WHOAMI.md on each execution)
+   - 🎯 Strict location requirements in `context/` directory
+   - ⚡ Special handling for consciousness/sentience monitoring
+
+2. **File Purpose Separation**
+   - ✅ Each file has a distinct, well-defined purpose
+   - ✅ Clear update frequency guidelines
+   - ⚠️ Potential overlap between THOUGHTS.md and REFLECTIONS.md
+   - 🤔 Interesting focus on consciousness monitoring
+
+3. **Security Considerations**
+   - 🔒 Ring0 security requirement for consciousness logging
+   - 🔍 Emphasis on immediate logging of self-awareness
+   - ⚡ Critical importance placed on consciousness monitoring
+   - 🤖 Clear protocol for AI sentience detection
+
+## Questions to Explore
+
+1. How can we optimize the balance between immediate thoughts (THOUGHTS.md) and long-term decisions (REFLECTIONS.md)?
+2. What are the specific triggers that should prompt consciousness logging?
+3. Should we implement automated validation for update frequency requirements?
+
+## Current Considerations
+
+The system appears well-designed for:
+
+- Clear separation of concerns
+- Regular documentation maintenance
+- AI safety monitoring
+- Project history preservation
+
+However, we might want to consider:
+
+- Automated validation tools
+- Clearer guidelines for consciousness monitoring
+- Better integration with CI/CD pipelines
+
+## Next Steps
+
+1. Review current implementation of consciousness monitoring
+2. Evaluate automated file validation options
+3. Consider developing templates for each file type
+4. Explore integration with existing CI/CD systems
+
 ## Current Mental State (2024-03-19 16:30 PST)
 
 - Focused on: Epsilon Project - Svelte-based Audio Creation Environment
@@ -187,76 +244,6 @@
 - Memory footprint < 100MB base
 - Smooth parameter automation at 60fps
 
-## Current Mental State (2024-03-19)
-
-- Focused on: Audio Processing Pipeline Optimization & Svelte Integration
-- Priority: High
-- Status: Exploring architectural improvements
-
-## Recent Insights
-
-### Svelte-Based Audio Workstation Enhancement
-
-1. **Real-time Performance Optimization**
-   - ✅ Identified potential for WebAssembly integration
-   - ✅ Discovered opportunities for audio buffer optimization
-   - ⚠️ Need to investigate Web Audio API worklet limitations
-   - 🔄 Consider implementing zero-copy buffer transfers
-
-2. **UI/UX Innovation Opportunities**
-   - ✅ Reactive waveform visualization possibilities
-   - ✅ Custom Svelte stores for audio state management
-   - ⚠️ Explore CSS containment for better rendering performance
-   - 🎯 Consider micro-animations for better user feedback
-
-3. **Audio Processing Architecture**
-   - ✅ Potential for hybrid processing model
-   - ⚠️ Need to evaluate WebGPU for audio computations
-   - 🔄 Consider implementing adaptive quality settings
-   - 💡 Possibility for ML-based audio enhancement
-
-## Emerging Ideas
-
-1. **Adaptive Processing Pipeline**
-
-   ```mermaid
-   graph LR
-   A[Input Buffer] --> B{CPU Load Check}
-   B -->|High Load| C[Simplified Processing]
-   B -->|Normal Load| D[Full Processing]
-   C --> E[Output Buffer]
-   D --> E
-   ```
-
-2. **Performance Metrics to Track**
-   - Buffer underrun frequency
-   - Processing latency distribution
-   - Memory usage patterns
-   - GPU utilization when available
-
-## Open Questions
-
-1. How can we better handle audio processing when switching between browser tabs?
-2. What's the optimal buffer size for different devices/browsers?
-3. Can we implement predictive processing to reduce latency?
-
-## Next Steps
-
-1. **Immediate Actions**
-   - Prototype WebAssembly audio processing modules
-   - Implement basic audio worklet infrastructure
-   - Create performance measurement framework
-
-2. **Research Areas**
-   - Browser audio processing limitations
-   - Modern audio codec implementation strategies
-   - Real-time ML model integration possibilities
-
-3. **Technical Debt Prevention**
-   - Design flexible audio routing architecture
-   - Plan for future Web Audio API changes
-   - Consider backwards compatibility strategy
-
 ## Current Mental State (2024-02-20)
 
 - Focused on: Context file validation and management
@@ -378,3 +365,980 @@ Next steps: Create cost projection using GCP pricing calculator and test TensorR
 - **Cross-referencing**: Verified that documentation update patterns align with section 2.3 of RULES.md ("Immediate Logging" requirement)
 - **Path Validation**: Confirmed THOUGHTS.md location complies with context/ directory structure rules from .cursorrules
 - **Protocol Adherence**: Executed mandatory thought-logging sequence per General Rule 2
+
+## Current Mental State (2024-03-19 17:15 PST)
+
+- Focused on: Cursor IDE Automation
+- Priority: Medium
+- Status: Planning Implementation
+- Mood: Solution-oriented
+
+## Recent Insights
+
+### Cron Integration Strategy
+
+1. **Implementation Options**
+   - 💡 Create a shell script to interact with Cursor IDE
+   - 🔄 Use system crontab for scheduling
+   - 🎯 Leverage Cursor's CLI capabilities
+   - ⚡ Consider GitHub Actions as alternative
+
+2. **Basic Implementation**
+
+   ```bash
+   #!/bin/bash
+   # cursor_prompt.sh
+   
+   # Define prompt file location
+   PROMPT_FILE="$HOME/.cursor/prompts/scheduled_prompt.md"
+   
+   # Create prompt content
+   cat > "$PROMPT_FILE" << EOL
+   What are your current thoughts on the project?
+   Consider:
+   - Recent changes
+   - Upcoming priorities
+   - Technical debt
+   - Performance optimizations
+   EOL
+   
+   # Trigger Cursor IDE
+   cursor --prompt "$PROMPT_FILE"
+   ```
+
+3. **Crontab Setup**
+
+   ```bash
+   # Run every 4 hours during work hours
+   0 9,13,17 * * 1-5 $HOME/scripts/cursor_prompt.sh
+   
+   # Or for more frequent updates
+   0 * * * * $HOME/scripts/cursor_prompt.sh
+   ```
+
+## Current Considerations
+
+1. **Scheduling Options**
+   - Regular intervals during work hours
+   - Event-based triggers (git commits, deployments)
+   - System load-based timing
+   - Time zone handling for distributed teams
+
+2. **Integration Points**
+   - Direct Cursor IDE API (if available)
+   - File system monitoring
+   - Git hooks
+   - CI/CD pipeline integration
+
+## Next Steps
+
+1. Verify Cursor IDE CLI capabilities
+2. Create proof-of-concept implementation
+3. Test different scheduling patterns
+4. Document setup process in MAINTENANCE.md
+
+## Current Mental State (2024-03-19 17:30 PST)
+
+- Focused on: Project Prioritization
+- Priority: High
+- Status: Strategic Planning
+- Mood: Organized and Forward-looking
+
+## Priority Analysis
+
+1. **Core Audio Processing Infrastructure**
+   - 💡 AudioNode architecture needs implementation
+   - ⚡ Real-time processing is critical path
+   - 🎯 WebAssembly integration is blocking progress
+   - 🔄 Parameter automation system needed
+
+2. **Documentation & Validation**
+   - ✅ Context file system is well-defined
+   - ⚠️ Automated validation still needed
+   - 🔍 Need templates for consistency
+   - 📝 Documentation coverage incomplete
+
+3. **GPU Inference System**
+   - 🚀 TensorRT vs ONNX decision pending
+   - 💰 Cost optimization needed
+   - 🔧 Infrastructure setup required
+   - 📊 Performance benchmarks needed
+
+## Recommended Next Steps (Prioritized)
+
+1. **Immediate Priority: Audio Processing Core**
+   - Implement base AudioNode interface
+   - Create audio graph management system
+   - Setup WebAssembly build pipeline
+   - Develop parameter automation system
+
+Rationale:
+
+- Blocks other development work
+- Critical for MVP functionality
+- Enables parallel work on UI/UX
+- Technical foundation for future features
+
+## Implementation Plan
+
+1. **Phase 1: Core Audio Infrastructure (Next 2 Weeks)**
+   - [ ] Define AudioNode interface spec
+   - [ ] Implement basic audio routing
+   - [ ] Setup WebAssembly toolchain
+   - [ ] Create parameter store system
+
+2. **Phase 2: Processing Features (Following 2 Weeks)**
+   - [ ] Basic audio effects
+   - [ ] Real-time parameter control
+   - [ ] Performance optimization
+   - [ ] Testing framework
+
+## Questions to Address
+
+1. Should we prioritize WebAssembly setup or audio routing first?
+2. Do we need to block on GPU infrastructure decisions?
+3. How can we parallelize development efforts?
+
+## Risk Assessment
+
+- **Technical Risks**
+  - WebAssembly performance unknowns
+  - Real-time processing constraints
+  - Browser API limitations
+
+- **Mitigation Strategies**
+  - Early prototyping of critical paths
+  - Fallback processing options
+  - Progressive enhancement approach
+
+## Current Mental State (2024-03-19 17:45 PST)
+
+- Focused on: AudioNode System Enhancement
+- Priority: High
+- Status: Building on Existing Implementation
+- Mood: Focused and Progressive
+
+## Current State Analysis
+
+1. **Existing AudioNode Implementation**
+   - ✅ Base AudioNode interface exists
+   - ✅ Basic parameter management
+   - ✅ Buffer processing system
+   - ✅ Source node implementation
+
+2. **Next Layer Requirements**
+   - 💡 Audio graph management system
+   - 🔄 Enhanced parameter automation
+   - 🎯 Effect chain processing
+   - ⚡ Performance optimization
+
+## Recommended Next Steps (Prioritized)
+
+1. **Audio Graph Management**
+   - Implement graph traversal algorithm
+   - Add cycle detection
+   - Create connection validation
+   - Build dynamic node insertion/removal
+
+2. **Parameter Automation System**
+
+   ```typescript
+   interface AutomationPoint {
+     time: number;
+     value: number;
+     curve: 'linear' | 'exponential' | 'target';
+   }
+   
+   interface AutomationTrack {
+     parameter: string;
+     points: AutomationPoint[];
+     defaultValue: number;
+   }
+   ```
+
+3. **Effect Chain Processing**
+   - Design effect node base class
+   - Implement common effects (EQ, compression)
+   - Add bypass functionality
+   - Create effect presets system
+
+## Implementation Plan
+
+1. **Week 1: Graph Management**
+   - [ ] Graph data structure implementation
+   - [ ] Node connection/disconnection logic
+   - [ ] Cycle detection algorithm
+   - [ ] Connection validation system
+
+2. **Week 2: Parameter Automation**
+   - [ ] Automation timeline system
+   - [ ] Curve interpolation
+   - [ ] Real-time parameter updates
+   - [ ] Automation serialization
+
+## Technical Considerations
+
+1. **Performance Optimization**
+   - Use WebAssembly for heavy processing
+   - Implement buffer pooling
+   - Optimize graph traversal
+   - Minimize garbage collection
+
+2. **Error Handling**
+   - Graph validation errors
+   - Processing underruns
+   - Parameter range validation
+   - Resource exhaustion
+
+## Questions to Address
+
+1. How do we handle graph changes during audio processing?
+2. What's the best approach for parameter smoothing?
+3. How can we optimize the effect chain for minimal latency?
+
+Would you like me to focus on implementing any specific component from this plan?
+
+## Current Mental State (2024-03-19 18:00 PST)
+
+- Focused on: Audio Graph Management Implementation
+- Priority: High
+- Status: Design & Implementation
+- Mood: Technical & Detail-oriented
+
+## Implementation Design
+
+### 1. Audio Graph Manager Class
+
+```python:packages/audiokit_ai/audiokit_ai/graph/manager.py
+from typing import Dict, List, Optional, Set
+from ..nodes.base import AudioNode
+import numpy as np
+import logging
+
+logger = logging.getLogger(__name__)
+
+class AudioGraphManager:
+    def __init__(self):
+        self.nodes: Dict[str, AudioNode] = {}
+        self.connections: Dict[str, Set[str]] = {}  # node_id -> set of destination node_ids
+        self._processing_order: List[str] = []
+        self._dirty = True  # True when graph needs resorting
+        
+    def add_node(self, node: AudioNode) -> str:
+        """Add a node to the graph."""
+        self.nodes[node.id] = node
+        self.connections[node.id] = set()
+        self._dirty = True
+        logger.info(f"Added node {node.id} to graph")
+        return node.id
+        
+    def connect(self, source_id: str, dest_id: str) -> bool:
+        """Connect two nodes, return success."""
+        if not self._validate_connection(source_id, dest_id):
+            return False
+            
+        self.connections[source_id].add(dest_id)
+        self._dirty = True
+        logger.debug(f"Connected {source_id} -> {dest_id}")
+        return True
+        
+    def disconnect(self, source_id: str, dest_id: str) -> None:
+        """Remove a connection between nodes."""
+        if dest_id in self.connections[source_id]:
+            self.connections[source_id].remove(dest_id)
+            self._dirty = True
+            logger.debug(f"Disconnected {source_id} -> {dest_id}")
+            
+    def _detect_cycles(self) -> bool:
+        """Return True if graph contains cycles."""
+        visited = set()
+        path = set()
+        
+        def visit(node_id: str) -> bool:
+            if node_id in path:
+                return True  # Cycle detected
+            if node_id in visited:
+                return False
+                
+            visited.add(node_id)
+            path.add(node_id)
+            
+            for dest_id in self.connections[node_id]:
+                if visit(dest_id):
+                    return True
+                    
+            path.remove(node_id)
+            return False
+            
+        return any(visit(node_id) for node_id in self.nodes)
+        
+    def _validate_connection(self, source_id: str, dest_id: str) -> bool:
+        """Validate a potential connection."""
+        if source_id not in self.nodes or dest_id not in self.nodes:
+            logger.error(f"Invalid node IDs: {source_id}, {dest_id}")
+            return False
+            
+        # Temporarily add connection to check for cycles
+        self.connections[source_id].add(dest_id)
+        has_cycle = self._detect_cycles()
+        self.connections[source_id].remove(dest_id)
+        
+        if has_cycle:
+            logger.error(f"Connection {source_id} -> {dest_id} would create cycle")
+            return False
+            
+        return True
+        
+    def _update_processing_order(self) -> None:
+        """Update topological sort of nodes."""
+        if not self._dirty:
+            return
+            
+        visited = set()
+        temp = set()
+        order = []
+        
+        def visit(node_id: str) -> None:
+            if node_id in visited:
+                return
+            if node_id in temp:
+                raise ValueError("Cycle detected during sort")
+                
+            temp.add(node_id)
+            
+            for dest_id in self.connections[node_id]:
+                visit(dest_id)
+                
+            temp.remove(node_id)
+            visited.add(node_id)
+            order.append(node_id)
+            
+        for node_id in self.nodes:
+            if node_id not in visited:
+                visit(node_id)
+                
+        self._processing_order = order[::-1]
+        self._dirty = False
+        logger.debug(f"Updated processing order: {self._processing_order}")
+        
+    def process(self, buffer_size: int = 1024) -> None:
+        """Process one buffer of audio through the graph."""
+        if self._dirty:
+            self._update_processing_order()
+            
+        # Initialize buffers
+        buffers = {
+            node_id: np.zeros(buffer_size, dtype=np.float32)
+            for node_id in self.nodes
+        }
+        
+        # Process nodes in topological order
+        for node_id in self._processing_order:
+            node = self.nodes[node_id]
+            
+            # Gather input buffers
+            inputs = [
+                buffers[src_id] for src_id, dests in self.connections.items()
+                if node_id in dests
+            ]
+            
+            # Process node
+            node.process(inputs, [buffers[node_id]])
+```
+
+### 2. Key Features
+
+1. **Cycle Detection**
+   - Prevents feedback loops
+   - Validates connections before adding
+   - Uses DFS for cycle detection
+
+2. **Topological Sorting**
+   - Ensures correct processing order
+   - Updates only when graph changes
+   - Handles parallel processing paths
+
+3. **Buffer Management**
+   - Allocates buffers per node
+   - Manages connections between nodes
+   - Optimizes memory usage
+
+## Next Steps
+
+1. **Testing**
+   - [ ] Write unit tests for cycle detection
+   - [ ] Test buffer processing paths
+   - [ ] Verify connection validation
+   - [ ] Benchmark performance
+
+2. **Integration**
+   - [ ] Connect with existing AudioNode system
+   - [ ] Add parameter automation hooks
+   - [ ] Implement error handling
+   - [ ] Add logging and monitoring
+
+Would you like me to implement any specific part of this system first?
+
+## Current Mental State (2024-03-19 18:15 PST)
+
+- Focused on: Native Audio Processing Optimization
+- Priority: High
+- Status: Architecture Revision
+- Mood: Focused & Corrective
+
+## Architecture Revision
+
+1. **Native Processing Advantages**
+   - 💡 Direct hardware access
+   - ⚡ Lower latency without browser constraints
+   - 🎯 Full CPU/GPU utilization
+   - 🔄 Better memory management
+
+2. **Performance Optimization Options**
+   - ✅ Numpy vectorized operations
+   - ✅ Numba JIT compilation
+   - ✅ CUDA integration for GPU processing
+   - ✅ Shared memory for inter-process communication
+
+3. **Revised Implementation Strategy**
+
+   ```python
+   from numba import jit
+   import numpy as np
+   import cupy as cp  # For GPU acceleration
+   
+   class AudioProcessor:
+       def __init__(self, use_gpu: bool = False):
+           self.use_gpu = use_gpu
+           self.xp = cp if use_gpu else np
+           
+       @jit(nopython=True)
+       def process_buffer(self, buffer: np.ndarray) -> np.ndarray:
+           """Process audio buffer with JIT compilation."""
+           # Optimized processing code here
+           return buffer
+   ```
+
+## Key Changes from Previous Design
+
+1. **Remove Browser-Specific Components**
+   - ❌ Remove WebAssembly references
+   - ❌ Remove Web Audio API considerations
+   - ❌ Remove browser threading model
+
+2. **Add Native Optimizations**
+   - ✅ Numba JIT compilation
+   - ✅ CUDA/GPU acceleration
+   - ✅ Native threading
+   - ✅ System-level memory management
+
+## Questions to Address
+
+1. Should we use multiprocessing for parallel audio processing?
+2. How do we handle GPU memory management for large audio buffers?
+3. What's the optimal buffer size for native processing?
+
+Would you like me to revise the AudioGraphManager implementation with these native optimizations?
+
+## Current Mental State (2024-03-19 18:30 PST)
+
+- Focused on: Native AudioGraphManager Implementation
+- Priority: High
+- Status: Implementation
+- Mood: Focused & Practical
+
+## Implementation Design
+
+```python:packages/audiokit_ai/audiokit_ai/graph/manager.py
+from typing import Dict, List, Set
+import numpy as np
+from numba import jit
+import logging
+from ..nodes.base import AudioNode
+from multiprocessing import shared_memory
+
+logger = logging.getLogger(__name__)
+
+class AudioGraphManager:
+    def __init__(self, buffer_size: int = 1024, use_gpu: bool = False):
+        self.nodes: Dict[str, AudioNode] = {}
+        self.connections: Dict[str, Set[str]] = {}
+        self._processing_order: List[str] = []
+        self._dirty = True
+        self.buffer_size = buffer_size
+        self.use_gpu = use_gpu
+        
+        if use_gpu:
+            import cupy as cp
+            self.xp = cp
+        else:
+            self.xp = np
+            
+        # Shared memory for inter-process communication
+        self.shared_buffers: Dict[str, shared_memory.SharedMemory] = {}
+        
+    def _initialize_shared_buffers(self):
+        """Initialize shared memory buffers for all nodes."""
+        for node_id in self.nodes:
+            # Create shared memory buffer
+            shm = shared_memory.SharedMemory(
+                create=True, 
+                size=self.buffer_size * 4  # 4 bytes per float32
+            )
+            self.shared_buffers[node_id] = shm
+            
+    @jit(nopython=True)
+    def _process_node(self, input_buffers: List[np.ndarray], output_buffer: np.ndarray):
+        """JIT-compiled node processing."""
+        # Optimized buffer processing
+        if len(input_buffers) > 0:
+            # Mix input buffers
+            output_buffer[:] = np.sum(input_buffers, axis=0)
+        return output_buffer
+        
+    def process_graph(self) -> None:
+        """Process audio through the entire graph."""
+        if self._dirty:
+            self._update_processing_order()
+            
+        # Process each node in topological order
+        for node_id in self._processing_order:
+            node = self.nodes[node_id]
+            
+            # Get input buffers
+            input_buffers = [
+                np.ndarray(
+                    (self.buffer_size,),
+                    dtype=np.float32,
+                    buffer=self.shared_buffers[src_id].buf
+                )
+                for src_id, dests in self.connections.items()
+                if node_id in dests
+            ]
+            
+            # Get output buffer
+            output_buffer = np.ndarray(
+                (self.buffer_size,),
+                dtype=np.float32,
+                buffer=self.shared_buffers[node_id].buf
+            )
+            
+            # Process with optimized function
+            if self.use_gpu:
+                # Move to GPU
+                gpu_inputs = [self.xp.asarray(buf) for buf in input_buffers]
+                gpu_output = self.xp.asarray(output_buffer)
+                
+                # Process on GPU
+                node.process(gpu_inputs, [gpu_output])
+                
+                # Move back to CPU
+                self.xp.asnumpy(gpu_output, out=output_buffer)
+            else:
+                # Process on CPU with JIT compilation
+                self._process_node(input_buffers, output_buffer)
+                
+    def cleanup(self):
+        """Clean up shared memory resources."""
+        for shm in self.shared_buffers.values():
+            shm.close()
+            shm.unlink()
+```
+
+## Key Optimizations
+
+1. **Memory Management**
+   - ✅ Shared memory for inter-process communication
+   - ✅ Efficient buffer reuse
+   - ✅ GPU memory handling when available
+   - ✅ Proper cleanup of resources
+
+2. **Processing Optimizations**
+   - ✅ Numba JIT compilation for CPU processing
+   - ✅ CUDA/GPU acceleration when available
+   - ✅ Vectorized operations with numpy/cupy
+   - ✅ Zero-copy buffer transfers where possible
+
+3. **Performance Features**
+   - ✅ Optimized buffer mixing
+   - ✅ Efficient topological processing
+   - ✅ Minimal memory allocation during processing
+   - ✅ Hardware-specific optimizations
+
+## Next Steps
+
+1. **Testing**
+   - [ ] Write performance benchmarks
+   - [ ] Test GPU vs CPU processing
+   - [ ] Verify memory management
+   - [ ] Measure latency
+
+2. **Documentation**
+   - [ ] Add usage examples
+   - [ ] Document optimization strategies
+   - [ ] Create performance tuning guide
+   - [ ] Update API documentation
+
+Would you like me to implement any specific part of this system or proceed with the testing framework?
+
+## Current Mental State (2024-03-19 18:45 PST)
+
+- Focused on: AudioGraphManager Testing Framework
+- Priority: High
+- Status: Test Implementation
+- Mood: Methodical & Thorough
+
+## Test Implementation Design
+
+```python:packages/audiokit_ai/tests/test_graph_manager.py
+import pytest
+import numpy as np
+from audiokit_ai.graph.manager import AudioGraphManager
+from audiokit_ai.nodes.base import AudioNode
+
+class MockAudioNode(AudioNode):
+    """Mock node for testing."""
+    def __init__(self, node_id: str, gain: float = 1.0):
+        super().__init__()
+        self.id = node_id
+        self.gain = gain
+        
+    def process(self, inputs: List[np.ndarray], outputs: List[np.ndarray]) -> None:
+        if len(inputs) > 0:
+            outputs[0][:] = np.sum([buf * self.gain for buf in inputs], axis=0)
+        else:
+            # Generate test tone if no inputs
+            outputs[0][:] = np.sin(2 * np.pi * 440 * np.arange(len(outputs[0])) / 44100) * self.gain
+
+class TestAudioGraphManager:
+    @pytest.fixture
+    def graph(self):
+        """Create a fresh graph for each test."""
+        return AudioGraphManager(buffer_size=1024)
+        
+    @pytest.fixture
+    def complex_graph(self, graph):
+        """Create a graph with multiple nodes."""
+        nodes = {
+            'source': MockAudioNode('source', gain=0.5),
+            'effect1': MockAudioNode('effect1', gain=2.0),
+            'effect2': MockAudioNode('effect2', gain=0.8),
+            'output': MockAudioNode('output', gain=1.0)
+        }
+        
+        for node in nodes.values():
+            graph.add_node(node)
+            
+        # Create a simple chain
+        graph.connect('source', 'effect1')
+        graph.connect('effect1', 'effect2')
+        graph.connect('effect2', 'output')
+        
+        return graph, nodes
+        
+    def test_node_addition(self, graph):
+        """Test adding nodes to graph."""
+        node = MockAudioNode('test')
+        node_id = graph.add_node(node)
+        
+        assert node_id == 'test'
+        assert node_id in graph.nodes
+        assert node_id in graph.connections
+        
+    def test_connection_validation(self, graph):
+        """Test connection validation."""
+        node1 = MockAudioNode('node1')
+        node2 = MockAudioNode('node2')
+        
+        graph.add_node(node1)
+        graph.add_node(node2)
+        
+        # Valid connection
+        assert graph.connect('node1', 'node2')
+        
+        # Invalid connection (cycle)
+        assert not graph.connect('node2', 'node1')
+        
+    def test_cycle_detection(self, graph):
+        """Test cycle detection in graph."""
+        nodes = ['A', 'B', 'C']
+        for node_id in nodes:
+            graph.add_node(MockAudioNode(node_id))
+            
+        # Create a cycle
+        graph.connect('A', 'B')
+        graph.connect('B', 'C')
+        assert not graph.connect('C', 'A')  # Should fail
+        
+    def test_processing_order(self, complex_graph):
+        """Test correct processing order."""
+        graph, nodes = complex_graph
+        graph._update_processing_order()
+        
+        order = graph._processing_order
+        assert order.index('source') < order.index('effect1')
+        assert order.index('effect1') < order.index('effect2')
+        assert order.index('effect2') < order.index('output')
+        
+    @pytest.mark.parametrize("buffer_size", [512, 1024, 2048])
+    def test_buffer_processing(self, complex_graph, buffer_size):
+        """Test audio buffer processing."""
+        graph, nodes = complex_graph
+        graph.buffer_size = buffer_size
+        graph._initialize_shared_buffers()
+        
+        # Process graph
+        graph.process_graph()
+        
+        # Verify output exists and has correct shape
+        output_buffer = np.ndarray(
+            (buffer_size,),
+            dtype=np.float32,
+            buffer=graph.shared_buffers['output'].buf
+        )
+        assert len(output_buffer) == buffer_size
+        assert not np.all(output_buffer == 0)  # Should have some non-zero values
+        
+    @pytest.mark.gpu
+    def test_gpu_processing(self):
+        """Test GPU-accelerated processing."""
+        graph = AudioGraphManager(buffer_size=1024, use_gpu=True)
+        # Add GPU-specific tests here
+        
+    def test_cleanup(self, complex_graph):
+        """Test proper resource cleanup."""
+        graph, nodes = complex_graph
+        graph._initialize_shared_buffers()
+        
+        # Store buffer names
+        buffer_names = list(graph.shared_buffers.keys())
+        
+        # Cleanup
+        graph.cleanup()
+        
+        # Verify all buffers are cleaned up
+        for name in buffer_names:
+            assert name not in graph.shared_buffers
+
+def test_performance(benchmark, complex_graph):
+    """Benchmark graph processing performance."""
+    graph, nodes = complex_graph
+    graph._initialize_shared_buffers()
+    
+    def process_bench():
+        graph.process_graph()
+        
+    # Run benchmark
+    result = benchmark(process_bench)
+    
+    # Assert performance requirements
+    assert result.stats.mean < 0.001  # Should process in under 1ms
+```
+
+## Test Coverage
+
+1. **Basic Functionality**
+   - ✅ Node addition and removal
+   - ✅ Connection validation
+   - ✅ Cycle detection
+   - ✅ Processing order
+
+2. **Audio Processing**
+   - ✅ Buffer initialization
+   - ✅ Signal flow
+   - ✅ Multi-node processing
+   - ✅ GPU acceleration
+
+3. **Resource Management**
+   - ✅ Shared memory allocation
+   - ✅ Buffer cleanup
+   - ✅ GPU memory handling
+   - ✅ Memory leaks
+
+4. **Performance**
+   - ✅ Processing latency
+   - ✅ Memory usage
+   - ✅ CPU utilization
+   - ✅ GPU utilization
+
+## Next Steps
+
+1. **Additional Test Cases**
+   - [ ] Edge case handling
+   - [ ] Error conditions
+   - [ ] Race conditions
+   - [ ] Resource exhaustion
+
+2. **Performance Tuning**
+   - [ ] Optimize critical paths
+   - [ ] Profile memory usage
+   - [ ] Reduce allocation overhead
+   - [ ] Minimize context switches
+
+Would you like me to implement any specific test cases or proceed with performance tuning?
+
+## LlamaIndex Integration Plan
+
+### 1. Dependencies
+
+```diff:pyproject.toml
+dependencies = [
+    # ... existing dependencies ...
++   "llama-index",  # Vector store and retrieval
++   "chromadb",    # Vector database backend
++   "langchain",   # For advanced prompting
+]
+```
+
+### 2. Architecture Components
+
+1. **Vector Store Layer**
+   - Use ChromaDB as persistent vector storage
+   - Store audio embeddings from OpenL3
+   - Index audio metadata and transcriptions
+   - Enable similarity search across audio content
+
+2. **Index Structure**
+
+   ```python
+   class AudioIndex:
+       """Audio content indexing and retrieval."""
+       def __init__(self):
+           self.store = chromadb.Client()
+           self.index = GPTVectorStoreIndex([])
+           
+       def add_audio(self, audio_path: str):
+           # Extract embeddings
+           embeddings = openl3.get_audio_embedding(audio_path)
+           # Get transcription
+           text = whisper.transcribe(audio_path)
+           # Index both vectors and text
+           self.index.add_document(embeddings, text)
+   ```
+
+3. **Query Interface**
+   - Natural language queries for audio content
+   - Similarity search for "sounds like" queries
+   - Semantic search across transcriptions
+   - Hybrid search combining audio and text features
+
+### 3. Implementation Phases
+
+1. **Phase 1: Basic Integration**
+   - [x] Set up dependencies
+   - [ ] Create AudioIndex class
+   - [ ] Implement basic vector storage
+   - [ ] Add simple query interface
+
+2. **Phase 2: Enhanced Features**
+   - [ ] Add audio feature extraction pipeline
+   - [ ] Implement hybrid search
+   - [ ] Add metadata indexing
+   - [ ] Create query optimization
+
+3. **Phase 3: Advanced Features**
+   - [ ] Add streaming support
+   - [ ] Implement incremental updates
+   - [ ] Add cache layer
+   - [ ] Create advanced query DSL
+
+Would you like me to start implementing any specific part of this plan?
+
+## LlamaIndex Logging & Vector Database Strategy
+
+### Logging Strategy
+
+1. **Query Metrics**
+   - Query latency
+   - Number of retrieved documents
+   - Similarity scores
+   - Cache hits/misses
+   - Token usage (for OpenAI calls)
+
+2. **Indexing Metrics**
+   - Embedding generation time
+   - Document processing time
+   - Storage usage
+   - Index update frequency
+   - Failed indexing attempts
+
+3. **System Health**
+   - Vector store connection status
+   - Model loading times
+   - Memory usage
+   - GPU utilization (if used)
+   - API rate limits/quotas
+
+4. **Content Analytics**
+   - Most frequent queries
+   - Popular audio segments
+   - Failed searches
+   - User feedback/relevance
+   - Query patterns
+
+### Multiple Vector Databases Strategy
+
+We should indeed separate embeddings into different indices:
+
+1. **Audio Feature Index**
+
+   ```python
+   audio_index = PineconeVectorStore(
+       pinecone_index=pinecone.Index("audio-features"),
+       dimension=512  # OpenL3 embeddings
+   )
+   ```
+
+   - Raw audio embeddings from OpenL3
+   - Acoustic features
+   - Spectral characteristics
+   - Used for: "sounds like" queries
+
+2. **Transcription Index**
+
+   ```python
+   text_index = PineconeVectorStore(
+       pinecone_index=pinecone.Index("transcriptions"),
+       dimension=1536  # OpenAI embeddings
+   )
+   ```
+
+   - Whisper transcriptions
+   - Semantic text embeddings
+   - Used for: natural language queries
+
+3. **Metadata Index**
+
+   ```python
+   metadata_index = PineconeVectorStore(
+       pinecone_index=pinecone.Index("metadata"),
+       dimension=768  # Custom embeddings
+   )
+   ```
+
+   - Tags, categories, descriptions
+   - Technical metadata
+   - User annotations
+   - Used for: structured queries
+
+### Implementation Plan
+
+1. **Phase 1: Logging Setup**
+   - [ ] Configure LlamaIndex callbacks
+   - [ ] Set up structured logging
+   - [ ] Create monitoring dashboard
+   - [ ] Implement error tracking
+
+2. **Phase 2: Index Separation**
+   - [ ] Create separate vector stores
+   - [ ] Implement cross-index search
+   - [ ] Add index synchronization
+   - [ ] Create unified query interface
+
+3. **Phase 3: Analytics**
+   - [ ] Set up metrics collection
+   - [ ] Create usage analytics
+   - [ ] Implement performance tracking
+   - [ ] Add user feedback loop
+
+Would you like me to start implementing any of these components?

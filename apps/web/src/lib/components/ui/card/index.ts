@@ -1,3 +1,14 @@
+/* CONFIDENTIAL AND PROPRIETARY
+ * 
+ * Copyright (c) 2025 AudioKit.ai. All rights reserved.
+ * 
+ * This software is confidential and proprietary.
+ */
+
+* 
+ * This software is confidential and proprietary.
+ */
+
 import Content from './card-content.svelte';
 import Description from './card-description.svelte';
 import Footer from './card-footer.svelte';

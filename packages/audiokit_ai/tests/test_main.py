@@ -1,3 +1,14 @@
+# CONFIDENTIAL AND PROPRIETARY
+# 
+# Copyright (c) 2025 AudioKit.ai. All rights reserved.
+# 
+# This software is confidential and proprietary.
+# 
+
+# 
+# This file is part of the AudioKit AI package.
+# 
+
 import pytest
 from fastapi.testclient import TestClient
 from audiokit_ai.main import app, verify_token

@@ -24,6 +24,20 @@ classifiers = [
 ]
 dependencies = [
     "pathspec>=0.11.0",  # For gitignore support
+    "fastapi",
+    "python-osc",  # OSC protocol support (https://pypi.org/project/python-osc/)
+    "torch",
+    "torchaudio",
+    "demucs",  # Audio source separation
+    "deepfilternet",  # Audio enhancement
+    "openai-whisper",  # Speech recognition
+    "faiss-cpu",  # Vector similarity search
+    "pinecone-client",  # Vector database backend
+    "openl3",      # Audio embeddings
+    "python-dotenv",  # Environment configuration
+    "llama-index",  # Vector store and retrieval
+    "google-cloud-speech",  # Google Cloud Speech API
+    "soundfile",  # Audio file I/O
 ]
 
 [tool.hatch.build]
@@ -77,8 +91,11 @@ skip-magic-trailing-comma = false
 line-ending = "auto"
 
 [tool.pytest.ini_options]
+testpaths = [
+    "packages/audiokit_ai/tests",
+    # Add other package test paths here
+]
 addopts = "-v"
-testpaths = ["packages/*/tests"]
 python_files = "test_*.py"
 markers = [
     "integration: marks tests as integration tests",
@@ -92,6 +109,8 @@ dev = [
     "pytest-cov",
     "pytest-mock",
     "mypy",
+    "pytest-watch",
+    "httpx",  # For FastAPI TestClient
 ]
 
 # Documentation

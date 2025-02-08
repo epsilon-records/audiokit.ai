@@ -1,3 +1,14 @@
+/* CONFIDENTIAL AND PROPRIETARY
+ * 
+ * Copyright (c) 2025 AudioKit.ai. All rights reserved.
+ * 
+ * This software is confidential and proprietary.
+ */
+
+* 
+ * This software is confidential and proprietary.
+ */
+
 import Cell from './calendar-cell.svelte';
 import Day from './calendar-day.svelte';
 import GridBody from './calendar-grid-body.svelte';

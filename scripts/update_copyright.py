@@ -41,8 +41,13 @@ PACKAGE_CONFIGS = {
         "extensions": EXTENSIONS,
         "exclude_dirs": {"venv", ".git", "node_modules", "__pycache__"},
     },
-    "audiokit_ai": {
+    "audiokit": {  # Open source package
         "header_type": "mit",
+        "extensions": EXTENSIONS,
+        "exclude_dirs": {"venv", ".git", "node_modules", "__pycache__"},
+    },
+    "audiokit_ai": {  # Private package
+        "header_type": "proprietary",
         "extensions": EXTENSIONS,
         "exclude_dirs": {"venv", ".git", "node_modules", "__pycache__"},
     },
@@ -179,21 +184,21 @@ def find_files(
 
     files = []
     for root, dirs, filenames in os.walk(directory):
-        # Filter out excluded directories
-        dirs[:] = [
-            d
-            for d in dirs
-            if d not in exclude_dirs
-            and not gitignore_spec.match_file(str(Path(root) / d))
-        ]
+        # Skip excluded directories
+        dirs[:] = [d for d in dirs if d not in exclude_dirs]
 
-        root_path = Path(root)
         for filename in filenames:
-            file_path = root_path / filename
-            if Path(filename).suffix in extensions and not gitignore_spec.match_file(
-                str(file_path)
-            ):
+            file_path = Path(root) / filename
+            rel_file_path = file_path.relative_to(directory)
+
+            # Skip files matching gitignore
+            if gitignore_spec.match_file(str(rel_file_path)):
+                continue
+
+            # Process files with configured extensions
+            if file_path.suffix in extensions:
                 files.append(file_path)
+
     return files
 
 
@@ -359,51 +364,59 @@ class CopyrightReport:
 
 
 def main() -> None:
-    """Update copyright headers in all source files."""
+    """Update copyright headers in code files."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--check", action="store_true")
-    parser.add_argument("--report", action="store_true")
     args = parser.parse_args()
 
     root = Path(__file__).parent.parent
     all_valid = True
 
-    # Initialize report if requested
-    report = CopyrightReport(REPORT_CONFIG) if args.report else None
+    # Process all files in packages/ directory
+    packages_dir = root / "packages"
+    if packages_dir.exists():
+        for package_dir in packages_dir.iterdir():
+            if not package_dir.is_dir():
+                continue
 
-    for package_name, config in PACKAGE_CONFIGS.items():
-        if package_name == "root":
-            package_dir = root
-        else:
-            package_dir = root / "packages" / package_name
+            # Get package name from directory name
+            package_name = package_dir.name
 
-        if not package_dir.exists():
-            continue
+            # Use package config if exists, otherwise use root config
+            config = PACKAGE_CONFIGS.get(package_name, PACKAGE_CONFIGS["root"])
 
+            files = find_files(
+                package_dir,
+                config["extensions"],
+                config["exclude_dirs"],
+            )
+
+            for file_path in files:
+                if args.check:
+                    if not update_copyright(file_path, config, check_only=True):
+                        print(f"Invalid copyright in: {file_path}")
+                        all_valid = False
+                else:
+                    update_copyright(file_path, config)
+
+    # Process all files in apps/ directory if it exists
+    apps_dir = root / "apps"
+    if apps_dir.exists():
         files = find_files(
-            package_dir,
-            config["extensions"],
-            config["exclude_dirs"],
+            apps_dir,
+            PACKAGE_CONFIGS["root"]["extensions"],
+            PACKAGE_CONFIGS["root"]["exclude_dirs"],
         )
 
         for file_path in files:
-            if report:
-                report.add_file_stat(file_path, package_name, config["header_type"])
-
             if args.check:
-                result = update_copyright(file_path, config, check_only=True)
-                if not result and report:
-                    report.add_issue(
-                        "missing_headers",
-                        file_path,
-                        "Missing or invalid copyright header",
-                    )
-                all_valid = all_valid and result
+                if not update_copyright(
+                    file_path, PACKAGE_CONFIGS["root"], check_only=True
+                ):
+                    print(f"Invalid copyright in: {file_path}")
+                    all_valid = False
             else:
-                update_copyright(file_path, config)
-
-    if report:
-        report.save_reports()
+                update_copyright(file_path, PACKAGE_CONFIGS["root"])
 
     if args.check and not all_valid:
         exit(1)

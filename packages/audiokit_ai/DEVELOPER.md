@@ -1,3 +1,16 @@
+<!--
+CONFIDENTIAL AND PROPRIETARY
+
+Copyright (c) 2025 AudioKit.ai. All rights reserved.
+
+This software is confidential and proprietary.
+
+-->
+
+This file is part of the AudioKit AI package.
+
+-->
+
 # **AudioKit-AI Developer Guide** 🛠️
 
 Welcome to the **AudioKit-AI** project! This guide will help you set up your development environment, run tests, and contribute to the project.

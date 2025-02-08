@@ -1,3 +1,14 @@
+/* CONFIDENTIAL AND PROPRIETARY
+ * 
+ * Copyright (c) 2025 AudioKit.ai. All rights reserved.
+ * 
+ * This software is confidential and proprietary.
+ */
+
+* 
+ * This software is confidential and proprietary.
+ */
+
 import { expect, test } from '@playwright/test';
 
 test.describe('Authentication Flows', () => {

@@ -1,3 +1,14 @@
+/* CONFIDENTIAL AND PROPRIETARY
+ * 
+ * Copyright (c) 2025 AudioKit.ai. All rights reserved.
+ * 
+ * This software is confidential and proprietary.
+ */
+
+* 
+ * This software is confidential and proprietary.
+ */
+
 // import * as Sentry from '@sentry/sveltekit';
 import { withClerkHandler } from 'svelte-clerk/server';
 // import { sequence } from '@sveltejs/kit/hooks';

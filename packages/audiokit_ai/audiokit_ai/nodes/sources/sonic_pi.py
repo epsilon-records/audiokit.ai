@@ -1,3 +1,14 @@
+# CONFIDENTIAL AND PROPRIETARY
+#
+# Copyright (c) 2025 AudioKit.ai. All rights reserved.
+#
+# This software is confidential and proprietary.
+#
+
+#
+# This file is part of the AudioKit AI package.
+#
+
 """
 Sonic Pi AI Source Node Implementation
 
@@ -5,15 +16,15 @@ Generates and executes Sonic Pi code in real-time using AI.
 Features live coding generation with contextual awareness and pattern learning.
 """
 
-from typing import List, Optional, Dict, Literal
+from typing import List, Optional, Dict
 import time
-import queue
 import threading
 from enum import Enum
 import mido
 import numpy as np
 from loguru import logger
-from python_osc import OscClient, OscServer
+from pythonosc.udp_client import SimpleUDPClient
+from pythonosc.osc_server import ThreadingOSCUDPServer
 import openai
 
 from audiokit_ai.nodes.source import SourceNode
@@ -23,6 +34,7 @@ from audiokit_ai.utils.config import get_settings
 
 class MusicalScale(str, Enum):
     """Available musical scales."""
+
     MAJOR = "major"
     MINOR = "minor"
     DORIAN = "dorian"
@@ -37,6 +49,7 @@ class MusicalScale(str, Enum):
 
 class MusicalStyle(str, Enum):
     """Available electronic music styles."""
+
     MINIMAL_TECHNO = "minimal_techno"
     DEEP_HOUSE = "deep_house"
     DUBS_TECHNO = "dub_techno"
@@ -81,8 +94,8 @@ class SonicPiAINode(SourceNode):
         openai.api_key = settings.openai_api_key
 
         # Sonic Pi OSC client
-        self._osc_client = OscClient("127.0.0.1", port)
-        self._osc_server = OscServer("127.0.0.1", port + 1)
+        self._osc_client = SimpleUDPClient("127.0.0.1", port)
+        self._osc_server = ThreadingOSCUDPServer(("127.0.0.1", port + 1), None)
         self._osc_server.add_handler("/sonic_pi/audio", self._handle_audio)
         logger.debug(f"🔌 Connected to Sonic Pi on port {port}")
 
@@ -99,89 +112,91 @@ class SonicPiAINode(SourceNode):
                 logger.error(f"❌ Failed to open MIDI input: {str(e)}")
 
         # Musical parameters
-        self.parameters.update({
-            "complexity": Parameter(
-                name="complexity",
-                value=0.5,
-                default_value=0.5,
-                min_value=0.0,
-                max_value=1.0,
-                step=0.01,
-                automatable=True,
-            ),
-            "mutation_rate": Parameter(
-                name="mutation_rate",
-                value=0.2,
-                default_value=0.2,
-                min_value=0.0,
-                max_value=1.0,
-                step=0.01,
-                automatable=True,
-            ),
-            "tempo": Parameter(
-                name="tempo",
-                value=120.0,
-                default_value=120.0,
-                min_value=40.0,
-                max_value=200.0,
-                step=0.1,
-                automatable=True,
-            ),
-            "swing": Parameter(
-                name="swing",
-                value=0.0,
-                default_value=0.0,
-                min_value=0.0,
-                max_value=1.0,
-                step=0.01,
-                automatable=True,
-            ),
-            "filter_cutoff": Parameter(
-                name="filter_cutoff",
-                value=100.0,
-                default_value=100.0,
-                min_value=20.0,
-                max_value=20000.0,
-                step=0.1,
-                automatable=True,
-            ),
-            "resonance": Parameter(
-                name="resonance",
-                value=0.3,
-                default_value=0.3,
-                min_value=0.0,
-                max_value=1.0,
-                step=0.01,
-                automatable=True,
-            ),
-            "delay_time": Parameter(
-                name="delay_time",
-                value=0.25,  # Quarter note delay
-                default_value=0.25,
-                min_value=0.0,
-                max_value=1.0,
-                step=0.01,
-                automatable=True,
-            ),
-            "delay_feedback": Parameter(
-                name="delay_feedback",
-                value=0.3,
-                default_value=0.3,
-                min_value=0.0,
-                max_value=0.9,
-                step=0.01,
-                automatable=True,
-            ),
-            "compression": Parameter(
-                name="compression",
-                value=0.5,
-                default_value=0.5,
-                min_value=0.0,
-                max_value=1.0,
-                step=0.01,
-                automatable=True,
-            ),
-        })
+        self.parameters.update(
+            {
+                "complexity": Parameter(
+                    name="complexity",
+                    value=0.5,
+                    default_value=0.5,
+                    min_value=0.0,
+                    max_value=1.0,
+                    step=0.01,
+                    automatable=True,
+                ),
+                "mutation_rate": Parameter(
+                    name="mutation_rate",
+                    value=0.2,
+                    default_value=0.2,
+                    min_value=0.0,
+                    max_value=1.0,
+                    step=0.01,
+                    automatable=True,
+                ),
+                "tempo": Parameter(
+                    name="tempo",
+                    value=120.0,
+                    default_value=120.0,
+                    min_value=40.0,
+                    max_value=200.0,
+                    step=0.1,
+                    automatable=True,
+                ),
+                "swing": Parameter(
+                    name="swing",
+                    value=0.0,
+                    default_value=0.0,
+                    min_value=0.0,
+                    max_value=1.0,
+                    step=0.01,
+                    automatable=True,
+                ),
+                "filter_cutoff": Parameter(
+                    name="filter_cutoff",
+                    value=100.0,
+                    default_value=100.0,
+                    min_value=20.0,
+                    max_value=20000.0,
+                    step=0.1,
+                    automatable=True,
+                ),
+                "resonance": Parameter(
+                    name="resonance",
+                    value=0.3,
+                    default_value=0.3,
+                    min_value=0.0,
+                    max_value=1.0,
+                    step=0.01,
+                    automatable=True,
+                ),
+                "delay_time": Parameter(
+                    name="delay_time",
+                    value=0.25,  # Quarter note delay
+                    default_value=0.25,
+                    min_value=0.0,
+                    max_value=1.0,
+                    step=0.01,
+                    automatable=True,
+                ),
+                "delay_feedback": Parameter(
+                    name="delay_feedback",
+                    value=0.3,
+                    default_value=0.3,
+                    min_value=0.0,
+                    max_value=0.9,
+                    step=0.01,
+                    automatable=True,
+                ),
+                "compression": Parameter(
+                    name="compression",
+                    value=0.5,
+                    default_value=0.5,
+                    min_value=0.0,
+                    max_value=1.0,
+                    step=0.01,
+                    automatable=True,
+                ),
+            }
+        )
 
         # Musical state
         self._key = "C"
@@ -232,10 +247,8 @@ class SonicPiAINode(SourceNode):
         4. Balances rhythm and space
         5. Incorporates dub-style effects
         """
-        
-        logger.debug(
-            f"🧠 Initialized AI with {model} model (temp={temperature:.1f})"
-        )
+
+        logger.debug(f"🧠 Initialized AI with {model} model (temp={temperature:.1f})")
 
     def _handle_audio(self, address: str, *args) -> None:
         """Handle incoming audio from Sonic Pi."""
@@ -264,33 +277,33 @@ class SonicPiAINode(SourceNode):
     def _generate_pattern(self, pattern_type: str) -> Dict:
         """Generate a new musical pattern."""
         complexity = self.get_parameter("complexity")
-        
+
         if pattern_type == "melody":
             # Generate melodic pattern using scale degrees
             pattern = {
                 "notes": self._generate_melody(complexity),
                 "rhythm": self._generate_rhythm(complexity),
-                "octave": 4 + int(complexity * 2)
+                "octave": 4 + int(complexity * 2),
             }
         elif pattern_type == "harmony":
             # Generate chord progression
             pattern = {
                 "chords": self._generate_chords(complexity),
-                "rhythm": self._generate_rhythm(complexity * 0.5)
+                "rhythm": self._generate_rhythm(complexity * 0.5),
             }
         elif pattern_type == "rhythm":
             # Generate drum pattern
             pattern = {
                 "kicks": self._generate_rhythm(complexity),
                 "snares": self._generate_rhythm(complexity),
-                "hats": self._generate_rhythm(complexity * 1.5)
+                "hats": self._generate_rhythm(complexity * 1.5),
             }
         else:  # bass
             pattern = {
                 "notes": self._generate_bass(complexity),
-                "rhythm": self._generate_rhythm(complexity * 0.75)
+                "rhythm": self._generate_rhythm(complexity * 0.75),
             }
-        
+
         return pattern
 
     def _generate_techno_pattern(self, complexity: float) -> Dict:
@@ -319,7 +332,7 @@ class SonicPiAINode(SourceNode):
         """Generate minimal techno rhythm pattern."""
         # Start with empty 16-step pattern
         pattern = [0] * 16
-        
+
         # Add essential beats (more likely on strong beats)
         for i in range(16):
             if i % 4 == 0:  # Strong beats
@@ -331,7 +344,7 @@ class SonicPiAINode(SourceNode):
             else:  # Weak beats
                 if np.random.random() < 0.2 * complexity:
                     pattern[i] = 1
-        
+
         return pattern
 
     def _generate_minimal_bassline(self) -> List[int]:
@@ -339,7 +352,7 @@ class SonicPiAINode(SourceNode):
         # Use pentatonic scale for safety
         scale_degrees = [0, 2, 4, 7, 9]
         pattern_length = 8
-        
+
         # Generate pattern focusing on root and fifth
         pattern = []
         for _ in range(pattern_length):
@@ -350,7 +363,7 @@ class SonicPiAINode(SourceNode):
             else:
                 note = np.random.choice(scale_degrees)  # Random scale degree
             pattern.append(note)
-            
+
         return pattern
 
     def _generate_code(self) -> str:
@@ -359,10 +372,14 @@ class SonicPiAINode(SourceNode):
             # Update patterns with techno-specific elements
             if not self._patterns.get("techno"):
                 self._patterns["techno"] = []
-            
+
             complexity = self.get_parameter("complexity")
-            if not self._patterns["techno"] or np.random.random() < self.get_parameter("mutation_rate"):
-                self._patterns["techno"].append(self._generate_techno_pattern(complexity))
+            if not self._patterns["techno"] or np.random.random() < self.get_parameter(
+                "mutation_rate"
+            ):
+                self._patterns["techno"].append(
+                    self._generate_techno_pattern(complexity)
+                )
 
             # Format prompt with electronic music context
             prompt = self._base_prompt.format(
@@ -378,7 +395,7 @@ class SonicPiAINode(SourceNode):
                 delay_time=self.get_parameter("delay_time"),
                 delay_feedback=self.get_parameter("delay_feedback"),
                 patterns=self._patterns,
-                previous_code=self._current_code
+                previous_code=self._current_code,
             )
 
             # Generate code with enhanced musical context
@@ -415,19 +432,18 @@ class SonicPiAINode(SourceNode):
         """Execute code in Sonic Pi."""
         try:
             # Send code to Sonic Pi via OSC
-            self._osc_client.send_message(
-                "/run-code",
-                [code]
-            )
+            self._osc_client.send_message("/run-code", [code])
             logger.debug("▶️ Executed code in Sonic Pi")
-            
+
             # Update state
             self._current_code = code
-            self._context_history.append({
-                "code": code,
-                "timestamp": time.time(),
-                "complexity": self.get_parameter("complexity")
-            })
+            self._context_history.append(
+                {
+                    "code": code,
+                    "timestamp": time.time(),
+                    "complexity": self.get_parameter("complexity"),
+                }
+            )
 
         except Exception as e:
             logger.error(f"❌ Code execution failed: {str(e)}")
@@ -439,7 +455,7 @@ class SonicPiAINode(SourceNode):
                 # Generate and execute new code periodically
                 new_code = self._generate_code()
                 self._execute_code(new_code)
-                
+
                 # Wait before next generation
                 time.sleep(8.0)  # Default to 8-bar patterns at 120 BPM
 
@@ -453,8 +469,7 @@ class SonicPiAINode(SourceNode):
             logger.info(f"▶️ Starting Sonic Pi AI generation on {self.name}")
             self._running = True
             self._execution_thread = threading.Thread(
-                target=self._execution_loop,
-                daemon=True
+                target=self._execution_loop, daemon=True
             )
             self._execution_thread.start()
             super().start(time)
@@ -482,7 +497,7 @@ class SonicPiAINode(SourceNode):
         # Copy captured audio to outputs
         for i, output in enumerate(outputs):
             if i < 2:  # Stereo output
-                output[:] = self._audio_buffer[i][:len(output)]
+                output[:] = self._audio_buffer[i][: len(output)]
 
         # Update metrics
         end_time = np.datetime64("now")
@@ -517,4 +532,4 @@ class SonicPiAINode(SourceNode):
     def __del__(self):
         """Cleanup resources."""
         self.stop()
-        logger.debug(f"🧹 Cleaned up Sonic Pi AI node: {self.name}") 
+        logger.debug(f"🧹 Cleaned up Sonic Pi AI node: {self.name}")

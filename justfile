@@ -33,10 +33,21 @@ acp: commit sync
     echo "🚀 Changes added, committed, and pushed!"
     echo "436f646520617363656e64656421" | xxd -r -p
 
-# Run tests
+# Run all tests across all packages
 test:
-    #!/usr/bin/env sh
-    hatch run test:pytest --cov=audiokit_ai --cov-report=term
+    pytest
+
+# Run tests with coverage
+test-cov:
+    pytest --cov=packages/audiokit_ai/audiokit_ai --cov-report=term-missing
+
+# Run tests in watch mode for development
+test-watch:
+    pytest-watch
+
+# Run specific test file
+test-file FILE:
+    pytest {{FILE}} -v
 
 # Generate requirements.txt
 requirements:
@@ -46,4 +57,4 @@ requirements:
 # Install dependencies from requirements.txt
 install:
     #!/usr/bin/env sh
-    uv pip install -r requirements.txt
+    uv pip install --editable ".[dev]"

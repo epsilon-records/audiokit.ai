@@ -1,3 +1,16 @@
+<!--
+CONFIDENTIAL AND PROPRIETARY
+
+Copyright (c) 2025 AudioKit.ai. All rights reserved.
+
+This software is confidential and proprietary.
+
+-->
+
+This file is part of the AudioKit AI package.
+
+-->
+
 # **AudioKit-AI** 🎶
 
 **AudioKit-AI** is a powerful backend service for audio processing, transcription, and music generation, built with **FastAPI** and powered by state-of-the-art AI models like **Whisper**, **Demucs**, and **DeepFilterNet**.

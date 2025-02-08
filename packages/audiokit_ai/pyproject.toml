@@ -1,3 +1,14 @@
+# CONFIDENTIAL AND PROPRIETARY
+# 
+# Copyright (c) 2025 AudioKit.ai. All rights reserved.
+# 
+# This software is confidential and proprietary.
+# 
+
+# 
+# This file is part of the AudioKit AI package.
+# 
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
@@ -16,6 +27,7 @@ dependencies = [
     "mido",
     "openai",
     "soundfile",
+    "pytest>=8.3.4",
 ]
 
 [project.optional-dependencies]

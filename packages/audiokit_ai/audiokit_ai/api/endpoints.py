@@ -1,3 +1,14 @@
+# CONFIDENTIAL AND PROPRIETARY
+# 
+# Copyright (c) 2025 AudioKit.ai. All rights reserved.
+# 
+# This software is confidential and proprietary.
+# 
+
+# 
+# This file is part of the AudioKit AI package.
+# 
+
 from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, WebSocket
 try:
     from fastapi_limiter.depends import WebSocketRateLimiter
