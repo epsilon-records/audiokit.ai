@@ -63,20 +63,13 @@ debug
 .temp
 
 # Python cache
-__pycache__
+**/__pycache__/
 *.py[cod]
 *$py.class
 
 # Python virtual environment
 .venv
-
-
-
-
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+**/.venv/
 
 # Distribution / packaging
 *.egg-info/

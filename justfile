@@ -49,12 +49,30 @@ test-watch:
 test-file FILE:
     pytest {{FILE}} -v
 
-# Generate requirements.txt
-requirements:
-    #!/usr/bin/env sh
-    uv pip compile pyproject.toml --output-file requirements.txt
-
 # Install dependencies from requirements.txt
 install:
     #!/usr/bin/env sh
-    uv pip install --editable ".[dev]"
+    # Install core packages in development mode
+    pip install -e packages/audiokit_ai
+    pip install -e packages/audiokit
+    
+    # Generate requirements if needed
+    if [ ! -f "requirements.txt" ]; then
+        just requirements
+    fi
+    
+    # Install any additional requirements
+    if [ -f "requirements.txt" ]; then
+        pip install -r requirements.txt
+    fi
+    
+    # Verify installation
+    echo "Testing audiokit CLI..."
+    ak --help
+
+# Generate requirements.txt
+requirements:
+    #!/usr/bin/env sh
+    echo "# Generated requirements for audiokit.ai" > requirements.txt
+    echo "# Core dependencies" >> requirements.txt
+    pip freeze | grep -v "audiokit" >> requirements.txt
