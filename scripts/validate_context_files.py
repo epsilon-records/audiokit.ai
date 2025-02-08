@@ -124,6 +124,24 @@ def validate_context_files():
             print("\nValidation SUCCESS: All context files are in place and valid.")
 
 
+# Add validation for new required sections
+def validate_section_exists(content, section):
+    """Check if a section exists in the content."""
+    return f"## {section}" in content or f"# {section}" in content
+
+# Add validation for audio node documentation
+VALIDATION_RULES = {
+    "THOUGHTS.md": {
+        "required_sections": [
+            "Current Mental State",
+            "Recent Progress", 
+            "Current Considerations",
+            "AudioNode Architecture"  # New required section
+        ],
+        # ... existing rules
+    }
+}
+
 if __name__ == "__main__":
     try:
     validate_context_files() 

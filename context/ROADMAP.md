@@ -5,11 +5,17 @@
    - Optimize /denoise endpoint for real-time processing
    - Improve /separate endpoint efficiency
    - Implement GPU acceleration for all models
+   - Define and implement core audio node types
+   - Create graph management system
+   - Add node parameter automation
+   - Implement resource pooling for audio buffers
 
 2. **Cloud Infrastructure**
    - Migrate remaining endpoints to Banana.dev
    - Set up auto-scaling for cloud processing
    - Implement cost monitoring and optimization
+   - Add node state persistence
+   - Implement distributed node processing
 
 ## Q2 2025: Advanced Features
 1. **Generative AI Expansion**
