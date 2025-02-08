@@ -31,6 +31,9 @@ FROM python:3.11-slim AS production
 # Set working directory
 WORKDIR /app
 
+# Add the libgomp1 package to provide libgomp.so.1 for torch/torchaudio
+RUN apt-get update && apt-get install -y libgomp1 && rm -rf /var/lib/apt/lists/*
+
 # Copy the installed dependencies and application files from the builder stage.
 # This step ensures the final image does not include build dependencies.
 COPY --from=builder /usr/local /usr/local
