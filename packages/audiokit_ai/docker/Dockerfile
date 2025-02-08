@@ -22,6 +22,9 @@ RUN pip install --upgrade pip && \
     uv pip compile pyproject.toml --output-file requirements.txt && \
     pip install --no-cache-dir -r requirements.txt
 
+# Install Google Cloud Speech explicitly
+RUN pip install --no-cache-dir google-cloud-speech
+
 # Copy the rest of the application code
 COPY . .
 

@@ -42,6 +42,7 @@ dependencies = [
     "pydantic-settings>=2.0.0",
     "fastapi-limiter>=0.1.6",
     "google-cloud-speech",
+    "matchering",
 ]
 
 [project.optional-dependencies]

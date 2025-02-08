@@ -20,11 +20,13 @@ services:
       dockerfile: docker/Dockerfile
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - JWT_SECRET=89a825b27c8da717a6d2970e75e4c98d6de78a0a9bfcdbbe31d51a710ae82540
-      - JWT_ALGORITHM=HS256
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_ALGORITHM=${JWT_ALGORITHM}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}

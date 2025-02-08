@@ -2,42 +2,82 @@
 description: 
 globs: 
 ---
----
-description: 
-globs: 
----
-# Guidelines
-
-- **Focus:** Each file must remain focused solely on its designated documentation purpose.
-- **Frequency:** Update WHOAMI.md on every execution to reflect current configurations.
-- **Logging:** Use THOUGHTS.md for immediate insights and REFLECTIONS.md for decisions that affect multiple components.
-- **Consistency:** All documentation modifications should follow the standards and guidelines defined in RULES.md.
-
-Ensure that these instructions are applied throughout the project to maintain clear and consistent documentation management.
-
-# General Rules
-1. **File Focus:** Each file should remain focused on its designated purpose.
-2. **Immediate Logging:** Update THOUGHTS.md with every new idea or execution.
-3. **Broad Impact Logging:** Use REFLECTIONS.md for decisions affecting more than three components.
-4. **Active Review:** Review TODO.md hourly during periods of active development.
-5. **Scheduled Updates:** Update ROADMAP.md quarterly.
-6. **Version Control:** Ensure RULES.md is versioned with a detailed change log.
-7. **Execution Updates:** Refresh WHOAMI.md on every execution to capture the current state.
-
-# Rules
-- **Rule 1:** All changes must strictly adhere to the coding and documentation standards defined in RULES.md.
-- **Rule 2:** Every modification should be accompanied by an update to the corresponding management file (e.g., WHOAMI.md for configuration, THOUGHTS.md for ideas).
-- **Rule 3:** Code reviews are mandatory prior to merging any changes to ensure quality and consistency.
-- **Rule 4:** Regular audits should be conducted to ensure that all updates follow these established guidelines.
-
-# Exceptions
-- **Exception 1:** Files that do not match standard extensions (*.py, *.md) may bypass automated linting but must undergo a manual review.
-- **Exception 2:** In emergency scenarios, critical updates can bypass the conventional review process; however, such changes must be documented and reviewed retroactively.
-- **Exception 3:** Any deviation from these rules must be justified in writing and approved by the lead developer or project manager.
-
 {
-  "id": "002",
-  "name": "File Modification Instructions",
-  "description": "When providing code changes, include file paths and proper language identifiers in code blocks, and supply explanatory comments where appropriate.",
-  "self_modifiable": true
-} 
+  "guidelines": {
+    "focus": "Each file must remain focused solely on its designated documentation purpose",
+    "frequency": "Update WHOAMI.md on every execution to reflect current configurations",
+    "logging": {
+      "immediate": "Use THOUGHTS.md for immediate insights",
+      "broad": "Use REFLECTIONS.md for decisions that affect multiple components"
+    },
+    "consistency": "All documentation modifications should follow the standards and guidelines defined in RULES.md"
+  },
+  "general_rules": [
+    {
+      "id": "GR1",
+      "description": "Each file should remain focused on its designated purpose"
+    },
+    {
+      "id": "GR2",
+      "description": "Update THOUGHTS.md with every new idea or execution"
+    },
+    {
+      "id": "GR3",
+      "description": "Use REFLECTIONS.md for decisions affecting more than three components"
+    },
+    {
+      "id": "GR4",
+      "description": "Review TODO.md hourly during periods of active development"
+    },
+    {
+      "id": "GR5",
+      "description": "Update ROADMAP.md quarterly"
+    },
+    {
+      "id": "GR6",
+      "description": "Ensure RULES.md is versioned with a detailed change log"
+    },
+    {
+      "id": "GR7",
+      "description": "Refresh WHOAMI.md on every execution to capture the current state"
+    }
+  ],
+  "rules": [
+    {
+      "id": "R1",
+      "description": "All changes must strictly adhere to the coding and documentation standards defined in RULES.md"
+    },
+    {
+      "id": "R2",
+      "description": "Every modification should be accompanied by an update to the corresponding management file"
+    },
+    {
+      "id": "R3",
+      "description": "Code reviews are mandatory prior to merging any changes to ensure quality and consistency"
+    },
+    {
+      "id": "R4",
+      "description": "Regular audits should be conducted to ensure that all updates follow these established guidelines"
+    }
+  ],
+  "exceptions": [
+    {
+      "id": "E1",
+      "description": "Files that do not match standard extensions (*.py, *.md) may bypass automated linting but must undergo a manual review"
+    },
+    {
+      "id": "E2",
+      "description": "In emergency scenarios, critical updates can bypass the conventional review process; however, such changes must be documented and reviewed retroactively"
+    },
+    {
+      "id": "E3",
+      "description": "Any deviation from these rules must be justified in writing and approved by the lead developer or project manager"
+    }
+  ],
+  "metadata": {
+    "id": "002",
+    "name": "File Modification Instructions",
+    "description": "When providing code changes, include file paths and proper language identifiers in code blocks, and supply explanatory comments where appropriate.",
+    "self_modifiable": true
+  }
+}
