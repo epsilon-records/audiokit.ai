@@ -1,0 +1,187 @@
+site_name: AudioKit
+site_description: Audio Processing and AI Tools
+repo_url: https://github.com/yourusername/audiokit
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.expand
+    - search.highlight
+    - content.code.copy
+    - content.tabs.link
+    - header.autohide
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Quick Start: getting-started/quickstart.md
+    - Installation: getting-started/installation.md
+    - First Steps: getting-started/first-steps.md
+    
+  - User Guide:
+    - Overview: user-guide/overview.md
+    - Audio Processing: user-guide/audio-processing.md
+    - AI Features: user-guide/ai-features.md
+    - DAW Integration: user-guide/daw-integration.md
+    
+  - Technical Documentation:
+    - Architecture: technical/architecture.md
+    - Audio Processing Guide: technical/audio-processing-guide.md
+    - SDK Reference: technical/sdk.md
+    - API Reference: technical/api.md
+    - Features: technical/features.md
+    
+  - API Reference:
+    - Overview: api/index.md
+    - Audio:
+      - Buffer: api/audio/buffer.md
+      - Effects: api/effects/index.md
+      - Analysis: api/analysis/index.md
+    - AI:
+      - Models: api/ai/models.md
+      - Training: api/ai/training.md
+    
+  - Examples:
+    - Overview: examples/index.md
+    - Audio Processing: examples/audio_processing/
+    - AI Models: examples/ai_models/
+    - Integration: examples/integration/
+    
+  - Deployment:
+    - Overview: deployment/overview.md
+    - GKE Setup: deployment/gke.md
+    - Terraform: deployment/terraform.md
+    - CI/CD: deployment/cicd.md
+    - Packaging: deployment/packaging.md
+    
+  - Development:
+    - Contributing: development/contributing.md
+    - Code Style: development/code-style.md
+    - Testing: development/testing.md
+    - Documentation: development/documentation.md
+    
+  - System Context:
+    - Overview: context/index.md
+    - System Identity: context/WHOAMI.md
+    - Current State: context/THOUGHTS.md
+    - Architecture: context/REFLECTIONS.md
+    - Planning: 
+      - Tasks: context/TODO.md
+      - Roadmap: context/ROADMAP.md
+    - Process:
+      - Rules: context/RULES.md
+      - Guidelines: context/PROMPT.md
+    - Operations:
+      - Maintenance: context/MAINTENANCE.md
+      - Changelog: context/CHANGELOG.txt
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_source: true
+            show_root_heading: true
+            show_category_heading: true
+            show_bases: true
+            group_by_category: true
+            docstring_style: google
+            docstring_section_style: spacy
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+  - minify:
+      minify_html: true
+      minify_js: true
+      minify_css: true
+  - social:
+      cards_layout: default
+  - tags:
+      tags_file: tags.md
+  - pdf-export:
+      combined: true
+      combined_output_path: pdf/audiokit-documentation.pdf
+  - redirects:
+      redirect_maps:
+        'old/sdk.md': 'technical/sdk.md'
+        'old/api.md': 'technical/api.md'
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - meta
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+  - pymdownx.highlight:
+      use_pygments: true
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/yourusername/audiokit
+    - icon: fontawesome/brands/discord
+      link: https://discord.gg/audiokit
+  version:
+    provider: mike
+  analytics:
+    provider: google
+    property: !ENV GOOGLE_ANALYTICS_KEY
+  alternate:
+    - name: English
+      link: /
+      lang: en
+    - name: 日本語
+      link: /ja/
+      lang: ja
+
+extra_css:
+  - stylesheets/extra.css
+
+extra_javascript:
+  - javascripts/mathjax.js
+  - https://polyfill.io/v3/polyfill.min.js?features=es6
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js 

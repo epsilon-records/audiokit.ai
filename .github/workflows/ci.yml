@@ -12,9 +12,95 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
-      - name: Run Context Files Validation
+        uses: actions/checkout@v4
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+          
+      - name: Run Content Quality Validation
+        id: quality_validation
+        run: python3 scripts/validate_content_quality.py
+        
+      - name: Clean Up Expired Bypasses
+        run: python3 scripts/cleanup_expired_bypasses.py
+        
+      - name: Run Basic Context Files Validation
+        id: basic_validation
         run: python3 scripts/validate_context_files.py
+        
+      - name: Create Pull Request on Failure
+        if: failure() && github.event_name == 'push'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "fix: Update context files to meet validation requirements"
+          title: "fix: Context Files Update Required"
+          body: |
+            This PR was automatically created because context files failed validation.
+            
+            Please review the changes and merge if appropriate.
+            
+            See validation logs for details.
+          branch: fix-context-files
+          base: main
+          
+      - name: Comment on PR
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let logs = {
+              content: 'No logs found',
+              quality: 'No logs found',
+              basic: 'No logs found'
+            };
+            
+            try {
+              logs.content = fs.readFileSync('content_validation.log', 'utf8');
+            } catch (error) {}
+            try {
+              logs.quality = fs.readFileSync('bypass_cleanup.log', 'utf8');
+            } catch (error) {}
+            try {
+              logs.basic = fs.readFileSync('context_validation.log', 'utf8');
+            } catch (error) {}
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Context File Validation Failed
+              
+              The context files in this PR do not meet the validation requirements.
+              Please review the validation logs and make necessary updates.
+              
+              <details>
+              <summary>Content Quality Validation Log</summary>
+              
+              \`\`\`
+              ${logs.content}
+              \`\`\`
+              </details>
+              
+              <details>
+              <summary>Bypass Cleanup Log</summary>
+              
+              \`\`\`
+              ${logs.quality}
+              \`\`\`
+              </details>
+              
+              <details>
+              <summary>Basic Validation Log</summary>
+              
+              \`\`\`
+              ${logs.basic}
+              \`\`\`
+              </details>
+              `
+            });
 
   lint_js:
     name: Lint JavaScript
