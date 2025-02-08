@@ -112,3 +112,9 @@ Thumbs.db
 
 # Docker related files (you can adjust this if necessary)
 docker-compose*.yml 
+.aider*
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class

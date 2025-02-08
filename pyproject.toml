@@ -3,9 +3,9 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "audiokit.ai"
+name = "audiokit-monorepo"
 version = "0.1.0"
-description = "AI-powered audio processing toolkit monorepo"
+description = "Monorepo for AudioKit packages (audiokit and audiokit_ai)"
 requires-python = ">=3.8"
 authors = [
     { name = "Nathaniel Houk", email = "nate@audiokit.ai" }
@@ -21,23 +21,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Multimedia :: Sound/Audio",
     "Topic :: Scientific/Engineering :: Artificial Intelligence",
-]
-dependencies = [
-    "pathspec>=0.11.0",  # For gitignore support
-    "fastapi",
-    "python-osc",  # OSC protocol support (https://pypi.org/project/python-osc/)
-    "torch",
-    "torchaudio",
-    "demucs",  # Audio source separation
-    "deepfilternet",  # Audio enhancement
-    "openai-whisper",  # Speech recognition
-    "faiss-cpu",  # Vector similarity search
-    "pinecone-client",  # Vector database backend
-    "openl3",      # Audio embeddings
-    "python-dotenv",  # Environment configuration
-    "llama-index",  # Vector store and retrieval
-    "google-cloud-speech",  # Google Cloud Speech API
-    "soundfile",  # Audio file I/O
 ]
 
 [tool.hatch.build]
@@ -124,4 +107,7 @@ include_package_readme = true
 repos = [
     { repo = "https://github.com/pre-commit/pre-commit-hooks", rev = "v4.4.0" },
     { repo = "https://github.com/charliermarsh/ruff-pre-commit", rev = "v0.1.11" },
-] 
+]
+
+[project.scripts]
+ak = "audiokit.cli:main" 
