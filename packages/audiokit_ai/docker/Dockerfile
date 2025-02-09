@@ -85,9 +85,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --prefer-binary .[test]
 
-# Remove unnecessary files to shrink image size
-RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
-
 # Copy application files after dependencies
 COPY . .
 
