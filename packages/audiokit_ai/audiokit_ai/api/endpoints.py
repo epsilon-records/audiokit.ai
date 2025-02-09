@@ -9,7 +9,8 @@
 # This file is part of the AudioKit AI package.
 #
 
-from fastapi import APIRouter, File, UploadFile, HTTPException, Depends, WebSocket
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, WebSocket
+
 
 try:
     from fastapi_limiter.depends import WebSocketRateLimiter
@@ -23,10 +24,11 @@ except ImportError:
             return True
 
 
-from audiokit_ai.services import processing
 from audiokit_ai.core.security import verify_token
+from audiokit_ai.services import processing
 
-router = APIRouter(prefix="/api/v1")
+
+router = APIRouter()
 
 
 # Audio processing endpoints (all protected via JWT dependency)
