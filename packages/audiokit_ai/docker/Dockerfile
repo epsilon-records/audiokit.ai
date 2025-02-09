@@ -21,9 +21,6 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     clang-11 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy dependency files first (for layer caching)
-COPY pyproject.toml .
-
 # Install dependencies efficiently with cache
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip
@@ -34,11 +31,23 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     numpy \
     torch>=1.13.0 \
     torchaudio>=0.13.0 \
-    faiss-cpu>=1.7.3 \
-    openai-whisper>=20240930 \
+    faiss-cpu \
+    openai-whisper \
     deepfilternet>=0.5.6 \
     deepfilterlib>=0.5.6 \
-    google-cloud-speech
+    google-cloud-speech \
+    tensorflow>=2.18.0 \
+    pandas==2.2.3 \
+    scikit-learn==1.6.1 \
+    scikit-image==0.25.1 \
+    moviepy==2.1.2 \
+    librosa==0.10.2.post1 \
+    statsmodels==0.14.4 \
+    redis
+
+# Copy dependency files first (for layer caching)
+COPY pyproject.toml .
+
 
 # Install core dependencies
 RUN --mount=type=cache,target=/root/.cache/pip \
