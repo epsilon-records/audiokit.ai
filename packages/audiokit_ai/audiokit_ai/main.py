@@ -26,7 +26,7 @@ from .core.config import settings
 # Keep in main.py to ensure proper initialization order
 os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
 os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 # Then load dotenv
 load_dotenv()

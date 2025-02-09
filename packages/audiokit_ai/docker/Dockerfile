@@ -48,7 +48,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Set environment variables for CUDA
 ENV TF_CPP_MIN_LOG_LEVEL=3
 ENV XLA_FLAGS="--xla_gpu_cuda_data_dir=/usr/local/cuda"
-ENV CUDA_VISIBLE_DEVICES=0
+ENV CUDA_VISIBLE_DEVICES=-1  # Disable GPU
 ENV CUDA_VERSION=12.6
 
 # Copy project configuration before installing core dependencies
