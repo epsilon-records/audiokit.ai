@@ -1,5 +1,8 @@
 # Use a minimal base image
-FROM python:3.10-slim-bullseye AS builder
+FROM python:3.10-slim-bullseye
+
+# Set up non-root user (security best practice)
+RUN useradd --create-home appuser
 
 # Use a dedicated directory for better organization
 WORKDIR /app
@@ -21,25 +24,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 # Copy dependency files first (for layer caching)
 COPY pyproject.toml .
 
-# Upgrade pip and install dependencies efficiently with cache
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --upgrade pip \
-    && pip install --no-cache-dir uv \
-    && uv pip compile pyproject.toml -o requirements.txt
-
-# Final runtime image
-FROM python:3.10-slim-bullseye AS runtime
-
-# Set up non-root user (security best practice)
-RUN useradd --create-home appuser
-
-# Set working directory
-WORKDIR /app
-
-# Copy requirements.txt from builder to runtime
-COPY --from=builder /app/requirements.txt .
-
-# Install dependencies first for better caching
+# Install dependencies efficiently with cache
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip \
     && pip install --no-cache-dir --prefer-binary -r requirements.txt --no-deps
