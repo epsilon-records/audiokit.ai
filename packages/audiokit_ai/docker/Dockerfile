@@ -31,7 +31,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --prefer-binary \
         numpy==1.26.4 \
         torch==2.6.0+cu124 \
-        torchaudio==2.6.0+cu124 \
+        torchaudio==2.6.0+cu126 \
         tensorflow==2.19.0 \
         demucs==4.0.1 \
         deepfilternet==0.5.6 \
@@ -49,7 +49,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 ENV TF_CPP_MIN_LOG_LEVEL=1
 ENV XLA_FLAGS="--xla_gpu_cuda_data_dir=/usr/local/cuda"
 ENV CUDA_VISIBLE_DEVICES=0
-ENV CUDA_VERSION=12.4
+ENV CUDA_VERSION=12.6
 
 # Copy application files before installing core dependencies
 COPY . .
