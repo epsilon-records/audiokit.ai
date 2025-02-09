@@ -45,6 +45,7 @@ dependencies = [
     "matchering",
     "llvmlite>=0.41.0",
     "exceptiongroup>=1.1.0",
+    "treetable>=0.2.5",
 ]
 
 [project.optional-dependencies]
