@@ -23,7 +23,7 @@ import soundfile as sf
 import torchaudio
 import whisper
 from demucs import separate
-from df import enhance, init_df
+from df import init_df
 from fastapi import UploadFile
 from google.cloud import speech_v1p1beta1 as speech
 
@@ -83,9 +83,22 @@ async def save_temp_file(file: UploadFile) -> str:
         raise RuntimeError(f"Failed to save temporary file: {e!s}")
 
 
+def get_tensorflow():
+    import tensorflow as tf
+
+    # Prevent fragmentation and limit GPU memory growth
+    tf.config.set_visible_devices([], "GPU")
+    tf.config.optimizer.set_jit(True)  # Enable XLA
+    return tf
+
+
 async def denoise(file: UploadFile) -> bytes:
     """Reduce noise using DeepFilterNet"""
     try:
+        import tensorflow as tf  # Local import
+        from df import enhance  # Move inside function
+
+        tf.config.set_visible_devices([], "GPU")  # Disable if not needed
         # Load audio
         audio = await file.read()
 

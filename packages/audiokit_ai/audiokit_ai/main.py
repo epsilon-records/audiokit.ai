@@ -9,6 +9,8 @@
 # This file is part of the AudioKit AI package.
 #
 
+import os
+
 import redis.asyncio as redis
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
@@ -20,6 +22,14 @@ from audiokit_ai.core.logger import logger
 
 from .core.config import settings
 
+
+# Keep in main.py to ensure proper initialization order
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+os.environ["XLA_PYTHON_CLIENT_ALLOCATOR"] = "platform"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+# Then load dotenv
+load_dotenv()
 
 # Ensure correct torchaudio imports are used
 
@@ -49,8 +59,6 @@ async def startup():
 
 # Include API endpoints
 app.include_router(api_router, prefix="/api/v1")
-
-load_dotenv()
 
 
 @app.middleware("http")

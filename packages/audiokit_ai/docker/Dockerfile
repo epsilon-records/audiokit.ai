@@ -96,10 +96,9 @@ EXPOSE 8000
 USER appuser
 
 # Add these environment variables to suppress warnings
-ENV TF_CPP_MIN_LOG_LEVEL=2
+ENV TF_CPP_MIN_LOG_LEVEL=3
 ENV XLA_FLAGS="--xla_gpu_cuda_data_dir=/usr/local/cuda"
-ENV TF_FORCE_GPU_ALLOW_GROWTH=true
-ENV TF_GPU_ALLOCATOR=cuda_malloc_async
+ENV CUDA_VISIBLE_DEVICES=0
 
 # Create cache directory and set permissions
 RUN mkdir -p /home/appuser/.cache/DeepFilterNet && \
