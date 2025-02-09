@@ -27,13 +27,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     && pip install --no-cache-dir uv \
     && uv pip compile pyproject.toml -o requirements.txt
 
-# Install dependencies efficiently (cached layer) directly into /app/deps
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --prefer-binary -r requirements.txt --target /app/deps --no-deps
-
-# Copy only the necessary source files (avoid large .git, .pytest_cache, etc.)
-COPY . .
-
 # Final runtime image
 FROM python:3.10-slim-bullseye AS runtime
 
@@ -43,12 +36,12 @@ RUN useradd --create-home appuser
 # Set working directory
 WORKDIR /app
 
-# Copy only necessary components from the builder stage
-COPY --from=builder /app/deps /app/deps
-COPY --from=builder /app /app
+# Copy only necessary source files
+COPY . .
 
-# Set environment variables to use the custom package directory
-ENV PYTHONPATH="/app/deps"
+# Install dependencies in the final image (instead of copying them)
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir --prefer-binary -r requirements.txt --no-deps
 
 # Remove unnecessary files to shrink image size
 RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
