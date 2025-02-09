@@ -30,9 +30,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --prefer-binary \
         numpy==1.26.4 \
-        torch==2.0.1+cu121 \
-        torchaudio==2.0.1 \
-        tensorflow==2.18.0 \
+        torch==2.1.0+cu121 \
+        torchaudio==2.1.0 \
+        tensorflow==2.19.0 \
         demucs==4.0.1 \
         deepfilternet==0.5.6 \
         openai-whisper==20231106 \
@@ -46,7 +46,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         google-cloud-speech==2.20.0
 
 # Set environment variables for CUDA.
-ENV TF_CPP_MIN_LOG_LEVEL=3
+ENV TF_CPP_MIN_LOG_LEVEL=1
 ENV XLA_FLAGS="--xla_gpu_cuda_data_dir=/usr/local/cuda"
 ENV CUDA_VISIBLE_DEVICES=0
 # Update CUDA_VERSION to match torch (cu121 indicates CUDA 12.1)
