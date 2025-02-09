@@ -74,8 +74,8 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --prefer-binary redis
 
-# Copy dependency files first (for layer caching)
-COPY pyproject.toml .
+# Copy application files before installing core dependencies
+COPY . .
 
 # Install core dependencies
 RUN --mount=type=cache,target=/root/.cache/pip \
@@ -84,9 +84,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 # Install test dependencies separately
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --prefer-binary .[test]
-
-# Copy application files after dependencies
-COPY . .
 
 # Change ownership to appuser
 RUN chown -R appuser:appuser /app
