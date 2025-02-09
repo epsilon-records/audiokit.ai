@@ -14,7 +14,6 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     gnupg \
     build-essential \
     cmake \
-    pipx \
     && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
     && echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-11 main" >> /etc/apt/sources.list \
     && apt-get update && apt-get install -y --no-install-recommends \
@@ -74,9 +73,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --prefer-binary redis
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pipx install rust-just
 
 # Copy application files before installing core dependencies
 COPY . .
