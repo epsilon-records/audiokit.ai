@@ -51,4 +51,4 @@ RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
 EXPOSE 8000
 
 # Start the application with optimized worker settings
-CMD ["uvicoShrn", "audiokit_ai.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicorn", "audiokit_ai.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
