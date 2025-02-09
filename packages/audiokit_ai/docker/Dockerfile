@@ -27,7 +27,7 @@ COPY pyproject.toml .
 # Install dependencies efficiently with cache
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip \
-    && pip install --no-cache-dir --prefer-binary -r requirements.txt --no-deps
+    && pip install --no-cache-dir --prefer-binary . --no-deps
 
 # Remove unnecessary files to shrink image size
 RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
