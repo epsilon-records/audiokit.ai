@@ -30,7 +30,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Install large individual packages first
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --prefer-binary \
+    pip install --prefer-binary \
     numpy \
     torch>=1.13.0 \
     torchaudio>=0.13.0 \
@@ -42,11 +42,11 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Install core dependencies
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --prefer-binary .
+    pip install --prefer-binary .
 
 # Install test dependencies separately
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --prefer-binary .[test]
+    pip install --prefer-binary .[test]
 
 # Remove unnecessary files to shrink image size
 RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
