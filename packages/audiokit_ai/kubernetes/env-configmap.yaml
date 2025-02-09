@@ -1,0 +1,13 @@
+apiVersion: v1
+data:
+  GOOGLE_APPLICATION_CREDENTIALS: /app/docker/audiokit-e3d58bb8c6c4.json
+  JWT_ALGORITHM: HS256
+  JWT_SECRET: 46e7421f193c4d804a3a91053709ed0a4c429351d9cb3a0aa0122486a9d6136d
+  OPENAI_API_KEY: your_openai_api_key_here
+  PINECONE_API_KEY: your_pinecone_api_key_here
+  PINECONE_ENVIRONMENT: your_pinecone_environment_here
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: audiokit-ai-env
+  name: env

@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose --file docker-compose.yml convert
+    kompose.version: 1.35.0 (HEAD)
+  labels:
+    io.kompose.service: audiokit-ai
+  name: audiokit-ai
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: audiokit-ai
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose --file docker-compose.yml convert
+        kompose.version: 1.35.0 (HEAD)
+      labels:
+        io.kompose.service: audiokit-ai
+    spec:
+      containers:
+        - env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              valueFrom:
+                configMapKeyRef:
+                  key: GOOGLE_APPLICATION_CREDENTIALS
+                  name: env
+            - name: JWT_ALGORITHM
+              valueFrom:
+                configMapKeyRef:
+                  key: JWT_ALGORITHM
+                  name: env
+            - name: JWT_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  key: JWT_SECRET
+                  name: env
+            - name: OPENAI_API_KEY
+              valueFrom:
+                configMapKeyRef:
+                  key: OPENAI_API_KEY
+                  name: env
+            - name: PINECONE_API_KEY
+              valueFrom:
+                configMapKeyRef:
+                  key: PINECONE_API_KEY
+                  name: env
+            - name: PINECONE_ENVIRONMENT
+              valueFrom:
+                configMapKeyRef:
+                  key: PINECONE_ENVIRONMENT
+                  name: env
+            - name: REDIS_HOST
+              value: redis
+            - name: REDIS_PORT
+              value: "6379"
+          image: audiokit-ai
+          name: audiokit-ai
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /app
+              name: audiokit-ai-cm0
+            - mountPath: /home/appuser/.cache/DeepFilterNet
+              name: deepfilternet-cache
+      restartPolicy: Always
+      volumes:
+        - configMap:
+            name: audiokit-ai-cm0
+          name: audiokit-ai-cm0
+        - name: deepfilternet-cache
+          persistentVolumeClaim:
+            claimName: deepfilternet-cache
