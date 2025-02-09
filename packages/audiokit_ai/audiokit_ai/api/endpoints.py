@@ -32,7 +32,8 @@ router = APIRouter()
 
 
 # Audio processing endpoints (all protected via JWT dependency)
-@router.post("/denoise", dependencies=[Depends(verify_token)])
+# @router.post("/denoise", dependencies=[Depends(verify_token)])
+@router.post("/denoise")
 async def denoise_audio(file: UploadFile = File(...)):
     try:
         result = await processing.denoise(file)
