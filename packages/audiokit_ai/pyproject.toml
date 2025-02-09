@@ -46,6 +46,7 @@ dependencies = [
     "llvmlite>=0.41.0",
     "exceptiongroup>=1.1.0",
     "treetable>=0.2.5",
+    "python-multipart",
 ]
 
 [project.optional-dependencies]
