@@ -36,16 +36,16 @@ RUN useradd --create-home appuser
 # Set working directory
 WORKDIR /app
 
-# Copy only necessary source files
-COPY . .
-
-# Install dependencies in the final image (instead of copying them)
+# Install dependencies first for better caching
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip \
     && pip install --no-cache-dir --prefer-binary -r requirements.txt --no-deps
 
 # Remove unnecessary files to shrink image size
 RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
+
+# Copy application files after dependencies
+COPY . .
 
 # Expose port
 EXPOSE 8000
