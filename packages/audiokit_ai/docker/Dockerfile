@@ -28,6 +28,18 @@ COPY pyproject.toml .
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip
 
+# Install large individual packages first
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --no-cache-dir --prefer-binary \
+    numpy \
+    torch>=1.13.0 \
+    torchaudio>=0.13.0 \
+    faiss-cpu>=1.7.3 \
+    openai-whisper>=20240930 \
+    deepfilternet>=0.5.6 \
+    deepfilterlib>=0.5.6 \
+    google-cloud-speech
+
 # Install core dependencies
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --no-cache-dir --prefer-binary .
