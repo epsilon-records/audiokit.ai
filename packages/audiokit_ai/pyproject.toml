@@ -47,7 +47,7 @@ dependencies = [
     "exceptiongroup>=1.1.0",
     "treetable>=0.2.5",
     "python-multipart",
-    "jose==5.9.6",
+    "jose==v5.9.6",
 ]
 
 [project.optional-dependencies]
