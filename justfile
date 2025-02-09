@@ -51,7 +51,7 @@ sync:
         git fetch origin && \
         git pull --rebase origin "$BRANCH" && \
         git push origin "$BRANCH" || echo "⚠️ No changes to sync in $path"
-    }
+    } 
 
     # Sync submodule
     sync_repo "packages/audiokit"
