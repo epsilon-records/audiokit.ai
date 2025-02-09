@@ -81,6 +81,12 @@ sync:
     # Sync submodule
     sync_repo "packages/audiokit"
     
+    # Commit submodule reference in root
+    echo "📦 Committing submodule reference in root"
+    cd .. && \
+    git add packages/audiokit && \
+    git commit -m "chore(submodule): 🔄 Updated submodule reference" || echo "⚠️ No submodule changes to commit"
+    
     # Sync root
     sync_repo "."
     
