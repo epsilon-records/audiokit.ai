@@ -26,6 +26,7 @@ from demucs import separate
 from df import init_df
 from fastapi import UploadFile
 from google.cloud import speech_v1p1beta1 as speech
+from loguru import logger
 
 from audiokit_ai.core.logger import logger
 
@@ -95,18 +96,20 @@ def get_tensorflow():
 async def denoise(file: UploadFile) -> bytes:
     """Reduce noise using DeepFilterNet"""
     try:
-        # Use the centralized TensorFlow configuration
+        logger.info("Starting denoising process...")
         tf = get_tensorflow()
         from df import enhance
 
-        # Load audio
+        logger.info("Reading audio file...")
         audio = await file.read()
 
-        # Process with DeepFilterNet using the pre-configured TensorFlow instance
+        logger.info("Processing audio with DeepFilterNet...")
         processed = enhance(model, df_state, audio)
 
+        logger.info("Denoising completed successfully.")
         return processed
     except Exception as e:
+        logger.error(f"Error during denoising: {e}")
         raise RuntimeError(f"Noise reduction failed: {e!s}")
 
 
