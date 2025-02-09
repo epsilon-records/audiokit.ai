@@ -120,6 +120,18 @@ test-watch:
 test-file FILE:
     pytest {{FILE}} -v
 
+# Deploy the application using docker compose
+deploy:
+    #!/usr/bin/env sh
+    echo "🚀 Starting deployment process..."
+    echo "⏬ Pulling latest changes from root..."
+    git pull || { echo "❌ Failed to pull changes"; exit 1; }
+    echo "📦 Moving to audiokit_ai package..."
+    cd packages/audiokit_ai && \
+    echo "🐳 Building and starting containers..." && \
+    docker compose -f docker/docker-compose.yml up --build
+    echo "✅ Deployment complete!"
+
 # Install dependencies from requirements.txt
 install:
     #!/usr/bin/env sh
