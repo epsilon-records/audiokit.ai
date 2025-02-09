@@ -20,6 +20,7 @@ import matchering as mg
 import numpy as np
 import openl3
 import soundfile as sf
+import torch
 import torchaudio
 import whisper
 from demucs import separate
@@ -107,12 +108,15 @@ async def denoise(file: UploadFile) -> bytes:
         with io.BytesIO(audio_bytes) as audio_buffer:
             audio, sample_rate = sf.read(audio_buffer)
 
+        # Convert NumPy array to PyTorch tensor
+        audio_tensor = torch.from_numpy(audio).float()
+
         logger.info("Processing audio with DeepFilterNet...")
-        processed = enhance(model, df_state, audio)
+        processed = enhance(model, df_state, audio_tensor)
 
         # Convert the processed audio back to bytes
         with io.BytesIO() as output_buffer:
-            sf.write(output_buffer, processed, sample_rate, format="WAV")
+            sf.write(output_buffer, processed.numpy(), sample_rate, format="WAV")
             output_buffer.seek(0)
             processed_bytes = output_buffer.read()
 
