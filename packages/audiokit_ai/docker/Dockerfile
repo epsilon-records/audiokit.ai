@@ -5,7 +5,7 @@ FROM python:3.10-slim-bullseye AS builder
 WORKDIR /app
 
 # Install required build dependencies (cached layer)
-RUN --mount=type=cache,target=/var/lib/apt \
+RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/apt \
     apt-get update && apt-get install -y --no-install-recommends \
     wget \
     gnupg \
@@ -24,7 +24,11 @@ ENV PATH="/venv/bin:$PATH"
 
 # Copy dependency files first (for layer caching)
 COPY pyproject.toml .
-RUN pip install --no-cache-dir uv \
+
+# Upgrade pip and install dependencies efficiently with cache
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --upgrade pip \
+    && pip install --no-cache-dir uv \
     && uv pip compile pyproject.toml -o requirements.txt
 
 # Install dependencies efficiently (cached layer)
@@ -52,6 +56,9 @@ COPY --from=builder /app /app
 
 # Set environment variables
 ENV PATH="/venv/bin:$PATH"
+
+# Remove unnecessary files to shrink image size
+RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
 
 # Expose port
 EXPOSE 8000
