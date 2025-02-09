@@ -44,6 +44,7 @@ dependencies = [
     "google-cloud-speech",
     "matchering",
     "llvmlite>=0.41.0",
+    "exceptiongroup>=1.1.0",
 ]
 
 [project.optional-dependencies]
