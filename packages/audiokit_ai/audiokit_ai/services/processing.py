@@ -95,14 +95,14 @@ def get_tensorflow():
 async def denoise(file: UploadFile) -> bytes:
     """Reduce noise using DeepFilterNet"""
     try:
-        import tensorflow as tf  # Local import
-        from df import enhance  # Move inside function
+        # Use the centralized TensorFlow configuration
+        tf = get_tensorflow()
+        from df import enhance
 
-        tf.config.set_visible_devices([], "GPU")  # Disable if not needed
         # Load audio
         audio = await file.read()
 
-        # Process with DeepFilterNet
+        # Process with DeepFilterNet using the pre-configured TensorFlow instance
         processed = enhance(model, df_state, audio)
 
         return processed

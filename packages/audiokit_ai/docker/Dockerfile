@@ -26,54 +26,31 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip
 
-# Install each package individually with a cache mount for pip
+# Use a single RUN command to install all dependencies with pinned versions.
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary numpy
+    pip install --prefer-binary \
+        numpy==1.26.4 \
+        torch==2.0.1+cu121 \
+        torchaudio==2.0.1 \
+        tensorflow==2.18.0 \
+        demucs==4.0.1 \
+        deepfilternet==0.5.6 \
+        openai-whisper==20231106 \
+        faiss-cpu==1.8.0 \
+        pandas==2.2.3 \
+        scikit-learn==1.6.1 \
+        scikit-image==0.25.1 \
+        moviepy==2.1.2 \
+        librosa==0.10.2.post1 \
+        statsmodels==0.14.4 \
+        google-cloud-speech==2.20.0
 
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary "torch>=1.13.0"
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary "torchaudio>=0.13.0"
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary faiss-cpu
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary openai-whisper
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary "deepfilternet>=0.5.6"
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary "deepfilterlib>=0.5.6"
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary google-cloud-speech
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary "tensorflow>=2.18.0"
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary pandas==2.2.3
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary scikit-learn==1.6.1
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary scikit-image==0.25.1
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary moviepy==2.1.2
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary librosa==0.10.2.post1
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary statsmodels==0.14.4
-
-RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary redis
+# Set environment variables for CUDA.
+ENV TF_CPP_MIN_LOG_LEVEL=3
+ENV XLA_FLAGS="--xla_gpu_cuda_data_dir=/usr/local/cuda"
+ENV CUDA_VISIBLE_DEVICES=0
+# Update CUDA_VERSION to match torch (cu121 indicates CUDA 12.1)
+ENV CUDA_VERSION=12.1
 
 # Copy application files before installing core dependencies
 COPY . .
@@ -94,11 +71,6 @@ EXPOSE 8000
 
 # Switch to appuser
 USER appuser
-
-# Add these environment variables to suppress warnings
-ENV TF_CPP_MIN_LOG_LEVEL=3
-ENV XLA_FLAGS="--xla_gpu_cuda_data_dir=/usr/local/cuda"
-ENV CUDA_VISIBLE_DEVICES=0
 
 # Create cache directory and set permissions
 RUN mkdir -p /home/appuser/.cache/DeepFilterNet && \
