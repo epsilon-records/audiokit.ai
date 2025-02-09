@@ -7,6 +7,21 @@ version: 2
 updates:
   # Maintain dependencies for npm
   - package-ecosystem: 'npm'
-    directory: '/'
+    directory: '/apps/web'
     schedule:
       interval: 'daily'
+    target-branch: 'beta'
+
+  # Add Python package ecosystem for audiotkit
+  - package-ecosystem: 'pip'
+    directory: '/packages/audiotkit'
+    schedule:
+      interval: 'daily'
+    target-branch: 'beta'
+
+  # Add Python package ecosystem for audiotkit_ai
+  - package-ecosystem: 'pip'
+    directory: '/packages/audiotkit_ai'
+    schedule:
+      interval: 'daily'
+    target-branch: 'beta'
