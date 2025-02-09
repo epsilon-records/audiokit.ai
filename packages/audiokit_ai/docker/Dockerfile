@@ -74,6 +74,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --prefer-binary redis
 
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pipx install rust-just
+
 # Copy application files before installing core dependencies
 COPY . .
 
