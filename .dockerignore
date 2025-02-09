@@ -8,6 +8,8 @@ __pycache__
 *.pyc
 *.pyo
 *.pyd
+*.db
+*.sqlite3
 *$py.class
 
 # Exclude virtual environment directories
@@ -65,4 +67,9 @@ models/
 *.pth
 *.bin
 *.npy
-*.npz 
+*.npz
+
+# Exclude additional files
+*.md
+tests/
+docs/ 

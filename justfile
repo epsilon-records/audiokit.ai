@@ -17,17 +17,31 @@ commit:
     git add . && \
     git commit -m "chore(ai): 🤖⚡️ Automated code alchemy in progress" || echo "⚠️ No changes in root project"
 
+# Add a new command to clean up Git objects
+clean:
+    #!/usr/bin/env sh
+    git prune
+    rm -f .git/gc.log
+    echo "🧹 Git repository cleaned"
+
 # Sync changes in both root and packages/audiokit
 sync:
     #!/usr/bin/env sh
     # Get current branch name
     BRANCH=$(git branch --show-current)
+    
+    # Clean up before sync
+    just clean
+    
     # Sync changes in packages/audiokit
     cd packages/audiokit && \
+    git fetch origin && \
     git pull --rebase origin "$BRANCH" && \
     git push origin "$BRANCH" || echo "⚠️ No changes to sync in packages/audiokit"
+    
     # Return to root and sync changes
     cd ../.. && \
+    git fetch origin && \
     git pull --rebase origin "$BRANCH" && \
     git push origin "$BRANCH"
     echo "🌐 Changes synchronized with the remote repository"
@@ -38,8 +52,8 @@ status:
     git status
     echo "🔍 Repository status checked"
 
-# Add, commit, and push in one command
-acp: commit sync
+# Update acp to include cleanup
+acp: clean commit sync
     #!/usr/bin/env sh
     echo "🚀 Changes added, committed, and pushed!"
     echo "436f646520617363656e64656421" | xxd -r -p
