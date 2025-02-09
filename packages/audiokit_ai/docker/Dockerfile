@@ -18,10 +18,6 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     clang-11 \
     && rm -rf /var/lib/apt/lists/*
 
-# Install a virtual environment to isolate dependencies
-RUN python -m venv /venv
-ENV PATH="/venv/bin:$PATH"
-
 # Copy dependency files first (for layer caching)
 COPY pyproject.toml .
 
@@ -31,15 +27,12 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     && pip install --no-cache-dir uv \
     && uv pip compile pyproject.toml -o requirements.txt
 
-# Install dependencies efficiently (cached layer)
+# Install dependencies efficiently (cached layer) directly into /app/deps
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --prefer-binary -r requirements.txt llvmlite==0.44.0
+    pip install --no-cache-dir --prefer-binary --only-binary=:all: -r requirements.txt --target /app/deps --no-deps
 
 # Copy only the necessary source files (avoid large .git, .pytest_cache, etc.)
 COPY . .
-
-# Install the application inside the virtual environment
-RUN pip install --no-cache-dir -e .
 
 # Final runtime image
 FROM python:3.10-slim-bullseye AS runtime
@@ -51,11 +44,11 @@ RUN useradd --create-home appuser
 WORKDIR /app
 
 # Copy only necessary components from the builder stage
-COPY --from=builder /venv /venv
+COPY --from=builder /app/deps /app/deps
 COPY --from=builder /app /app
 
-# Set environment variables
-ENV PATH="/venv/bin:$PATH"
+# Set environment variables to use the custom package directory
+ENV PYTHONPATH="/app/deps"
 
 # Remove unnecessary files to shrink image size
 RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
