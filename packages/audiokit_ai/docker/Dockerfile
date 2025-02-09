@@ -35,7 +35,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         tensorflow==2.18.0 \
         demucs==4.0.1 \
         deepfilternet==0.5.6 \
-        openai-whisper==20231106 \
+        openai-whisper==v20240930 \
         faiss-cpu==1.8.0 \
         pandas==2.2.3 \
         scikit-learn==1.6.1 \
