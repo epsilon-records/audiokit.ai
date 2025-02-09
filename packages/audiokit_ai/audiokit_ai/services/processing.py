@@ -108,15 +108,27 @@ async def denoise(file: UploadFile) -> bytes:
         with io.BytesIO(audio_bytes) as audio_buffer:
             audio, sample_rate = sf.read(audio_buffer)
 
-        # Convert NumPy array to PyTorch tensor
-        audio_tensor = torch.from_numpy(audio).float()
+        # Split the audio into smaller chunks to reduce memory usage
+        chunk_size = 10 * sample_rate  # 10-second chunks
+        chunks = [audio[i : i + chunk_size] for i in range(0, len(audio), chunk_size)]
 
-        logger.info("Processing audio with DeepFilterNet...")
-        processed = enhance(model, df_state, audio_tensor)
+        processed_chunks = []
+        for chunk in chunks:
+            # Convert NumPy array to PyTorch tensor
+            audio_tensor = torch.from_numpy(chunk).float()
+
+            logger.info("Processing audio chunk with DeepFilterNet...")
+            processed = enhance(model, df_state, audio_tensor)
+
+            # Convert the processed audio back to NumPy array
+            processed_chunks.append(processed.numpy())
+
+        # Combine the processed chunks into a single array
+        processed_audio = np.concatenate(processed_chunks)
 
         # Convert the processed audio back to bytes
         with io.BytesIO() as output_buffer:
-            sf.write(output_buffer, processed.numpy(), sample_rate, format="WAV")
+            sf.write(output_buffer, processed_audio, sample_rate, format="WAV")
             output_buffer.seek(0)
             processed_bytes = output_buffer.read()
 
