@@ -35,9 +35,6 @@ RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
 # Copy application files after dependencies
 COPY . .
 
-# Install the package
-RUN pip install --no-cache-dir --prefer-binary .
-
 # Change ownership to appuser
 RUN chown -R appuser:appuser /app
 
