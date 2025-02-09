@@ -42,15 +42,40 @@ sync:
     # Function to sync a repository
     sync_repo() {
         local path=$1
-        cd "$path" || return
+        echo "🔄 Syncing repository at $path"
+        cd "$path" || { echo "❌ Failed to cd to $path"; return 1; }
+        
+        # Get current branch name
         BRANCH=$(git branch --show-current)
+        echo "🌿 Current branch: $BRANCH"
+        
+        # Check if branch exists on remote
         if ! git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
             echo "🌱 Branch $BRANCH doesn't exist on remote. Creating..."
-            git push --set-upstream origin "$BRANCH"
+            git push --set-upstream origin "$BRANCH" || {
+                echo "❌ Failed to create branch $BRANCH on remote"
+                return 1
+            }
         fi
-        git fetch origin && \
-        git pull --rebase origin "$BRANCH" && \
-        git push origin "$BRANCH" || echo "⚠️ No changes to sync in $path"
+        
+        # Fetch and pull changes
+        echo "⏬ Fetching changes..."
+        git fetch origin || { echo "❌ Failed to fetch from origin"; return 1; }
+        
+        echo "🔄 Pulling changes..."
+        git pull --rebase origin "$BRANCH" || {
+            echo "❌ Failed to pull changes"
+            return 1
+        }
+        
+        # Push changes
+        echo "⏫ Pushing changes..."
+        git push origin "$BRANCH" || {
+            echo "⚠️ Push failed or no changes to push in $path"
+            return 0  # Continue with other repos even if this one fails
+        }
+        
+        echo "✅ Successfully synced $path"
     }
 
     # Sync submodule
