@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 
 # Install dependencies efficiently (cached layer) directly into /app/deps
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --prefer-binary --only-binary=:all: -r requirements.txt --target /app/deps --no-deps
+    pip install --no-cache-dir --prefer-binary -r requirements.txt --target /app/deps --no-deps
 
 # Copy only the necessary source files (avoid large .git, .pytest_cache, etc.)
 COPY . .
