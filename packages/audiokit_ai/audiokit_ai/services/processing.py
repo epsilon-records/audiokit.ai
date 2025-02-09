@@ -17,7 +17,6 @@ import whisper
 import faiss
 import openl3
 from google.cloud import speech_v1p1beta1 as speech
-from google.oauth2 import service_account
 import tempfile
 import os
 from audiokit_ai.core.logger import logger
@@ -26,6 +25,7 @@ import numpy as np
 import soundfile as sf
 import io
 import base64
+import json
 
 # Initialize DeepFilterNet using the recommended API
 model, df_state, _ = init_df()
@@ -41,14 +41,28 @@ openl3_model = openl3.models.load_audio_embedding_model(
 
 # Initialize the SpeechClient
 try:
-    if "GOOGLE_APPLICATION_CREDENTIALS" in os.environ:
-        credentials = service_account.Credentials.from_service_account_file(
-            os.environ["GOOGLE_APPLICATION_CREDENTIALS"]
-        )
-        client = speech.SpeechClient(credentials=credentials)
-    else:
-        client = speech.SpeechClient()  # Fallback to ADC
+    # Get the path to the credentials file from environment
+    credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    if not credentials_path:
+        raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable not set")
+
+    # Verify the file exists
+    if not os.path.exists(credentials_path):
+        raise FileNotFoundError(f"Credentials file not found at: {credentials_path}")
+
+    # Read and parse the credentials file
+    with open(credentials_path, "r") as f:
+        credentials = json.load(f)
+
+    # Initialize the SpeechClient
+    speech_client = speech.SpeechClient.from_service_account_info(credentials)
+    logger.info("Successfully initialized SpeechClient")
+
+except json.JSONDecodeError as e:
+    logger.error(f"Failed to parse credentials JSON: {str(e)}")
+    raise RuntimeError("Invalid credentials file format")
 except Exception as e:
+    logger.error(f"Failed to initialize SpeechClient: {str(e)}")
     raise RuntimeError(f"Failed to initialize SpeechClient: {str(e)}")
 
 

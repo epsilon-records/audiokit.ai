@@ -17,7 +17,7 @@ build-backend = "hatchling.build"
 name = "audiokit_ai"
 version = "0.1.0"
 description = "AI-powered audio processing toolkit"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 dependencies = [
     "numpy",
     "loguru",
@@ -43,6 +43,7 @@ dependencies = [
     "fastapi-limiter>=0.1.6",
     "google-cloud-speech",
     "matchering",
+    "llvmlite>=0.41.0",
 ]
 
 [project.optional-dependencies]

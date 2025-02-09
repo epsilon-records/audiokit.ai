@@ -60,7 +60,6 @@ models/
 *.wav
 *.mp4
 *.csv
-*.json
 *.h5
 *.pt
 *.pth

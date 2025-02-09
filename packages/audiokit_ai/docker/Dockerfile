@@ -1,53 +1,40 @@
-# -------- Stage 1: Builder --------
-FROM python:3.11-slim AS builder
+# Use a more complete base image that includes LLVM repositories
+FROM python:3.10-bullseye
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Set working directory
-WORKDIR /app
-
-# Install system dependencies needed for building
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Add LLVM repository and install dependencies
+RUN apt-get update && apt-get install -y \
+    wget \
+    gnupg \
+    && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
+    && echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-11 main" >> /etc/apt/sources.list \
+    && apt-get update && apt-get install -y \
     build-essential \
-    git \
+    cmake \
+    llvm-11-dev \
+    clang-11 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy only the dependency descriptor so that pip install layers are cached
-COPY pyproject.toml ./pyproject.toml
-
-# Upgrade pip, install uv, compile requirements and install them
-RUN pip install --upgrade pip && \
-    pip install --no-cache-dir uv && \
-    uv pip compile pyproject.toml --output-file requirements.txt && \
-    pip install --no-cache-dir -r requirements.txt
-
-# Install Google Cloud Speech explicitly
-RUN pip install --no-cache-dir google-cloud-speech
-
-# Copy the rest of the application code
-COPY . .
-
-# Install the local package
-RUN pip install --no-cache-dir .
-
-# -------- Stage 2: Production --------
-FROM python:3.11-slim AS production
-
-# Set working directory
 WORKDIR /app
 
-# Install runtime dependency for torch/torchaudio and git
-RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 git && \
-    rm -rf /var/lib/apt/lists/*
+# Install uv temporarily to generate requirements.txt
+RUN pip install uv
 
-# Copy only the necessary files from builder
-COPY --from=builder /usr/local /usr/local
-COPY --from=builder /app /app
+# Copy pyproject.toml and generate requirements.txt
+COPY pyproject.toml .
+RUN uv pip compile pyproject.toml -o requirements.txt && \
+    pip install --use-pep517 llvmlite llvmlite==0.44.0
 
-# Expose the port your FastAPI app will listen on
+# Install dependencies from requirements.txt
+RUN pip install -r requirements.txt
+
+# Install the package in editable mode
+RUN pip install -e .
+
+# Copy the application code
+COPY . .
+
+# Expose the port
 EXPOSE 8000
 
-# Start the server using Gunicorn with Uvicorn workers
-CMD ["gunicorn", "audiokit_ai.main:app", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
+# Run the application
+CMD ["uvicorn", "audiokit_ai.main:app", "--host", "0.0.0.0", "--port", "8000"]

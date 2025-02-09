@@ -220,3 +220,6 @@ local.properties
 *.apk
 *.ap_
 *.aab
+
+# Add this line
+credentials.json

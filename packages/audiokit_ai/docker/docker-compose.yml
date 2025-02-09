@@ -16,7 +16,7 @@ services:
 
   audiokit_ai:
     build:
-      context: ..
+      context: ../
       dockerfile: docker/Dockerfile
     ports:
       - "8000:8000"
@@ -30,12 +30,12 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
     volumes:
       - ../:/app
-      - ./credentials.json:/app/credentials.json
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
       - ak-network
 
