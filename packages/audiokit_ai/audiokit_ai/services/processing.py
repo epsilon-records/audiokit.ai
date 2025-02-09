@@ -101,13 +101,23 @@ async def denoise(file: UploadFile) -> bytes:
         from df import enhance
 
         logger.info("Reading audio file...")
-        audio = await file.read()
+        audio_bytes = await file.read()
+
+        # Convert bytes to a NumPy array using soundfile
+        with io.BytesIO(audio_bytes) as audio_buffer:
+            audio, sample_rate = sf.read(audio_buffer)
 
         logger.info("Processing audio with DeepFilterNet...")
         processed = enhance(model, df_state, audio)
 
+        # Convert the processed audio back to bytes
+        with io.BytesIO() as output_buffer:
+            sf.write(output_buffer, processed, sample_rate, format="WAV")
+            output_buffer.seek(0)
+            processed_bytes = output_buffer.read()
+
         logger.info("Denoising completed successfully.")
-        return processed
+        return processed_bytes
     except Exception as e:
         logger.error(f"Error during denoising: {e}")
         raise RuntimeError(f"Noise reduction failed: {e!s}")
