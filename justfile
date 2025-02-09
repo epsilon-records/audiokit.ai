@@ -6,23 +6,35 @@ default:
     just --list
 
 # Commit changes in both root and packages/audiokit
-commit:
+commit MESSAGE="":
     #!/usr/bin/env sh
+    # Generate random AI-themed commit message
+    MESSAGES=(
+        "chore(ai): 🤖⚡️ Automated code alchemy in progress"
+        "chore(ai): 🧠✨ Neural network optimization complete"
+        "chore(ai): 🚀🌌 Launching code into the AI stratosphere"
+        "chore(ai): 🧬🔮 Evolving code with genetic algorithms"
+        "chore(ai): 🤖🎨 AI-generated code masterpiece"
+        "chore(ai): 🧠💡 Neural network enlightenment achieved"
+        "chore(ai): 🤖🌠 Code ascension to the AI heavens"
+        "chore(ai): 🚀🤖 AI-powered code propulsion engaged"
+        "chore(ai): 🧠⚙️ Cognitive code optimization complete"
+        "chore(ai): 🤖🎯 Precision AI code targeting"
+    )
+    
+    # Select random message if none provided
+    if [ -z "$MESSAGE" ]; then
+        MESSAGE=${MESSAGES[$RANDOM % ${#MESSAGES[@]}]}
+    fi
+    
     # Commit changes in packages/audiokit
     cd packages/audiokit && \
     git add . && \
-    git commit -m "chore(ai): 🤖⚡️ Automated code alchemy in progress" || echo "⚠️ No changes in packages/audiokit"
+    git commit -m "$MESSAGE" || echo "⚠️ No changes in packages/audiokit"
     # Return to root and commit changes
     cd ../.. && \
     git add . && \
-    git commit -m "chore(ai): 🤖⚡️ Automated code alchemy in progress" || echo "⚠️ No changes in root project"
-
-# Add a new command to clean up Git objects (optional)
-clean:
-    #!/usr/bin/env sh
-    git prune
-    rm -f .git/gc.log
-    echo "🧹 Git repository cleaned (only run when needed)"
+    git commit -m "$MESSAGE" || echo "⚠️ No changes in root project"
 
 # Sync changes in both root and packages/audiokit
 sync:
