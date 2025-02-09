@@ -51,8 +51,8 @@ ENV XLA_FLAGS="--xla_gpu_cuda_data_dir=/usr/local/cuda"
 ENV CUDA_VISIBLE_DEVICES=0
 ENV CUDA_VERSION=12.6
 
-# Copy application files before installing core dependencies
-COPY . .
+# Copy project configuration before installing core dependencies
+COPY pyproject.toml .
 
 # Install core dependencies
 RUN --mount=type=cache,target=/root/.cache/pip \
