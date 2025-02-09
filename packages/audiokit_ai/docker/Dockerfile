@@ -30,7 +30,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --prefer-binary \
         numpy==1.26.4 \
-        torch==2.5.1+cu124 \
+        torch==2.6.0+cu124 \
         torchaudio==2.6.0+cu124 \
         tensorflow==2.19.0 \
         demucs==4.0.1 \
