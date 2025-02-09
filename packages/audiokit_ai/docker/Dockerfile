@@ -41,7 +41,8 @@ COPY . .
 
 # Install dependencies in the final image (instead of copying them)
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --no-cache-dir --prefer-binary -r requirements.txt --no-deps
+    pip install --upgrade pip \
+    && pip install --no-cache-dir --prefer-binary -r requirements.txt --no-deps
 
 # Remove unnecessary files to shrink image size
 RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
@@ -50,4 +51,4 @@ RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
 EXPOSE 8000
 
 # Start the application with optimized worker settings
-CMD ["uvicorn", "audiokit_ai.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+CMD ["uvicoShrn", "audiokit_ai.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
