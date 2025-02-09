@@ -31,7 +31,6 @@ services:
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
     volumes:
       - ../:/app
-      - ./credentials.json:/app/audiokit_ai/audiokit_ai/docker/credentials.json
     depends_on:
       redis:
         condition: service_healthy
