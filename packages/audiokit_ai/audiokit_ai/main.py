@@ -9,14 +9,17 @@
 # This file is part of the AudioKit AI package.
 #
 
-from fastapi import FastAPI, Request
-from fastapi.middleware.cors import CORSMiddleware
-from .core.config import settings
-from fastapi_limiter import FastAPILimiter
 import redis.asyncio as redis
 from dotenv import load_dotenv
-from audiokit_ai.core.logger import logger
+from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi_limiter import FastAPILimiter
+
 from audiokit_ai.api.endpoints import router as api_router
+from audiokit_ai.core.logger import logger
+
+from .core.config import settings
+
 
 # Ensure correct torchaudio imports are used
 

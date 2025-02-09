@@ -9,23 +9,26 @@
 # This file is part of the AudioKit AI package.
 #
 
-from fastapi import UploadFile
-import torchaudio
-from df import enhance, init_df
-from demucs import separate
-import whisper
-import faiss
-import openl3
-from google.cloud import speech_v1p1beta1 as speech
-import tempfile
+import base64
+import io
+import json
 import os
-from audiokit_ai.core.logger import logger
+import tempfile
+
+import faiss
 import matchering as mg
 import numpy as np
+import openl3
 import soundfile as sf
-import io
-import base64
-import json
+import torchaudio
+import whisper
+from demucs import separate
+from df import enhance, init_df
+from fastapi import UploadFile
+from google.cloud import speech_v1p1beta1 as speech
+
+from audiokit_ai.core.logger import logger
+
 
 # Initialize DeepFilterNet using the recommended API
 model, df_state, _ = init_df()
@@ -51,7 +54,7 @@ try:
         raise FileNotFoundError(f"Credentials file not found at: {credentials_path}")
 
     # Read and parse the credentials file
-    with open(credentials_path, "r") as f:
+    with open(credentials_path) as f:
         credentials = json.load(f)
 
     # Initialize the SpeechClient
@@ -59,11 +62,11 @@ try:
     logger.info("Successfully initialized SpeechClient")
 
 except json.JSONDecodeError as e:
-    logger.error(f"Failed to parse credentials JSON: {str(e)}")
+    logger.error(f"Failed to parse credentials JSON: {e!s}")
     raise RuntimeError("Invalid credentials file format")
 except Exception as e:
-    logger.error(f"Failed to initialize SpeechClient: {str(e)}")
-    raise RuntimeError(f"Failed to initialize SpeechClient: {str(e)}")
+    logger.error(f"Failed to initialize SpeechClient: {e!s}")
+    raise RuntimeError(f"Failed to initialize SpeechClient: {e!s}")
 
 
 async def save_temp_file(file: UploadFile) -> str:
@@ -76,8 +79,8 @@ async def save_temp_file(file: UploadFile) -> str:
             logger.info(f"Saved temporary file: {temp_file.name}")
             return temp_file.name
     except Exception as e:
-        logger.error(f"Failed to save temporary file: {str(e)}")
-        raise RuntimeError(f"Failed to save temporary file: {str(e)}")
+        logger.error(f"Failed to save temporary file: {e!s}")
+        raise RuntimeError(f"Failed to save temporary file: {e!s}")
 
 
 async def denoise(file: UploadFile) -> bytes:
@@ -91,7 +94,7 @@ async def denoise(file: UploadFile) -> bytes:
 
         return processed
     except Exception as e:
-        raise RuntimeError(f"Noise reduction failed: {str(e)}")
+        raise RuntimeError(f"Noise reduction failed: {e!s}")
 
 
 async def separate_audio(file: UploadFile) -> dict:
@@ -111,7 +114,7 @@ async def separate_audio(file: UploadFile) -> dict:
 
         return result
     except Exception as e:
-        raise RuntimeError(f"Audio separation failed: {str(e)}")
+        raise RuntimeError(f"Audio separation failed: {e!s}")
 
 
 async def auto_master(file: UploadFile, reference_file: UploadFile) -> str:
@@ -156,8 +159,8 @@ async def auto_master(file: UploadFile, reference_file: UploadFile) -> str:
 
         return encoded
     except Exception as e:
-        logger.error(f"Auto mastering failed: {str(e)}")
-        raise RuntimeError(f"Auto mastering failed: {str(e)}")
+        logger.error(f"Auto mastering failed: {e!s}")
+        raise RuntimeError(f"Auto mastering failed: {e!s}")
 
 
 async def transcribe(file: UploadFile) -> str:
@@ -170,7 +173,7 @@ async def transcribe(file: UploadFile) -> str:
         result = whisper_model.transcribe(temp_path)
         return result["text"]
     except Exception as e:
-        raise RuntimeError(f"Transcription failed: {str(e)}")
+        raise RuntimeError(f"Transcription failed: {e!s}")
 
 
 def clone_voice(file: UploadFile):
@@ -186,7 +189,7 @@ def midi_to_audio(file: UploadFile):
 async def generate_music(prompt: str) -> bytes:
     """Generate music from a text prompt (functionality removed: riffusion is no longer maintained)"""
     raise NotImplementedError(
-        "Music generation is not available as riffusion is no longer maintained."
+        "Music generation is not available as riffusion is no longer maintained.",
     )
 
 
@@ -198,7 +201,7 @@ async def search_by_sound(file: UploadFile) -> list:
         distances, indices = index.search(embedding, k=5)
         return indices.tolist()
     except Exception as e:
-        raise RuntimeError(f"Audio search failed: {str(e)}")
+        raise RuntimeError(f"Audio search failed: {e!s}")
 
 
 def identify_song(file: UploadFile):
@@ -220,7 +223,7 @@ async def apply_effects(file: UploadFile, effects: list) -> bytes:
             waveform = torchaudio.functional.apply_effect(waveform, effect)
         return waveform
     except Exception as e:
-        raise RuntimeError(f"Audio effects failed: {str(e)}")
+        raise RuntimeError(f"Audio effects failed: {e!s}")
 
 
 # Add other processing functions here...

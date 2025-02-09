@@ -14,6 +14,7 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
     gnupg \
     build-essential \
     cmake \
+    git \
     && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
     && echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-11 main" >> /etc/apt/sources.list \
     && apt-get update && apt-get install -y --no-install-recommends \
@@ -93,6 +94,16 @@ EXPOSE 8000
 
 # Switch to appuser
 USER appuser
+
+# Add these environment variables to suppress warnings
+ENV TF_CPP_MIN_LOG_LEVEL=2
+ENV XLA_FLAGS="--xla_gpu_cuda_data_dir=/usr/local/cuda"
+ENV TF_FORCE_GPU_ALLOW_GROWTH=true
+ENV TF_GPU_ALLOCATOR=cuda_malloc_async
+
+# Create cache directory and set permissions
+RUN mkdir -p /home/appuser/.cache/DeepFilterNet && \
+    chown -R appuser:appuser /home/appuser/.cache
 
 # Start the application with optimized worker settings
 CMD ["uvicorn", "audiokit_ai.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
