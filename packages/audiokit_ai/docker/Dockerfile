@@ -27,7 +27,7 @@ COPY pyproject.toml .
 # Install dependencies efficiently with cache
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip \
-    && pip install --no-cache-dir --prefer-binary . --no-deps
+    && pip install --no-cache-dir --prefer-binary .[test]
 
 # Remove unnecessary files to shrink image size
 RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
@@ -35,8 +35,14 @@ RUN rm -rf /root/.cache /usr/local/share/.cache /tmp/*
 # Copy application files after dependencies
 COPY . .
 
+# Change ownership to appuser
+RUN chown -R appuser:appuser /app
+
 # Expose port
 EXPOSE 8000
+
+# Switch to appuser
+USER appuser
 
 # Start the application with optimized worker settings
 CMD ["uvicorn", "audiokit_ai.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
