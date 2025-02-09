@@ -25,7 +25,7 @@ When receiving the command "write or save your context", follow these steps:
      7. `RULES.md`
      8. `PROMPT.md`
      9. `MAINTENANCE.md`
-     10. `CHANGELOG.txt`
+     10. `CHANGELOG.txt` (append only, never overwrite)
      11. `MERMAID.mmd`
 
 3. **File Content Guidelines**
@@ -33,6 +33,7 @@ When receiving the command "write or save your context", follow these steps:
    - Fill in placeholders with current context
    - Maintain consistent formatting
    - Include timestamps for all entries
+   - For `CHANGELOG.txt`: Always append new entries, never overwrite existing content
 
 4. **Update Frequency**
    - Update all files on each "write or save your context" command
@@ -44,6 +45,7 @@ When receiving the command "write or save your context", follow these steps:
    - Check for required sections
    - Verify minimum content length
    - Confirm proper formatting
+   - For `CHANGELOG.txt`: Verify entries are appended, not overwritten
 
 6. **Error Handling**
    - If unable to create a file, log the error
@@ -103,11 +105,13 @@ When receiving the command "write or save your context", follow these steps:
    - Automatically generate all context files on command
    - Use current system state to populate templates
    - Maintain version history of changes
+   - For `CHANGELOG.txt`: Always append new entries at the end of the file
 
 2. **Validation**
    - Run validation checks after file creation
    - Ensure all required files exist
    - Verify minimum content requirements
+   - Check `CHANGELOG.txt` for proper append-only behavior
 
 3. **Error Reporting**
    - Log any generation failures
@@ -120,13 +124,16 @@ When receiving the command "write or save your context", follow these steps:
    - Maintain audit trail of context file changes
    - Log all generation events
    - Track validation results
+   - Monitor `CHANGELOG.txt` append operations
 
 2. **Monitoring**
    - Monitor context file health
    - Track update frequency
    - Alert on validation failures
+   - Verify `CHANGELOG.txt` integrity
 
 3. **Reporting**
    - Generate weekly context file reports
    - Track compliance metrics
    - Identify improvement areas
+   - Include `CHANGELOG.txt` append statistics
