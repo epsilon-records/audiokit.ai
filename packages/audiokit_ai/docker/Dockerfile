@@ -27,9 +27,6 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     && pip install --no-cache-dir uv \
     && uv pip compile pyproject.toml -o requirements.txt
 
-# Copy requirements.txt from builder to runtime
-COPY --from=builder /app/requirements.txt .
-
 # Final runtime image
 FROM python:3.10-slim-bullseye AS runtime
 
@@ -38,6 +35,9 @@ RUN useradd --create-home appuser
 
 # Set working directory
 WORKDIR /app
+
+# Copy requirements.txt from builder to runtime
+COPY --from=builder requirements.txt .
 
 # Install dependencies first for better caching
 RUN --mount=type=cache,target=/root/.cache/pip \
