@@ -53,7 +53,6 @@ ignore = [
     "D203",  # no-blank-line-before-class
     "D212",  # multi-line-summary-first-line
     "E501",  # line-too-long (handled by formatter)
-    "H101",  # Include your copyright notice at the start of the file
 ]
 
 # Import sorting
