@@ -37,7 +37,7 @@ RUN useradd --create-home appuser
 WORKDIR /app
 
 # Copy requirements.txt from builder to runtime
-COPY --from=builder requirements.txt .
+COPY --from=builder /app/requirements.txt .
 
 # Install dependencies first for better caching
 RUN --mount=type=cache,target=/root/.cache/pip \
