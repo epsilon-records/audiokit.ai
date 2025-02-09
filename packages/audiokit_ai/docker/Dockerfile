@@ -25,29 +25,57 @@ RUN --mount=type=cache,target=/var/cache/apt --mount=type=cache,target=/var/lib/
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install --upgrade pip
 
-# Install large individual packages first
+# Install each package individually with a cache mount for pip
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary \
-    numpy \
-    torch>=1.13.0 \
-    torchaudio>=0.13.0 \
-    faiss-cpu \
-    openai-whisper \
-    deepfilternet>=0.5.6 \
-    deepfilterlib>=0.5.6 \
-    google-cloud-speech \
-    tensorflow>=2.18.0 \
-    pandas==2.2.3 \
-    scikit-learn==1.6.1 \
-    scikit-image==0.25.1 \
-    moviepy==2.1.2 \
-    librosa==0.10.2.post1 \
-    statsmodels==0.14.4 \
-    redis
+    pip install --prefer-binary numpy
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary "torch>=1.13.0"
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary "torchaudio>=0.13.0"
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary faiss-cpu
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary openai-whisper
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary "deepfilternet>=0.5.6"
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary "deepfilterlib>=0.5.6"
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary google-cloud-speech
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary "tensorflow>=2.18.0"
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary pandas==2.2.3
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary scikit-learn==1.6.1
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary scikit-image==0.25.1
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary moviepy==2.1.2
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary librosa==0.10.2.post1
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary statsmodels==0.14.4
+
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install --prefer-binary redis
 
 # Copy dependency files first (for layer caching)
 COPY pyproject.toml .
-
 
 # Install core dependencies
 RUN --mount=type=cache,target=/root/.cache/pip \
