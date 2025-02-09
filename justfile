@@ -27,20 +27,26 @@ clean:
 # Sync changes in both root and packages/audiokit
 sync:
     #!/usr/bin/env sh
-    # Get current branch name
-    BRANCH=$(git branch --show-current)
+    # Function to sync a repository
+    sync_repo() {
+        local path=$1
+        cd "$path" || return
+        BRANCH=$(git branch --show-current)
+        if ! git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
+            echo "🌱 Branch $BRANCH doesn't exist on remote. Creating..."
+            git push --set-upstream origin "$BRANCH"
+        fi
+        git fetch origin && \
+        git pull --rebase origin "$BRANCH" && \
+        git push origin "$BRANCH" || echo "⚠️ No changes to sync in $path"
+    }
+
+    # Sync submodule
+    sync_repo "packages/audiokit"
     
-    # Sync changes in packages/audiokit
-    cd packages/audiokit && \
-    git fetch origin && \
-    git pull --rebase origin "$BRANCH" && \
-    git push origin "$BRANCH" || echo "⚠️ No changes to sync in packages/audiokit"
+    # Sync root
+    sync_repo "."
     
-    # Return to root and sync changes
-    cd ../.. && \
-    git fetch origin && \
-    git pull --rebase origin "$BRANCH" && \
-    git push origin "$BRANCH"
     echo "🌐 Changes synchronized with the remote repository"
 
 # Check status of the repository
