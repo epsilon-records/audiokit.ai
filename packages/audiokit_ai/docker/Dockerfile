@@ -23,6 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-numpy \
     python3-scipy \
     python3-statsmodels \
+    libnccl2=2.18.3-1+cuda12.2 \
+    libnccl-dev=2.18.3-1+cuda12.2 \
     && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo "$TZ" > /etc/timezone \
     && dpkg-reconfigure --frontend noninteractive tzdata \
@@ -33,6 +35,11 @@ ENV LD_LIBRARY_PATH=/usr/local/cuda-12.2/lib64:$LD_LIBRARY_PATH
 ENV XLA_FLAGS="--xla_gpu_cuda_data_dir=/usr/local/cuda-12.2"
 ENV TF_FORCE_GPU_ALLOW_GROWTH=true
 ENV CUDA_VISIBLE_DEVICES=0
+
+# Configure NCCL paths
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+ENV NCCL_DEBUG=INFO
+ENV NCCL_VERSION=2.18.3
 
 # Set up non-root user (security best practice)
 RUN useradd --create-home appuser
