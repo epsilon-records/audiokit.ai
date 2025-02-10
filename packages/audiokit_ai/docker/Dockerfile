@@ -1,8 +1,12 @@
 # Use NVIDIA base image
 FROM nvidia/cuda:12.2.0-base-ubuntu22.04
 
+# Set non-interactive mode to avoid timezone prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install system dependencies (BEFORE installing pip packages)
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    tzdata \
     python3.10 \
     python3-pip \
     python3.10-venv \
@@ -19,6 +23,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-sklearn \
     python3-scipy \
     python3-statsmodels \
+    && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
+    && dpkg-reconfigure --frontend noninteractive tzdata \
     && rm -rf /var/lib/apt/lists/*
 
 # Configure CUDA/cuDNN paths
