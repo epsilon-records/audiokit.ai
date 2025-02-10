@@ -46,11 +46,12 @@ RUN pip install --upgrade pip
 
 # Install Python dependencies (ONE TIME, no duplication)
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip install --prefer-binary \
-        torch==2.6.0 \
-        torchaudio==2.6.0 \
+    pip install --no-cache-dir \
+        torch==2.6.0+cu121 \
+        torchaudio==2.6.0+cu121 \
         tensorflow[and-cuda]==2.18.0 \
         nvidia-cudnn-cu12==9.1.0.70 \
+        nvidia-cublas-cu12==12.5.3.2 \
         demucs==4.0.1 \
         deepfilternet==0.5.6 \
         openai-whisper==v20240930 \
