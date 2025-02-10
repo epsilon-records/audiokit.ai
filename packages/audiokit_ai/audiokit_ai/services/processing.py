@@ -112,6 +112,11 @@ class ProcessingState:
 processing_state = ProcessingState()
 
 
+def get_progress():
+    """Get the current processing progress."""
+    return processing_state.get_progress()
+
+
 async def denoise(file: UploadFile) -> dict:
     """Reduce noise using DeepFilterNet"""
     try:
@@ -189,10 +194,11 @@ async def denoise(file: UploadFile) -> dict:
         processed_chunks = []
         for i, chunk in enumerate(chunks):
             try:
-                # Calculate progress
-                processing_state.progress = (i + 1) / total_chunks * 100
+                # Update progress more frequently
+                progress = (i / total_chunks) * 100
+                processing_state.progress = progress
                 logger.info(
-                    f"Processing chunk {i + 1}/{total_chunks} ({processing_state.progress:.1f}%)",
+                    f"Processing chunk {i + 1}/{total_chunks} ({progress:.1f}%) - State progress: {processing_state.get_progress()}",
                 )
 
                 # Log memory before processing
@@ -224,6 +230,13 @@ async def denoise(file: UploadFile) -> dict:
                     logger.debug(
                         f"GPU memory: {torch.cuda.memory_allocated() / 1024 / 1024:.2f} MB used",
                     )
+
+                # Update progress after chunk completion
+                progress = ((i + 1) / total_chunks) * 100
+                processing_state.progress = progress
+                logger.info(
+                    f"Completed chunk {i + 1}/{total_chunks} ({progress:.1f}%) - State progress: {processing_state.get_progress()}",
+                )
 
             except Exception as e:
                 logger.error(f"Error processing chunk: {e}")

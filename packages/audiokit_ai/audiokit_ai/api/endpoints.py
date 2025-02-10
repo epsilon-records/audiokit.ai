@@ -11,8 +11,10 @@
 
 import asyncio
 import base64
+import time
 
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, WebSocket
+from fastapi.websockets import WebSocketDisconnect
 
 from audiokit_ai.core.logger import logger
 
@@ -172,12 +174,41 @@ async def audio_stream(websocket: WebSocket):
 async def denoise_progress(websocket: WebSocket):
     await websocket.accept()
     try:
+        logger.debug("WebSocket client connected")
+        last_progress = -1
+        last_heartbeat = time.time()
+
         while True:
-            progress = processing.get_progress()
-            await websocket.send_json({"progress": progress})
-            await asyncio.sleep(0.5)
+            current_progress = processing.get_progress()
+            current_time = time.time()
+
+            # Send progress update if changed
+            if current_progress != last_progress:
+                await websocket.send_json(
+                    {
+                        "type": "progress",
+                        "progress": current_progress,
+                    }
+                )
+                logger.debug(f"Sent progress update: {current_progress}%")
+                last_progress = current_progress
+
+            # Send heartbeat every 30 seconds
+            if current_time - last_heartbeat > 30:
+                await websocket.send_json(
+                    {
+                        "type": "heartbeat",
+                        "timestamp": current_time,
+                    }
+                )
+                last_heartbeat = current_time
+
+            await asyncio.sleep(0.1)  # Poll frequently
+
     except WebSocketDisconnect:
-        logger.info("WebSocket disconnected")
+        logger.info("WebSocket client disconnected")
     except Exception as e:
         logger.error(f"WebSocket error: {e}")
         await websocket.close(code=1011, reason=str(e))
+    finally:
+        logger.debug("WebSocket connection closed")
