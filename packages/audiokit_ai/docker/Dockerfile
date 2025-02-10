@@ -21,7 +21,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     llvm-11-dev \
     clang-11 \
     python3-numpy \
-    python3-sklearn \
     python3-scipy \
     python3-statsmodels \
     && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
@@ -58,6 +57,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         faiss-cpu==1.8.0 \
         pandas==2.2.3 \
         scikit-image==0.25.1 \
+        scikit-learn \
         moviepy==2.1.2 \
         librosa==0.10.2.post1 \
         google-cloud-speech==2.20.0
