@@ -3,9 +3,10 @@ services:
     image: redis:7.2-alpine
     container_name: redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
+    command: redis-server --requirepass ${REDIS_PASSWORD}
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 1s
       timeout: 3s
       retries: 30
@@ -23,12 +24,14 @@ services:
     environment:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_ALGORITHM=${JWT_ALGORITHM}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - PINECONE_API_KEY=${PINECONE_API_KEY}
       - PINECONE_ENVIRONMENT=${PINECONE_ENVIRONMENT}
       - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - CUDA_VISIBLE_DEVICES=-1
     volumes:
       - ../:/app
       - deepfilternet_cache:/home/appuser/.cache/DeepFilterNet
@@ -37,6 +40,12 @@ services:
         condition: service_healthy
     networks:
       - ak-network
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 2G
 
 volumes:
   deepfilternet_cache:
