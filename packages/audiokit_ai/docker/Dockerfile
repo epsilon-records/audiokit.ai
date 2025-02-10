@@ -50,7 +50,7 @@ RUN --mount=type=cache,target=/root/.cache/pip \
         torch==2.6.0 \
         torchaudio==2.6.0 \
         tensorflow[and-cuda]==2.18.0 \
-        nvidia-cudnn-cu12==8.9.4 \
+        nvidia-cudnn-cu12==9.7.1.26 \
         demucs==4.0.1 \
         deepfilternet==0.5.6 \
         openai-whisper==v20240930 \
