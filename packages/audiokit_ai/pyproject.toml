@@ -22,7 +22,7 @@ dependencies = [
     "numpy",
     "loguru",
     "python-osc",
-    "sounddevice",
+    "sounddevice>=0.4.6",
     "JACK-client",
     "mido",
     "openai",
@@ -48,6 +48,9 @@ dependencies = [
     "treetable>=0.2.5",
     "python-multipart",
     "python-jose==3.3.0",
+    "psutil",
+    "websockets>=10.0",
+    "uvicorn[standard]",
 ]
 
 [project.optional-dependencies]

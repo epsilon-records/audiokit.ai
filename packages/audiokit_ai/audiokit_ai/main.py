@@ -9,12 +9,14 @@
 # This file is part of the AudioKit AI package.
 #
 
+import multiprocessing
 import os
 
 import redis.asyncio as redis
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi_limiter import FastAPILimiter
 
 from audiokit_ai.api.endpoints import router as api_router
@@ -51,10 +53,15 @@ async def startup():
     redis_client = redis.Redis(
         host=settings.redis_host,
         port=settings.redis_port,
+        password=settings.redis_password,
         db=0,
         decode_responses=True,
     )
     await FastAPILimiter.init(redis_client)
+
+    # Add process monitoring
+    multiprocessing.set_start_method("spawn", force=True)
+    logger.info(f"Initialized multiprocessing with {multiprocessing.cpu_count()} cores")
 
 
 # Include API endpoints
@@ -63,6 +70,12 @@ app.include_router(api_router, prefix="/api/v1")
 
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    # Add process health check
+    if request.url.path == "/api/v1/health":
+        return JSONResponse(
+            {"status": "ok", "workers": len(multiprocessing.active_children())},
+        )
+
     logger.info(f"Request: {request.method} {request.url}")
     response = await call_next(request)
     logger.info(f"Response: {response.status_code}")

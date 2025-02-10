@@ -9,7 +9,12 @@
 # This file is part of the AudioKit AI package.
 #
 
+import asyncio
+import base64
+
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, WebSocket
+
+from audiokit_ai.core.logger import logger
 
 
 try:
@@ -27,6 +32,8 @@ except ImportError:
 from audiokit_ai.core.security import verify_token
 from audiokit_ai.services import processing
 
+from ..services.exceptions import AudioProcessingError
+
 
 router = APIRouter()
 
@@ -37,9 +44,32 @@ router = APIRouter()
 async def denoise_audio(file: UploadFile = File(...)):
     try:
         result = await processing.denoise(file)
-        return {"status": "success", "result": result}
+        return {
+            "status": "success",
+            "result": base64.b64encode(result["result"]).decode("utf-8"),
+            "warnings": result.get("warnings", []),
+            "metrics": result.get("metrics", {}),
+        }
+    except AudioProcessingError as e:
+        raise HTTPException(
+            status_code=e.status_code,
+            detail={
+                "error": str(e),
+                "type": e.__class__.__name__,
+                "status_code": e.status_code,
+                "suggestion": "Please ensure your audio is 48kHz sample rate before processing",
+            },
+        )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Unexpected error during denoising: {e!s}")
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "Internal server error",
+                "type": "InternalServerError",
+                "status_code": 500,
+            },
+        )
 
 
 @router.post("/separate", dependencies=[Depends(verify_token)])
@@ -135,4 +165,19 @@ async def audio_stream(websocket: WebSocket):
             processed = await processing.denoise(audio_chunk)
             await websocket.send_bytes(processed)
     except Exception as e:
+        await websocket.close(code=1011, reason=str(e))
+
+
+@router.websocket("/denoise/progress")
+async def denoise_progress(websocket: WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            progress = processing.get_progress()
+            await websocket.send_json({"progress": progress})
+            await asyncio.sleep(0.5)
+    except WebSocketDisconnect:
+        logger.info("WebSocket disconnected")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
         await websocket.close(code=1011, reason=str(e))

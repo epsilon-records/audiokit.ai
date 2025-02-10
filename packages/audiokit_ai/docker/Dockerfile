@@ -25,6 +25,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-statsmodels \
     libnccl2=2.18.3-1+cuda12.2 \
     libnccl-dev=2.18.3-1+cuda12.2 \
+    portaudio19-dev \
+    supervisor \
     && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
     && echo "$TZ" > /etc/timezone \
     && dpkg-reconfigure --frontend noninteractive tzdata \
@@ -43,6 +45,10 @@ ENV NCCL_VERSION=2.18.3
 
 # Set up non-root user (security best practice)
 RUN useradd --create-home appuser
+
+# Create supervisor directories and set permissions
+RUN mkdir -p /etc/supervisor/conf.d && \
+    chown -R appuser:appuser /etc/supervisor
 
 # Use a dedicated directory for better organization
 WORKDIR /app
@@ -94,9 +100,16 @@ EXPOSE 8000
 # Switch to appuser
 USER appuser
 
-# Create cache directory and set permissions
+# Create cache and log directories
 RUN mkdir -p /home/appuser/.cache/DeepFilterNet && \
-    chown -R appuser:appuser /home/appuser/.cache
+    mkdir -p /home/appuser/logs && \
+    chown -R appuser:appuser /home/appuser
 
-# Start the application with optimized worker settings
-CMD ["uvicorn", "audiokit_ai.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+# Add supervisor config
+COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Start via supervisor
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/api/v1/health || exit 1

@@ -35,6 +35,7 @@ services:
     volumes:
       - ../:/app
       - deepfilternet_cache:/home/appuser/.cache/DeepFilterNet
+      - logs:/home/appuser/logs
     depends_on:
       redis:
         condition: service_healthy
@@ -43,12 +44,16 @@ services:
     deploy:
       resources:
         limits:
-          memory: 4G
+          memory: 16G
+          cpus: '4'
         reservations:
-          memory: 2G
+          memory: 8G
+          cpus: '2'
 
 volumes:
   deepfilternet_cache:
+    driver: local
+  logs:
     driver: local
 
 networks:
