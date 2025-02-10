@@ -1,8 +1,9 @@
 # Use NVIDIA base image
 FROM nvidia/cuda:12.2.0-base-ubuntu22.04
 
-# Set non-interactive mode to avoid timezone prompts
+# Set non-interactive mode for apt
 ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
 
 # Install system dependencies (BEFORE installing pip packages)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -23,7 +24,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-sklearn \
     python3-scipy \
     python3-statsmodels \
-    && ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime \
+    && ln -fs /usr/share/zoneinfo/$TZ /etc/localtime \
+    && echo "$TZ" > /etc/timezone \
     && dpkg-reconfigure --frontend noninteractive tzdata \
     && rm -rf /var/lib/apt/lists/*
 
