@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 from typing import Dict, List, Optional
 
 import aiohttp
@@ -7,6 +8,7 @@ from fastapi import HTTPException
 
 from audiokit_mcp_server.core.llm import call_llm
 from audiokit_mcp_server.core.logger import logger
+from audiokit_mcp_server.core.markdown import save_artist_report
 
 
 class SoundchartsClient:
@@ -173,14 +175,16 @@ class SoundchartsClient:
     ) -> str:
         """Generate insights from artist data"""
         try:
-            # Get artist metadata from the object field
+            # Get artist metadata and ID
             artist_info = data.get("metadata", {}).get("object", {})
             artist_name = artist_info.get("name", "Unknown Artist")
+            artist_id = artist_info.get("uuid", "unknown")
 
             # Create prompt with structured format request
             prompt = f"""
-You are a professional music industry analyst providing insights for a client presentation. 
-Create a beautifully formatted markdown report with emojis and rich formatting.
+You are Mari Mikava, a senior music industry analyst at Nieuwe Groove Collectief, providing insights for a client presentation.
+Create a beautifully formatted markdown report with emojis and rich formatting, focusing on narrative paragraphs rather than bullet points.
+Only include sections where there is sufficient data for meaningful analysis.
 
 Artist: {artist_name}
 
@@ -193,70 +197,63 @@ Previous Context:
 Please provide an elegantly formatted analysis that includes:
 
 # 🎯 Executive Summary
-Brief overview of key findings and current performance
+A concise overview of the artist's current market position and key performance indicators.
 
 # 📊 Performance Analysis
-## 📈 Audience Growth
-- Follower trends
-- Monthly listener evolution
-- Growth rate analysis
+Write in flowing paragraphs about:
+- Audience growth and engagement trends
+- Streaming performance and platform presence
+- Playlist and chart performance
+- Geographic distribution and market penetration
 
-## 🎵 Streaming Performance
-- Current streaming metrics
-- Historical comparisons
-- Platform-specific insights
-
-## 🎸 Playlist & Chart Performance
-- Playlist inclusion metrics
-- Chart positions and trends
-- Key playlist categories
-
-## 🌍 Geographic Distribution
-- Top performing markets
-- Market-specific trends
-- Regional opportunities
-
-# 💡 Strategic Insights
-## 💪 Strengths
-- Key performance highlights
+# 💡 Strategic Analysis
+Narrative assessment of:
+- Current market positioning
 - Competitive advantages
-- Successful initiatives
+- Growth trajectory
+- Brand strength
 
-## 🚀 Growth Opportunities
-- Potential market expansions
-- Engagement opportunities
-- Strategic recommendations
+# 🚀 Marketing Strategy
+Detailed marketing recommendations including:
+- Target audience development
+- Platform-specific strategies
+- Content opportunities
+- Collaboration possibilities
+- Brand partnerships
 
-# ✨ Recommendations
-Actionable steps for improvement
+# ✨ Next Steps
+Prioritized action items with:
+- Immediate actions (next 30 days)
+- Short-term initiatives (90 days)
+- Long-term strategic moves
+- Resource requirements
+
+---
+*Analysis prepared by:*
+**Mari Mikava**
+Senior Music Industry Analyst
+Nieuwe Groove Collectief
+{datetime.now().strftime("%B %d, %Y")}
 
 Formatting Guidelines:
-- Use emojis to enhance section headings and key points
+- Write in flowing paragraphs instead of bullet points
+- Use emojis thoughtfully for section headers
 - Format numbers with commas and appropriate units
-- Use bold and italics for emphasis
-- Include bullet points and numbered lists
-- Add horizontal rules between major sections
-- Use blockquotes for important insights
-- Include tables where appropriate
+- Use markdown formatting for emphasis and structure
+- Include blockquotes for key insights
 - Focus on the most recent 3 months of data
 - Maintain a professional yet engaging tone
-
-Make the report visually appealing and easy to read while maintaining professionalism.
+- Skip any sections where data is insufficient
+- End with a clear marketing strategy and next steps
 """
 
             # Call OpenRouter LLM with formal prompt
             response = await call_llm(prompt)
 
-            # Save response to markdown file
-            try:
-                file_path = "tmp.md"
-                with open(file_path, "w") as f:
-                    f.write(response)
-                logger.info(f"✍️ Saved analysis to {file_path}")
-            except Exception as e:
-                logger.error(f"Failed to save markdown file: {e!s}")
+            # Save as HTML and get URL
+            report_url = save_artist_report(artist_id, response)
 
-            return response
+            return response, report_url
 
         except Exception as e:
             logger.error(f"Failed to generate insight: {e!s}")

@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     # API configurations
     OPENROUTER_API_KEY: str
     OPENROUTER_API_BASE: str = "https://openrouter.ai/api/v1"
-    OPENROUTER_MODEL: str = "anthropic/claude-3.5-sonnet"
+    OPENROUTER_MODEL: str = "openai/gpt-4-turbo-preview"
 
     # Soundcharts API
     SOUNDCHARTS_APP_ID: str

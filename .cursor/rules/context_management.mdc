@@ -1,5 +1,5 @@
 ---
-description: 
+description: # LLM Context Management When receiving the command "write or save your context", the LLM should create/update files in the `context/` directory to maintain its own state and understanding. This is purely for the LLM's internal use and should not affect any actual application code or infrastructure.  Note: These context files are NOT part of the application and should not be included in Dockerfiles, deployment scripts, or any other application code.
 globs: 
 ---
 {

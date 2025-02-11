@@ -5,8 +5,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.routing import APIRouter
+from fastapi.staticfiles import StaticFiles
 from mcp.server.fastmcp import FastMCP
 
+from audiokit_mcp_server.core.config import settings
 from audiokit_mcp_server.core.logger import logger
 from audiokit_mcp_server.handlers.analytics_rag import analyze_spotify_uri
 from audiokit_mcp_server.handlers.audio_converter import (
@@ -88,6 +90,16 @@ async def test_soundcharts_endpoint():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint."""
+    return {
+        "status": "healthy",
+        "version": "1.0.0",  # TODO: Get from package version
+        "environment": settings.ENV,
+    }
+
+
 # Include router in app
 app.include_router(router)
 
@@ -109,6 +121,10 @@ async def general_exception_handler(request, exc):
         status_code=500,
         content={"error": "Internal server error", "status_code": 500},
     )
+
+
+# Add after FastAPI initialization
+app.mount("/artists", StaticFiles(directory="static/artists"), name="artists")
 
 
 if __name__ == "__main__":
