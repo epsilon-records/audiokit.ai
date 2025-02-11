@@ -49,3 +49,29 @@ The project is progressing well, with core functionality taking shape. While we'
 
 - Could implement more comprehensive validation checks
 - Should consider adding rollback capabilities
+
+# Implementation Reflections
+
+## Design Decisions
+
+1. Using Weaviate for analytics storage due to:
+   - Vector search capabilities
+   - Schema flexibility
+   - Good Python integration
+
+2. Choosing OpenRouter for LLM:
+   - Access to Claude-3.5-Sonnet
+   - Reliable API
+   - Good documentation
+
+3. Soundcharts API integration:
+   - Comprehensive music analytics
+   - Well-documented API
+   - Industry standard metrics
+
+## Areas for Improvement
+
+1. Need better error handling
+2. Should add request validation
+3. Could improve caching strategy
+4. Should add more comprehensive logging

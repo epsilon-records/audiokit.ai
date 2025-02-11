@@ -13,27 +13,13 @@
 import asyncio
 import base64
 import time
-from typing import Dict
+from typing import Any, Dict
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
-from socketio import ASGIApp, AsyncServer
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from pydantic import BaseModel
 
 from audiokit_ai.core.logger import logger
-
-
-try:
-    from fastapi_limiter.depends import WebSocketRateLimiter
-except ImportError:
-    # Fallback for when rate limiting is not available
-    class WebSocketRateLimiter:
-        def __init__(self, *args, **kwargs):
-            pass
-
-        async def __call__(self, websocket):
-            return True
-
-
 from audiokit_ai.core.security import verify_token
 from audiokit_ai.services import processing
 from audiokit_ai.services.exceptions import (
@@ -44,17 +30,6 @@ from audiokit_ai.services.exceptions import (
 
 
 router = APIRouter()
-
-
-# Initialize Socket.IO
-sio = AsyncServer(
-    async_mode="asgi",
-    cors_allowed_origins="*",
-    ping_interval=25,  # 25 seconds between pings
-    ping_timeout=60,  # Wait 60 seconds for pong response
-    max_http_buffer_size=100 * 1024 * 1024,  # 100MB
-)
-socket_app = ASGIApp(socketio_server=sio)
 
 
 # Progress tracking state
@@ -224,22 +199,72 @@ async def generate_music(file: UploadFile = File(...)):
     return await handle_processing("generate_music", file, processing.generate_music)
 
 
-@router.post("/search_by_sound", dependencies=[Depends(verify_token)])
-async def search_by_sound(file: UploadFile = File(...)):
-    try:
-        result = processing.search_by_sound(file)
-        return {"status": "success", "result": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+class AudioRequest(BaseModel):
+    audio_file: str  # Path or URL to the audio file
+    options: Dict[str, Any] = {}
 
 
-@router.post("/identify_song", dependencies=[Depends(verify_token)])
-async def identify_song(file: UploadFile = File(...)):
+def verify_api_key(request: Request, api_key: str = Depends(verify_token)):
+    """Enhanced API key verification combining JWT and Redis"""
+    redis_client = request.app.state.redis_client
+    if not redis_client.exists(f"api_key:{api_key}"):
+        logger.warning(f"Invalid API key attempt: {api_key}")
+        raise HTTPException(status_code=401, detail="Unauthorized")
+    return api_key
+
+
+@router.post("/search_by_sound")
+async def search_by_sound(
+    request: Request,
+    audio_request: AudioRequest,
+    api_key: str = Depends(verify_api_key),
+):
+    """Vector-based audio similarity search"""
     try:
-        result = processing.identify_song(file)
-        return {"status": "success", "result": result}
+        response = (
+            request.app.state.weaviate_client.query.get(
+                "Audio",
+                ["metadata", "audio_file"],
+            )
+            .with_near_audio(audio_request.audio_file)
+            .with_limit(5)
+            .do()
+        )
+        return {
+            "status": "success",
+            "results": response.get("data", {}).get("Get", {}).get("Audio", []),
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Weaviate search error: {e!s}")
+        raise HTTPException(status_code=500, detail="Search operation failed")
+
+
+@router.post("/identify_song")
+async def identify_song(
+    request: Request,
+    audio_request: AudioRequest,
+    api_key: str = Depends(verify_api_key),
+):
+    """Song identification through audio fingerprinting"""
+    try:
+        response = (
+            request.app.state.weaviate_client.query.get(
+                "Songs",
+                ["title", "artist", "audio_file"],
+            )
+            .with_near_audio(audio_request.audio_file)
+            .with_limit(1)
+            .do()
+        )
+        results = response.get("data", {}).get("Get", {}).get("Songs", [])
+        return {
+            "status": "success",
+            "match_found": len(results) > 0,
+            "results": results[0] if results else {},
+        }
+    except Exception as e:
+        logger.error(f"Song identification error: {e!s}")
+        raise HTTPException(status_code=500, detail="Identification failed")
 
 
 @router.post("/detect_genre", dependencies=[Depends(verify_token)])

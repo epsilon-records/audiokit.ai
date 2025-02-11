@@ -1,0 +1,67 @@
+[tool.poetry]
+name = "audiokit-mcp-server"
+version = "0.1.0"
+description = "AudioKit MCP Server with music analytics and audio processing capabilities"
+authors = ["AudioKit Team"]
+readme = "README.md"
+packages = [
+    { include = "audiokit_mcp_server" }
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.115.8"
+uvicorn = "^0.34.0"
+weaviate-client = "*"
+pydantic = "^2.10.6"
+pydantic-settings = "^2.7.1"
+gitpython = "^3.1.44"
+ffmpeg-python = "^0.2.0"
+aiohttp = "^3.11.12"
+numpy = "^2.2.2"
+pandas = "^2.2.3"
+scipy = "^1.15.1"
+loguru = "^0.7.3"
+mcp = "^1.2.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.0.0"
+pytest-asyncio = "^0.21.0"
+pytest-cov = "^4.1.0"
+black = "^23.0.0"
+isort = "^5.12.0"
+flake8 = "^6.0.0"
+mypy = "^1.0.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+target-version = ['py39']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+line_length = 88
+
+[tool.mypy]
+python_version = "3.9"
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+strict_optional = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short" 

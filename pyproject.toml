@@ -109,4 +109,11 @@ repos = [
 ]
 
 [project.scripts]
-ak = "audiokit.cli:main" 
+ak = "audiokit.cli:main"
+
+[tool.uvicorn]
+app = "audiokit_ai.main:app"
+timeout-keep-alive = 600
+timeout-graceful-shutdown = 30
+ws-max-size = 100000000  # 100MB
+proxy-headers = true 

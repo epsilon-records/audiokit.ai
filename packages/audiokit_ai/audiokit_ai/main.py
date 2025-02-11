@@ -15,6 +15,7 @@ import os
 import sys
 
 import redis.asyncio as redis
+import weaviate
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -94,6 +95,20 @@ def create_application() -> FastAPI:
         # Override default keep-alive timeout (300s = 5min)
         if (transport := loop.get_debug()) and hasattr(transport, "_protocol"):
             transport._protocol.keepalive_timeout = 600  # 10 minutes
+
+    # Add to application state
+    app.state.redis_client = redis.Redis(
+        host=settings.redis_host,
+        port=settings.redis_port,
+        password=settings.redis_password,
+        db=0,
+        decode_responses=True,
+    )
+
+    app.state.weaviate_client = weaviate.Client(
+        url=os.getenv("WEAVIATE_URL", "http://localhost:8080"),
+        additional_headers={"X-OpenAI-Api-Key": settings.openai_api_key},
+    )
 
     # Include API endpoints
     app.include_router(router, prefix="/api/v1")
