@@ -3,6 +3,8 @@
 import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.routing import APIRouter
 from mcp.server.fastmcp import FastMCP
 
 from audiokit_mcp_server.core.logger import logger
@@ -11,6 +13,7 @@ from audiokit_mcp_server.handlers.audio_converter import (
     convert_audio,
 )
 from audiokit_mcp_server.handlers.audio_handler import ingest_audio, search_audio
+from audiokit_mcp_server.models.spotify_analytics_request import SpotifyAnalyticsRequest
 
 
 # Create FastAPI application
@@ -36,67 +39,76 @@ mcp_server = FastMCP(
         "pandas",
         "numpy",
         "scipy",
-        "weaviate-client",
+        "pinecone-client",
         "ffmpeg-python",
     ],
 )
 
+# Create API router
+router = APIRouter(prefix="/api/v1")
 
-# Register endpoints as MCP tools
-@mcp_server.tool()
-async def ingest_audio_tool(request: dict) -> dict:
-    """Ingest audio file metadata into Weaviate"""
+
+# Register endpoints
+@router.post("/ingest")
+async def ingest_audio_endpoint(request: dict):
+    """Ingest audio file metadata into vector store"""
     return await ingest_audio(request)
 
 
-@mcp_server.tool()
-async def search_audio_tool(request: dict) -> dict:
+@router.post("/search")
+async def search_audio_endpoint(request: dict):
     """Search for audio files using vector similarity"""
     return await search_audio(request)
 
 
-@mcp_server.tool()
-async def convert_audio_tool(request: dict) -> dict:
+@router.post("/convert")
+async def convert_audio_endpoint(request: dict):
     """Convert audio file to different format"""
     return await convert_audio(request)
 
 
-@mcp_server.tool()
-async def analyze_spotify_tool(request: dict) -> dict:
+@router.post("/analyze/spotify")
+async def analyze_spotify_endpoint(request: SpotifyAnalyticsRequest):
     """Analyze Spotify artist data"""
     return await analyze_spotify_uri(request)
 
 
-@mcp_server.tool()
-async def test_soundcharts_rag(request: dict) -> dict:
+@router.post("/test/soundcharts")
+async def test_soundcharts_endpoint():
     """Test the Soundcharts RAG system with a sample query"""
     try:
         # Test with Drake's Spotify URI
-        test_request = {
-            "spotify_uri": "spotify:artist:3TVXtAsR1Inumwj472S9r4",
-            "query": "What are Drake's top performing songs and their trends over the last year?",
-        }
+        test_request = SpotifyAnalyticsRequest(
+            spotify_uri="spotify:artist:3TVXtAsR1Inumwj472S9r4",
+            query="What are Drake's top performing songs and their trends over the last year?",
+        )
         return await analyze_spotify_uri(test_request)
     except Exception as e:
         logger.error(f"Soundcharts RAG test failed: {e!s}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Mount FastAPI app
-mcp_server.mount_to_fastapi(app)
+# Include router in app
+app.include_router(router)
 
 
 # Error handling
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
     logger.error(f"HTTP error: {exc.detail}")
-    return {"error": exc.detail, "status_code": exc.status_code}
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"error": exc.detail, "status_code": exc.status_code},
+    )
 
 
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
     logger.error(f"Unexpected error: {exc!s}")
-    return {"error": "Internal server error", "status_code": 500}
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "status_code": 500},
+    )
 
 
 if __name__ == "__main__":

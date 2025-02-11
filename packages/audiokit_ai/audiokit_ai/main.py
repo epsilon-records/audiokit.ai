@@ -21,6 +21,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_limiter import FastAPILimiter
+from weaviate.connect import ConnectionParams
 
 from audiokit_ai.api.endpoints import router, socket_app
 from audiokit_ai.core.logger import logger
@@ -105,8 +106,30 @@ def create_application() -> FastAPI:
         decode_responses=True,
     )
 
-    app.state.weaviate_client = weaviate.Client(
-        url=os.getenv("WEAVIATE_URL", "http://localhost:8080"),
+    weaviate_http_url = os.getenv("WEAVIATE_HTTP_URL", "http://localhost:8080")
+    weaviate_grpc_url = os.getenv("WEAVIATE_GRPC_URL", "localhost:50051")
+
+    # For local development, use from_url
+    if "localhost" in weaviate_http_url:
+        connection_params = ConnectionParams.from_url(
+            url=weaviate_http_url,
+            grpc_port=50051,  # Default local gRPC port
+            grpc_secure=False,
+        )
+    else:
+        # For production, use from_params with secure connections
+        grpc_host, grpc_port_str = weaviate_grpc_url.split(":")
+        connection_params = ConnectionParams.from_params(
+            http_host=weaviate_http_url.split("://")[1],
+            http_port=443,
+            http_secure=True,
+            grpc_host=grpc_host,
+            grpc_port=int(grpc_port_str),
+            grpc_secure=True,
+        )
+
+    app.state.weaviate_client = weaviate.WeaviateClient(
+        connection_params=connection_params,
         additional_headers={"X-OpenAI-Api-Key": settings.openai_api_key},
     )
 

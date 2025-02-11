@@ -1,6 +1,11 @@
-from typing import List, Optional
+from typing import List
 
+from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+# Load .env file before initializing settings
+load_dotenv()
 
 
 class Settings(BaseSettings):
@@ -21,9 +26,9 @@ class Settings(BaseSettings):
     SOUNDCHARTS_API_KEY: str
     SOUNDCHARTS_API_BASE: str = "https://api.soundcharts.com/api/v2"
 
-    # Weaviate settings
-    WEAVIATE_URL: str  # This should be the full URL of your Weaviate instance (with protocol, e.g., "https://my-weaviate-instance.com")
-    WEAVIATE_API_KEY: Optional[str] = None
+    # Pinecone settings
+    PINECONE_API_KEY: str
+    PINECONE_ENVIRONMENT: str = "us-west1-gcp"  # Default environment
 
     # RAG settings
     MIN_RELEVANCE_SCORE: float = 0.7

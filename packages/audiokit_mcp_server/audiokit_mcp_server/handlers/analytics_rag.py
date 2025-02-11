@@ -4,17 +4,24 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Union
 
-import aiohttp
 import numpy as np
 import pandas as pd
-import weaviate
 from fastapi import HTTPException
-from pydantic import BaseModel, Field, root_validator, validator
+from pinecone import Pinecone
+from pydantic import (
+    BaseModel,
+    Field,
+    field_validator,
+    model_validator,
+)
 from scipy import stats
 
 from audiokit_mcp_server.core.config import settings
+from audiokit_mcp_server.core.embeddings import get_embedding
+from audiokit_mcp_server.core.llm import call_llm  # Update import
 from audiokit_mcp_server.core.logger import logger
 from audiokit_mcp_server.handlers.soundcharts_client import SoundchartsClient
+from audiokit_mcp_server.models.spotify_analytics_request import SpotifyAnalyticsRequest
 
 
 class AnalyticsQuery(BaseModel):
@@ -26,47 +33,24 @@ class AnalyticsQuery(BaseModel):
 
 
 class AnalyticsInsight(BaseModel):
-    query: str
+    """Model for analytics insights"""
+
     insight: str
     data_snapshot: Dict
     timestamp: datetime
-    reference_id: Optional[str] = None  # Weaviate reference ID
+    reference_id: Optional[str] = None  # Vector store reference ID
+    query: Optional[str] = ""  # Make query optional with empty string default
 
 
-class WeaviateClient:
-    """Weaviate client wrapper"""
+class PineconeClient:
+    """Pinecone client wrapper"""
 
     def __init__(self):
-        auth_config = (
-            weaviate.auth.AuthApiKey(api_key=settings.WEAVIATE_API_KEY)
-            if settings.WEAVIATE_API_KEY
-            else None
-        )
+        # Initialize Pinecone with new API
+        self.pc = Pinecone(api_key=settings.PINECONE_API_KEY)
 
-        self.client = weaviate.Client(
-            url=settings.WEAVIATE_URL,
-            auth_client=auth_config,
-        )
-        self.init_schema()
-
-    def init_schema(self):
-        """Initialize Weaviate schema"""
-        schema = {
-            "class": "AnalyticsInsight",
-            "properties": [
-                {"name": "query", "dataType": ["text"]},
-                {"name": "insight", "dataType": ["text"]},
-                {"name": "dataSnapshot", "dataType": ["text"]},
-                {"name": "timestamp", "dataType": ["date"]},
-                {"name": "dataTypes", "dataType": ["text[]"]},
-                {"name": "timeRange", "dataType": ["text"]},
-            ],
-        }
-
-        try:
-            self.client.schema.create_class(schema)
-        except weaviate.exceptions.UnexpectedStatusCodeException:
-            pass
+        # Use existing audiokit-brain index
+        self.index = self.pc.Index("audiokit-brain")
 
     async def store_insight(
         self,
@@ -74,84 +58,102 @@ class WeaviateClient:
         data_types: List[str],
         time_range: str,
     ) -> str:
-        """Store insight in Weaviate"""
+        """Store insight in Pinecone"""
         try:
-            result = self.client.data_object.create(
-                class_name="AnalyticsInsight",
-                data_object={
-                    "query": insight.query,
-                    "insight": insight.insight,
-                    "dataSnapshot": str(insight.data_snapshot),
-                    "timestamp": insight.timestamp.isoformat(),
-                    "dataTypes": data_types,
-                    "timeRange": time_range,
-                },
+            # Extract only essential data for metadata
+            essential_data = {
+                "metadata": insight.data_snapshot.get("metadata", {}),
+                "current_stats": insight.data_snapshot.get("current_stats", {}),
+                # Add other critical fields as needed
+            }
+
+            # Create Pinecone metadata with reduced data
+            metadata = {
+                "query": insight.query or "",  # Use empty string if query is None
+                "insight": insight.insight,
+                "data_snapshot": json.dumps(
+                    essential_data,
+                ),  # Store only essential data
+                "timestamp": insight.timestamp.isoformat(),
+                "data_types": ",".join(data_types),
+                "time_range": time_range,
+            }
+
+            # Log metadata size for debugging
+            metadata_size = len(json.dumps(metadata).encode("utf-8"))
+            logger.debug(f"Metadata size: {metadata_size / 1024:.2f}KB")
+
+            if metadata_size > 40000:  # Pinecone's limit is 40KB
+                logger.warning(
+                    "Metadata exceeds Pinecone limit, truncating data_snapshot",
+                )
+                # Further reduce data if still too large
+                metadata["data_snapshot"] = json.dumps(
+                    {
+                        "metadata": essential_data.get("metadata", {}),
+                        "stats_summary": "Data truncated due to size limits",
+                    },
+                )
+
+            # Convert insight to vector
+            vector = await self.get_embedding(insight.insight)
+
+            # Generate vector ID
+            vector_id = f"insight_{datetime.utcnow().timestamp()}"
+
+            # Upsert to Pinecone
+            self.index.upsert(
+                vectors=[(vector_id, vector, metadata)],
             )
-            return result["id"]
+
+            return vector_id
+
         except Exception as e:
             logger.error(f"Failed to store insight: {e!s}")
-            raise HTTPException(status_code=500, detail="Failed to store insight")
+            raise HTTPException(
+                status_code=500,
+                detail=f"Failed to store insight: {e!s}",
+            )
 
     async def get_related_insights(
         self,
         query: str,
         data_types: List[str],
-        min_relevance: float = None,
+        limit: int = 5,
     ) -> List[Dict]:
-        """Get related insights with time weighting"""
+        """Get related insights using vector similarity"""
         try:
-            now = datetime.utcnow()
-            min_relevance = min_relevance or settings.MIN_RELEVANCE_SCORE
+            # Convert query to vector
+            query_vector = await self.get_embedding(query)
 
-            result = (
-                self.client.query.get(
-                    "AnalyticsInsight",
-                    ["query", "insight", "timestamp", "dataTypes", "dataSnapshot"],
-                )
-                .with_near_text({"concepts": [query], "certainty": min_relevance})
-                .with_limit(settings.MAX_INSIGHTS)
-                .do()
+            # Search Pinecone
+            results = self.index.query(
+                vector=query_vector,
+                filter={"data_types": {"$in": data_types}},
+                top_k=limit,
+                include_metadata=True,
             )
 
-            insights = result["data"]["Get"]["AnalyticsInsight"]
-            weighted_insights = []
-
-            for insight in insights:
-                age = now - datetime.fromisoformat(insight["timestamp"])
-
-                # Get time weight based on age
-                if age <= timedelta(hours=24):
-                    time_weight = settings.TIME_WEIGHTS["24h"]
-                elif age <= timedelta(days=7):
-                    time_weight = settings.TIME_WEIGHTS["7d"]
-                elif age <= timedelta(days=30):
-                    time_weight = settings.TIME_WEIGHTS["30d"]
-                elif age <= timedelta(days=90):
-                    time_weight = settings.TIME_WEIGHTS["90d"]
-                else:
-                    time_weight = settings.TIME_WEIGHTS["older"]
-
-                weighted_insights.append(
-                    {
-                        **insight,
-                        "age_days": age.days,
-                        "relevance_score": time_weight,
-                    },
-                )
-
-            return sorted(
-                weighted_insights,
-                key=lambda x: x["relevance_score"],
-                reverse=True,
-            )
+            return [
+                {
+                    "insight": match.metadata["insight"],
+                    "score": match.score,
+                    "timestamp": match.metadata["timestamp"],
+                }
+                for match in results.matches
+            ]
 
         except Exception as e:
             logger.error(f"Failed to get related insights: {e!s}")
             return []
 
+    async def get_embedding(self, text: str) -> List[float]:
+        """Get embedding vector using OpenAI"""
+        return await get_embedding(text)
+
 
 # Initialize clients
-weaviate_client = WeaviateClient()
+pinecone_client = PineconeClient()
 soundcharts_client = SoundchartsClient()
 
 
@@ -188,34 +190,54 @@ async def store_insight(
     data_types: List[str],
     time_range: str,
 ) -> str:
-    """Store analytics insight in Weaviate"""
+    """Store analytics insight in Pinecone"""
     try:
-        # Convert data snapshot to string to store in Weaviate
-        data_snapshot_str = json.dumps(insight.data_snapshot)
-
-        # Create Weaviate object
-        properties = {
-            "query": insight.query,
-            "insight": insight.insight,
-            "dataSnapshot": data_snapshot_str,
-            "timestamp": insight.timestamp.isoformat(),
-            "dataTypes": data_types,
-            "timeRange": time_range,
+        # Extract only essential data for metadata
+        essential_data = {
+            "metadata": insight.data_snapshot.get("metadata", {}),
+            "current_stats": insight.data_snapshot.get("current_stats", {}),
         }
 
-        # Store in Weaviate
-        result = weaviate_client.client.data_object.create(
-            data_object=properties,
-            class_name="AnalyticsInsight",
+        # Create Pinecone metadata with reduced data
+        metadata = {
+            "query": insight.query or "",  # Use empty string if query is None
+            "insight": insight.insight,
+            "data_snapshot": json.dumps(essential_data),
+            "timestamp": insight.timestamp.isoformat(),
+            "data_types": ",".join(data_types),
+            "time_range": time_range,
+        }
+
+        # Log metadata size for debugging
+        metadata_size = len(json.dumps(metadata).encode("utf-8"))
+        logger.debug(f"Metadata size: {metadata_size / 1024:.2f}KB")
+
+        if metadata_size > 40000:  # Pinecone's limit is 40KB
+            logger.warning("Metadata exceeds Pinecone limit, truncating data_snapshot")
+            # Further reduce data if still too large
+            metadata["data_snapshot"] = json.dumps(
+                {
+                    "metadata": essential_data.get("metadata", {}),
+                    "stats_summary": "Data truncated due to size limits",
+                },
+            )
+
+        # Convert insight to vector
+        vector = await pinecone_client.get_embedding(insight.insight)
+
+        # Generate vector ID
+        vector_id = f"insight_{datetime.utcnow().timestamp()}"
+
+        # Upsert to Pinecone
+        pinecone_client.index.upsert(
+            vectors=[(vector_id, vector, metadata)],
         )
 
-        return result["id"]
+        return vector_id
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error storing insight in Weaviate: {e!s}",
-        )
+        logger.error(f"Failed to store insight: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Failed to store insight: {e!s}")
 
 
 class ContextConfig:
@@ -231,59 +253,24 @@ class ContextConfig:
 
 
 async def get_time_weighted_insights(
-    query: str,
     data_types: List[str],
     min_relevance: float = ContextConfig.MIN_SIMILARITY,
     limit: int = ContextConfig.MAX_INSIGHTS,
 ) -> List[Dict]:
-    """Get time-weighted related insights from Weaviate"""
+    """Get time-weighted related insights from Pinecone"""
     try:
-        # Get current time for age calculation
-        now = datetime.utcnow()
-
-        # Build Weaviate query with metadata filtering
-        result = (
-            weaviate_client.client.query.get(
-                "AnalyticsInsight",
-                [
-                    "query",
-                    "insight",
-                    "timestamp",
-                    "dataTypes",
-                    "dataSnapshot",
-                    "_additional {certainty}",
-                ],
-            )
-            .with_near_text(
-                {
-                    "concepts": [query],
-                    "certainty": min_relevance,
-                },
-            )
-            .with_where(
-                {
-                    "operator": "Or",
-                    "operands": [
-                        {
-                            "path": ["dataTypes"],
-                            "operator": "ContainsAny",
-                            "valueStringArray": data_types,
-                        },
-                    ],
-                },
-            )
-            .with_limit(limit)
-            .do()
+        # Get related insights from Pinecone
+        related_insights = await pinecone_client.get_related_insights(
+            query="",  # Empty query since we're just getting recent insights
+            data_types=data_types,
+            limit=limit,
         )
-
-        insights = result["data"]["Get"]["AnalyticsInsight"]
 
         # Add time weights and sort by combined relevance
         weighted_insights = []
-        for insight in insights:
+        for insight in related_insights:
             # Calculate age and get time weight
-            timestamp = datetime.fromisoformat(insight["timestamp"])
-            age = now - timestamp
+            age = datetime.utcnow() - datetime.fromisoformat(insight["timestamp"])
 
             if age <= timedelta(hours=24):
                 time_weight = ContextConfig.TIME_WEIGHTS["24h"]
@@ -297,8 +284,8 @@ async def get_time_weighted_insights(
                 time_weight = ContextConfig.TIME_WEIGHTS["older"]
 
             # Calculate combined relevance score
-            certainty = insight["_additional"]["certainty"]
-            combined_score = certainty * time_weight
+            score = insight["score"]
+            combined_score = score * time_weight
 
             # Add metadata for context generation
             weighted_insights.append(
@@ -306,10 +293,6 @@ async def get_time_weighted_insights(
                     **insight,
                     "age_days": age.days,
                     "relevance_score": combined_score,
-                    "data_overlap": len(
-                        set(insight["dataTypes"]) & set(data_types),
-                    )
-                    / len(data_types),
                 },
             )
 
@@ -319,7 +302,7 @@ async def get_time_weighted_insights(
         return weighted_insights[:limit]
 
     except Exception as e:
-        print(f"Warning: Error fetching related insights: {e!s}")
+        logger.warning(f"Error fetching related insights: {e!s}")
         return []
 
 
@@ -339,46 +322,6 @@ class OpenRouterConfig:
         }
 
 
-async def call_llm(prompt: str) -> str:
-    """Call OpenRouter API with Claude-3-Sonnet"""
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                f"{OpenRouterConfig.API_BASE}/chat/completions",
-                headers=OpenRouterConfig.get_headers(),
-                json={
-                    "model": OpenRouterConfig.MODEL,
-                    "messages": [
-                        {
-                            "role": "system",
-                            "content": """You are an analytics expert for AudioKit, a powerful audio processing toolkit.
-                            Analyze data and provide insights about audio processing patterns and user behavior.
-                            Focus on actionable insights, clear trends, and specific recommendations.""",
-                        },
-                        {
-                            "role": "user",
-                            "content": prompt,
-                        },
-                    ],
-                },
-            ) as response:
-                if response.status != 200:
-                    error_detail = await response.text()
-                    raise HTTPException(
-                        status_code=response.status,
-                        detail=f"LLM API error: {error_detail}",
-                    )
-
-                data = await response.json()
-                return data["choices"][0]["message"]["content"]
-
-    except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error calling LLM: {e!s}",
-        )
-
-
 async def generate_insight(query: str, data: Dict, related_insights: List[Dict]) -> str:
     """Generate natural language insights using LLM with context"""
     # Build context sections
@@ -388,8 +331,7 @@ async def generate_insight(query: str, data: Dict, related_insights: List[Dict])
     for insight in related_insights:
         context_entry = (
             f"Previous insight ({insight['timestamp']}, "
-            f"relevance: {insight['relevance_score']:.2f}, "
-            f"data overlap: {insight['data_overlap']:.2f}): "
+            f"relevance: {insight['relevance_score']:.2f}): "
             f"{insight['insight']}"
         )
 
@@ -423,56 +365,68 @@ async def generate_insight(query: str, data: Dict, related_insights: List[Dict])
     return await call_llm(prompt)
 
 
-async def analyze_data(request: AnalyticsQuery) -> AnalyticsInsight:
-    """Generate analytics insights using RAG and store in Weaviate"""
+async def analyze_spotify_uri(request: SpotifyAnalyticsRequest) -> Dict:
+    """Analyze artist data from Spotify URI"""
     try:
-        # Fetch relevant analytics data
-        data = await fetch_analytics_data(
-            data_types=request.data_types,
-            time_range=request.time_range,
+        logger.info(f"Starting analysis for Spotify URI: {request.spotify_uri}")
+
+        # Extract artist ID from Spotify URI
+        spotify_id = request.spotify_uri.split(":")[-1]
+        logger.debug(f"Extracted Spotify ID: {spotify_id}")
+
+        # Get Soundcharts artist ID
+        artist_id = await soundcharts_client.get_artist_by_spotify_uri(spotify_id)
+        logger.debug(f"Got Soundcharts artist ID: {artist_id}")
+
+        if not artist_id:
+            raise HTTPException(status_code=404, detail="Artist not found")
+
+        # Get artist data
+        artist_data = await soundcharts_client.get_artist_data(artist_id)
+
+        # Get related insights
+        try:
+            related_insights = await get_time_weighted_insights(
+                data_types=["artist"],
+            )
+        except Exception as e:
+            logger.warning(f"Failed to get related insights: {e!s}")
+            related_insights = []
+
+        # Generate new insight
+        insight = await soundcharts_client.generate_insight(
+            data=artist_data,
+            context=related_insights,
         )
 
-        # Get time-weighted related insights
-        related_insights = await get_time_weighted_insights(
-            query=request.query,
-            data_types=request.data_types,
-            min_relevance=request.min_relevance,
-        )
-
-        # Generate insight using LLM
-        insight = await generate_insight(
-            request.query,
-            data,
-            related_insights,
-        )
-
-        # Create insight object
+        # Create and store insight
         analytics_insight = AnalyticsInsight(
-            query=request.query,
             insight=insight,
-            data_snapshot=data,
+            data_snapshot=artist_data,
             timestamp=datetime.utcnow(),
         )
 
-        # Store in Weaviate
-        reference_id = await store_insight(
-            analytics_insight,
-            request.data_types,
-            request.time_range,
-        )
-        analytics_insight.reference_id = reference_id
+        try:
+            reference_id = await store_insight(
+                analytics_insight,
+                ["artist"],
+                "all",
+            )
+        except Exception as e:
+            logger.error(f"Failed to store insight: {e!s}")
+            reference_id = None
 
-        return analytics_insight
+        return {
+            "analysis": insight,
+            "reference_id": reference_id,
+            "timestamp": analytics_insight.timestamp.isoformat(),
+        }
 
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500,
-            detail=f"Error analyzing data: {e!s}",
-        )
-
-
-# Initialize Weaviate schema when module loads
-weaviate_client.init_schema()
+        logger.error(f"Failed to analyze Spotify URI: {e!s}")
+        raise HTTPException(status_code=500, detail=f"Analysis failed: {e!s}")
 
 
 class Platform(str, Enum):
@@ -683,10 +637,10 @@ class TimeSeriesMetrics(BaseModel):
     value: Union[int, float]
     change_percent: Optional[float]
 
-    @validator("change_percent")
-    def validate_change(cls, v):
-        if v is not None:
-            return MetricValidation.validate_percentage(v, "change_percent")
+    @field_validator("change_percent")
+    def validate_change_percent(cls, v: float) -> float:
+        if not -100 <= v <= 100:
+            raise ValueError("change_percent must be between -100 and 100")
         return v
 
 
@@ -771,30 +725,25 @@ class PlatformSpecificMetrics:
 
 
 class ExtendedValidators:
-    """Extended validation rules for metrics"""
+    @field_validator("followers", "monthly_listeners", "total_streams")
+    def validate_positive_numbers(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError("Value must be non-negative")
+        return v
 
-    @validator("followers", "monthly_listeners", "total_streams")
-    def validate_counts(cls, v, field):
-        return MetricValidation.validate_count(
-            v,
-            field.name,
-            MetricValidation.MIN_FOLLOWERS,
-            MetricValidation.MAX_FOLLOWERS,
-        )
+    @field_validator("engagement_rate", "market_share")
+    def validate_percentage(cls, v: float) -> float:
+        if not 0 <= v <= 100:
+            raise ValueError("Value must be between 0 and 100")
+        return v
 
-    @validator("engagement_rate", "market_share")
-    def validate_rates(cls, v, field):
-        return MetricValidation.validate_percentage(v, field.name)
-
-    @root_validator
-    def validate_dates(cls, values):
-        """Validate date-related fields"""
-        if "start_date" in values and "end_date" in values:
-            start = values["start_date"]
-            end = values["end_date"]
-            if start > end:
-                raise ValueError("end_date must be after start_date")
-        return values
+    @model_validator(mode="after")
+    def validate_dates(self) -> "ExtendedValidators":
+        start_date = self.start_date
+        end_date = self.end_date
+        if start_date and end_date and start_date > end_date:
+            raise ValueError("end_date must be after start_date")
+        return self
 
 
 class ArtistMetrics(BaseModel):
@@ -1349,61 +1298,25 @@ class ExtendedSoundchartsAnalytics(SoundchartsAnalytics):
     playlist_snapshots: Dict[str, List[PlaylistSnapshot]]
 
 
-class SpotifyAnalyticsRequest(BaseModel):
-    """Request for Spotify URI analysis"""
-
-    spotify_uri: str
-    query: Optional[str] = "What are the key insights about this artist?"
-
-
-async def analyze_spotify_uri(request: SpotifyAnalyticsRequest) -> Dict:
-    """Analyze artist data from Spotify URI"""
-    try:
-        # Get Soundcharts artist ID
-        artist_id = await soundcharts_client.get_artist_by_spotify_uri(
-            request.spotify_uri,
-        )
-        if not artist_id:
-            raise HTTPException(status_code=404, detail="Artist not found")
-
-        # Get artist data
-        artist_data = await soundcharts_client.get_artist_data(artist_id)
-
-        # Get related insights
-        related_insights = await weaviate_client.get_related_insights(
-            query=request.query,
-            data_types=["artist"],
-        )
-
-        # Generate new insight
-        insight = await soundcharts_client.generate_insight(
-            query=request.query,
-            data=artist_data,
-            context=related_insights,
-        )
-
-        # Create and store insight
-        analytics_insight = AnalyticsInsight(
-            query=request.query,
-            insight=insight,
-            data_snapshot=artist_data,
-            timestamp=datetime.utcnow(),
-        )
-
-        reference_id = await weaviate_client.store_insight(
-            insight=analytics_insight,
-            data_types=["artist"],
-            time_range="all",
-        )
-
-        return {
-            "analysis": insight,
-            "reference_id": reference_id,
-            "timestamp": analytics_insight.timestamp.isoformat(),
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to analyze Spotify URI: {e!s}")
-        raise HTTPException(status_code=500, detail="Analysis failed")
+class MetricsData(BaseModel):
+    metrics: Dict[str, List[Dict]] = Field(
+        default_factory=dict,
+        json_schema_extra={
+            "example": {
+                "streams": [
+                    {
+                        "date": "2024-03-20",
+                        "value": 150000,
+                        "change_percent": 5.2,
+                    },
+                ],
+                "playlist_adds": [
+                    {
+                        "date": "2024-03-20",
+                        "value": 50,
+                        "change_percent": 2.5,
+                    },
+                ],
+            },
+        },
+    )
