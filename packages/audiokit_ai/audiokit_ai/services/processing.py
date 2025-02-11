@@ -15,6 +15,7 @@ import io
 import json
 import os
 import tempfile
+import time
 
 import faiss
 import matchering as mg
@@ -26,7 +27,7 @@ import torchaudio
 import whisper
 from demucs import separate
 from df import enhance, init_df
-from fastapi import UploadFile
+from fastapi import HTTPException, UploadFile
 from google.cloud import speech_v1p1beta1 as speech
 
 from audiokit_ai.core.logger import logger
@@ -300,3 +301,105 @@ async def apply_effects(file: UploadFile, effects: list) -> bytes:
         return waveform
     except Exception as e:
         raise RuntimeError(f"Audio effects failed: {e!s}")
+
+
+async def denoise_music(file: UploadFile, progress_callback: callable = None) -> dict:
+    """Denoise music using Open-Unmix source separation model for enhanced audio."""
+    try:
+        logger.info("🎵 Starting music denoising process using Open-Unmix")
+        start_time = time.time()
+
+        # Save the uploaded file temporarily
+        temp_path = await save_temp_file(file)
+        logger.info(f"📁 Saved uploaded file to: {temp_path}")
+
+        if progress_callback:
+            await progress_callback(10)
+            logger.info("📊 File saved: 10%")
+
+        # Load audio file using TorchAudio
+        logger.info(f"🎧 Loading audio file: {file.filename}")
+        waveform, sr = torchaudio.load(temp_path)
+        logger.info(
+            f"📊 Audio specs - Channels: {waveform.shape[0]}, Sample rate: {sr}, Duration: {waveform.shape[1] / sr:.2f}s",
+        )
+
+        # Ensure stereo: if mono, replicate channels
+        if waveform.shape[0] == 1:
+            waveform = waveform.repeat(2, 1)
+            logger.info("🔊 Converted mono to stereo")
+
+        if progress_callback:
+            await progress_callback(20)
+            logger.info("📊 Audio loaded: 20%")
+
+        # Determine device and move waveform to device
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        waveform = waveform.to(device)
+
+        # Load Open-Unmix model from torch.hub
+        logger.info("🔄 Loading Open-Unmix model (umxl)")
+        separator = torch.hub.load("sigsep/open-unmix-pytorch", "umxl", device=device)
+        separator.eval()
+        logger.info("✅ Open-Unmix model loaded")
+
+        if progress_callback:
+            await progress_callback(40)
+            logger.info("📊 Model loaded: 40%")
+
+        # Run separation using Open-Unmix
+        with torch.no_grad():
+            estimates = separator(waveform)
+
+        # Handle output from Open-Unmix: ensure dict format.
+        # If a tensor is returned, wrap it in a dict as 'vocals'
+        if isinstance(estimates, torch.Tensor):
+            estimates = {"vocals": estimates}
+            logger.info(
+                "ℹ️ Open-Unmix returned tensor output, treating it as 'vocals' stem",
+            )
+        else:
+            logger.info("ℹ️ Open-Unmix returned dictionary of separated sources")
+
+        if progress_callback:
+            await progress_callback(60)
+            logger.info("📊 Separation complete: 60%")
+
+        # Mix the separated sources to reconstruct a denoised audio.
+        # Here we assume that if multiple stems are available (vocals, drums, bass, other)
+        # we sum them with a reduced gain for 'other' to help reduce noise.
+        if "vocals" in estimates and len(estimates) > 1:
+            vocals = estimates.get("vocals", 0)
+            drums = estimates.get("drums", 0)
+            bass = estimates.get("bass", 0)
+            other = estimates.get("other", 0)
+            denoised = vocals + drums + bass + 0.5 * other
+            logger.info("✅ Mixed multiple stems for denoised output")
+        else:
+            # If only a single stem is returned, use it directly.
+            denoised = list(estimates.values())[0]
+            logger.info("✅ Single stem available, using it for denoised output")
+
+        # Ensure the denoised audio is on CPU
+        denoised = denoised.cpu()
+
+        if progress_callback:
+            await progress_callback(80)
+            logger.info("📊 Mixing complete: 80%")
+
+        # Save the processed file to a temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_file:
+            torchaudio.save(temp_file.name, denoised, sr)
+            output_path = temp_file.name
+            logger.info(f"💾 Saved denoised file: {output_path}")
+
+        if progress_callback:
+            await progress_callback(100)
+            logger.info("Final progress: 100%")
+
+        logger.info(f"✅ Processing complete in {time.time() - start_time:.2f}s")
+        return {"status": "success", "file_path": output_path}
+
+    except Exception as e:
+        logger.error(f"❌ Error during music denoising with Open-Unmix: {e}")
+        raise HTTPException(status_code=500, detail=str(e))

@@ -76,11 +76,31 @@ async def denoise_speech(
 
 
 @router.post("/denoise_music", response_model=dict)
-async def denoise(file: UploadFile = File(...)):
+async def denoise_music(
+    file: UploadFile = File(...),
+    task_id: str = Form(None),  # Accept task_id from form data
+):
     """Intelligently denoise music by separating, denoising specific stems, and recombining"""
+    if not task_id:
+        task_id = str(uuid4())
+    progress_tracker.tasks[task_id] = 0
+
     try:
-        result = await processing.denoise_music(file)
-        return result
+        # Start processing in background
+        result = await processing.denoise_music(
+            file,
+            progress_callback=lambda p: asyncio.create_task(
+                progress_tracker.broadcast_progress(task_id, p),
+            ),
+        )
+
+        # Read the processed file and encode it
+        with open(result["file_path"], "rb") as f:
+            audio_data = base64.b64encode(f.read()).decode("utf-8")
+
+        # Clean up
+        del progress_tracker.tasks[task_id]
+        return {"task_id": task_id, "result": audio_data}
     except Exception as e:
         logger.error(f"Music denoising failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
