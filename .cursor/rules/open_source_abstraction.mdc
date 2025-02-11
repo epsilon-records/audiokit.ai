@@ -1,0 +1,82 @@
+---
+description: 
+globs: 
+---
+{
+  "rule": {
+    "name": "Open Source Abstraction Rule (ADR-004)",
+    "purpose": "Prioritize using well-maintained open source solutions over custom implementations",
+    "criteria": {
+      "github_stars": 1000,
+      "last_updated": "6 months",
+      "test_coverage": 80,
+      "maintainers": 3,
+      "licenses": ["MIT", "Apache 2.0"]
+    },
+    "implementation": {
+      "process": [
+        {
+          "phase": "Research",
+          "duration": "1-2 days",
+          "tasks": ["Survey solutions", "Create comparison matrix"]
+        },
+        {
+          "phase": "Evaluation",
+          "duration": "1 day",
+          "tasks": ["Security audit", "Performance benchmarking"]
+        },
+        {
+          "phase": "Integration",
+          "tasks": ["Package manager addition", "Abstraction layer creation"]
+        },
+        {
+          "phase": "Documentation",
+          "tasks": ["Update architecture docs", "Maintain dependency matrix"]
+        }
+      ]
+    },
+    "examples": {
+      "websocket": {
+        "non_compliant": {
+          "description": "Raw WebSocket handler",
+          "code": [
+            "async def websocket_endpoint(websocket):",
+            "    await websocket.accept()",
+            "    while True:",
+            "        data = await websocket.receive_text()"
+          ]
+        },
+        "compliant": {
+          "description": "Using Socket.IO library",
+          "code": [
+            "from socketio import AsyncServer",
+            "",
+            "sio = AsyncServer()",
+            "@sio.on(\"message\")",
+            "async def handle_message(sid, data):"
+          ]
+        }
+      }
+    },
+    "exceptions": [
+      "Performance-critical sections",
+      "Unique business logic",
+      "Security-sensitive operations"
+    ],
+    "verification": {
+      "tools": ["pip-audit", "licensecheck", "dependabot"],
+      "processes": [
+        "CI pipeline checks",
+        "License scanning",
+        "Deprecation monitoring"
+      ]
+    },
+    "related_rules": [
+      "ADR-003: Dependency Management",
+      "ADR-005: Security Practices"
+    ],
+    "decision_flow": {
+      "mermaid": "graph TD\n    A[New Feature Requirement] --> B{Existing OSS Solution?}\n    B -->|Yes| C[Evaluate Against Criteria]\n    C --> D{Meets Standards?}\n    D -->|Yes| E[Implement with Adapter]\n    D -->|No| F[Consider Custom Implementation]\n    B -->|No| F\n    E --> G[Document Decision]\n    F --> G"
+    }
+  }
+}

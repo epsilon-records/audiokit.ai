@@ -20,7 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi_limiter import FastAPILimiter
 
-from audiokit_ai.api.endpoints import router as api_router
+from audiokit_ai.api.endpoints import router, socket_app
 from audiokit_ai.core.logger import logger
 
 from .core.config import settings
@@ -36,50 +36,80 @@ load_dotenv()
 
 # Ensure correct torchaudio imports are used
 
-app = FastAPI(title="AudioKit-AI Server")
 
-# Enable CORS (adjust origins as needed)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Add/modify the logger configuration near the top of the file
-logger.remove()
-logger.add(
-    sys.stdout,
-    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
-    "<level>{level.icon} {level}</level> | "
-    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-    level="DEBUG",
-    colorize=True,
-    backtrace=True,
-    diagnose=True,
-)
-
-
-# Initialize rate limiter using Redis on startup
-@app.on_event("startup")
-async def startup():
-    redis_client = redis.Redis(
-        host=settings.redis_host,
-        port=settings.redis_port,
-        password=settings.redis_password,
-        db=0,
-        decode_responses=True,
+def create_application() -> FastAPI:
+    """Factory function for creating the configured FastAPI application"""
+    app = FastAPI(
+        title="AudioKit AI",
+        version="1.3.0",
+        description="Core API service for AudioKit AI processing pipeline",
+        docs_url="/api/docs",
+        redoc_url="/api/redoc",
     )
-    await FastAPILimiter.init(redis_client)
 
-    # Add process monitoring
-    multiprocessing.set_start_method("spawn", force=True)
-    logger.info(f"Initialized multiprocessing with {multiprocessing.cpu_count()} cores")
+    # Enable CORS (adjust origins as needed)
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # Add/modify the logger configuration near the top of the file
+    logger.remove()
+    logger.add(
+        sys.stdout,
+        format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+        "<level>{level.icon} {level}</level> | "
+        "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+        level="DEBUG",
+        colorize=True,
+        backtrace=True,
+        diagnose=True,
+    )
+
+    # Initialize rate limiter using Redis on startup
+    @app.on_event("startup")
+    async def startup():
+        redis_client = redis.Redis(
+            host=settings.redis_host,
+            port=settings.redis_port,
+            password=settings.redis_password,
+            db=0,
+            decode_responses=True,
+        )
+        await FastAPILimiter.init(redis_client)
+
+        # Add process monitoring
+        multiprocessing.set_start_method("spawn", force=True)
+        logger.info(
+            f"Initialized multiprocessing with {multiprocessing.cpu_count()} cores",
+        )
+
+    # Include API endpoints
+    app.include_router(router, prefix="/api/v1")
+
+    # Mount Socket.IO server
+    app.mount("/socket.io", socket_app)
+
+    return app
 
 
-# Include API endpoints
-app.include_router(api_router, prefix="/api/v1")
+# Create the application instance
+app = create_application()
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Initialize application services on startup"""
+    logger.info("🚀 Starting AudioKit AI service...")
+
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Cleanup resources on shutdown"""
+    logger.info("🛑 Shutting down AudioKit AI service...")
 
 
 @app.middleware("http")

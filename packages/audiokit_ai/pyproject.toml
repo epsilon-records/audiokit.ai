@@ -49,8 +49,9 @@ dependencies = [
     "python-multipart",
     "python-jose==3.3.0",
     "psutil",
-    "websockets>=10.0",
     "uvicorn[standard]",
+    "python-socketio[asgi]",
+    "aiohttp",
 ]
 
 [project.optional-dependencies]

@@ -11,11 +11,14 @@
 
 import asyncio
 import base64
+import hashlib
 import io
 import json
 import os
 import tempfile
 import time
+from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 
 import faiss
 import matchering as mg
@@ -26,6 +29,8 @@ import torch
 import torchaudio
 import whisper
 from demucs import separate
+from demucs.apply import apply_model
+from demucs.pretrained import get_model
 from df import enhance, init_df
 from fastapi import HTTPException, UploadFile
 from google.cloud import speech_v1p1beta1 as speech
@@ -303,95 +308,142 @@ async def apply_effects(file: UploadFile, effects: list) -> bytes:
         raise RuntimeError(f"Audio effects failed: {e!s}")
 
 
-async def denoise_music(file: UploadFile, progress_callback: callable = None) -> dict:
-    """Denoise music using Open-Unmix source separation model for enhanced audio."""
+# Cache for processed chunks
+CHUNK_CACHE = {}
+CACHE_SIZE_LIMIT = 1000  # Maximum number of chunks to cache
+
+
+@lru_cache(maxsize=1000)
+def process_chunk(chunk_hash: str, model):
+    """Process a chunk using the cached result if available."""
+    chunk_tensor = CHUNK_CACHE[chunk_hash]["tensor"]
+    return model(chunk_tensor)
+
+
+def get_chunk_hash(chunk: torch.Tensor) -> str:
+    """Generate a hash for a chunk of audio."""
+    # Convert to numpy and get bytes
+    chunk_bytes = chunk.cpu().numpy().tobytes()
+    # Generate hash
+    return hashlib.md5(chunk_bytes).hexdigest()
+
+
+def cache_chunk(chunk: torch.Tensor, chunk_hash: str):
+    """Cache a chunk with its hash."""
+    # Remove oldest item if cache is full
+    if len(CHUNK_CACHE) >= CACHE_SIZE_LIMIT:
+        oldest_key = next(iter(CHUNK_CACHE))
+        del CHUNK_CACHE[oldest_key]
+
+    CHUNK_CACHE[chunk_hash] = {
+        "tensor": chunk,
+        "timestamp": time.time(),
+    }
+
+
+# Initialize Demucs model at module level
+demucs_model = get_model("mdx_extra")  # Use the MDX-Extra music separation model
+demucs_model.eval()
+if torch.cuda.is_available():
+    demucs_model = demucs_model.cuda()
+
+
+# Create a global thread pool executor
+PROCESS_EXECUTOR = ThreadPoolExecutor(max_workers=4)  # Adjust based on CPU cores
+
+
+async def denoise_music(
+    file: UploadFile,
+    work_dir: str = None,
+    progress_callback: callable = None,
+) -> dict:
+    """Denoise music using Demucs denoising model with isolated working directory."""
     try:
-        logger.info("🎵 Starting music denoising process using Open-Unmix")
+        logger.info("🎵 Starting music denoising process")
         start_time = time.time()
 
-        # Save the uploaded file temporarily
-        temp_path = await save_temp_file(file)
+        # Create work directory if not provided
+        if work_dir is None:
+            work_dir = tempfile.mkdtemp(prefix="denoise_")
+
+        # Use work_dir for temporary files
+        temp_path = os.path.join(work_dir, "input.wav")
+
+        # Save the uploaded file to work directory
+        with open(temp_path, "wb") as f:
+            f.write(await file.read())
         logger.info(f"📁 Saved uploaded file to: {temp_path}")
 
         if progress_callback:
             await progress_callback(10)
             logger.info("📊 File saved: 10%")
 
-        # Load audio file using TorchAudio
-        logger.info(f"🎧 Loading audio file: {file.filename}")
-        waveform, sr = torchaudio.load(temp_path)
-        logger.info(
-            f"📊 Audio specs - Channels: {waveform.shape[0]}, Sample rate: {sr}, Duration: {waveform.shape[1] / sr:.2f}s",
-        )
+        # Load audio using torchaudio
+        waveform, sample_rate = torchaudio.load(temp_path)
 
-        # Ensure stereo: if mono, replicate channels
+        # Ensure stereo
         if waveform.shape[0] == 1:
             waveform = waveform.repeat(2, 1)
-            logger.info("🔊 Converted mono to stereo")
+        elif waveform.shape[0] > 2:
+            waveform = waveform[:2]  # Take first two channels
 
-        if progress_callback:
-            await progress_callback(20)
-            logger.info("📊 Audio loaded: 20%")
+        # Add batch dimension
+        waveform = waveform.unsqueeze(0)
 
-        # Determine device and move waveform to device
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        waveform = waveform.to(device)
+        if torch.cuda.is_available():
+            waveform = waveform.cuda()
 
-        # Load Open-Unmix model from torch.hub
-        logger.info("🔄 Loading Open-Unmix model (umxl)")
-        separator = torch.hub.load("sigsep/open-unmix-pytorch", "umxl", device=device)
-        separator.eval()
-        logger.info("✅ Open-Unmix model loaded")
+        # Process in chunks
+        chunk_size = 10 * sample_rate  # 10 second chunks
+        total_chunks = (waveform.shape[-1] + chunk_size - 1) // chunk_size
+        processed_chunks = []
 
-        if progress_callback:
-            await progress_callback(40)
-            logger.info("📊 Model loaded: 40%")
+        # Process in chunks using thread pool
+        loop = asyncio.get_event_loop()
 
-        # Run separation using Open-Unmix
-        with torch.no_grad():
-            estimates = separator(waveform)
+        for i in range(total_chunks):
+            start = i * chunk_size
+            end = min(start + chunk_size, waveform.shape[-1])
+            chunk = waveform[..., start:end].clone()
 
-        # Handle output from Open-Unmix: ensure dict format.
-        # If a tensor is returned, wrap it in a dict as 'vocals'
-        if isinstance(estimates, torch.Tensor):
-            estimates = {"vocals": estimates}
-            logger.info(
-                "ℹ️ Open-Unmix returned tensor output, treating it as 'vocals' stem",
+            # Offload processing to thread pool
+            processed = await loop.run_in_executor(
+                PROCESS_EXECUTOR,
+                process_chunk_sync,  # Synchronous processing function
+                chunk,
+                demucs_model,
+                i,  # Pass chunk index for logging
             )
-        else:
-            logger.info("ℹ️ Open-Unmix returned dictionary of separated sources")
 
-        if progress_callback:
-            await progress_callback(60)
-            logger.info("📊 Separation complete: 60%")
+            processed_chunks.append(processed.cpu())
 
-        # Mix the separated sources to reconstruct a denoised audio.
-        # Here we assume that if multiple stems are available (vocals, drums, bass, other)
-        # we sum them with a reduced gain for 'other' to help reduce noise.
-        if "vocals" in estimates and len(estimates) > 1:
-            vocals = estimates.get("vocals", 0)
-            drums = estimates.get("drums", 0)
-            bass = estimates.get("bass", 0)
-            other = estimates.get("other", 0)
-            denoised = vocals + drums + bass + 0.5 * other
-            logger.info("✅ Mixed multiple stems for denoised output")
-        else:
-            # If only a single stem is returned, use it directly.
-            denoised = list(estimates.values())[0]
-            logger.info("✅ Single stem available, using it for denoised output")
+            # Update progress
+            if progress_callback:
+                progress = min(int((i + 1) * 80 / total_chunks) + 10, 90)
+                await progress_callback(progress)
+                logger.info(f"📊 Processing progress: {progress}%")
 
-        # Ensure the denoised audio is on CPU
-        denoised = denoised.cpu()
+        # Combine chunks
+        denoised = torch.cat(processed_chunks, dim=-1)
+        denoised = denoised.squeeze(0)  # Remove batch dimension
 
-        if progress_callback:
-            await progress_callback(80)
-            logger.info("📊 Mixing complete: 80%")
+        # Ensure the tensor is 2D (channels x samples)
+        if len(denoised.shape) != 2:
+            if len(denoised.shape) == 3:
+                denoised = denoised.squeeze(0)  # Remove any extra batch dimension
+            elif len(denoised.shape) == 1:
+                denoised = denoised.unsqueeze(0)  # Add channel dimension
 
-        # Save the processed file to a temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_file:
-            torchaudio.save(temp_file.name, denoised, sr)
-            output_path = temp_file.name
-            logger.info(f"💾 Saved denoised file: {output_path}")
+        # Ensure the tensor is on CPU and in the correct format
+        denoised = denoised.cpu().float()
+
+        # Log tensor shape for debugging
+        logger.debug(f"Final tensor shape before saving: {denoised.shape}")
+
+        # Save result to work directory
+        output_path = os.path.join(work_dir, "output.wav")
+        torchaudio.save(output_path, denoised, sample_rate)
+        logger.info(f"💾 Saved processed file: {output_path}")
 
         if progress_callback:
             await progress_callback(100)
@@ -401,5 +453,32 @@ async def denoise_music(file: UploadFile, progress_callback: callable = None) ->
         return {"status": "success", "file_path": output_path}
 
     except Exception as e:
-        logger.error(f"❌ Error during music denoising with Open-Unmix: {e}")
+        logger.error(f"❌ Error during music denoising in {work_dir}: {e!s}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+def process_chunk_sync(chunk: torch.Tensor, model, chunk_idx: int):
+    """Synchronous chunk processing to run in thread pool"""
+    try:
+        # Generate hash for chunk
+        chunk_hash = get_chunk_hash(chunk)
+
+        # Check cache
+        if chunk_hash in CHUNK_CACHE:
+            processed = process_chunk(
+                chunk_hash,
+                lambda x: apply_model(model, x),
+            )
+            logger.debug(f"✅ Cache hit for chunk {chunk_idx}")
+            return processed
+
+        # Process chunk and cache result
+        with torch.no_grad():
+            processed = apply_model(model, chunk)
+        cache_chunk(chunk, chunk_hash)
+        logger.debug(f"❌ Cache miss for chunk {chunk_idx}")
+        return processed
+
+    finally:
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
