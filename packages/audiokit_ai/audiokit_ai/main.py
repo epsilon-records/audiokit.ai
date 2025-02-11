@@ -11,6 +11,7 @@
 
 import multiprocessing
 import os
+import sys
 
 import redis.asyncio as redis
 from dotenv import load_dotenv
@@ -44,6 +45,19 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+# Add/modify the logger configuration near the top of the file
+logger.remove()
+logger.add(
+    sys.stdout,
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+    "<level>{level.icon} {level}</level> | "
+    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+    level="DEBUG",
+    colorize=True,
+    backtrace=True,
+    diagnose=True,
 )
 
 

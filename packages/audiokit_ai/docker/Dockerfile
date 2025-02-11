@@ -46,10 +46,6 @@ ENV NCCL_VERSION=2.18.3
 # Set up non-root user (security best practice)
 RUN useradd --create-home appuser
 
-# Create supervisor directories and set permissions
-RUN mkdir -p /etc/supervisor/conf.d && \
-    chown -R appuser:appuser /etc/supervisor
-
 # Use a dedicated directory for better organization
 WORKDIR /app
 
@@ -105,11 +101,8 @@ RUN mkdir -p /home/appuser/.cache/DeepFilterNet && \
     mkdir -p /home/appuser/logs && \
     chown -R appuser:appuser /home/appuser
 
-# Add supervisor config
-COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-
-# Start via supervisor
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/v1/health || exit 1
+
+# Start the application directly with uvicorn
+CMD ["uvicorn", "audiokit_ai.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]

@@ -9,18 +9,17 @@
 # This file is part of the AudioKit AI package.
 #
 
+import asyncio
 import base64
 import io
 import json
 import os
 import tempfile
-import time
 
 import faiss
 import matchering as mg
 import numpy as np
 import openl3
-import psutil
 import soundfile as sf
 import torch
 import torchaudio
@@ -29,14 +28,8 @@ from demucs import separate
 from df import enhance, init_df
 from fastapi import UploadFile
 from google.cloud import speech_v1p1beta1 as speech
-from scipy.signal import resample
 
 from audiokit_ai.core.logger import logger
-
-from .exceptions import (
-    FileTooLargeError,
-    InsufficientMemoryError,
-)
 
 
 # Initialize DeepFilterNet using the recommended API
@@ -103,10 +96,18 @@ def get_tensorflow():
 
 class ProcessingState:
     def __init__(self):
-        self.progress = 0
+        self._progress = 0
+        self._lock = asyncio.Lock()  # Add lock for thread safety
 
-    def get_progress(self):
-        return self.progress
+    async def set_progress(self, value: float):
+        """Set the current progress value."""
+        async with self._lock:
+            self._progress = value
+            logger.debug(f"Progress updated to: {value}%")
+
+    def get_progress(self) -> float:
+        """Get the current progress value."""
+        return self._progress
 
 
 processing_state = ProcessingState()
@@ -117,184 +118,62 @@ def get_progress():
     return processing_state.get_progress()
 
 
-async def denoise(file: UploadFile) -> dict:
-    """Reduce noise using DeepFilterNet"""
+async def denoise_speech(file: UploadFile, progress_callback: callable = None) -> dict:
+    """Reduce noise in speech/vocal audio using DeepFilterNet"""
     try:
-        # Track processing start time
-        start_time = time.time()
+        # Save the uploaded file temporarily
+        temp_path = await save_temp_file(file)
 
-        # Set default chunk size (10 seconds of audio at 48kHz)
-        chunk_size = 10 * 48000  # 480000 samples
+        # Get audio info
+        info = sf.info(temp_path)
+        total_frames = info.frames
+        chunk_size = 1024 * 1024  # 1MB chunks
 
-        # Reduce chunk size if memory is low
-        if (
-            psutil.virtual_memory().available < 1 * 1024 * 1024 * 1024
-        ):  # Less than 1GB available
-            chunk_size = 5 * 48000  # Reduce to 5-second chunks
-            logger.info("Reduced chunk size due to low memory")
+        # Calculate number of chunks for accurate progress
+        num_chunks = (total_frames + chunk_size - 1) // chunk_size
 
-        # Update progress
-        processing_state.progress = 0
-
-        # Validate file size
-        if file.size > 100 * 1024 * 1024:  # 100MB limit
-            raise FileTooLargeError("File too large (max 100MB)")
-
-        # Add memory monitoring
-        process = psutil.Process()
-        logger.debug(
-            f"Initial memory usage: {process.memory_info().rss / 1024 / 1024:.2f} MB",
-        )
-
-        # Add verbose logging
-        logger.info("Starting denoising process...")
-        file_size = len(await file.read())
-        await file.seek(0)
-        logger.debug(f"Processing file size: {file_size} bytes")
-
-        # Check memory
-        if psutil.virtual_memory().percent > 90:
-            raise InsufficientMemoryError("System memory threshold exceeded")
-
-        logger.info("Reading audio file...")
-        audio_bytes = await file.read()
-
-        # Read audio file
-        with io.BytesIO(audio_bytes) as audio_buffer:
-            try:
-                audio, sample_rate = sf.read(audio_buffer)
-            except Exception as e:
-                logger.error(f"Error reading audio file: {e}")
-                raise RuntimeError(f"Invalid audio file: {e}")
-
-        # Handle stereo audio
-        is_stereo = len(audio.shape) > 1 and audio.shape[1] == 2
-        if is_stereo:
-            logger.warning("Stereo file detected - converting to mono for processing")
-            # Convert to mono by averaging channels
-            audio = np.mean(audio, axis=1)
-            # Ensure mono shape is (n_samples,)
-            audio = np.squeeze(audio)
-
-        # Handle sample rate conversion
-        if sample_rate != 48000:
-            logger.warning(f"Resampling audio from {sample_rate}Hz to 48kHz")
-            num_samples = int(len(audio) * 48000 / sample_rate)
-            audio = resample(audio, num_samples)
-            sample_rate = 48000
-
-        # Split the audio into smaller chunks to reduce memory usage
-        chunks = [audio[i : i + chunk_size] for i in range(0, len(audio), chunk_size)]
-
-        # Store original sample rate
-        original_sample_rate = sample_rate
-
-        # Process chunks with progress
-        total_chunks = len(chunks)
+        # Process in chunks
         processed_chunks = []
-        for i, chunk in enumerate(chunks):
-            try:
-                # Update progress more frequently
-                progress = (i / total_chunks) * 100
-                processing_state.progress = progress
-                logger.info(
-                    f"Processing chunk {i + 1}/{total_chunks} ({progress:.1f}%) - State progress: {processing_state.get_progress()}",
-                )
-
-                # Log memory before processing
-                logger.debug(
-                    f"Memory before chunk: {process.memory_info().rss / 1024 / 1024:.2f} MB",
-                )
-
+        with sf.SoundFile(temp_path) as infile:
+            for i, chunk in enumerate(infile.blocks(chunk_size)):
                 # Process chunk
                 audio_tensor = torch.from_numpy(chunk).float()
-
-                # Ensure tensor has correct shape (1, n_samples)
                 if len(audio_tensor.shape) == 1:
                     audio_tensor = audio_tensor.unsqueeze(0)
-
                 processed = enhance(model, df_state, audio_tensor)
-
-                # Log memory after processing
-                logger.debug(
-                    f"Memory after chunk: {process.memory_info().rss / 1024 / 1024:.2f} MB",
-                )
-
-                # Convert the processed audio back to NumPy array
                 processed_chunks.append(processed.squeeze().numpy())
 
-                # Manual memory management
+                # Update progress (ensure it doesn't exceed 100%)
+                if progress_callback:
+                    progress = min(int((i + 1) * 100 / num_chunks), 100)
+                    await progress_callback(progress)
+                    logger.info(f"Processing progress: {progress}%")
+
+                # Clean up
                 del audio_tensor
                 if torch.cuda.is_available():
                     torch.cuda.empty_cache()
-                    logger.debug(
-                        f"GPU memory: {torch.cuda.memory_allocated() / 1024 / 1024:.2f} MB used",
-                    )
 
-                # Update progress after chunk completion
-                progress = ((i + 1) / total_chunks) * 100
-                processing_state.progress = progress
-                logger.info(
-                    f"Completed chunk {i + 1}/{total_chunks} ({progress:.1f}%) - State progress: {processing_state.get_progress()}",
-                )
-
-            except Exception as e:
-                logger.error(f"Error processing chunk: {e}")
-                raise RuntimeError(f"Chunk processing failed: {e}")
-
-            finally:
-                import gc
-
-                gc.collect()
-
-        # Combine the processed chunks into a single array
+        # Combine processed chunks
         processed_audio = np.concatenate(processed_chunks)
 
-        # Convert back to stereo if input was stereo
-        if is_stereo:
-            # Ensure processed audio is 1D before converting to stereo
-            if len(processed_audio.shape) == 1:
-                processed_audio = np.column_stack((processed_audio, processed_audio))
-                logger.info("Converted processed audio back to stereo")
-            else:
-                logger.warning("Processed audio already has multiple channels")
+        # Send 100% progress before saving
+        if progress_callback:
+            await progress_callback(100)
+            logger.info("Processing complete: 100%")
 
-        # Convert back to original sample rate
-        if sample_rate != original_sample_rate:
-            logger.info(f"Resampling back to original rate: {original_sample_rate}Hz")
-            num_samples = int(len(processed_audio) * original_sample_rate / sample_rate)
-            processed_audio = resample(processed_audio, num_samples)
-            sample_rate = original_sample_rate
+        # Save result to temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as temp_file:
+            sf.write(temp_file.name, processed_audio, info.samplerate)
+            logger.info(f"Saved processed file: {temp_file.name}")
 
-        # Convert the processed audio back to bytes
-        with io.BytesIO() as output_buffer:
-            sf.write(output_buffer, processed_audio, sample_rate, format="WAV")
-            output_buffer.seek(0)
-            processed_bytes = output_buffer.read()
-
-        logger.info("Denoising completed successfully.")
-
-        # Add metrics to response
-        return {
-            "result": processed_bytes,
-            "warnings": ["Stereo file converted to mono for processing"]
-            if is_stereo
-            else [],
-            "metrics": {
-                "input_size": file_size,
-                "output_size": len(processed_bytes),
-                "processing_time": time.time() - start_time,
-                "noise_reduction_db": 12.5,
-                "input_channels": 2 if is_stereo else 1,
-                "output_channels": 2 if is_stereo else 1,
-            },
-        }
+        return {"status": "success", "file_path": temp_file.name}
     except Exception as e:
-        logger.error(f"Error during denoising: {e}")
-        raise RuntimeError(f"Noise reduction failed: {e!s}")
+        logger.error(f"Error during speech denoising: {e}")
+        raise RuntimeError(f"Speech denoising failed: {e}")
 
 
-async def separate_audio(file: UploadFile) -> dict:
+async def separate_stems(file: UploadFile) -> dict:
     """Separate audio into stems using Demucs"""
     try:
         # Save the uploaded file temporarily
@@ -421,6 +300,3 @@ async def apply_effects(file: UploadFile, effects: list) -> bytes:
         return waveform
     except Exception as e:
         raise RuntimeError(f"Audio effects failed: {e!s}")
-
-
-# Add other processing functions here...

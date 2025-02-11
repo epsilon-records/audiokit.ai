@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  audiokit_ai:
+    image: audiokit_ai:latest
+    container_name: audiokit_ai
+    ports:
+      - "8000:8000"
+    environment:
+      - WORKERS=1  # Ensure only one worker is running
+    command: uvicorn audiokit_ai.main:app --host 0.0.0.0 --port 8000 --workers 1 

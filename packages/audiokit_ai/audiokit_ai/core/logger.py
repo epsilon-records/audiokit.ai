@@ -1,16 +1,18 @@
 # CONFIDENTIAL AND PROPRIETARY
-# 
+#
 # Copyright (c) 2025 AudioKit.ai. All rights reserved.
-# 
+#
 # This software is confidential and proprietary.
-# 
+#
 
-# 
+#
 # This file is part of the AudioKit AI package.
-# 
+#
+
+import sys
 
 from loguru import logger
-import sys
+
 
 # Custom log format with emojis
 LOG_FORMAT = (
@@ -19,8 +21,7 @@ LOG_FORMAT = (
     "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
 )
 
-# Configure logger
-logger.remove()  # Remove default logger
+# Add our single handler
 logger.add(
     sys.stdout,
     format=LOG_FORMAT,
@@ -40,4 +41,4 @@ logger.level("SUCCESS", icon="✅")
 logger.level("TRACE", icon="🔍")
 
 # Export logger for use in other modules
-__all__ = ["logger"] 
+__all__ = ["logger"]
