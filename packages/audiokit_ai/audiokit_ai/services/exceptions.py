@@ -1,5 +1,5 @@
 class AudioProcessingError(Exception):
-    """Base class for audio processing errors"""
+    """Base class for audio processing exceptions"""
 
     status_code = 500
 
@@ -20,3 +20,15 @@ class InsufficientMemoryError(AudioProcessingError):
     """Raised when system memory is insufficient"""
 
     status_code = 507
+
+
+class ResourceError(AudioProcessingError):
+    """Raised when system resources are unavailable"""
+
+    status_code = 503
+
+
+class ProcessingError(AudioProcessingError):
+    """Raised when audio processing fails"""
+
+    status_code = 500

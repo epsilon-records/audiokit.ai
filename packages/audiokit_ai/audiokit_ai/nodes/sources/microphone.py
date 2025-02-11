@@ -1,13 +1,13 @@
 # CONFIDENTIAL AND PROPRIETARY
-# 
+#
 # Copyright (c) 2025 AudioKit.ai. All rights reserved.
-# 
+#
 # This software is confidential and proprietary.
-# 
+#
 
-# 
+#
 # This file is part of the AudioKit AI package.
-# 
+#
 
 """
 Microphone Source Node Implementation
@@ -16,13 +16,14 @@ Handles real-time audio input from system audio devices using sounddevice.
 Provides configurable input settings and automatic device selection.
 """
 
-from typing import Optional, Dict, Any, List
+from typing import Any, Dict, List, Optional
+
 import numpy as np
 import sounddevice as sd
 from loguru import logger
 
-from audiokit_ai.nodes.source import SourceNode
 from audiokit_ai.nodes.base import Parameter
+from audiokit_ai.nodes.source import SourceNode
 
 
 class MicrophoneNode(SourceNode):
@@ -94,7 +95,7 @@ class MicrophoneNode(SourceNode):
         self._rms_level = 0.0
 
         logger.debug(
-            f"🔧 Configured microphone node {name} with {channels} channels @ {sample_rate}Hz"
+            f"🔧 Configured microphone node {name} with {channels} channels @ {sample_rate}Hz",
         )
 
     def _setup_stream(self) -> None:
@@ -118,7 +119,7 @@ class MicrophoneNode(SourceNode):
                 # Use first matching device
                 self._device_id = input_devices[0][0]
                 logger.info(
-                    f"📱 Selected input device: {devices[self._device_id]['name']}"
+                    f"📱 Selected input device: {devices[self._device_id]['name']}",
                 )
 
             # Create input stream
@@ -132,7 +133,7 @@ class MicrophoneNode(SourceNode):
             logger.debug("🔌 Created audio input stream")
 
         except Exception as e:
-            logger.error(f"❌ Failed to setup audio input: {str(e)}")
+            logger.error(f"❌ Failed to setup audio input: {e!s}")
             raise
 
     def _audio_callback(
@@ -144,7 +145,7 @@ class MicrophoneNode(SourceNode):
     ) -> None:
         """Handle incoming audio data from sounddevice."""
         if status:
-            logger.warning(f"⚠️ Audio callback status: {str(status)}")
+            logger.warning(f"⚠️ Audio callback status: {status!s}")
 
         # Update input buffer
         self._buffer = indata.copy()
@@ -154,7 +155,7 @@ class MicrophoneNode(SourceNode):
         self._rms_level = np.sqrt(np.mean(indata**2))
 
         logger.trace(
-            f"📊 Input levels - Peak: {self._peak_level:.2f}, RMS: {self._rms_level:.2f}"
+            f"📊 Input levels - Peak: {self._peak_level:.2f}, RMS: {self._rms_level:.2f}",
         )
 
     def start(self, time: Optional[float] = None) -> None:
@@ -203,7 +204,7 @@ class MicrophoneNode(SourceNode):
 
                 logger.trace(
                     f"🔊 Processed channel {i} with gain={input_gain:.2f}, "
-                    f"DC offset={dc_offset:.2f}"
+                    f"DC offset={dc_offset:.2f}",
                 )
 
         # Update metrics

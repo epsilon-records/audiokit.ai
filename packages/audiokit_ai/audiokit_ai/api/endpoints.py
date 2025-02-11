@@ -12,6 +12,7 @@
 
 import asyncio
 import base64
+import time
 from typing import Dict
 from uuid import uuid4
 
@@ -35,13 +36,24 @@ except ImportError:
 
 from audiokit_ai.core.security import verify_token
 from audiokit_ai.services import processing
+from audiokit_ai.services.exceptions import (
+    InvalidAudioFormatError,
+    ProcessingError,
+    ResourceError,
+)
 
 
 router = APIRouter()
 
 
 # Initialize Socket.IO
-sio = AsyncServer(async_mode="asgi", cors_allowed_origins="*")
+sio = AsyncServer(
+    async_mode="asgi",
+    cors_allowed_origins="*",
+    ping_interval=25,  # 25 seconds between pings
+    ping_timeout=60,  # Wait 60 seconds for pong response
+    max_http_buffer_size=100 * 1024 * 1024,  # 100MB
+)
 socket_app = ASGIApp(socketio_server=sio)
 
 
@@ -70,6 +82,8 @@ progress_tracker = ProgressTracker()
 @sio.on("connect")
 async def handle_connect(sid, environ):
     logger.debug(f"Client connected: {sid}")
+    await sio.save_session(sid, {"last_ping": time.time()})
+    await sio.emit("heartbeat", {"ts": time.time()}, to=sid)
 
 
 @sio.on("disconnect")
@@ -106,7 +120,14 @@ async def handle_subscribe(sid, data):
 
 async def broadcast_progress(task_id: str, progress: int):
     """Update progress for all subscribed clients"""
-    await progress_tracker.update_progress(task_id, progress)
+    try:
+        await sio.emit(
+            "progress",
+            {"task_id": task_id, "progress": progress},
+            room=task_id,
+        )
+    except Exception as e:
+        logger.warning(f"Progress broadcast failed: {e!s}")
 
 
 # Common processing handler
@@ -228,3 +249,18 @@ async def detect_genre(file: UploadFile = File(...)):
         return {"status": "success", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/denoise")
+async def denoise_endpoint(file: UploadFile = File(...)):
+    try:
+        return await denoise_music(file)
+    except InvalidAudioFormatError as e:
+        raise HTTPException(400, detail=str(e))
+    except ResourceError as e:
+        raise HTTPException(503, detail=str(e))
+    except ProcessingError as e:
+        raise HTTPException(500, detail=str(e))
+    except Exception as e:
+        logger.error(f"Unexpected error: {e!s}")
+        raise HTTPException(500, detail="Internal server error")

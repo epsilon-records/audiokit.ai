@@ -9,6 +9,7 @@
 # This file is part of the AudioKit AI package.
 #
 
+import asyncio
 import multiprocessing
 import os
 import sys
@@ -86,6 +87,13 @@ def create_application() -> FastAPI:
         logger.info(
             f"Initialized multiprocessing with {multiprocessing.cpu_count()} cores",
         )
+
+        # Get the running loop
+        loop = asyncio.get_running_loop()
+
+        # Override default keep-alive timeout (300s = 5min)
+        if (transport := loop.get_debug()) and hasattr(transport, "_protocol"):
+            transport._protocol.keepalive_timeout = 600  # 10 minutes
 
     # Include API endpoints
     app.include_router(router, prefix="/api/v1")

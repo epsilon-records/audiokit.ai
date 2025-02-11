@@ -15,6 +15,7 @@ import hashlib
 import io
 import json
 import os
+import shutil
 import tempfile
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -32,7 +33,7 @@ from demucs import separate
 from demucs.apply import apply_model
 from demucs.pretrained import get_model
 from df import enhance, init_df
-from fastapi import HTTPException, UploadFile
+from fastapi import UploadFile
 from google.cloud import speech_v1p1beta1 as speech
 
 from audiokit_ai.core.logger import logger
@@ -362,9 +363,14 @@ async def denoise_music(
         logger.info("🎵 Starting music denoising process")
         start_time = time.time()
 
+        # Validate input file
+        if not file.filename.lower().endswith((".wav", ".flac", ".mp3")):
+            raise InvalidAudioFormatError("Unsupported file format")
+
         # Create work directory if not provided
         if work_dir is None:
             work_dir = tempfile.mkdtemp(prefix="denoise_")
+            logger.debug(f"Created temporary work directory: {work_dir}")
 
         # Use work_dir for temporary files
         temp_path = os.path.join(work_dir, "input.wav")
@@ -452,9 +458,25 @@ async def denoise_music(
         logger.info(f"✅ Processing complete in {time.time() - start_time:.2f}s")
         return {"status": "success", "file_path": output_path}
 
+    except InvalidAudioFormatError as e:
+        logger.error(f"❌ Invalid audio format: {e!s}")
+        raise
+    except torch.cuda.OutOfMemoryError:
+        logger.critical("💥 GPU out of memory during denoising")
+        raise ResourceError("GPU memory exhausted")
+    except RuntimeError as e:
+        logger.error(f"🔧 Torch runtime error: {e!s}")
+        raise ProcessingError(f"Processing failed: {e!s}")
     except Exception as e:
-        logger.error(f"❌ Error during music denoising in {work_dir}: {e!s}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.opt(exception=True).error(
+            f"💥 Unexpected error during denoising: {type(e).__name__}",
+        )
+        raise ProcessingError(f"Denoising failed: {e!s}")
+    finally:
+        # Add cleanup logic here
+        if work_dir and os.path.exists(work_dir):
+            logger.debug(f"🧹 Cleaning up work directory: {work_dir}")
+            shutil.rmtree(work_dir)
 
 
 def process_chunk_sync(chunk: torch.Tensor, model, chunk_idx: int):
