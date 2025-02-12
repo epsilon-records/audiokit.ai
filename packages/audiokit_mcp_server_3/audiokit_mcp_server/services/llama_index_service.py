@@ -1,7 +1,7 @@
 from typing import List
 
 from llama_index.core import VectorStoreIndex
-from llama_index.core.schema import Node
+from llama_index.core.schema import TextNode
 from llama_index.core.settings import Settings as LlamaSettings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openrouter import OpenRouter
@@ -207,7 +207,7 @@ class LlamaIndexService:
         # Generate an embedding using the current embed_model from LlamaSettings.
         embedding = LlamaSettings.embed_model.get_text_embedding(new_document)
 
-        new_node = Node(
+        new_node = TextNode(
             text=new_document,
             embedding=embedding,
             metadata=context_metadata,
@@ -247,7 +247,7 @@ class LlamaIndexService:
         # Generate an embedding for the document.
         embedding = LlamaSettings.embed_model.get_text_embedding(document)
 
-        new_node = Node(
+        new_node = TextNode(
             text=document,
             embedding=embedding,
             metadata=metadata,
