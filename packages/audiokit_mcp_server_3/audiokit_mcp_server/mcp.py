@@ -1,5 +1,3 @@
-from typing import Any, Dict
-
 from fastapi import APIRouter, Body
 from pydantic import BaseModel
 from structlog import get_logger
@@ -30,18 +28,18 @@ class MCPRouter:
         """Setup MCP routes."""
         self.router.post("/process")(self.process)
 
-    async def process(self, request: QueryRequest = Body(...)) -> Dict[str, Any]:
+    async def process(self, query: str = Body(...)) -> dict:
         """Process an MCP request."""
         try:
-            # Process the request using llama_index_service
-            query_response = await self.llama_index_service.query(request.query)
-            return {
-                "status": "success",
-                "response": {
-                    "answer": query_response["answer"],
-                    "sources": query_response["sources"],
-                },
-            }
+            # Retrieve the answer and sources from the query
+            result = await self.llama_index_service.query(query)
+
+            # Write back the LLM output to the vector store so that future queries can improve.
+            # Note: writeback_llm_output is a synchronous function; if needed, you can wrap it in
+            # an executor to avoid blocking.
+            self.llama_index_service.writeback_llm_output(query, result["answer"])
+
+            return {"status": "success", "response": result}
         except Exception as e:
             logger.error("Failed to process MCP request", error=str(e))
             return {"status": "error", "message": str(e)}

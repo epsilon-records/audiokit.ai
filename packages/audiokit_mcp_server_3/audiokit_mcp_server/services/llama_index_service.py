@@ -176,6 +176,37 @@ class LlamaIndexService:
             logger.error("Filtered query failed", error=str(e))
             raise
 
+    def writeback_llm_output(
+        self, query: str, llm_output: str, context_metadata: dict = None
+    ) -> None:
+        """
+        Write the LLM's output back to the vector store as a new node.
+
+        The document is formed by combining the original query and the LLM's answer.
+        An embedding is generated for this document, and then the node is upserted into the Pinecone index.
+        """
+        new_document = f"Query: {query}\nLLM Response: {llm_output}"
+        if context_metadata is None:
+            context_metadata = {}
+
+        # Generate an embedding using the current embed_model from LlamaSettings.
+        embedding = LlamaSettings.embed_model.get_text_embedding(new_document)
+
+        new_node = {
+            "text": new_document,
+            "metadata": context_metadata,
+            "score": 1.0,  # You can adjust how you wish to score or flag new nodes.
+            "embedding": embedding,
+        }
+
+        try:
+            # Upsert the new node into the existing vector store.
+            self.vector_store.upsert_nodes([new_node])
+            logger.info("LLM output written back to vector store", new_node=new_node)
+        except Exception as e:
+            logger.error("Failed to writeback LLM output", error=str(e))
+            raise
+
     def get_index_stats(self) -> dict:
         """Get statistics about the index."""
         try:
