@@ -1,0 +1,23 @@
+AudioKit MCP Server v2.0 - Basic MCP Integration
+
+Objective
+
+Implement the foundational AudioKit MCP Server v2.0 using FastAPI and the Model Context Protocol (MCP) SDK. This version will focus exclusively on MCP integration, ensuring clean, modular, and well-documented code.
+
+Core Specifications
+	•	Language: Python 3.10
+	•	Package Manager: Poetry
+	•	Framework: FastAPI
+	•	MCP Integration: MCP Python SDK
+	•	Best Practices: Type hints, docstrings, and structured logging
+
+Implementation Plan
+	1.	Set up a FastAPI server using Poetry for dependency management
+	2.	Integrate MCP SDK to register an MCP-compatible API
+	3.	Implement basic handlers for MCP request handling
+	4.	Provide structured logging and clear API documentation
+
+Deliverables
+	1.	Minimal FastAPI MCP Server with MCP-compliant endpoints
+	2.	Poetry-based project structure with best practices
+	3.	Well-documented API (Swagger/OpenAPI)

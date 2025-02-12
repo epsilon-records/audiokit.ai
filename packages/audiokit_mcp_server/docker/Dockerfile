@@ -31,4 +31,4 @@ ENV PYTHONUNBUFFERED=1
 EXPOSE 8000
 
 # Run uvicorn directly
-CMD ["uvicorn", "audiokit_mcp_server.main:app", "--host", "0.0.0.0", "--port", "8000"] 
+CMD ["uvicorn", "audiokit_mcp_server.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"] 

@@ -15,6 +15,8 @@ from audiokit_mcp_server.handlers.audio_converter import (
     convert_audio,
 )
 from audiokit_mcp_server.handlers.audio_handler import ingest_audio, search_audio
+from audiokit_mcp_server.handlers.ingestion_pipeline import ingestion_pipeline
+from audiokit_mcp_server.handlers.llama_index_handler import llama_index_handler
 from audiokit_mcp_server.models.spotify_analytics_request import SpotifyAnalyticsRequest
 
 
@@ -43,6 +45,8 @@ mcp_server = FastMCP(
         "scipy",
         "pinecone-client",
         "ffmpeg-python",
+        "llama-index",
+        "llama-index-vector-stores-pinecone",
     ],
 )
 
@@ -69,9 +73,9 @@ async def convert_audio_endpoint(request: dict):
     return await convert_audio(request)
 
 
-@router.post("/analyze/spotify")
+@router.post("/analyze")
 async def analyze_spotify_endpoint(request: SpotifyAnalyticsRequest):
-    """Analyze Spotify artist data"""
+    """Analyze artist data."""
     return await analyze_spotify_uri(request)
 
 
@@ -87,6 +91,52 @@ async def test_soundcharts_endpoint():
         return await analyze_spotify_uri(test_request)
     except Exception as e:
         logger.error(f"Soundcharts RAG test failed: {e!s}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/query")
+async def query_endpoint(request: dict):
+    """Query the LlamaIndex with natural language"""
+    try:
+        query = request.get("query")
+        top_k = request.get("top_k", 5)
+        if not query:
+            raise HTTPException(status_code=400, detail="Query is required")
+        return await llama_index_handler.query(query, top_k)
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Query endpoint failed: {e!s}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/ingest/metadata")
+async def ingest_metadata_endpoint(request: dict):
+    """Ingest audio metadata"""
+    try:
+        return await ingestion_pipeline.ingest_audio_metadata(request)
+    except Exception as e:
+        logger.error(f"Metadata ingestion failed: {e!s}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/ingest/text")
+async def ingest_text_endpoint(request: dict):
+    """Ingest text documents"""
+    try:
+        return await ingestion_pipeline.ingest_text_documents(request["documents"])
+    except Exception as e:
+        logger.error(f"Text ingestion failed: {e!s}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/ingest/file")
+async def ingest_file_endpoint(file_path: str):
+    """Ingest data from file"""
+    try:
+        return await ingestion_pipeline.ingest_from_file(file_path)
+    except Exception as e:
+        logger.error(f"File ingestion failed: {e!s}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

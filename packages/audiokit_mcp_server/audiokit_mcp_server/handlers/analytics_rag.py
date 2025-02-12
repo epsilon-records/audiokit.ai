@@ -36,10 +36,10 @@ class AnalyticsInsight(BaseModel):
     """Model for analytics insights"""
 
     insight: str
+    report_url: str
     data_snapshot: Dict
     timestamp: datetime
     reference_id: Optional[str] = None  # Vector store reference ID
-    query: Optional[str] = ""  # Make query optional with empty string default
 
 
 class PineconeClient:
@@ -69,7 +69,7 @@ class PineconeClient:
 
             # Create Pinecone metadata with reduced data
             metadata = {
-                "query": insight.query or "",  # Use empty string if query is None
+                "query": insight.insight or "",  # Use empty string if query is None
                 "insight": insight.insight,
                 "data_snapshot": json.dumps(
                     essential_data,
@@ -200,7 +200,7 @@ async def store_insight(
 
         # Create Pinecone metadata with reduced data
         metadata = {
-            "query": insight.query or "",  # Use empty string if query is None
+            "query": insight.insight or "",  # Use empty string if query is None
             "insight": insight.insight,
             "data_snapshot": json.dumps(essential_data),
             "timestamp": insight.timestamp.isoformat(),
@@ -393,19 +393,21 @@ async def analyze_spotify_uri(request: SpotifyAnalyticsRequest) -> Dict:
             logger.warning(f"Failed to get related insights: {e!s}")
             related_insights = []
 
-        # Generate new insight
-        insight = await soundcharts_client.generate_insight(
-            data=artist_data,
-            context=related_insights,
+        # Generate insight
+        insight_text, report_url = await soundcharts_client.generate_insight(
+            artist_data,
+            related_insights,
         )
 
         # Create and store insight
         analytics_insight = AnalyticsInsight(
-            insight=insight,
+            insight=insight_text,
+            report_url=report_url,
             data_snapshot=artist_data,
             timestamp=datetime.utcnow(),
         )
 
+        # Store insight and get reference ID
         try:
             reference_id = await store_insight(
                 analytics_insight,
@@ -416,8 +418,12 @@ async def analyze_spotify_uri(request: SpotifyAnalyticsRequest) -> Dict:
             logger.error(f"Failed to store insight: {e!s}")
             reference_id = None
 
+        # Update insight with reference ID
+        analytics_insight.reference_id = reference_id
+
         return {
-            "analysis": insight,
+            "insight": insight_text,
+            "report_url": report_url,
             "reference_id": reference_id,
             "timestamp": analytics_insight.timestamp.isoformat(),
         }

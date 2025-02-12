@@ -1,6 +1,5 @@
 import json
 import os
-from datetime import datetime
 from typing import Dict, List, Optional
 
 import aiohttp
@@ -9,6 +8,22 @@ from fastapi import HTTPException
 from audiokit_mcp_server.core.llm import call_llm
 from audiokit_mcp_server.core.logger import logger
 from audiokit_mcp_server.core.markdown import save_artist_report
+
+
+class OpenRouterConfig:
+    """Configuration for OpenRouter API"""
+
+    API_KEY = os.getenv("OPENROUTER_API_KEY")
+    API_BASE = "https://openrouter.ai/api/v1"
+    MODEL = "openai/o1-mini"
+
+    @classmethod
+    def get_headers(cls):
+        return {
+            "Authorization": f"Bearer {cls.API_KEY}",
+            "HTTP-Referer": "https://audiokit.io",  # Replace with your domain
+            "X-Title": "AudioKit Analytics",  # Your app name
+        }
 
 
 class SoundchartsClient:
@@ -180,78 +195,80 @@ class SoundchartsClient:
             artist_name = artist_info.get("name", "Unknown Artist")
             artist_id = artist_info.get("uuid", "unknown")
 
+            # Extract image URLs
+            avatar_url = artist_info.get("avatar_url", "")
+            image_urls = [
+                url
+                for url in [
+                    avatar_url,
+                    *[
+                        link.get("url")
+                        for link in artist_info.get("links", [])
+                        if link.get("type") == "image"
+                    ],
+                ]
+                if url
+            ]
+
+            # Extract releases and other key data
+            releases = data.get("albums", {}).get("items", [])
+            streaming_stats = data.get("streaming", {})
+            social_stats = data.get("social", {})
+            chart_data = data.get("charts", {})
+
             # Create prompt with structured format request
             prompt = f"""
-You are Mari Mikava, a senior music industry analyst at Nieuwe Groove Collectief, providing insights for a client presentation.
-Create a beautifully formatted markdown report with emojis and rich formatting, focusing on narrative paragraphs rather than bullet points.
-Only include sections where there is sufficient data for meaningful analysis.
+Here’s a refined version of your prompt that allows for more creativity in structuring the report while ensuring all data and images are incorporated. It also emphasizes the importance of calculating derived statistics based on the provided data.
 
-Artist: {artist_name}
+You are a senior music industry analyst, tasked with creating a high-impact Electronic Press Kit (EPK) report for an artist.
 
-Full Artist Data:
-{json.dumps(data, indent=2)}
+Your goal is to craft a compelling, professionally formatted markdown report that presents the artist in the most favorable light for industry professionals, media outlets, and music executives. The report should be engaging, insightful, and strategically structured to maximize its impact.
 
-Previous Context:
-{json.dumps(context, indent=2) if context else "No previous context available"}
+While you have full creative freedom in structuring the report, it must incorporate all provided data, images, and relevant statistics. Additionally, derive meaningful insights from the data, such as trends, averages, growth rates, or comparisons, to strengthen the narrative. The report should feel polished, data-driven, and visually appealing while maintaining readability.
 
-Please provide an elegantly formatted analysis that includes:
+Provided Data
+	•	Artist Overview (name, number of releases, chart history)
+	•	Streaming & Social Media Performance (detailed stats on platforms)
+	•	Releases (list of past releases with dates)
+	•	Artist Images (URLs for visuals)
+	•	Full Artist Data (JSON dataset for deeper analysis)
 
-# 🎯 Executive Summary
-A concise overview of the artist's current market position and key performance indicators.
+Expectations:
+	•	All data and images must be seamlessly integrated into the report.
+	•	Derived statistics must be calculated where applicable to provide additional insights.
+	•	Formatting should be clean, industry-standard, and visually effective.
+	•	The structure should be optimized for impact, but is not bound to predefined sections.
 
-# 📊 Performance Analysis
-Write in flowing paragraphs about:
-- Audience growth and engagement trends
-- Streaming performance and platform presence
-- Playlist and chart performance
-- Geographic distribution and market penetration
-
-# 💡 Strategic Analysis
-Narrative assessment of:
-- Current market positioning
-- Competitive advantages
-- Growth trajectory
-- Brand strength
-
-# 🚀 Marketing Strategy
-Detailed marketing recommendations including:
-- Target audience development
-- Platform-specific strategies
-- Content opportunities
-- Collaboration possibilities
-- Brand partnerships
-
-# ✨ Next Steps
-Prioritized action items with:
-- Immediate actions (next 30 days)
-- Short-term initiatives (90 days)
-- Long-term strategic moves
-- Resource requirements
-
+Now, generate the EPK report in markdown.
 ---
-*Analysis prepared by:*
-**Mari Mikava**
-Senior Music Industry Analyst
-Nieuwe Groove Collectief
-{datetime.now().strftime("%B %d, %Y")}
+Artist Overview
+- **Artist Name:** {artist_name}
+- **Total Releases:** {len(releases)}
+- **Chart Performance:** {json.dumps(chart_data, indent=2) if chart_data else "No chart data"}
 
-Formatting Guidelines:
-- Write in flowing paragraphs instead of bullet points
-- Use emojis thoughtfully for section headers
-- Format numbers with commas and appropriate units
-- Use markdown formatting for emphasis and structure
-- Include blockquotes for key insights
-- Focus on the most recent 3 months of data
-- Maintain a professional yet engaging tone
-- Skip any sections where data is insufficient
-- End with a clear marketing strategy and next steps
+Streaming Stats
+{json.dumps(streaming_stats, indent=2) if streaming_stats else "No streaming data"}
+
+Social Media Stats
+{json.dumps(social_stats, indent=2) if social_stats else "No social media data"}
+
+Releases
+{chr(10).join([f"- {release.get('name', 'Untitled')} ({release.get('release_date', 'Unknown date')})" for release in releases]) if releases else "No release data available"}
+
+Artist Images
+{chr(10).join([f"![Artist Image]({url})" for url in image_urls]) if image_urls else "No images available"}
+
+Full Artist Data
+```json
+{json.dumps(data, indent=2)}
+```
 """
 
             # Call OpenRouter LLM with formal prompt
             response = await call_llm(prompt)
 
             # Save as HTML and get URL
-            report_url = save_artist_report(artist_id, response)
+            report_url = save_artist_report(artist_id, artist_name, response)
 
             return response, report_url
 
