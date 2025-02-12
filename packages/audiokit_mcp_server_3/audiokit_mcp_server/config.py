@@ -1,4 +1,4 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
@@ -9,11 +9,10 @@ class Settings(BaseSettings):
     mcp_version: str = "3.0"
     openrouter_api_key: str
     openrouter_base_url: str = "https://openrouter.ai/api/v1"
-    openrouter_model: str = "openai/chatgpt-4o-latest"  # Default OpenRouter model
-    embedding_model: str = (
-        "sentence-transformers/all-MiniLM-L6-v2"  # Open-source Hugging Face model
-    )
-    index_name: str = "audiokit-brain"  # Fixed index name
+    openrouter_model: str = "openai/chatgpt-4o-latest"
+    embedding_model: str = "sentence-transformers/all-MiniLM-L6-v2"
+    index_name: str = "audiokit-brain"
+    pinecone_api_key: str
+    pinecone_environment: str = "us-west1-gcp"
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file=".env")

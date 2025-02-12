@@ -2,16 +2,24 @@
 name = "audiokit-mcp-server"
 version = "3.0.0"
 description = "AudioKit MCP Server - FastAPI implementation with MCP SDK integration"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Nathaniel Houk <nate@audiokit.io>"]
 
 [tool.poetry.dependencies]
-python = "^3.10"
-fastapi = "^0.109.0"
-uvicorn = "^0.27.0"
-pydantic = "^2.5.0"
+python = ">=3.10,<3.11"
+fastapi = "^0.115.8"
+uvicorn = "^0.34.0"
+pydantic = "^2.10.6"
+pydantic-settings = "^2.7.1"
 mcp = "1.2.1"
-structlog = "^24.1.0"
-llama-index = "^0.10.0"
+llama-index = "^0.12.17"
+llama-index-core = "^0.12.17"
+llama-index-vector-stores-pinecone = "^0.4.4"
+structlog = "^25.1.0"
+llama-index-embeddings-huggingface = "^0.5.1"
+tensorflow = "^2.18.0"
+tf-keras = "^2.18.0"
+llama-index-llms-openrouter = "^0.3.1"
+pinecone = ">=5.0.0,<6.0.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
@@ -30,3 +38,7 @@ target-version = ['py310']
 [tool.isort]
 profile = "black"
 multi_line_output = 3 
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."] 
