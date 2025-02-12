@@ -9,8 +9,9 @@ python = "^3.10"
 fastapi = "^0.109.0"
 uvicorn = "^0.27.0"
 pydantic = "^2.5.0"
-mcp-sdk = "^0.1.0"  # Replace with actual MCP SDK version
+mcp = "1.2.1"
 structlog = "^24.1.0"
+llama-index = "^0.10.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
