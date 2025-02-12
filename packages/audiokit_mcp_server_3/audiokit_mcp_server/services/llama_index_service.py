@@ -18,7 +18,7 @@ class LlamaIndexService:
         self.settings = settings
         self._initialize_pinecone()
         self._setup_llama_settings()
-        # For simplicity, we create a dummy index.
+        # Load the existing vector store index.
         self.index = None
         logger.info("LlamaIndexService initialized")
 
@@ -70,10 +70,18 @@ class LlamaIndexService:
         logger.info("LlamaIndex settings configured")
 
     def get_index(self) -> VectorStoreIndex:
-        """Get the existing vector store index."""
+        """Load the existing vector store index from Pinecone."""
         if self.index is None:
-            # For demonstration, simply return an empty index.
-            self.index = VectorStoreIndex([])
+            from llama_index.vector_stores.pinecone import PineconeVectorStore
+
+            # Retrieve the already existing Pinecone index using the index name from settings ("audiokit-brain")
+            pinecone_index = self.pc.Index(self.settings.index_name)
+            # Wrap the existing Pinecone index into a PineconeVectorStore
+            self.vector_store = PineconeVectorStore(pinecone_index=pinecone_index)
+            # Load the VectorStoreIndex from the existing vector store
+            self.index = VectorStoreIndex.from_vector_store(
+                vector_store=self.vector_store,
+            )
         return self.index
 
     async def query(self, query: str, top_k: int = 5) -> dict:
@@ -104,11 +112,12 @@ class LlamaIndexService:
                             "text": text,
                             "metadata": metadata,
                             "score": score,
-                        }
+                        },
                     )
                 except Exception as e:
                     logger.warning(
-                        "Node processing failed, skipping node", error=str(e)
+                        "Node processing failed, skipping node",
+                        error=str(e),
                     )
         answer = str(response)
         return {"answer": answer, "sources": sources}
