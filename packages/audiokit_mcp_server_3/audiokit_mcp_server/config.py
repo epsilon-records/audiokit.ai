@@ -14,5 +14,6 @@ class Settings(BaseSettings):
     index_name: str = "audiokit-brain"
     pinecone_api_key: str
     pinecone_environment: str = "us-west1-gcp"
+    acoustid_api_key: str
 
     model_config = SettingsConfigDict(env_file=".env")
