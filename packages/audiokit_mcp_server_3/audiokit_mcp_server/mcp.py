@@ -27,6 +27,7 @@ class MCPRouter:
     def _setup_routes(self):
         """Setup MCP routes."""
         self.router.post("/process")(self.process)
+        self.router.post("/ingest")(self.ingest)
 
     async def process(self, query: str = Body(...)) -> dict:
         """Process an MCP request."""
@@ -42,4 +43,15 @@ class MCPRouter:
             return {"status": "success", "response": result}
         except Exception as e:
             logger.error("Failed to process MCP request", error=str(e))
+            return {"status": "error", "message": str(e)}
+
+    async def ingest(
+        self, document: str = Body(...), metadata: dict = Body(None)
+    ) -> dict:
+        """Ingest a document into the vector store."""
+        try:
+            result = self.llama_index_service.ingest_document(document, metadata)
+            return {"status": "success", "result": result}
+        except Exception as e:
+            logger.error("Document ingestion failed", error=str(e))
             return {"status": "error", "message": str(e)}

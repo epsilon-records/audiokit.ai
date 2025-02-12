@@ -1,6 +1,7 @@
 from typing import List
 
 from llama_index.core import VectorStoreIndex
+from llama_index.core.schema import Node
 from llama_index.core.settings import Settings as LlamaSettings
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.openrouter import OpenRouter
@@ -20,6 +21,7 @@ class LlamaIndexService:
         self._setup_llama_settings()
         # Load the existing vector store index.
         self.index = None
+        self.vector_store = None
         logger.info("LlamaIndexService initialized")
 
     def _initialize_pinecone(self):
@@ -114,6 +116,12 @@ class LlamaIndexService:
                             "score": score,
                         },
                     )
+                except KeyError as ke:
+                    logger.warning(
+                        "Missing expected key in node, skipping node",
+                        error=str(ke),
+                    )
+                    continue
                 except Exception as e:
                     logger.warning(
                         "Node processing failed, skipping node",
@@ -177,7 +185,10 @@ class LlamaIndexService:
             raise
 
     def writeback_llm_output(
-        self, query: str, llm_output: str, context_metadata: dict = None
+        self,
+        query: str,
+        llm_output: str,
+        context_metadata: dict = None,
     ) -> None:
         """
         Write the LLM's output back to the vector store as a new node.
@@ -189,19 +200,23 @@ class LlamaIndexService:
         if context_metadata is None:
             context_metadata = {}
 
+        # Ensure vector_store is loaded
+        if self.vector_store is None:
+            self.get_index()
+
         # Generate an embedding using the current embed_model from LlamaSettings.
         embedding = LlamaSettings.embed_model.get_text_embedding(new_document)
 
-        new_node = {
-            "text": new_document,
-            "metadata": context_metadata,
-            "score": 1.0,  # You can adjust how you wish to score or flag new nodes.
-            "embedding": embedding,
-        }
+        new_node = Node(
+            text=new_document,
+            embedding=embedding,
+            metadata=context_metadata,
+            score=1.0,
+        )
 
         try:
-            # Upsert the new node into the existing vector store.
-            self.vector_store.upsert_nodes([new_node])
+            # Add the new node into the existing vector store.
+            self.vector_store.add([new_node])
             logger.info("LLM output written back to vector store", new_node=new_node)
         except Exception as e:
             logger.error("Failed to writeback LLM output", error=str(e))
@@ -218,4 +233,35 @@ class LlamaIndexService:
             }
         except Exception as e:
             logger.error("Failed to get index stats", error=str(e))
+            raise
+
+    def ingest_document(self, document: str, metadata: dict = None) -> dict:
+        """
+        Ingest a document into the vector store.
+
+        The document is embedded, and the resulting node is upserted into the existing Pinecone index.
+        """
+        if metadata is None:
+            metadata = {}
+
+        # Generate an embedding for the document.
+        embedding = LlamaSettings.embed_model.get_text_embedding(document)
+
+        new_node = Node(
+            text=document,
+            embedding=embedding,
+            metadata=metadata,
+            score=1.0,
+        )
+
+        # Ensure vector_store is loaded
+        if self.vector_store is None:
+            self.get_index()
+
+        try:
+            self.vector_store.add([new_node])
+            logger.info("Document ingested into vector store", document=document)
+            return {"message": "Document ingested successfully"}
+        except Exception as e:
+            logger.error("Failed to ingest document", error=str(e))
             raise
