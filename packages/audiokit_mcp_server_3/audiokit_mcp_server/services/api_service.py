@@ -14,17 +14,16 @@ from ..models import (
     Album,
     Artist,
     Audience,
-    Audio,
     Genre,
     Label,
     LyricsAnalysis,
     Platform,
     Popularity,
-    Role,
     StreamingData,
     Track,
     sanitize_id_string,
 )
+from ..utils.deduplication_queue import DeduplicationQueue
 from .soundcharts_service import SoundChartsService
 
 
@@ -40,13 +39,18 @@ class APIService:
             self.settings.neo4j_uri,
             auth=(self.settings.neo4j_user, self.settings.neo4j_password),
         )
+        self.deduplication_queue = DeduplicationQueue(
+            redis_url=settings.redis_url,
+            ttl=settings.redis_cache_ttl,
+        )
 
     async def startup(self) -> None:
         """Perform asynchronous initialization tasks."""
         try:
+            await self.deduplication_queue.connect()
             await self._add_unique_constraints()
         except Exception as e:
-            logger.error("❌ Failed to add unique constraints", error=str(e))
+            logger.error("❌ Failed to initialize API service", error=str(e))
             raise
 
     async def _add_unique_constraints(self) -> None:
@@ -94,41 +98,33 @@ class APIService:
     async def _upsert_neo4j_node(self, label: str, properties: Dict) -> None:
         """Upsert a Neo4j node with error handling."""
         try:
-            logger.debug("Upserting node", label=label, id=properties.get("id"))
+            node_id = properties["id"]
 
-            # Validate model based on label
-            model_classes = {
-                "Artist": Artist,
-                "Track": Track,
-                "Album": Album,
-                "Genre": Genre,
-                "Label": Label,
-                "Role": Role,
-                "Platform": Platform,
-                "Audience": Audience,
-                "Popularity": Popularity,
-                "StreamingData": StreamingData,
-                "LyricsAnalysis": LyricsAnalysis,
-                "ISRC": ISRC,
-                "Audio": Audio,
-            }
+            # Check if node has been recently processed
+            if await self.deduplication_queue.is_processed(node_id):
+                logger.debug(
+                    "Node recently processed, skipping",
+                    label=label,
+                    id=node_id,
+                )
+                return
 
-            if label not in model_classes:
-                raise ValueError(f"Invalid label: {label}")
-
-            model_classes[label](**properties)
-
-            # Get merge key and execute query
+            # Proceed with upsert
             merge_key = self._get_merge_key(label)
-            query = f"MERGE (n:{label} {{{merge_key}: ${merge_key}}}) SET n += $props"
-
+            query = f"""
+            MERGE (n:{label} {{{merge_key}: ${merge_key}}})
+            SET n += $props, n.last_updated = $now
+            """
             async with self.neo4j_driver.session() as session:
                 await session.run(
                     query,
                     **{merge_key: properties[merge_key]},
                     props=properties,
+                    now=datetime.utcnow(),
                 )
 
+            # Mark node as processed
+            await self.deduplication_queue.mark_processed(node_id)
         except Exception as e:
             logger.error("❌ Failed to upsert Neo4j node", label=label, error=str(e))
             raise
@@ -878,10 +874,11 @@ class APIService:
     async def close(self) -> None:
         """Close all resources."""
         try:
+            await self.deduplication_queue.close()
             await self.neo4j_driver.close()
-            logger.info("✅ Neo4j driver closed successfully")
+            logger.info("✅ Resources closed successfully")
         except Exception as e:
-            logger.error("❌ Failed to close Neo4j driver", error=str(e))
+            logger.error("❌ Failed to close resources", error=str(e))
 
     async def _create_artist_node(self, artist_data: Dict) -> str:
         """Create an Artist node from artist data."""
