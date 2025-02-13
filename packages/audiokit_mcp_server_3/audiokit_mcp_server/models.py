@@ -10,7 +10,7 @@ class GenreData(BaseModel):
 
 
 class Artist(BaseModel):
-    id: str  # Our own UUIDv4
+    id: Optional[str] = None  # Our own UUIDv4
     name: str
     credit_name: Optional[str] = None
     country_code: Optional[str] = None
@@ -23,14 +23,14 @@ class Artist(BaseModel):
 
 
 class ISRC(BaseModel):
-    id: str  # Composite ID: "isrc_{value}"
+    id: Optional[str] = None  # Composite ID: "isrc_{value}"
     value: str
     country_code: str
     country_name: str
 
 
 class Track(BaseModel):
-    id: str  # Our own UUIDv4
+    id: Optional[str] = None  # Our own UUIDv4
     name: str
     credit_name: Optional[str] = None
     release_date: Optional[datetime] = None
@@ -46,7 +46,7 @@ class Track(BaseModel):
 
 
 class Album(BaseModel):
-    id: str  # Our own UUIDv4
+    id: Optional[str] = None  # Our own UUIDv4
     name: str
     credit_name: Optional[str] = None
     upc: Optional[str] = None
@@ -59,19 +59,19 @@ class Album(BaseModel):
 
 
 class Genre(BaseModel):
-    id: str  # Composite ID: "genre_{root}"
+    id: Optional[str] = None  # Composite ID: "genre_{root}"
     root: str
     sub: List[str]
 
 
 class Label(BaseModel):
-    id: str  # Our own UUIDv4
+    id: Optional[str] = None  # Our own UUIDv4
     name: str
     type: Optional[str] = None
 
 
 class Lyrics(BaseModel):
-    id: str  # Our own UUIDv4
+    id: Optional[str] = None  # Our own UUIDv4
     text: str
     language: str
     sentiment: Optional[float] = None
@@ -79,19 +79,19 @@ class Lyrics(BaseModel):
 
 
 class Annotation(BaseModel):
-    id: str  # Composite ID: "annotation_{uuid}"
+    id: Optional[str] = None  # Composite ID: "annotation_{uuid}"
     text: str
     start: int
     end: int
 
 
 class Platform(BaseModel):
-    id: str  # Use the "code" field from the API
+    id: Optional[str] = None  # Use the "code" field from the API
     platform: str  # Use the "name" field from the API
 
 
 class Popularity(BaseModel):
-    id: str  # Composite ID: "popularity_{artist_id}_{platform}_{date}"
+    id: Optional[str] = None  # Composite ID: "popularity_{artist_id}_{platform}_{date}"
     artist_id: str
     platform: str
     date: datetime
@@ -99,7 +99,7 @@ class Popularity(BaseModel):
 
 
 class StreamingData(BaseModel):
-    id: str  # Composite ID: "streaming_{artist_id}_{platform}_{date}"
+    id: Optional[str] = None  # Composite ID: "streaming_{artist_id}_{platform}_{date}"
     artist_id: str
     platform: str
     date: datetime
@@ -107,7 +107,7 @@ class StreamingData(BaseModel):
 
 
 class Audience(BaseModel):
-    id: str  # Composite ID: "audience_{artist_id}_{platform}_{date}"
+    id: Optional[str] = None  # Composite ID: "audience_{artist_id}_{platform}_{date}"
     artist_id: str
     platform: str
     date: datetime
@@ -119,12 +119,12 @@ class Audience(BaseModel):
 
 
 class Role(BaseModel):
-    id: str  # Composite ID: "role_{name}"
+    id: Optional[str] = None  # Composite ID: "role_{name}"
     name: str  # e.g., "artist", "producer", "composer"
 
 
 class LyricsAnalysis(BaseModel):
-    id: str  # Composite ID: "lyrics_{track_id}"
+    id: Optional[str] = None  # Composite ID: "lyrics_{track_id}"
     themes: Optional[List[str]] = None
     moods: Optional[List[str]] = None
     cultural_reference_people: Optional[List[str]] = None
@@ -140,7 +140,7 @@ class LyricsAnalysis(BaseModel):
 
 
 class SoundCharts(BaseModel):
-    id: str  # Composite ID: "soundcharts_{uuid}"
+    id: Optional[str] = None  # Composite ID: "soundcharts_{uuid}"
     uuid: str
     type: str  # Entity type: "artist", "track", "album"
     slug: Optional[str] = None
@@ -149,7 +149,7 @@ class SoundCharts(BaseModel):
 
 
 class Audio(BaseModel):
-    id: str  # Composite ID: "audio_{track_id}"
+    id: Optional[str] = None  # Composite ID: "audio_{track_id}"
     danceability: Optional[float] = None
     energy: Optional[float] = None
     key: Optional[int] = None
