@@ -683,6 +683,8 @@ class APIService:
         genres = artist_data.get("genres", [])
         if isinstance(genres, str):
             genres = [{"root": genres, "sub": [genres]}]
+        elif isinstance(genres, dict):
+            genres = [genres]
         elif isinstance(genres, list):
             genres = [
                 {"root": genre, "sub": [genre]} if isinstance(genre, str) else genre

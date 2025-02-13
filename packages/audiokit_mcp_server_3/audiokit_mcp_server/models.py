@@ -9,7 +9,7 @@ class Artist(BaseModel):
     name: str
     credit_name: Optional[str] = None
     country_code: Optional[str] = None
-    genres: Optional[List[Dict[str, List[str]]]] = None  # Strictly match API response
+    genres: Optional[List[Dict[str, List[str]]]] = None  # Match API response structure
     biography: Optional[str] = None
     isni: Optional[str] = None
     ipi: Optional[str] = None
