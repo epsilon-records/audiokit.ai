@@ -582,16 +582,16 @@ class APIService:
                 themes=lyrics_analysis.get("themes"),
                 moods=lyrics_analysis.get("moods"),
                 cultural_reference_people=lyrics_analysis.get(
-                    "culturalReferencePeople"
+                    "culturalReferencePeople",
                 ),
                 cultural_reference_non_people=lyrics_analysis.get(
-                    "culturalReferenceNonPeople"
+                    "culturalReferenceNonPeople",
                 ),
                 brands=lyrics_analysis.get("brands"),
                 locations=lyrics_analysis.get("locations"),
                 narrative_style=lyrics_analysis.get("narrativeStyle"),
                 emotional_intensity_score=lyrics_analysis.get(
-                    "emotionalIntensityScore"
+                    "emotionalIntensityScore",
                 ),
                 complexity_score=lyrics_analysis.get("complexityScore"),
                 repetitiveness_score=lyrics_analysis.get("repetitivenessScore"),
