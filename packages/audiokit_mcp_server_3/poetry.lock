@@ -12,6 +12,22 @@ files = [
 ]
 
 [[package]]
+name = "aiocache"
+version = "0.12.3"
+description = "multi backend asyncio cache"
+optional = false
+python-versions = "*"
+files = [
+    {file = "aiocache-0.12.3-py2.py3-none-any.whl", hash = "sha256:889086fc24710f431937b87ad3720a289f7fc31c4fd8b68e9f918b9bacd8270d"},
+    {file = "aiocache-0.12.3.tar.gz", hash = "sha256:f528b27bf4d436b497a1d0d1a8f59a542c153ab1e37c3621713cb376d44c4713"},
+]
+
+[package.extras]
+memcached = ["aiomcache (>=0.5.2)"]
+msgpack = ["msgpack (>=0.5.5)"]
+redis = ["redis (>=4.2.0)"]
+
+[[package]]
 name = "aiohappyeyeballs"
 version = "2.4.6"
 description = "Happy Eyeballs for asyncio"
@@ -3132,6 +3148,24 @@ files = [
 ]
 
 [[package]]
+name = "redis"
+version = "5.2.1"
+description = "Python client for Redis database and key-value store"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "redis-5.2.1-py3-none-any.whl", hash = "sha256:ee7e1056b9aea0f04c6c2ed59452947f34c4940ee025f5dd83e6a6418b6989e4"},
+    {file = "redis-5.2.1.tar.gz", hash = "sha256:16f2e22dff21d5125e8481515e386711a34cbec50f0e44413dd7d9c060a54e0f"},
+]
+
+[package.dependencies]
+async-timeout = {version = ">=4.0.3", markers = "python_full_version < \"3.11.3\""}
+
+[package.extras]
+hiredis = ["hiredis (>=3.0.0)"]
+ocsp = ["cryptography (>=36.0.1)", "pyopenssl (==23.2.1)", "requests (>=2.31.0)"]
+
+[[package]]
 name = "regex"
 version = "2024.11.6"
 description = "Alternative regular expression module, to replace re."
@@ -4428,4 +4462,4 @@ propcache = ">=0.2.0"
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.11"
-content-hash = "bc9a9f1d551f4cfb227a2884f3805104248e5bb483aca5ce3705b54771e701ab"
+content-hash = "d18a22005c76fc697f88ef1a09764e1bcae199457abfa53d1701aef2f5c5f87a"

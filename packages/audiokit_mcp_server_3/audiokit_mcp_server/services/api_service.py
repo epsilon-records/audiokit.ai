@@ -20,24 +20,36 @@ class APIService:
             auth=(self.settings.neo4j_user, self.settings.neo4j_password),
         )
 
-    async def _create_neo4j_node(self, label: str, properties: Dict) -> None:
-        """Helper method to create a Neo4j node"""
-        query = f"CREATE (n:{label} $props)"
+    async def _upsert_neo4j_node(self, label: str, properties: Dict) -> None:
+        """
+        Upsert a Neo4j node using MERGE.
+        If node exists, updates its properties. If not, creates it.
+        """
+        query = f"""
+        MERGE (n:{label} {{id: $id}})
+        SET n += $props
+        """
         async with self.neo4j_driver.session() as session:
-            await session.run(query, props=properties)
+            await session.run(
+                query,
+                id=properties["id"],
+                props=properties,
+            )
 
-    async def _create_neo4j_relationship(
+    async def _upsert_neo4j_relationship(
         self,
         from_id: str,
         to_id: str,
         rel_type: str,
         properties: Optional[Dict] = None,
     ) -> None:
-        """Helper method to create a Neo4j relationship"""
+        """
+        Upsert a Neo4j relationship using MERGE.
+        If relationship exists, updates its properties. If not, creates it.
+        """
         query = f"""
-        MATCH (a), (b)
-        WHERE a.id = $from_id AND b.id = $to_id
-        CREATE (a)-[r:{rel_type}]->(b)
+        MATCH (a {{id: $from_id}}), (b {{id: $to_id}})
+        MERGE (a)-[r:{rel_type}]->(b)
         """
         if properties:
             query += " SET r += $props"
@@ -83,7 +95,7 @@ class APIService:
             "soundcharts:active_since": artist_metadata.get("activeSince"),
             "soundcharts:social_links": artist_metadata.get("socialLinks"),
         }
-        await self._create_neo4j_node("Artist", artist_node)
+        await self._upsert_neo4j_node("Artist", artist_node)
 
         # Process popularity data with namespacing
         if artist_popularity:
@@ -95,8 +107,8 @@ class APIService:
                     "soundcharts:rank": data.get("rank"),
                     "soundcharts:date": data.get("date"),
                 }
-                await self._create_neo4j_node("Popularity", popularity_node)
-                await self._create_neo4j_relationship(
+                await self._upsert_neo4j_node("Popularity", popularity_node)
+                await self._upsert_neo4j_relationship(
                     artist_id,
                     popularity_node["id"],
                     "HAS_POPULARITY",
@@ -113,8 +125,8 @@ class APIService:
                 "soundcharts:playlist_adds": artist_stats.get("playlistAdds"),
                 "soundcharts:radio_spins": artist_stats.get("radioSpins"),
             }
-            await self._create_neo4j_node("StreamingData", stats_node)
-            await self._create_neo4j_relationship(
+            await self._upsert_neo4j_node("StreamingData", stats_node)
+            await self._upsert_neo4j_relationship(
                 artist_id,
                 stats_node["id"],
                 "HAS_STREAMS",
@@ -134,8 +146,8 @@ class APIService:
                     "listenerAffinity",
                 ),
             }
-            await self._create_neo4j_node("Audience", audience_node)
-            await self._create_neo4j_relationship(
+            await self._upsert_neo4j_node("Audience", audience_node)
+            await self._upsert_neo4j_relationship(
                 artist_id,
                 audience_node["id"],
                 "HAS_AUDIENCE",
@@ -145,25 +157,44 @@ class APIService:
         songs = await self.soundcharts_service.get_artist_songs(artist_id)
         for song in songs.get("items", []):
             song_id = song["uuid"]
-            song_metadata = await self.soundcharts_service.get_song_by_isrc(
-                song["isrc"],
-            )
+
+            # Get full song metadata using song ID
+            song_metadata = await self.soundcharts_service.get_song_metadata(song_id)
+            song_object = song_metadata.get("object", {})
 
             # Create Track node with namespaced data
             track_node = {
                 "id": song_id,
-                "title": song_metadata.get("title"),
-                "soundcharts:release_date": song_metadata.get("releaseDate"),
-                "soundcharts:duration": song_metadata.get("duration"),
-                "soundcharts:bpm": song_metadata.get("bpm"),
-                "soundcharts:key": song_metadata.get("key"),
-                "soundcharts:isrc": song_metadata.get("isrc"),
-                "soundcharts:explicit": song_metadata.get("explicit"),
-                "soundcharts:language": song_metadata.get("language"),
-                "soundcharts:popularity": song_metadata.get("popularity"),
+                "title": song_object.get("name"),
+                "soundcharts:release_date": song_object.get("releaseDate"),
+                "soundcharts:duration": song_object.get("duration"),
+                "soundcharts:explicit": song_object.get("explicit"),
+                "soundcharts:language": song_object.get("languageCode"),
+                "soundcharts:popularity": song_object.get("popularity"),
+                "soundcharts:isrc": song_object.get("isrc", {}).get("value"),
             }
-            await self._create_neo4j_node("Track", track_node)
-            await self._create_neo4j_relationship(artist_id, song_id, "PERFORMED")
+
+            # Add audio features
+            if audio := song_object.get("audio"):
+                track_node.update(
+                    {
+                        "soundcharts:acousticness": audio.get("acousticness"),
+                        "soundcharts:danceability": audio.get("danceability"),
+                        "soundcharts:energy": audio.get("energy"),
+                        "soundcharts:instrumentalness": audio.get("instrumentalness"),
+                        "soundcharts:key": audio.get("key"),
+                        "soundcharts:liveness": audio.get("liveness"),
+                        "soundcharts:loudness": audio.get("loudness"),
+                        "soundcharts:mode": audio.get("mode"),
+                        "soundcharts:speechiness": audio.get("speechiness"),
+                        "soundcharts:tempo": audio.get("tempo"),
+                        "soundcharts:time_signature": audio.get("timeSignature"),
+                        "soundcharts:valence": audio.get("valence"),
+                    },
+                )
+
+            await self._upsert_neo4j_node("Track", track_node)
+            await self._upsert_neo4j_relationship(artist_id, song_id, "PERFORMED")
 
             # Process lyrics with namespacing
             lyrics = await self.soundcharts_service.get_song_lyrics_analysis(song_id)
@@ -175,8 +206,8 @@ class APIService:
                     "soundcharts:sentiment": lyrics.get("sentiment"),
                     "soundcharts:topics": lyrics.get("topics"),
                 }
-                await self._create_neo4j_node("Lyrics", lyrics_node)
-                await self._create_neo4j_relationship(
+                await self._upsert_neo4j_node("Lyrics", lyrics_node)
+                await self._upsert_neo4j_relationship(
                     song_id,
                     lyrics_node["id"],
                     "HAS_LYRICS",
@@ -186,8 +217,11 @@ class APIService:
         albums = await self.soundcharts_service.get_artist_albums(artist_id)
         for album in albums.get("items", []):
             album_id = album["uuid"]
+            album_object = album.get("object", {})
+
+            # Get full album metadata using UPC
             album_metadata = await self.soundcharts_service.get_album_by_upc(
-                album["upc"],
+                album_object["upc"],
             )
 
             # Create Album node with namespaced data
@@ -201,15 +235,16 @@ class APIService:
                 "soundcharts:track_count": album_metadata.get("trackCount"),
                 "soundcharts:popularity": album_metadata.get("popularity"),
             }
-            await self._create_neo4j_node("Album", album_node)
-            await self._create_neo4j_relationship(artist_id, album_id, "PRODUCED_BY")
+
+            await self._upsert_neo4j_node("Album", album_node)
+            await self._upsert_neo4j_relationship(artist_id, album_id, "PRODUCED_BY")
 
             # Process tracklisting
             tracklisting = await self.soundcharts_service.get_album_tracklisting(
                 album_id,
             )
             for track in tracklisting.get("tracks", []):
-                await self._create_neo4j_relationship(
+                await self._upsert_neo4j_relationship(
                     album_id,
                     track["uuid"],
                     "CONTAINS",
@@ -219,7 +254,7 @@ class APIService:
         similar_artists = await self.soundcharts_service.get_similar_artists(artist_id)
         for similar in similar_artists.get("items", []):
             similar_id = similar["uuid"]
-            await self._create_neo4j_relationship(artist_id, similar_id, "SIMILAR_TO")
+            await self._upsert_neo4j_relationship(artist_id, similar_id, "SIMILAR_TO")
 
         return {"status": "success", "artist_id": artist_id}
 

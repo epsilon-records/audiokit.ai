@@ -24,5 +24,12 @@ class Settings(BaseSettings):
     spotify_api_key: str
     soundcharts_api_base: str
     soundcharts_app_id: str
+    redis_url: str = "redis://localhost:6379/0"
+    redis_cache_ttl: int = 86400  # 1 day in seconds
+    redis_timeout: int = 5
+    log_level: str = "INFO"
 
     model_config = SettingsConfigDict(env_file=".env")
+
+
+settings = Settings()

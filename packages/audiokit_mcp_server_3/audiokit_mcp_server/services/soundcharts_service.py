@@ -3,6 +3,9 @@ from typing import Dict, Optional
 import httpx
 from structlog import get_logger
 
+from ..cache import redis_cache
+from ..config import settings
+
 
 logger = get_logger()
 
@@ -24,8 +27,10 @@ class SoundChartsService:
             "🔑 API credentials configured",
             app_id=settings.soundcharts_app_id,
         )
+        self.cache_ttl = settings.redis_cache_ttl
 
     # Artist Endpoints
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_artist_by_platform_id(self, platform: str, identifier: str) -> Dict:
         """Get artist by platform ID"""
         url = f"{self.base_url}/api/v2.9/artist/by-platform/{platform}/{identifier}"
@@ -34,6 +39,7 @@ class SoundChartsService:
             response.raise_for_status()
             return response.json()
 
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_artist_ids(self, artist_id: str) -> Dict:
         """Get artist IDs across platforms"""
         url = f"{self.base_url}/api/v2/artist/{artist_id}/identifiers"
@@ -59,6 +65,7 @@ class SoundChartsService:
             )
             raise
 
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_artist_popularity(self, artist_id: str) -> Dict:
         """Get artist popularity across all platforms"""
         platforms = await self.get_platforms()
@@ -116,45 +123,92 @@ class SoundChartsService:
     async def get_song_by_isrc(self, isrc: str) -> Dict:
         """Get song by ISRC"""
         url = f"{self.base_url}/api/v2/song/by-isrc/{isrc}"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=self.headers)
-            response.raise_for_status()
-            return response.json()
+        logger.info(
+            "🎵 Fetching song by ISRC",
+            isrc=isrc,
+            url=url,
+        )
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(url, headers=self.headers)
+                response.raise_for_status()
+                logger.info(
+                    "✅ Song retrieved by ISRC",
+                    isrc=isrc,
+                    status_code=response.status_code,
+                )
+                return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                "❌ Failed to fetch song by ISRC",
+                isrc=isrc,
+                url=e.request.url,
+                status_code=e.response.status_code,
+                error=str(e),
+            )
+            raise
+        except Exception as e:
+            logger.error(
+                "🚨 Unexpected error fetching song by ISRC",
+                isrc=isrc,
+                error=str(e),
+            )
+            raise
 
     async def get_song_lyrics_analysis(self, song_id: str) -> Dict:
         """Get lyrics analysis for a song"""
         url = f"{self.base_url}/api/v2/song/{song_id}/lyrics-analysis"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=self.headers)
-            response.raise_for_status()
-            return response.json()
+        logger.info(
+            "📜 Fetching lyrics analysis",
+            song_id=song_id,
+            url=url,
+        )
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(url, headers=self.headers)
+                response.raise_for_status()
+                logger.info(
+                    "✅ Lyrics analysis retrieved",
+                    song_id=song_id,
+                    status_code=response.status_code,
+                )
+                return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                "❌ Failed to fetch lyrics analysis",
+                song_id=song_id,
+                url=e.request.url,
+                status_code=e.response.status_code,
+                error=str(e),
+            )
+            raise
+        except Exception as e:
+            logger.error(
+                "🚨 Unexpected error fetching lyrics analysis",
+                song_id=song_id,
+                error=str(e),
+            )
+            raise
 
     # Album Endpoints
     async def get_album_by_upc(self, upc: str) -> Dict:
-        """Get album by UPC."""
+        """Get album by UPC"""
         url = f"{self.base_url}/api/v2/album/by-upc/{upc}"
         logger.info(
             "💿 Fetching album by UPC",
             upc=upc,
             url=url,
         )
-
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(url, headers=self.headers)
                 response.raise_for_status()
-                data = response.json()
-
-                # Always set the UPC to the one we queried with
-                data["upc"] = upc
-
                 logger.info(
                     "📀 Album retrieved by UPC",
                     upc=upc,
                     status_code=response.status_code,
                 )
-                return data
-
+                return response.json()
         except httpx.HTTPStatusError as e:
             logger.error(
                 "❌ Failed to fetch album by UPC",
@@ -175,10 +229,37 @@ class SoundChartsService:
     async def get_album_tracklisting(self, album_id: str) -> Dict:
         """Get album tracklisting"""
         url = f"{self.base_url}/api/v2/album/{album_id}/tracks"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=self.headers)
-            response.raise_for_status()
-            return response.json()
+        logger.info(
+            "📋 Fetching album tracklisting",
+            album_id=album_id,
+            url=url,
+        )
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(url, headers=self.headers)
+                response.raise_for_status()
+                logger.info(
+                    "✅ Album tracklisting retrieved",
+                    album_id=album_id,
+                    status_code=response.status_code,
+                )
+                return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                "❌ Failed to fetch album tracklisting",
+                album_id=album_id,
+                url=e.request.url,
+                status_code=e.response.status_code,
+                error=str(e),
+            )
+            raise
+        except Exception as e:
+            logger.error(
+                "🚨 Unexpected error fetching album tracklisting",
+                album_id=album_id,
+                error=str(e),
+            )
+            raise
 
     # Charts Endpoints
     async def get_song_ranking(self, slug: str, date: Optional[str] = None) -> Dict:
@@ -364,21 +445,41 @@ class SoundChartsService:
         )
 
         try:
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(url, params=params, headers=self.headers)
                 response.raise_for_status()
+                data = response.json()
+
+                # Handle missing UPC codes
+                if "items" in data:
+                    for album in data["items"]:
+                        if "upc" not in album:
+                            logger.warning(
+                                "⚠️ Missing UPC for album",
+                                artist_id=artist_id,
+                                album_id=album.get("id"),
+                            )
+                            album["upc"] = None  # Set default value
+
                 logger.info(
                     "📀 Artist albums retrieved",
                     artist_id=artist_id,
                     status_code=response.status_code,
                 )
-                return response.json()
+                return data
         except httpx.HTTPStatusError as e:
             logger.error(
-                "💾 Failed to fetch artist albums",
+                "❌ Failed to fetch artist albums",
                 artist_id=artist_id,
                 url=e.request.url,
                 status_code=e.response.status_code,
+                error=str(e),
+            )
+            raise
+        except Exception as e:
+            logger.error(
+                "🚨 Unexpected error fetching artist albums",
+                artist_id=artist_id,
                 error=str(e),
             )
             raise
