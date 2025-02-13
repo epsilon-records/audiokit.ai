@@ -590,7 +590,7 @@ class SoundChartsService:
     @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_platforms(self) -> List[Dict]:
         """Get all platforms from the SoundCharts API."""
-        url = f"{self.base_url}/api/v2.25/platform"
+        url = f"{self.base_url}/api/v2/referential/platforms"
         logger.info("🖥️ Fetching available platforms", url=url)
 
         try:
