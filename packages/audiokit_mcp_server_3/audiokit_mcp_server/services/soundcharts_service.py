@@ -5,7 +5,6 @@ from structlog import get_logger
 
 from ..cache import redis_cache
 from ..config import settings
-from ..models import Track
 
 
 logger = get_logger()
@@ -614,20 +613,44 @@ class SoundChartsService:
             song_id: The UUID of the song.
 
         Returns:
-            Dictionary containing song metadata.
+            Dictionary containing song metadata in the format:
+            {
+                "type": "song",
+                "object": {
+                    // song data
+                },
+                "errors": []
+            }
         """
         url = f"{self.base_url}/api/v2.25/song/{song_id}"
+        logger.info(
+            "🎵 Fetching song metadata",
+            song_id=song_id,
+            url=url,
+        )
+
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(url, headers=self.headers)
                 response.raise_for_status()
                 data = response.json()
+
+                # Validate response structure
+                if not isinstance(data, dict) or "object" not in data:
+                    logger.error(
+                        "❌ Invalid song metadata structure",
+                        song_id=song_id,
+                        response=data,
+                    )
+                    raise ValueError("Invalid song metadata structure")
+
                 logger.info(
                     "✅ Song metadata retrieved",
                     song_id=song_id,
                     status_code=response.status_code,
                 )
-                return Track(**data["object"]).dict()
+                return data
+
         except httpx.HTTPStatusError as e:
             logger.error(
                 "❌ Failed to fetch song metadata",
