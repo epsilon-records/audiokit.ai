@@ -196,14 +196,65 @@ class APIService:
 
     async def _process_song_metadata(self, song_metadata: Dict) -> None:
         """Process song metadata and create nodes/relationships."""
-        song_object = song_metadata["object"]
-        soundcharts_song_id = song_object["uuid"]  # SoundCharts UUID
+        try:
+            # Add validation for song_metadata structure
+            if not song_metadata:
+                logger.error("❌ Empty song metadata received")
+                raise ValueError("Empty song metadata")
 
-        # Create Track node
-        await self._create_track_node(song_object)
+            if song_metadata.get("errors"):
+                logger.error(
+                    "❌ Errors in song metadata response",
+                    errors=song_metadata["errors"],
+                )
+                raise ValueError(f"API errors: {song_metadata['errors']}")
 
-        # Process all related entities (including ISRC)
-        await self._process_related_entities(song_object, soundcharts_song_id)
+            if "object" not in song_metadata:
+                logger.error(
+                    "❌ Invalid song metadata structure: missing 'object' key",
+                    metadata=song_metadata,
+                )
+                raise ValueError("Invalid song metadata: missing 'object' key")
+
+            song_object = song_metadata["object"]
+
+            # Validate required fields in song_object
+            required_fields = ["uuid", "name", "artists"]
+            for field in required_fields:
+                if field not in song_object:
+                    logger.error(
+                        "❌ Missing required field in song object",
+                        field=field,
+                        song_object=song_object,
+                    )
+                    raise ValueError(f"Song object missing required field: {field}")
+
+            # Validate artists array
+            if (
+                not isinstance(song_object["artists"], list)
+                or not song_object["artists"]
+            ):
+                logger.error(
+                    "❌ Invalid artists data in song object",
+                    artists=song_object["artists"],
+                )
+                raise ValueError("Song object must have non-empty artists array")
+
+            soundcharts_song_id = song_object["uuid"]  # SoundCharts UUID
+
+            # Create Track node
+            await self._create_track_node(song_object)
+
+            # Process all related entities (including ISRC)
+            await self._process_related_entities(song_object, soundcharts_song_id)
+
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process song metadata",
+                error=str(e),
+                song_metadata=song_metadata,
+            )
+            raise
 
     async def _process_album_metadata(self, album_metadata: Dict) -> None:
         """Process album metadata and create nodes/relationships."""
