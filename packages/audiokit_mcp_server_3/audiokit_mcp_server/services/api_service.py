@@ -796,19 +796,30 @@ class APIService:
             for role_type in ["producers", "composers"]:
                 if role_type in entity_data:
                     for name in entity_data[role_type]:
-                        # Create basic artist stub with just the name
-                        artist_node = {
-                            "name": name,
-                        }
-                        # Upsert using name as merge key
-                        query = "MERGE (n:Artist {name: $name}) SET n += $props"
+                        # Check if artist exists first
+                        check_query = "MATCH (n:Artist {name: $name}) RETURN n"
                         async with self.neo4j_driver.session() as session:
+                            result = await session.run(check_query, name=name)
+                            if not await result.single():
+                                logger.debug(
+                                    "Artist not found, skipping",
+                                    name=name,
+                                    role_type=role_type,
+                                )
+                                continue
+
+                            # Update existing artist
+                            update_query = """
+                            MATCH (n:Artist {name: $name})
+                            SET n += $props
+                            """
                             await session.run(
-                                query,
+                                update_query,
                                 name=name,
-                                props=artist_node,
+                                props={"updated_at": datetime.utcnow()},
                             )
-                        # Create role relationship
+
+                        # Create role relationship only if artist exists
                         await self._upsert_neo4j_relationship(
                             entity_id,
                             name,  # Use name as the identifier
