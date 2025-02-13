@@ -1,3 +1,6 @@
+import asyncio
+import fcntl
+import os
 from typing import Dict, Optional
 
 import httpx
@@ -28,6 +31,42 @@ class APIService:
             self.settings.neo4j_uri,
             auth=(self.settings.neo4j_user, self.settings.neo4j_password),
         )
+        # Add unique constraints on startup
+        asyncio.run(self._add_unique_constraints())
+
+    async def _add_unique_constraints(self) -> None:
+        """Add unique constraints to Neo4j if they don't already exist."""
+        constraints = [
+            ("Artist", "id"),
+            ("Track", "id"),
+            ("Album", "id"),
+            ("Genre", "id"),
+            ("Label", "id"),
+            ("AudioFeature", "id"),
+            ("Role", "id"),
+        ]
+
+        for label, property in constraints:
+            query = f"""
+            CREATE CONSTRAINT {label.lower()}_{property}_unique IF NOT EXISTS
+            FOR (n:{label}) REQUIRE n.{property} IS UNIQUE
+            """
+            try:
+                async with self.neo4j_driver.session() as session:
+                    await session.run(query)
+                logger.info(
+                    "✅ Added unique constraint",
+                    label=label,
+                    property=property,
+                )
+            except Exception as e:
+                logger.error(
+                    "❌ Failed to add unique constraint",
+                    label=label,
+                    property=property,
+                    error=str(e),
+                )
+                raise
 
     async def _upsert_neo4j_node(self, label: str, properties: Dict) -> None:
         """Upsert a Neo4j node with error handling."""
@@ -115,13 +154,19 @@ class APIService:
 
         file_path = self.PENDING_FILES[node_type]
 
-        # Check if the node_id is already in the file
-        with open(file_path) as f:
+        # Create the file if it doesn't exist
+        if not os.path.exists(file_path):
+            with open(file_path, "w") as f:
+                pass
+
+        # Use file locking to prevent concurrent writes
+        with open(file_path, "r+") as f:
+            fcntl.flock(f, fcntl.LOCK_EX)  # Acquire an exclusive lock
             existing_ids = set(line.strip() for line in f.readlines())
 
-        if node_id not in existing_ids:
-            with open(file_path, "a") as f:
+            if node_id not in existing_ids:
                 f.write(f"{node_id}\n")
+            fcntl.flock(f, fcntl.LOCK_UN)  # Release the lock
 
     async def _process_song_metadata(self, song_metadata: Dict) -> None:
         """Process song metadata and create nodes/relationships."""
