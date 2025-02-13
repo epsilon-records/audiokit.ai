@@ -1,4 +1,3 @@
-import asyncio
 import fcntl
 import os
 import uuid
@@ -48,7 +47,7 @@ class APIService:
             logger.error("❌ Failed to add unique constraints", error=str(e))
             raise
 
-    def _add_unique_constraints(self) -> None:
+    async def _add_unique_constraints(self) -> None:
         """Add unique constraints to Neo4j if they don't already exist."""
         constraints = [
             ("Artist", "id"),
@@ -65,11 +64,8 @@ class APIService:
             FOR (n:{label}) REQUIRE n.{property} IS UNIQUE
             """
             try:
-                # Use run_until_complete to execute the async query synchronously
-                loop = asyncio.get_event_loop()
-                loop.run_until_complete(
-                    self.neo4j_driver.session().run(query),
-                )
+                async with self.neo4j_driver.session() as session:
+                    await session.run(query)
                 logger.info(
                     "✅ Added unique constraint",
                     label=label,
