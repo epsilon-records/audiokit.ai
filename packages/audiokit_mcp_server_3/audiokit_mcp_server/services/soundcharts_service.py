@@ -594,23 +594,34 @@ class SoundChartsService:
         logger.info("🖥️ Fetching available platforms", url=url)
 
         try:
-            response = await self._make_request(url)
-            platforms = [
-                {
-                    "id": platform["code"],  # Map "code" to "id"
-                    "platform": platform["name"],  # Map "name" to "platform"
-                }
-                for platform in response["items"]
-            ]
-            logger.info(
-                "✅ Platforms retrieved",
-                count=len(platforms),
-                status_code=response.status_code,
-            )
-            return platforms
-        except Exception as e:
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, headers=self.headers)
+                response.raise_for_status()
+                data = response.json()
+                platforms = [
+                    {
+                        "id": platform["code"],  # Map "code" to "id"
+                        "platform": platform["name"],  # Map "name" to "platform"
+                    }
+                    for platform in data["items"]
+                ]
+                logger.info(
+                    "✅ Platforms retrieved",
+                    count=len(platforms),
+                    status_code=response.status_code,
+                )
+                return platforms
+        except httpx.HTTPStatusError as e:
             logger.error(
                 "❌ Failed to fetch platforms",
+                url=url,
+                status_code=e.response.status_code,
+                error=str(e),
+            )
+            raise
+        except Exception as e:
+            logger.error(
+                "🚨 Unexpected error fetching platforms",
                 url=url,
                 error=str(e),
             )
