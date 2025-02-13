@@ -45,10 +45,9 @@ class APIService:
         """Initialize required resources."""
         # Initialize Neo4j driver
         self.neo4j_driver = AsyncGraphDatabase.driver(
-            self.settings.neo4j_uri,
+            self.settings.neo4j_uri,  # Ensure this uses the correct scheme (e.g., bolt+s)
             auth=(self.settings.neo4j_user, self.settings.neo4j_password),
-            # Remove the 'ssl' parameter and use 'encrypted' instead
-            encrypted=True,  # Use 'encrypted' for SSL/TLS
+            # Remove the 'encrypted' parameter
         )
         logger.info("✅ Neo4j driver initialized")
 
