@@ -742,13 +742,14 @@ class APIService:
             if "labels" in entity_data:
                 for label in entity_data["labels"]:
                     label_node = Label(
-                        id=label["uuid"],
+                        id=f"label_{label['name']}",
                         name=label["name"],
+                        type=label["type"],
                     )
                     await self._upsert_neo4j_node("Label", label_node.dict())
                     await self._upsert_neo4j_relationship(
                         entity_id,
-                        label["uuid"],
+                        label_node.id,
                         "HAS_LABEL",
                     )
 
