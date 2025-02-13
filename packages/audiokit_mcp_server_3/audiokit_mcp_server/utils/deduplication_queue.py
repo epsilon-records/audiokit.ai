@@ -19,7 +19,6 @@ class DeduplicationQueue:
             self.redis = await aioredis.from_url(
                 self.redis_url,
                 decode_responses=True,
-                ssl=False,  # Explicitly disable SSL
             )
             logger.info("✅ Connected to Redis deduplication queue")
 
