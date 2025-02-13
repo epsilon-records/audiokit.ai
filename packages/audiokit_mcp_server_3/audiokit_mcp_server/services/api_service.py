@@ -1,6 +1,7 @@
 import fcntl
 import os
 import uuid
+from datetime import datetime
 from typing import Dict, List, Optional
 
 import httpx
@@ -50,20 +51,34 @@ class APIService:
     async def _add_unique_constraints(self) -> None:
         """Add unique constraints to Neo4j if they don't already exist."""
         constraints = [
+            # Models with SoundCharts UUID
+            ("Artist", "soundcharts_uuid"),
+            ("Track", "soundcharts_uuid"),
+            ("Album", "soundcharts_uuid"),
+            # Models with composite IDs
+            ("Genre", "id"),
+            ("Label", "name"),
+            ("Role", "id"),
+            ("Platform", "id"),
+            ("Audience", "id"),
+            ("Popularity", "id"),
+            ("StreamingData", "id"),
+            ("LyricsAnalysis", "id"),
+            ("ISRC", "value"),
+            ("Audio", "id"),
+            # Additional constraints
             ("Artist", "id"),
             ("Track", "id"),
             ("Album", "id"),
-            ("Genre", "id"),
-            ("Label", "id"),
-            ("Role", "id"),
         ]
 
         for label, property in constraints:
-            query = f"""
-            CREATE CONSTRAINT {label.lower()}_{property}_unique IF NOT EXISTS
-            FOR (n:{label}) REQUIRE n.{property} IS UNIQUE
-            """
             try:
+                # Create constraint if it doesn't exist
+                query = f"""
+                CREATE CONSTRAINT {label.lower()}_{property}_unique IF NOT EXISTS
+                FOR (n:{label}) REQUIRE n.{property} IS UNIQUE
+                """
                 async with self.neo4j_driver.session() as session:
                     await session.run(query)
                 logger.info(
@@ -82,60 +97,75 @@ class APIService:
 
     async def _upsert_neo4j_node(self, label: str, properties: Dict) -> None:
         """Upsert a Neo4j node with error handling."""
-        # Validate properties based on label
-        if label == "Artist":
-            Artist(**properties)
-            merge_key = "soundcharts_uuid"
-        elif label == "Track":
-            Track(**properties)
-            merge_key = "soundcharts_uuid"
-        elif label == "Album":
-            Album(**properties)
-            merge_key = "soundcharts_uuid"
-        elif label == "Genre":
-            Genre(**properties)
-            merge_key = "id"
-        elif label == "Label":
-            Label(**properties)
-            merge_key = "name"
-        elif label == "Role":
-            Role(**properties)
-            merge_key = "id"
-        elif label == "Platform":
-            Platform(**properties)
-            merge_key = "id"
-        elif label == "Audience":
-            Audience(**properties)
-            merge_key = "id"
-        elif label == "Popularity":
-            Popularity(**properties)
-            merge_key = "id"
-        elif label == "StreamingData":
-            StreamingData(**properties)
-            merge_key = "id"
-        elif label == "LyricsAnalysis":
-            LyricsAnalysis(**properties)
-            merge_key = "id"
-        elif label == "ISRC":
-            ISRC(**properties)
-            merge_key = "value"
-        elif label == "Audio":
-            Audio(**properties)
-            merge_key = "id"
-        else:
-            raise ValueError(f"Invalid label: {label}")
-
-        query = f"""
-        MERGE (n:{label} {{{merge_key}: ${merge_key}}})
-        SET n += $props
-        """
         try:
-            async with self.neo4j_driver.session() as session:
-                await session.run(
-                    query,
-                    **{merge_key: properties[merge_key]},
-                    props=properties,
+            logger.debug(
+                "Upserting node",
+                label=label,
+                id=properties.get("id"),
+                merge_key=self._get_merge_key(label),
+            )
+            # Validate properties based on label
+            if label == "Artist":
+                Artist(**properties)
+                merge_key = "soundcharts_uuid"
+            elif label == "Track":
+                Track(**properties)
+                merge_key = "soundcharts_uuid"
+            elif label == "Album":
+                Album(**properties)
+                merge_key = "soundcharts_uuid"
+            elif label == "Genre":
+                Genre(**properties)
+                merge_key = "id"
+            elif label == "Label":
+                Label(**properties)
+                merge_key = "name"
+            elif label == "Role":
+                Role(**properties)
+                merge_key = "id"
+            elif label == "Platform":
+                Platform(**properties)
+                merge_key = "id"
+            elif label == "Audience":
+                Audience(**properties)
+                merge_key = "id"
+            elif label == "Popularity":
+                Popularity(**properties)
+                merge_key = "id"
+            elif label == "StreamingData":
+                StreamingData(**properties)
+                merge_key = "id"
+            elif label == "LyricsAnalysis":
+                LyricsAnalysis(**properties)
+                merge_key = "id"
+            elif label == "ISRC":
+                ISRC(**properties)
+                merge_key = "value"
+            elif label == "Audio":
+                Audio(**properties)
+                merge_key = "id"
+            else:
+                raise ValueError(f"Invalid label: {label}")
+
+            query = f"""
+            MERGE (n:{label} {{{merge_key}: ${merge_key}}})
+            SET n += $props
+            """
+            try:
+                async with self.neo4j_driver.session() as session:
+                    await session.run(
+                        query,
+                        **{merge_key: properties[merge_key]},
+                        props=properties,
+                    )
+            except Exception as e:
+                logger.error(
+                    "❌ Failed to upsert Neo4j node",
+                    label=label,
+                    properties=properties,
+                    error=str(e),
                 )
+                raise
         except Exception as e:
             logger.error(
                 "❌ Failed to upsert Neo4j node",
@@ -442,7 +472,7 @@ class APIService:
     ) -> None:
         """Process lyrics analysis data and create nodes."""
         analysis_model = LyricsAnalysis(
-            id=track_id,
+            id=f"lyrics_analysis_{track_id}",
             themes=lyrics_analysis.get("themes", []),
             moods=lyrics_analysis.get("moods", []),
             cultural_reference_people=lyrics_analysis.get(
@@ -468,6 +498,15 @@ class APIService:
             analysis_model.id,
             "HAS_LYRICS_ANALYSIS",
         )
+
+    async def _process_isrc(self, isrc_data: Dict, track_id: str) -> None:
+        isrc = ISRC(
+            id=f"isrc_{isrc_data['value']}",
+            value=isrc_data["value"],
+            country_code=isrc_data["countryCode"],
+            country_name=isrc_data["countryName"],
+        )
+        await self._upsert_neo4j_node("ISRC", isrc.dict())
 
     async def ingest_soundcharts_api(self, artist_name: str) -> Dict:
         """Ingest all SoundCharts data for an artist and build Neo4j graph."""
@@ -561,16 +600,11 @@ class APIService:
             response.raise_for_status()
             return response.json()
 
-    async def _create_track_node(self, track_data: Dict) -> None:
+    async def _create_track_node(self, track_data: Dict) -> str:
         """Create a Track node from track data."""
-        soundcharts_track_id = track_data["uuid"]  # SoundCharts UUID
-
-        # Check if track already exists
-        existing_id = await self._find_existing_node("Track", soundcharts_track_id)
-
-        # Create Track node
+        soundcharts_track_id = track_data["uuid"]
         track = Track(
-            id=existing_id or str(uuid.uuid4()),  # Use existing ID or generate new one
+            id=str(uuid.uuid4()),  # Generate new UUID
             name=track_data["name"],
             credit_name=track_data.get("creditName"),
             release_date=track_data.get("releaseDate"),
@@ -582,53 +616,9 @@ class APIService:
             composers=track_data.get("composers", []),
             producers=track_data.get("producers", []),
             language_code=track_data.get("languageCode"),
+            soundcharts_uuid=soundcharts_track_id,
         )
         await self._upsert_neo4j_node("Track", track.dict())
-
-        # Create SoundCharts node and relationship
-        soundcharts = SoundCharts(
-            id=f"soundcharts_{soundcharts_track_id}",
-            uuid=soundcharts_track_id,
-            type="track",  # Entity type
-            slug=track_data.get("slug"),
-            app_url=track_data.get("appUrl"),
-            image_url=track_data.get("imageUrl"),
-        )
-        await self._upsert_neo4j_node("SoundCharts", soundcharts.dict())
-        await self._upsert_neo4j_relationship(
-            track.id,
-            soundcharts.id,
-            "HAS_SOUNDCHARTS",
-        )
-
-        # Create ISRC node and relationship only if ISRC data exists
-        if track_data.get("isrc") and isinstance(track_data["isrc"], dict):
-            isrc = ISRC(
-                id=f"isrc_{track_data['isrc']['value']}",
-                value=track_data["isrc"]["value"],
-                country_code=track_data["isrc"]["countryCode"],
-                country_name=track_data["isrc"]["countryName"],
-            )
-            await self._upsert_neo4j_node("ISRC", isrc.dict())
-            await self._upsert_neo4j_relationship(
-                track.id,
-                isrc.id,
-                "HAS_ISRC",
-            )
-
-        # Process audio features if they exist
-        if track_data.get("audio"):
-            audio = Audio(
-                id=f"audio_{track.id}",
-                **track_data["audio"],
-            )
-            await self._upsert_neo4j_node("Audio", audio.dict())
-            await self._upsert_neo4j_relationship(
-                track.id,
-                audio.id,
-                "HAS_AUDIO",
-            )
-
         return track.id
 
     async def _create_album_node(self, album_data: Dict) -> None:
@@ -650,6 +640,7 @@ class APIService:
             image_url=album_data.get("imageUrl"),
             labels=album_data.get("labels"),
             type=album_data.get("type"),
+            soundcharts_uuid=soundcharts_album_id,
         )
         await self._upsert_neo4j_node("Album", album.dict())
 
@@ -731,18 +722,7 @@ class APIService:
             and entity_data["isrc"]
             and entity_data["isrc"].get("value")
         ):
-            isrc_node = {
-                "id": f"isrc_{entity_data['isrc']['value']}",
-                "value": entity_data["isrc"]["value"],
-                "country_code": entity_data["isrc"]["countryCode"],
-                "country_name": entity_data["isrc"]["countryName"],
-            }
-            await self._upsert_neo4j_node("ISRC", isrc_node)
-            await self._upsert_neo4j_relationship(
-                entity_id,
-                isrc_node["id"],
-                "HAS_ISRC",
-            )
+            await self._process_isrc(entity_data["isrc"], entity_id)
 
         # Process producers
         if "producers" in entity_data:
@@ -838,11 +818,12 @@ class APIService:
 
     async def _create_artist_node(self, artist_data: Dict) -> str:
         """Create an Artist node from artist data."""
-        soundcharts_artist_id = artist_data["uuid"]  # SoundCharts UUID
+        self._validate_ids(artist_data, ["uuid"])
+        soundcharts_artist_id = artist_data["uuid"]
 
-        # Create Artist node with SoundCharts UUID
         artist = Artist(
-            id=str(uuid.uuid4()),  # Generate new UUID
+            id=str(uuid.uuid4()),
+            soundcharts_uuid=soundcharts_artist_id,
             name=artist_data["name"],
             credit_name=artist_data.get("creditName"),
             country_code=artist_data.get("countryCode"),
@@ -852,7 +833,6 @@ class APIService:
             gender=artist_data.get("gender"),
             type=artist_data.get("type"),
             birth_date=artist_data.get("birthDate"),
-            soundcharts_uuid=soundcharts_artist_id,
         )
         await self._upsert_neo4j_node("Artist", artist.dict())
         return artist.id
@@ -884,3 +864,54 @@ class APIService:
                 error=str(e),
             )
             return None
+
+    def _generate_composite_id(self, prefix: str, *parts: str) -> str:
+        """Generate a consistent composite ID from parts."""
+        if not parts:
+            raise ValueError("At least one part is required for composite ID")
+
+        clean_parts = []
+        for part in parts:
+            if not part:
+                raise ValueError("Empty part in composite ID generation")
+            clean_parts.append(str(part).strip().lower().replace(" ", "_"))
+
+        return f"{prefix}_{'_'.join(clean_parts)}"
+
+    def _validate_ids(self, properties: Dict, required_ids: List[str]) -> None:
+        """Validate that required IDs are present in properties."""
+        missing_ids = [id for id in required_ids if id not in properties]
+        if missing_ids:
+            raise ValueError(f"Missing required IDs: {missing_ids}")
+
+    def _get_merge_key(self, label: str) -> str:
+        """Get the merge key for a given label."""
+        merge_keys = {
+            "Artist": "soundcharts_uuid",
+            "Track": "soundcharts_uuid",
+            "Album": "soundcharts_uuid",
+            "Genre": "id",
+            "Label": "name",
+            # ... other labels
+        }
+        return merge_keys.get(label, "id")
+
+    async def _create_lyrics_analysis_node(
+        self, track_id: str, analysis_data: Dict
+    ) -> None:
+        analysis = LyricsAnalysis(
+            track_id=track_id,
+            **analysis_data,
+        )
+        await self._upsert_neo4j_node("LyricsAnalysis", analysis.dict())
+
+    async def _create_popularity_node(
+        self, artist_id: str, platform: str, date: datetime, value: int
+    ) -> None:
+        popularity = Popularity(
+            artist_id=artist_id,
+            platform=platform,
+            date=date,
+            value=value,
+        )
+        await self._upsert_neo4j_node("Popularity", popularity.dict())

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Dict, List, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 
 class GenreData(BaseModel):
@@ -22,12 +22,30 @@ class Artist(BaseModel):
     birth_date: Optional[datetime] = None
     soundcharts_uuid: str  # SoundCharts UUID for merging
 
+    @validator("soundcharts_uuid")
+    def validate_soundcharts_uuid(cls, v):
+        if not v:
+            raise ValueError("SoundCharts UUID cannot be empty")
+        return v
+
 
 class ISRC(BaseModel):
-    id: Optional[str] = None  # Composite ID: "isrc_{value}"
+    id: Optional[str] = None
     value: str
     country_code: str
     country_name: str
+
+    @validator("value")
+    def validate_value(cls, v):
+        if not v:
+            raise ValueError("ISRC value cannot be empty")
+        return v
+
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            return f"isrc_{values['value']}"
+        return v
 
 
 class Track(BaseModel):
@@ -93,19 +111,31 @@ class Platform(BaseModel):
 
 
 class Popularity(BaseModel):
-    id: Optional[str] = None  # Composite ID: "popularity_{artist_id}_{platform}_{date}"
+    id: Optional[str] = None
     artist_id: str
     platform: str
     date: datetime
     value: Optional[int] = None
+
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            return f"popularity_{values['artist_id']}_{values['platform']}_{values['date'].isoformat()}"
+        return v
 
 
 class StreamingData(BaseModel):
-    id: Optional[str] = None  # Composite ID: "streaming_{artist_id}_{platform}_{date}"
+    id: Optional[str] = None
     artist_id: str
     platform: str
     date: datetime
     value: Optional[int] = None
+
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            return f"streaming_{values['artist_id']}_{values['platform']}_{values['date'].isoformat()}"
+        return v
 
 
 class Audience(BaseModel):
@@ -126,7 +156,8 @@ class Role(BaseModel):
 
 
 class LyricsAnalysis(BaseModel):
-    id: Optional[str] = None  # Composite ID: "lyrics_analysis_{track_id}"
+    id: Optional[str] = None
+    track_id: str
     themes: Optional[List[str]] = None
     moods: Optional[List[str]] = None
     cultural_reference_people: Optional[List[str]] = None
@@ -139,6 +170,12 @@ class LyricsAnalysis(BaseModel):
     repetitiveness_score: Optional[int] = None
     rhyme_scheme_score: Optional[int] = None
     imagery_score: Optional[int] = None
+
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            return f"lyrics_analysis_{values['track_id']}"
+        return v
 
 
 class Audio(BaseModel):
