@@ -568,15 +568,17 @@ class APIService:
             # Step 5: Get and process artist albums
             albums = await self.soundcharts_service.get_artist_albums(artist_id)
             for album in albums.get("items", []):
-                if not isinstance(album, dict) or "object" not in album:
+                # Check for UUID instead of UPC
+                if not album.get("uuid"):
                     logger.error(
-                        "Invalid album data",
+                        "Album missing UUID, skipping",
                         album=album,
                     )
                     continue
 
-                album_metadata = await self.soundcharts_service.get_album_by_upc(
-                    album["object"]["upc"],
+                # Get album by UUID instead of UPC
+                album_metadata = await self.soundcharts_service.get_album_metadata(
+                    album["uuid"],
                 )
                 await self._process_album_metadata(album_metadata)
 

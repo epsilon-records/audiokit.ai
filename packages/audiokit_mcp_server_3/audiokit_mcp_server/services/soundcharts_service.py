@@ -199,28 +199,56 @@ class SoundChartsService:
 
     # Album Endpoints
     @cache()  # Uses self.cache_ttl
-    async def get_album_by_upc(self, upc: str) -> Dict:
-        """Get album by UPC"""
-        url = f"{self.base_url}/api/v2/album/by-upc/{upc}"
-        logger.info(
-            "💿 Fetching album by UPC",
-            upc=upc,
-            url=url,
-        )
+    async def get_album_metadata(self, album_uuid: str) -> Dict:
+        """Get album metadata by UUID from SoundCharts API.
+
+        Args:
+            album_uuid: The UUID of the album to retrieve
+
+        Returns:
+            Dictionary containing album metadata in the format:
+            {
+                "type": "album",
+                "object": {
+                    // album data
+                },
+                "errors": []
+            }
+        """
         try:
+            # Use API version 2.36 as per documentation
+            url = f"{self.base_url}/api/v2.36/album/by-uuid/{album_uuid}"
+            logger.info(
+                "💿 Fetching album metadata",
+                album_uuid=album_uuid,
+                url=url,
+            )
+
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(url, headers=self.headers)
                 response.raise_for_status()
+                data = response.json()
+
+                # Validate response structure
+                if not isinstance(data, dict) or "object" not in data:
+                    logger.error(
+                        "❌ Invalid album metadata structure",
+                        album_uuid=album_uuid,
+                        response=data,
+                    )
+                    raise ValueError("Invalid album metadata structure")
+
                 logger.info(
-                    "✅ Album retrieved by UPC",
-                    upc=upc,
+                    "✅ Album metadata retrieved",
+                    album_uuid=album_uuid,
                     status_code=response.status_code,
                 )
-                return response.json()
+                return data
+
         except httpx.HTTPStatusError as e:
             logger.error(
-                "❌ Failed to fetch album by UPC",
-                upc=upc,
+                "❌ Failed to fetch album metadata",
+                album_uuid=album_uuid,
                 url=e.request.url,
                 status_code=e.response.status_code,
                 error=str(e),
@@ -228,8 +256,8 @@ class SoundChartsService:
             raise
         except Exception as e:
             logger.error(
-                "🚨 Unexpected error fetching album by UPC",
-                upc=upc,
+                "🚨 Unexpected error fetching album metadata",
+                album_uuid=album_uuid,
                 error=str(e),
             )
             raise
