@@ -20,7 +20,6 @@ from ..models import (
     Platform,
     Popularity,
     Role,
-    SoundCharts,
     StreamingData,
     Track,
 )
@@ -897,7 +896,9 @@ class APIService:
         return merge_keys.get(label, "id")
 
     async def _create_lyrics_analysis_node(
-        self, track_id: str, analysis_data: Dict
+        self,
+        track_id: str,
+        analysis_data: Dict,
     ) -> None:
         analysis = LyricsAnalysis(
             track_id=track_id,
@@ -906,7 +907,11 @@ class APIService:
         await self._upsert_neo4j_node("LyricsAnalysis", analysis.dict())
 
     async def _create_popularity_node(
-        self, artist_id: str, platform: str, date: datetime, value: int
+        self,
+        artist_id: str,
+        platform: str,
+        date: datetime,
+        value: int,
     ) -> None:
         popularity = Popularity(
             artist_id=artist_id,
