@@ -8,15 +8,18 @@ from neo4j import AsyncGraphDatabase
 from structlog import get_logger
 
 from ..models import (
+    ISRC,
     Album,
     Artist,
     Audience,
+    Audio,
     Genre,
     Label,
     LyricsAnalysis,
     Platform,
     Popularity,
     Role,
+    SoundCharts,
     StreamingData,
     Track,
 )
@@ -102,6 +105,12 @@ class APIService:
             StreamingData(**properties)
         elif label == "LyricsAnalysis":
             LyricsAnalysis(**properties)
+        elif label == "ISRC":
+            ISRC(**properties)
+        elif label == "SoundCharts":
+            SoundCharts(**properties)
+        elif label == "Audio":
+            Audio(**properties)
         else:
             raise ValueError(f"Invalid label: {label}")
 
@@ -490,17 +499,11 @@ class APIService:
         """Create a Track node from track data."""
         soundcharts_track_id = track_data["uuid"]  # SoundCharts UUID
 
-        # Fetch lyrics analysis data using the SoundCharts UUID
-        lyrics_analysis = await self.soundcharts_service.get_song_lyrics_analysis(
-            soundcharts_track_id,
-        )
-
         # Create Track node
         track = Track(
             id=str(uuid.uuid4()),  # Generate our own UUIDv4
             name=track_data["name"],
             credit_name=track_data.get("creditName"),
-            isrc=track_data.get("isrc"),  # Pass ISRC object directly
             release_date=track_data.get("releaseDate"),
             copyright=track_data.get("copyright"),
             app_url=track_data.get("appUrl"),
@@ -511,44 +514,96 @@ class APIService:
             composers=track_data.get("composers"),
             producers=track_data.get("producers"),
             language_code=track_data.get("languageCode"),
-            soundcharts_uuid=soundcharts_track_id,  # Flattened SoundCharts data
-            soundcharts_slug=track_data.get("slug"),
-            soundcharts_app_url=track_data.get("appUrl"),
-            soundcharts_image_url=track_data.get("imageUrl"),
-            audio_danceability=track_data.get("audio", {}).get("danceability"),
-            audio_energy=track_data.get("audio", {}).get("energy"),
-            audio_key=track_data.get("audio", {}).get("key"),
-            audio_loudness=track_data.get("audio", {}).get("loudness"),
-            audio_mode=track_data.get("audio", {}).get("mode"),
-            audio_speechiness=track_data.get("audio", {}).get("speechiness"),
-            audio_acousticness=track_data.get("audio", {}).get("acousticness"),
-            audio_instrumentalness=track_data.get("audio", {}).get("instrumentalness"),
-            audio_liveness=track_data.get("audio", {}).get("liveness"),
-            audio_valence=track_data.get("audio", {}).get("valence"),
-            audio_tempo=track_data.get("audio", {}).get("tempo"),
-            audio_time_signature=track_data.get("audio", {}).get("timeSignature"),
-            lyrics_analysis_themes=lyrics_analysis.get("themes"),
-            lyrics_analysis_moods=lyrics_analysis.get("moods"),
-            lyrics_analysis_cultural_reference_people=lyrics_analysis.get(
-                "culturalReferencePeople",
-            ),
-            lyrics_analysis_cultural_reference_non_people=lyrics_analysis.get(
-                "culturalReferenceNonPeople",
-            ),
-            lyrics_analysis_brands=lyrics_analysis.get("brands"),
-            lyrics_analysis_locations=lyrics_analysis.get("locations"),
-            lyrics_analysis_narrative_style=lyrics_analysis.get("narrativeStyle"),
-            lyrics_analysis_emotional_intensity_score=lyrics_analysis.get(
-                "emotionalIntensityScore",
-            ),
-            lyrics_analysis_complexity_score=lyrics_analysis.get("complexityScore"),
-            lyrics_analysis_repetitiveness_score=lyrics_analysis.get(
-                "repetitivenessScore"
-            ),
-            lyrics_analysis_rhyme_scheme_score=lyrics_analysis.get("rhymeSchemeScore"),
-            lyrics_analysis_imagery_score=lyrics_analysis.get("imageryScore"),
         )
         await self._upsert_neo4j_node("Track", track.dict())
+
+        # Create ISRC node and relationship
+        if "isrc" in track_data:
+            isrc = ISRC(
+                id=f"isrc_{track_data['isrc']['value']}",
+                value=track_data["isrc"]["value"],
+                country_code=track_data["isrc"]["countryCode"],
+                country_name=track_data["isrc"]["countryName"],
+            )
+            await self._upsert_neo4j_node("ISRC", isrc.dict())
+            await self._upsert_neo4j_relationship(
+                track.id,
+                isrc.id,
+                "HAS_ISRC",
+            )
+
+        # Create SoundCharts node and relationship
+        soundcharts = SoundCharts(
+            id=f"soundcharts_{soundcharts_track_id}",
+            uuid=soundcharts_track_id,
+            type="track",  # Entity type
+            slug=track_data.get("slug"),
+            app_url=track_data.get("appUrl"),
+            image_url=track_data.get("imageUrl"),
+        )
+        await self._upsert_neo4j_node("SoundCharts", soundcharts.dict())
+        await self._upsert_neo4j_relationship(
+            track.id,
+            soundcharts.id,
+            "HAS_SOUNDCHARTS",
+        )
+
+        # Create Audio node and relationship
+        if "audio" in track_data:
+            audio = Audio(
+                id=f"audio_{track.id}",
+                danceability=track_data["audio"].get("danceability"),
+                energy=track_data["audio"].get("energy"),
+                key=track_data["audio"].get("key"),
+                loudness=track_data["audio"].get("loudness"),
+                mode=track_data["audio"].get("mode"),
+                speechiness=track_data["audio"].get("speechiness"),
+                acousticness=track_data["audio"].get("acousticness"),
+                instrumentalness=track_data["audio"].get("instrumentalness"),
+                liveness=track_data["audio"].get("liveness"),
+                valence=track_data["audio"].get("valence"),
+                tempo=track_data["audio"].get("tempo"),
+                time_signature=track_data["audio"].get("timeSignature"),
+            )
+            await self._upsert_neo4j_node("Audio", audio.dict())
+            await self._upsert_neo4j_relationship(
+                track.id,
+                audio.id,
+                "HAS_AUDIO",
+            )
+
+        # Create LyricsAnalysis node and relationship
+        lyrics_analysis = await self.soundcharts_service.get_song_lyrics_analysis(
+            soundcharts_track_id,
+        )
+        if lyrics_analysis:
+            lyrics = LyricsAnalysis(
+                id=f"lyrics_{track.id}",
+                themes=lyrics_analysis.get("themes"),
+                moods=lyrics_analysis.get("moods"),
+                cultural_reference_people=lyrics_analysis.get(
+                    "culturalReferencePeople"
+                ),
+                cultural_reference_non_people=lyrics_analysis.get(
+                    "culturalReferenceNonPeople"
+                ),
+                brands=lyrics_analysis.get("brands"),
+                locations=lyrics_analysis.get("locations"),
+                narrative_style=lyrics_analysis.get("narrativeStyle"),
+                emotional_intensity_score=lyrics_analysis.get(
+                    "emotionalIntensityScore"
+                ),
+                complexity_score=lyrics_analysis.get("complexityScore"),
+                repetitiveness_score=lyrics_analysis.get("repetitivenessScore"),
+                rhyme_scheme_score=lyrics_analysis.get("rhymeSchemeScore"),
+                imagery_score=lyrics_analysis.get("imageryScore"),
+            )
+            await self._upsert_neo4j_node("LyricsAnalysis", lyrics.dict())
+            await self._upsert_neo4j_relationship(
+                track.id,
+                lyrics.id,
+                "HAS_LYRICS_ANALYSIS",
+            )
 
     async def _create_album_node(self, album_data: Dict) -> None:
         """Create an Album node from album data."""
@@ -566,12 +621,24 @@ class APIService:
             image_url=album_data.get("imageUrl"),
             labels=album_data.get("labels"),
             type=album_data.get("type"),
-            soundcharts={
-                "uuid": soundcharts_album_id,  # Store SoundCharts UUID
-                "slug": album_data.get("slug"),
-            },
         )
         await self._upsert_neo4j_node("Album", album.dict())
+
+        # Create SoundCharts node and relationship
+        soundcharts = SoundCharts(
+            id=f"soundcharts_{soundcharts_album_id}",
+            uuid=soundcharts_album_id,
+            type="album",  # Entity type
+            slug=album_data.get("slug"),
+            app_url=album_data.get("appUrl"),
+            image_url=album_data.get("imageUrl"),
+        )
+        await self._upsert_neo4j_node("SoundCharts", soundcharts.dict())
+        await self._upsert_neo4j_relationship(
+            album.id,
+            soundcharts.id,
+            "HAS_SOUNDCHARTS",
+        )
 
     async def _process_related_entities(
         self,
@@ -720,12 +787,24 @@ class APIService:
             gender=artist_data.get("gender"),
             type=artist_data.get("type"),
             birth_date=artist_data.get("birthDate"),
-            soundcharts_uuid=soundcharts_artist_id,  # Store SoundCharts UUID
-            soundcharts_slug=artist_data.get("slug"),
-            soundcharts_app_url=artist_data.get("appUrl"),
-            soundcharts_image_url=artist_data.get("imageUrl"),
         )
         await self._upsert_neo4j_node("Artist", artist.dict())
+
+        # Create SoundCharts node and relationship
+        soundcharts = SoundCharts(
+            id=f"soundcharts_{soundcharts_artist_id}",
+            uuid=soundcharts_artist_id,
+            type="artist",  # Entity type
+            slug=artist_data.get("slug"),
+            app_url=artist_data.get("appUrl"),
+            image_url=artist_data.get("imageUrl"),
+        )
+        await self._upsert_neo4j_node("SoundCharts", soundcharts.dict())
+        await self._upsert_neo4j_relationship(
+            artist.id,
+            soundcharts.id,
+            "HAS_SOUNDCHARTS",
+        )
 
         # Process genres
         if "genres" in artist_data:

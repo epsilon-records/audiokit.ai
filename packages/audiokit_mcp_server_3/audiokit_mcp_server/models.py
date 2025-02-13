@@ -20,13 +20,10 @@ class Artist(BaseModel):
     gender: Optional[str] = None
     type: Optional[str] = None
     birth_date: Optional[datetime] = None
-    soundcharts_uuid: Optional[str] = None  # Store SoundCharts UUID
-    soundcharts_slug: Optional[str] = None  # Store SoundCharts slug
-    soundcharts_app_url: Optional[str] = None  # Store SoundCharts app URL
-    soundcharts_image_url: Optional[str] = None  # Store SoundCharts image URL
 
 
 class ISRC(BaseModel):
+    id: str  # Composite ID: "isrc_{value}"
     value: str
     country_code: str
     country_name: str
@@ -36,7 +33,6 @@ class Track(BaseModel):
     id: str  # Our own UUIDv4
     name: str
     credit_name: Optional[str] = None
-    isrc: Optional[ISRC] = None  # Nested ISRC object
     release_date: Optional[datetime] = None
     copyright: Optional[str] = None
     app_url: Optional[str] = None
@@ -47,34 +43,6 @@ class Track(BaseModel):
     composers: Optional[List[str]] = None
     producers: Optional[List[str]] = None
     language_code: Optional[str] = None
-    soundcharts_uuid: Optional[str] = None  # Flattened SoundCharts data
-    soundcharts_slug: Optional[str] = None
-    soundcharts_app_url: Optional[str] = None
-    soundcharts_image_url: Optional[str] = None
-    audio_danceability: Optional[float] = None  # Flattened audio features
-    audio_energy: Optional[float] = None
-    audio_key: Optional[int] = None
-    audio_loudness: Optional[float] = None
-    audio_mode: Optional[int] = None
-    audio_speechiness: Optional[float] = None
-    audio_acousticness: Optional[float] = None
-    audio_instrumentalness: Optional[float] = None
-    audio_liveness: Optional[float] = None
-    audio_valence: Optional[float] = None
-    audio_tempo: Optional[float] = None
-    audio_time_signature: Optional[int] = None
-    lyrics_analysis_themes: Optional[List[str]] = None  # Flattened lyrics analysis
-    lyrics_analysis_moods: Optional[List[str]] = None
-    lyrics_analysis_cultural_reference_people: Optional[List[str]] = None
-    lyrics_analysis_cultural_reference_non_people: Optional[List[str]] = None
-    lyrics_analysis_brands: Optional[List[str]] = None
-    lyrics_analysis_locations: Optional[List[str]] = None
-    lyrics_analysis_narrative_style: Optional[str] = None
-    lyrics_analysis_emotional_intensity_score: Optional[int] = None
-    lyrics_analysis_complexity_score: Optional[int] = None
-    lyrics_analysis_repetitiveness_score: Optional[int] = None
-    lyrics_analysis_rhyme_scheme_score: Optional[int] = None
-    lyrics_analysis_imagery_score: Optional[int] = None
 
 
 class Album(BaseModel):
@@ -88,7 +56,6 @@ class Album(BaseModel):
     image_url: Optional[str] = None
     labels: Optional[List[Dict]] = None
     type: Optional[str] = None
-    soundcharts: Optional[Dict] = None  # Namespace for SoundCharts-specific data
 
 
 class Genre(BaseModel):
@@ -157,16 +124,41 @@ class Role(BaseModel):
 
 
 class LyricsAnalysis(BaseModel):
-    id: str  # Use the track UUID
-    themes: List[str]
-    moods: List[str]
-    cultural_reference_people: List[str]
-    cultural_reference_non_people: List[str]
-    brands: List[str]
-    locations: List[str]
-    narrative_style: str
-    emotional_intensity_score: int
-    complexity_score: int
-    repetitiveness_score: int
-    rhyme_scheme_score: int
-    imagery_score: int
+    id: str  # Composite ID: "lyrics_{track_id}"
+    themes: Optional[List[str]] = None
+    moods: Optional[List[str]] = None
+    cultural_reference_people: Optional[List[str]] = None
+    cultural_reference_non_people: Optional[List[str]] = None
+    brands: Optional[List[str]] = None
+    locations: Optional[List[str]] = None
+    narrative_style: Optional[str] = None
+    emotional_intensity_score: Optional[int] = None
+    complexity_score: Optional[int] = None
+    repetitiveness_score: Optional[int] = None
+    rhyme_scheme_score: Optional[int] = None
+    imagery_score: Optional[int] = None
+
+
+class SoundCharts(BaseModel):
+    id: str  # Composite ID: "soundcharts_{uuid}"
+    uuid: str
+    type: str  # Entity type: "artist", "track", "album"
+    slug: Optional[str] = None
+    app_url: Optional[str] = None
+    image_url: Optional[str] = None
+
+
+class Audio(BaseModel):
+    id: str  # Composite ID: "audio_{track_id}"
+    danceability: Optional[float] = None
+    energy: Optional[float] = None
+    key: Optional[int] = None
+    loudness: Optional[float] = None
+    mode: Optional[int] = None
+    speechiness: Optional[float] = None
+    acousticness: Optional[float] = None
+    instrumentalness: Optional[float] = None
+    liveness: Optional[float] = None
+    valence: Optional[float] = None
+    tempo: Optional[float] = None
+    time_signature: Optional[int] = None
