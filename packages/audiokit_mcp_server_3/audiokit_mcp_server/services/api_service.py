@@ -263,16 +263,10 @@ class APIService:
                 )
                 raise ValueError("Invalid album metadata: expected dict")
 
-            if "object" not in album_metadata:
-                logger.error(
-                    "Missing 'object' key in album metadata",
-                    album_metadata=album_metadata,
-                )
-                raise ValueError("Missing 'object' key in album metadata")
-
-            album_object = album_metadata["object"]
+            # Directly use album_metadata since it's already the album object
+            album_object = album_metadata
             logger.debug(
-                "Extracted album object",
+                "Processing album object",
                 album_object=album_object,
             )
 
@@ -297,7 +291,7 @@ class APIService:
             tracklisting = await self.soundcharts_service.get_album_tracklisting(
                 soundcharts_album_id,
             )
-            for track in tracklisting["tracks"]:
+            for track in tracklisting.get("tracks", []):
                 # Create Track node and get internal ID
                 internal_track_id = await self._create_track_node(track)
 
@@ -774,25 +768,13 @@ class APIService:
                                 )
                                 continue
 
-                            artist_id = record["artist_id"]
+                            internal_artist_id = record["artist_id"]
 
-                            # Update existing artist
-                            update_query = """
-                            MATCH (n:Artist {id: $artist_id})
-                            SET n += $props
-                            """
-                            await session.run(
-                                update_query,
-                                artist_id=artist_id,
-                                props={"updated_at": datetime.utcnow()},
+                            await self._upsert_neo4j_relationship(
+                                entity_id,
+                                internal_artist_id,
+                                f"HAS_{role_type[:-1].upper()}",
                             )
-
-                        # Create role relationship using the actual artist UUID
-                        await self._upsert_neo4j_relationship(
-                            entity_id,
-                            artist_id,  # Use the UUID from the database
-                            f"HAS_{role_type[:-1].upper()}",
-                        )
 
             # Process featured artists
             if "featured_artists" in entity_data:
