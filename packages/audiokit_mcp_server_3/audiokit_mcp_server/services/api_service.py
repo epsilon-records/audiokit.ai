@@ -757,11 +757,16 @@ class APIService:
             for role_type in ["producers", "composers"]:
                 if role_type in entity_data:
                     for name in entity_data[role_type]:
-                        # Check if artist exists first
-                        check_query = "MATCH (n:Artist {name: $name}) RETURN n"
+                        # Check if artist exists first and get UUID
+                        check_query = """
+                        MATCH (n:Artist {name: $name}) 
+                        RETURN n.id AS artist_id
+                        """
                         async with self.neo4j_driver.session() as session:
                             result = await session.run(check_query, name=name)
-                            if not await result.single():
+                            record = await result.single()
+
+                            if not record:
                                 logger.debug(
                                     "Artist not found, skipping",
                                     name=name,
@@ -769,28 +774,30 @@ class APIService:
                                 )
                                 continue
 
+                            artist_id = record["artist_id"]
+
                             # Update existing artist
                             update_query = """
-                            MATCH (n:Artist {name: $name})
+                            MATCH (n:Artist {id: $artist_id})
                             SET n += $props
                             """
                             await session.run(
                                 update_query,
-                                name=name,
+                                artist_id=artist_id,
                                 props={"updated_at": datetime.utcnow()},
                             )
 
-                        # Create role relationship only if artist exists
+                        # Create role relationship using the actual artist UUID
                         await self._upsert_neo4j_relationship(
                             entity_id,
-                            name,  # Use name as the identifier
+                            artist_id,  # Use the UUID from the database
                             f"HAS_{role_type[:-1].upper()}",
                         )
 
                         # Add unidirectional WORKED_WITH relationship
                         await self._upsert_neo4j_relationship(
                             entity_id,
-                            name,
+                            artist_id,
                             "WORKED_WITH",
                         )
 
