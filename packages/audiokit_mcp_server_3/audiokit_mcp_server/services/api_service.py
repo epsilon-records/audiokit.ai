@@ -169,7 +169,6 @@ class APIService:
         "artists": "PENDING_ARTISTS.txt",
         "tracks": "PENDING_TRACKS.txt",
         "albums": "PENDING_ALBUMS.txt",
-        "labels": "PENDING_LABELS.txt",
     }
 
     def _add_to_pending_list(self, node_type: str, node_id: str) -> None:
@@ -448,6 +447,22 @@ class APIService:
         )
 
     async def _process_isrc(self, isrc_data: Dict, track_id: str) -> None:
+        if not isinstance(isrc_data, dict):
+            logger.warning(
+                "Invalid ISRC data format",
+                track_id=track_id,
+                isrc_data=isrc_data,
+            )
+            return
+
+        if not isrc_data.get("value"):
+            logger.warning(
+                "Missing required ISRC value",
+                track_id=track_id,
+                isrc_data=isrc_data,
+            )
+            return
+
         isrc = ISRC(
             id=f"isrc_{isrc_data['value']}",
             value=isrc_data["value"],
@@ -455,6 +470,16 @@ class APIService:
             country_name=isrc_data["countryName"],
         )
         await self._upsert_neo4j_node("ISRC", isrc.dict())
+        await self._upsert_neo4j_relationship(
+            track_id,
+            isrc.id,
+            "HAS_ISRC",
+        )
+        logger.debug(
+            "✅ Successfully processed ISRC",
+            track_id=track_id,
+            isrc_value=isrc_data["value"],
+        )
 
     async def ingest_soundcharts_api(self, artist_name: str) -> Dict:
         """Ingest all SoundCharts data for an artist and build Neo4j graph."""
@@ -694,20 +719,67 @@ class APIService:
                         )
                         continue
 
-            # Process labels
+            # Process labels - modified to always create label nodes
             if "labels" in entity_data:
                 for label in entity_data["labels"]:
-                    label_model = Label(**label)
-                    self._add_to_pending_list("labels", label_model.id)
-                    await self._upsert_neo4j_relationship(
-                        entity_id,
-                        label_model.id,
-                        "HAS_LABEL",
-                    )
+                    try:
+                        label_model = Label(**label)
+                        await self._upsert_neo4j_node("Label", label_model.dict())
+                        await self._upsert_neo4j_relationship(
+                            entity_id,
+                            label_model.id,
+                            "HAS_LABEL",
+                        )
+                        logger.debug(
+                            "✅ Processed label",
+                            label=label_model.dict(),
+                            entity_id=entity_id,
+                        )
+                    except Exception as e:
+                        logger.error(
+                            "❌ Failed to process label",
+                            label=label,
+                            entity_id=entity_id,
+                            error=str(e),
+                            stack_trace=traceback.format_exc(),
+                        )
+                        continue
 
             # Process ISRC
-            if "isrc" in entity_data and entity_data["isrc"].get("value"):
-                await self._process_isrc(entity_data["isrc"], entity_id)
+            if "isrc" in entity_data:
+                isrc_data = entity_data["isrc"]
+                if isrc_data is not None:
+                    try:
+                        if not isinstance(isrc_data, dict):
+                            logger.warning(
+                                "Invalid ISRC data format",
+                                entity_id=entity_id,
+                                isrc_data=isrc_data,
+                            )
+                            return
+
+                        if not isrc_data.get("value"):
+                            logger.warning(
+                                "Missing required ISRC value",
+                                entity_id=entity_id,
+                                isrc_data=isrc_data,
+                            )
+                            return
+
+                        await self._process_isrc(isrc_data, entity_id)
+                        logger.debug(
+                            "✅ Successfully processed ISRC",
+                            entity_id=entity_id,
+                            isrc_value=isrc_data["value"],
+                        )
+                    except Exception as e:
+                        logger.error(
+                            "❌ Failed to process ISRC",
+                            entity_id=entity_id,
+                            isrc_data=isrc_data,
+                            error=str(e),
+                            stack_trace=traceback.format_exc(),
+                        )
 
             # Process producers and composers
             for role_type in ["producers", "composers"]:
