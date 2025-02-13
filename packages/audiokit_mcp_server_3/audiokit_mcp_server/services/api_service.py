@@ -43,19 +43,19 @@ class APIService:
 
     async def startup(self):
         """Initialize required resources."""
-        # Initialize Neo4j driver
-        self.neo4j_driver = AsyncGraphDatabase.driver(
-            self.settings.neo4j_uri,
-            auth=(self.settings.neo4j_user, self.settings.neo4j_password),
-        )
-        logger.info("✅ Neo4j driver initialized")
-
         # Initialize Redis
         self.redis = await aioredis.from_url(
             self.settings.redis_url,
             decode_responses=True,
         )
         logger.info("✅ Redis connection established")
+
+        # Initialize Neo4j driver
+        self.neo4j_driver = AsyncGraphDatabase.driver(
+            self.settings.neo4j_uri,
+            auth=(self.settings.neo4j_user, self.settings.neo4j_password),
+        )
+        logger.info("✅ Neo4j driver initialized")
 
         # Initialize deduplication queue
         self.deduplication_queue = DeduplicationQueue(
@@ -64,7 +64,10 @@ class APIService:
             redis_connection=self.redis,
         )
         await self.deduplication_queue.connect()
-        logger.info("✅ Deduplication queue initialized")
+
+        # Clear using queue's own method
+        await self.deduplication_queue.clear()
+        logger.info("🧹 Cleared Redis deduplication queue on startup")
 
     async def _add_unique_constraints(self) -> None:
         """Add unique constraints to Neo4j."""

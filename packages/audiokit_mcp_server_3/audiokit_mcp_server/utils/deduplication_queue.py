@@ -39,7 +39,8 @@ class DeduplicationQueue:
             raise RuntimeError("Redis connection not established")
         try:
             await asyncio.wait_for(
-                self.redis.set(node_id, "1", ex=self.ttl), timeout=1.0
+                self.redis.set(node_id, "1", ex=self.ttl),
+                timeout=1.0,
             )
             logger.debug("Marked node as processed", node_id=node_id)
         except asyncio.TimeoutError:
@@ -50,3 +51,13 @@ class DeduplicationQueue:
         if self.redis:
             await self.redis.close()
             logger.info("✅ Closed Redis deduplication queue")
+
+    async def clear(self) -> None:
+        """Clear all entries from the deduplication queue."""
+        if not self.redis:
+            raise RuntimeError("Redis connection not established")
+        try:
+            await asyncio.wait_for(self.redis.flushdb(), timeout=5.0)
+            logger.info("🧹 Cleared deduplication queue")
+        except asyncio.TimeoutError:
+            logger.warning("Redis flush operation timed out")

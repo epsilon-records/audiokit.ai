@@ -5,6 +5,7 @@ import traceback
 from aiocache import caches
 from audiokit_mcp_server.config import settings
 from audiokit_mcp_server.services.api_service import APIService
+from audiokit_mcp_server.services.deduplication_queue import DeduplicationQueue
 from audiokit_mcp_server.utils.redis import setup_redis_cache
 from loguru import logger
 
@@ -33,9 +34,23 @@ logger.level("TRACE", icon="🔍")
 
 
 async def main():
+    # Initialize Redis
+    setup_redis_cache(settings)
+
+    # Create temp queue instance for cleanup
+    dq = DeduplicationQueue(settings.redis_url)
+    await dq.connect()
+    await dq.clear()  # Use queue's clear method
+    await dq.close()
+
     # Initialize Redis cache with simpler config
     logger.debug("🔧 Initializing LOCAL Redis cache")
     setup_redis_cache(settings)
+
+    # Clear queue before starting
+    cache = caches.get("default")
+    await cache.raw("flushdb")
+    logger.debug("🧪 Cleared Redis cache for test ingestion")
 
     # Verify cache backend
     cache = caches.get("default")
@@ -94,7 +109,9 @@ async def main():
                 "error_type": type(e).__name__,
                 "error_fields": getattr(e, "fields", None),
                 "input_data": getattr(
-                    e, "input_data", None
+                    e,
+                    "input_data",
+                    None,
                 ),  # Add input data if available
             },
         )
