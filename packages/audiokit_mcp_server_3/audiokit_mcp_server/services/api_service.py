@@ -45,9 +45,8 @@ class APIService:
         """Initialize required resources."""
         # Initialize Neo4j driver
         self.neo4j_driver = AsyncGraphDatabase.driver(
-            self.settings.neo4j_uri,  # Ensure this uses the correct scheme (e.g., bolt+s)
+            self.settings.neo4j_uri,
             auth=(self.settings.neo4j_user, self.settings.neo4j_password),
-            # Remove the 'encrypted' parameter
         )
         logger.info("✅ Neo4j driver initialized")
 
@@ -55,7 +54,6 @@ class APIService:
         self.redis = await aioredis.from_url(
             self.settings.redis_url,
             decode_responses=True,
-            ssl=self.settings.redis_ssl,
         )
         logger.info("✅ Redis connection established")
 
