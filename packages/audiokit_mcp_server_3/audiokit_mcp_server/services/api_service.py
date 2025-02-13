@@ -108,16 +108,10 @@ class APIService:
         }
         await self._upsert_neo4j_node("Album", album_node)
 
-        # Process artists
-        for artist in album_object["artists"]:
-            self._add_to_pending_list("artists", artist["uuid"])
-            await self._upsert_neo4j_relationship(
-                album_id,
-                artist["uuid"],
-                "HAS_ARTIST",
-            )
+        # Process related entities
+        await self._process_related_entities(album_object, album_id)
 
-        # Process tracks
+        # Process tracklisting
         tracklisting = await self.soundcharts_service.get_album_tracklisting(album_id)
         for track in tracklisting["tracks"]:
             self._add_to_pending_list("tracks", track["uuid"])
@@ -179,148 +173,23 @@ class APIService:
 
         # Step 2: Get all artist metadata
         artist_metadata = await self.soundcharts_service.get_artist_metadata(artist_id)
-        artist_ids = await self.soundcharts_service.get_artist_ids(artist_id)
-        artist_popularity = await self.soundcharts_service.get_artist_popularity(
-            artist_id,
-        )
-        artist_stats = await self.soundcharts_service.get_artist_stats(artist_id)
-        artist_audience = await self.soundcharts_service.get_artist_audience(artist_id)
-
-        # Create Artist node with namespaced data
-        artist_node = {
-            "id": artist_id,
-            "name": artist_metadata.get("name"),
-            "soundcharts:genre": artist_metadata.get("genre"),
-            "soundcharts:country": artist_metadata.get("country"),
-            "soundcharts:spotify_id": artist_ids.get("spotify"),
-            "soundcharts:lastfm_id": artist_ids.get("lastfm"),
-            "soundcharts:chartmetric_id": artist_ids.get("chartmetric"),
-            "soundcharts:follower_count": artist_metadata.get("followerCount"),
-            "soundcharts:monthly_listeners": artist_metadata.get("monthlyListeners"),
-            "soundcharts:biography": artist_metadata.get("biography"),
-            "soundcharts:active_since": artist_metadata.get("activeSince"),
-            "soundcharts:social_links": artist_metadata.get("socialLinks"),
-        }
-        await self._upsert_neo4j_node("Artist", artist_node)
-
-        # Process popularity data with namespacing
-        if artist_popularity:
-            for platform, data in artist_popularity.items():
-                popularity_node = {
-                    "id": f"popularity_{artist_id}_{platform}",
-                    "platform": platform,
-                    "soundcharts:score": data.get("score"),
-                    "soundcharts:rank": data.get("rank"),
-                    "soundcharts:date": data.get("date"),
-                }
-                await self._upsert_neo4j_node("Popularity", popularity_node)
-                await self._upsert_neo4j_relationship(
-                    artist_id,
-                    popularity_node["id"],
-                    "HAS_POPULARITY",
-                    {"platform": platform},
-                )
-
-        # Process stats with namespacing
-        if artist_stats:
-            stats_node = {
-                "id": f"stats_{artist_id}",
-                "soundcharts:stream_count": artist_stats.get("streamCount"),
-                "soundcharts:peak_position": artist_stats.get("peakPosition"),
-                "soundcharts:chart_appearances": artist_stats.get("chartAppearances"),
-                "soundcharts:playlist_adds": artist_stats.get("playlistAdds"),
-                "soundcharts:radio_spins": artist_stats.get("radioSpins"),
-            }
-            await self._upsert_neo4j_node("StreamingData", stats_node)
-            await self._upsert_neo4j_relationship(
-                artist_id,
-                stats_node["id"],
-                "HAS_STREAMS",
-            )
-
-        # Process audience data with namespacing
-        if artist_audience:
-            audience_node = {
-                "id": f"audience_{artist_id}",
-                "soundcharts:country": artist_audience.get("country"),
-                "soundcharts:age_group": artist_audience.get("ageGroup"),
-                "soundcharts:gender_distribution": artist_audience.get(
-                    "genderDistribution",
-                ),
-                "soundcharts:top_cities": artist_audience.get("topCities"),
-                "soundcharts:listener_affinity": artist_audience.get(
-                    "listenerAffinity",
-                ),
-            }
-            await self._upsert_neo4j_node("Audience", audience_node)
-            await self._upsert_neo4j_relationship(
-                artist_id,
-                audience_node["id"],
-                "HAS_AUDIENCE",
-            )
+        await self._process_artist_metadata(artist_metadata)
 
         # Step 3: Get and process artist songs
         songs = await self.soundcharts_service.get_artist_songs(artist_id)
         for song in songs.get("items", []):
-            song_id = song["uuid"]
-
-            # Get full song metadata using song ID
-            song_metadata = await self.soundcharts_service.get_song_metadata(song_id)
+            song_metadata = await self.soundcharts_service.get_song_metadata(
+                song["uuid"]
+            )
             await self._process_song_metadata(song_metadata)
-
-            # Process lyrics with namespacing
-            lyrics = await self.soundcharts_service.get_song_lyrics_analysis(song_id)
-            if lyrics:
-                lyrics_node = {
-                    "id": f"lyrics_{song_id}",
-                    "soundcharts:text": lyrics.get("text"),
-                    "soundcharts:language": lyrics.get("language"),
-                    "soundcharts:sentiment": lyrics.get("sentiment"),
-                    "soundcharts:topics": lyrics.get("topics"),
-                }
-                await self._upsert_neo4j_node("Lyrics", lyrics_node)
-                await self._upsert_neo4j_relationship(
-                    song_id,
-                    lyrics_node["id"],
-                    "HAS_LYRICS",
-                )
 
         # Step 4: Get and process artist albums
         albums = await self.soundcharts_service.get_artist_albums(artist_id)
         for album in albums.get("items", []):
-            album_id = album["uuid"]
-            album_object = album.get("object", {})
-
-            # Get full album metadata using UPC
             album_metadata = await self.soundcharts_service.get_album_by_upc(
-                album_object["upc"],
+                album["object"]["upc"],
             )
-
-            # Create Album node with namespaced data
-            album_node = {
-                "id": album_id,
-                "title": album_metadata.get("title"),
-                "soundcharts:release_date": album_metadata.get("releaseDate"),
-                "soundcharts:upc": album_metadata.get("upc"),
-                "soundcharts:label": album_metadata.get("label"),
-                "soundcharts:type": album_metadata.get("type"),
-                "soundcharts:track_count": album_metadata.get("trackCount"),
-                "soundcharts:popularity": album_metadata.get("popularity"),
-            }
-
-            await self._upsert_neo4j_node("Album", album_node)
-            await self._upsert_neo4j_relationship(artist_id, album_id, "PRODUCED_BY")
-
-            # Process tracklisting
-            tracklisting = await self.soundcharts_service.get_album_tracklisting(
-                album_id,
-            )
-            for track in tracklisting.get("tracks", []):
-                await self._upsert_neo4j_relationship(
-                    album_id,
-                    track["uuid"],
-                    "CONTAINS",
-                )
+            await self._process_album_metadata(album_metadata)
 
         return {"status": "success", "artist_id": artist_id}
 
@@ -435,9 +304,7 @@ class APIService:
         await self._upsert_neo4j_node("Track", track_node)
 
     async def _process_related_entities(
-        self,
-        entity_data: Dict,
-        entity_id: str,
+        self, entity_data: Dict, entity_id: str
     ) -> None:
         """Process related entities for a given entity."""
         # Process artists
