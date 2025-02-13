@@ -66,16 +66,6 @@ class AudioFeature(BaseModel):
     valence: Optional[float] = None
 
 
-class Producer(BaseModel):
-    id: str
-    name: str
-
-
-class Composer(BaseModel):
-    id: str
-    name: str
-
-
 class Lyrics(BaseModel):
     id: str
     text: str
@@ -92,21 +82,21 @@ class Annotation(BaseModel):
 
 
 class Platform(BaseModel):
-    id: str
-    platform: str
-    platform_id: str
+    id: str  # Use the "code" field from the API
+    platform: str  # Use the "name" field from the API
 
 
 class Popularity(BaseModel):
     id: str
+    date: Optional[datetime] = None
     platform: str
     score: Optional[float] = None
     rank: Optional[int] = None
-    date: Optional[datetime] = None
 
 
 class StreamingData(BaseModel):
     id: str
+    date: Optional[datetime] = None
     stream_count: Optional[int] = None
     peak_position: Optional[int] = None
     chart_appearances: Optional[int] = None
@@ -116,6 +106,7 @@ class StreamingData(BaseModel):
 
 class Audience(BaseModel):
     id: str
+    date: Optional[datetime] = None
     country: Optional[str] = None
     age_group: Optional[str] = None
     gender_distribution: Optional[Dict[str, float]] = None

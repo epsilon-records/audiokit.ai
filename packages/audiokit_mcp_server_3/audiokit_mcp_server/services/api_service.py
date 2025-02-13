@@ -423,8 +423,7 @@ class APIService:
                 )
                 # Add producer role
                 await self._upsert_neo4j_node(
-                    "Role",
-                    {"id": "role_producer", "name": "producer"},
+                    "Role", {"id": "role_producer", "name": "producer"}
                 )
                 await self._upsert_neo4j_relationship(
                     producer_model.id,
@@ -444,8 +443,7 @@ class APIService:
                 )
                 # Add composer role
                 await self._upsert_neo4j_node(
-                    "Role",
-                    {"id": "role_composer", "name": "composer"},
+                    "Role", {"id": "role_composer", "name": "composer"}
                 )
                 await self._upsert_neo4j_relationship(
                     composer_model.id,
