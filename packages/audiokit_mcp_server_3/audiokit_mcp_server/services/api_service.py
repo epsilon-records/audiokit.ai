@@ -1,7 +1,7 @@
 import asyncio
 import fcntl
 import os
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import httpx
 from neo4j import AsyncGraphDatabase
@@ -13,6 +13,7 @@ from ..models import (
     AudioFeature,
     Genre,
     Label,
+    Platform,
     Role,
     Track,
 )
@@ -85,6 +86,8 @@ class APIService:
             AudioFeature(**properties)
         elif label == "Role":
             Role(**properties)
+        elif label == "Platform":
+            Platform(**properties)
         else:
             raise ValueError(f"Invalid label: {label}")
 
@@ -254,7 +257,7 @@ class APIService:
             )
 
     async def ingest_soundcharts_api(self, artist_name: str) -> Dict:
-        """Ingest all SoundCharts data for an artist and build Neo4j graph"""
+        """Ingest all SoundCharts data for an artist and build Neo4j graph."""
         # Step 1: Search for artist and get UUID
         search_results = await self.soundcharts_service.search_artist(artist_name)
         if not search_results.get("items"):
@@ -267,7 +270,11 @@ class APIService:
         artist_metadata = await self.soundcharts_service.get_artist_metadata(artist_id)
         await self._process_artist_metadata(artist_metadata)
 
-        # Step 3: Get and process artist songs
+        # Step 3: Get and process platforms
+        platforms = await self.soundcharts_service.get_platforms()
+        await self._process_platforms(platforms)
+
+        # Step 4: Get and process artist songs
         songs = await self.soundcharts_service.get_artist_songs(artist_id)
         for song in songs.get("items", []):
             song_metadata = await self.soundcharts_service.get_song_metadata(
@@ -275,7 +282,7 @@ class APIService:
             )
             await self._process_song_metadata(song_metadata)
 
-        # Step 4: Get and process artist albums
+        # Step 5: Get and process artist albums
         albums = await self.soundcharts_service.get_artist_albums(artist_id)
         for album in albums.get("items", []):
             album_metadata = await self.soundcharts_service.get_album_by_upc(
@@ -423,7 +430,8 @@ class APIService:
                 )
                 # Add producer role
                 await self._upsert_neo4j_node(
-                    "Role", {"id": "role_producer", "name": "producer"}
+                    "Role",
+                    {"id": "role_producer", "name": "producer"},
                 )
                 await self._upsert_neo4j_relationship(
                     producer_model.id,
@@ -443,7 +451,8 @@ class APIService:
                 )
                 # Add composer role
                 await self._upsert_neo4j_node(
-                    "Role", {"id": "role_composer", "name": "composer"}
+                    "Role",
+                    {"id": "role_composer", "name": "composer"},
                 )
                 await self._upsert_neo4j_relationship(
                     composer_model.id,
@@ -460,6 +469,27 @@ class APIService:
                     entity_id,
                     "FEATURED_ON",
                 )
+
+    async def _process_platforms(self, platforms: List[Dict]) -> None:
+        """Process platform data and create nodes."""
+        logger.info("🖥️ Processing platforms", count=len(platforms))
+
+        for platform in platforms:
+            try:
+                platform_model = Platform(**platform)
+                await self._upsert_neo4j_node("Platform", platform_model.dict())
+                logger.debug(
+                    "✅ Platform node created",
+                    platform_id=platform_model.id,
+                    platform_name=platform_model.platform,
+                )
+            except Exception as e:
+                logger.error(
+                    "❌ Failed to process platform",
+                    platform=platform,
+                    error=str(e),
+                )
+                raise
 
     async def close(self) -> None:
         """Close all resources."""

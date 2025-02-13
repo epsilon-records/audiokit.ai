@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import httpx
 from structlog import get_logger
@@ -588,25 +588,30 @@ class SoundChartsService:
             return response.json()
 
     @redis_cache(ttl=settings.redis_cache_ttl)
-    async def get_platforms(self) -> Dict:
-        """Get all available platforms from Soundcharts API"""
-        url = f"{self.base_url}/api/v2/referential/platforms"
+    async def get_platforms(self) -> List[Dict]:
+        """Get all platforms from the SoundCharts API."""
+        url = f"{self.base_url}/api/v2.25/platform"
         logger.info("🖥️ Fetching available platforms", url=url)
 
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(url, headers=self.headers)
-                response.raise_for_status()
-                logger.info(
-                    "✅ Platforms retrieved",
-                    status_code=response.status_code,
-                )
-                return response.json()
-        except httpx.HTTPStatusError as e:
+            response = await self._make_request(url)
+            platforms = [
+                {
+                    "id": platform["code"],  # Map "code" to "id"
+                    "platform": platform["name"],  # Map "name" to "platform"
+                }
+                for platform in response["items"]
+            ]
+            logger.info(
+                "✅ Platforms retrieved",
+                count=len(platforms),
+                status_code=response.status_code,
+            )
+            return platforms
+        except Exception as e:
             logger.error(
                 "❌ Failed to fetch platforms",
-                url=e.request.url,
-                status_code=e.response.status_code,
+                url=url,
                 error=str(e),
             )
             raise
