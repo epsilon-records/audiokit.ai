@@ -1,6 +1,7 @@
 import asyncio
 import fcntl
 import os
+import uuid
 from typing import Dict, List, Optional
 
 import httpx
@@ -10,11 +11,15 @@ from structlog import get_logger
 from ..models import (
     Album,
     Artist,
+    Audience,
     AudioFeature,
     Genre,
     Label,
+    LyricsAnalysis,
     Platform,
+    Popularity,
     Role,
+    StreamingData,
     Track,
 )
 from .soundcharts_service import SoundChartsService
@@ -32,10 +37,19 @@ class APIService:
             self.settings.neo4j_uri,
             auth=(self.settings.neo4j_user, self.settings.neo4j_password),
         )
-        # Add unique constraints on startup
-        asyncio.run(self._add_unique_constraints())
 
-    async def _add_unique_constraints(self) -> None:
+        # Add unique constraints on startup
+        self._add_unique_constraints()
+
+    async def startup(self) -> None:
+        """Perform asynchronous initialization tasks."""
+        try:
+            await self._add_unique_constraints()
+        except Exception as e:
+            logger.error("❌ Failed to add unique constraints", error=str(e))
+            raise
+
+    def _add_unique_constraints(self) -> None:
         """Add unique constraints to Neo4j if they don't already exist."""
         constraints = [
             ("Artist", "id"),
@@ -53,8 +67,11 @@ class APIService:
             FOR (n:{label}) REQUIRE n.{property} IS UNIQUE
             """
             try:
-                async with self.neo4j_driver.session() as session:
-                    await session.run(query)
+                # Use run_until_complete to execute the async query synchronously
+                loop = asyncio.get_event_loop()
+                loop.run_until_complete(
+                    self.neo4j_driver.session().run(query),
+                )
                 logger.info(
                     "✅ Added unique constraint",
                     label=label,
@@ -88,6 +105,14 @@ class APIService:
             Role(**properties)
         elif label == "Platform":
             Platform(**properties)
+        elif label == "Audience":
+            Audience(**properties)
+        elif label == "Popularity":
+            Popularity(**properties)
+        elif label == "StreamingData":
+            StreamingData(**properties)
+        elif label == "LyricsAnalysis":
+            LyricsAnalysis(**properties)
         else:
             raise ValueError(f"Invalid label: {label}")
 
@@ -174,45 +199,47 @@ class APIService:
     async def _process_song_metadata(self, song_metadata: Dict) -> None:
         """Process song metadata and create nodes/relationships."""
         song_object = song_metadata["object"]
-        song_id = song_object["uuid"]
+        soundcharts_song_id = song_object["uuid"]  # SoundCharts UUID
 
         # Create Track node
         await self._create_track_node(song_object)
 
-        # Process audio features
-        if "audio" in song_object:
-            await self._create_audio_node(song_id, song_object["audio"])
-
         # Process artists, genres, labels, producers, composers, and featured artists
-        await self._process_related_entities(song_object, song_id)
+        await self._process_related_entities(song_object, soundcharts_song_id)
 
     async def _process_album_metadata(self, album_metadata: Dict) -> None:
         """Process album metadata and create nodes/relationships."""
         album_object = album_metadata["object"]
-        album_id = album_object["uuid"]
+        soundcharts_album_id = album_object["uuid"]  # SoundCharts UUID
 
         # Create Album node
         album_node = {
-            "id": album_id,
+            "id": str(uuid.uuid4()),  # Our own UUIDv4
             "title": album_object["name"],
             "release_date": album_object["release_date"],
             "upc": album_object["upc"],
             "label": album_object["label"],
             "type": album_object["type"],
             "track_count": album_object["track_count"],
+            "soundcharts": {
+                "uuid": soundcharts_album_id,  # Store SoundCharts UUID
+            },
         }
         await self._upsert_neo4j_node("Album", album_node)
 
         # Process related entities
-        await self._process_related_entities(album_object, album_id)
+        await self._process_related_entities(album_object, soundcharts_album_id)
 
         # Process tracklisting
-        tracklisting = await self.soundcharts_service.get_album_tracklisting(album_id)
+        tracklisting = await self.soundcharts_service.get_album_tracklisting(
+            soundcharts_album_id,
+        )
         for track in tracklisting["tracks"]:
-            self._add_to_pending_list("tracks", track["uuid"])
+            soundcharts_track_id = track["uuid"]  # SoundCharts UUID
+            self._add_to_pending_list("tracks", soundcharts_track_id)
             await self._upsert_neo4j_relationship(
-                album_id,
-                track["uuid"],
+                soundcharts_album_id,
+                soundcharts_track_id,
                 "CONTAINS",
             )
 
@@ -255,6 +282,128 @@ class APIService:
                 annotation_node["id"],
                 "HAS_ANNOTATION",
             )
+
+    async def _process_audience_data(
+        self,
+        artist_id: str,
+        platform: str,
+        audience_data: Dict,
+    ) -> None:
+        """Process audience data and create nodes."""
+        for item in audience_data["items"]:
+            audience_id = f"audience_{artist_id}_{platform}_{item['date']}"
+            audience_model = Audience(
+                id=audience_id,
+                artist_id=artist_id,
+                platform=platform,
+                date=item["date"],
+                follower_count=item.get("followerCount"),
+                following_count=item.get("followingCount"),
+                post_count=item.get("postCount"),
+                view_count=item.get("viewCount"),
+                like_count=item.get("likeCount"),
+            )
+            await self._upsert_neo4j_node("Audience", audience_model.dict())
+            await self._upsert_neo4j_relationship(
+                artist_id,
+                audience_id,
+                "HAS_AUDIENCE",
+            )
+            await self._upsert_neo4j_relationship(
+                platform,
+                audience_id,
+                "ON_PLATFORM",
+            )
+
+    async def _process_popularity_data(
+        self,
+        artist_id: str,
+        platform: str,
+        popularity_data: Dict,
+    ) -> None:
+        """Process popularity data and create nodes."""
+        for item in popularity_data["items"]:
+            popularity_id = f"popularity_{artist_id}_{platform}_{item['date']}"
+            popularity_model = Popularity(
+                id=popularity_id,
+                artist_id=artist_id,
+                platform=platform,
+                date=item["date"],
+                value=item.get("value"),
+            )
+            await self._upsert_neo4j_node("Popularity", popularity_model.dict())
+            await self._upsert_neo4j_relationship(
+                artist_id,
+                popularity_id,
+                "HAS_POPULARITY",
+            )
+            await self._upsert_neo4j_relationship(
+                platform,
+                popularity_id,
+                "ON_PLATFORM",
+            )
+
+    async def _process_streaming_data(
+        self,
+        artist_id: str,
+        platform: str,
+        streaming_data: Dict,
+    ) -> None:
+        """Process streaming data and create nodes."""
+        for item in streaming_data["items"]:
+            streaming_id = f"streaming_{artist_id}_{platform}_{item['date']}"
+            streaming_model = StreamingData(
+                id=streaming_id,
+                artist_id=artist_id,
+                platform=platform,
+                date=item["date"],
+                value=item.get("value"),
+            )
+            await self._upsert_neo4j_node("StreamingData", streaming_model.dict())
+            await self._upsert_neo4j_relationship(
+                artist_id,
+                streaming_id,
+                "HAS_STREAMING",
+            )
+            await self._upsert_neo4j_relationship(
+                platform,
+                streaming_id,
+                "ON_PLATFORM",
+            )
+
+    async def _process_lyrics_analysis(
+        self,
+        track_id: str,
+        lyrics_analysis: Dict,
+    ) -> None:
+        """Process lyrics analysis data and create nodes."""
+        analysis_model = LyricsAnalysis(
+            id=track_id,
+            themes=lyrics_analysis.get("themes", []),
+            moods=lyrics_analysis.get("moods", []),
+            cultural_reference_people=lyrics_analysis.get(
+                "culturalReferencePeople",
+                [],
+            ),
+            cultural_reference_non_people=lyrics_analysis.get(
+                "culturalReferenceNonPeople",
+                [],
+            ),
+            brands=lyrics_analysis.get("brands", []),
+            locations=lyrics_analysis.get("locations", []),
+            narrative_style=lyrics_analysis.get("narrativeStyle", ""),
+            emotional_intensity_score=lyrics_analysis.get("emotionalIntensityScore", 0),
+            complexity_score=lyrics_analysis.get("complexityScore", 0),
+            repetitiveness_score=lyrics_analysis.get("repetitivenessScore", 0),
+            rhyme_scheme_score=lyrics_analysis.get("rhymeSchemeScore", 0),
+            imagery_score=lyrics_analysis.get("imageryScore", 0),
+        )
+        await self._upsert_neo4j_node("LyricsAnalysis", analysis_model.dict())
+        await self._upsert_neo4j_relationship(
+            track_id,
+            analysis_model.id,
+            "HAS_LYRICS_ANALYSIS",
+        )
 
     async def ingest_soundcharts_api(self, artist_name: str) -> Dict:
         """Ingest all SoundCharts data for an artist and build Neo4j graph."""
@@ -348,25 +497,60 @@ class APIService:
             response.raise_for_status()
             return response.json()
 
-    async def _create_audio_node(self, song_id: str, audio_data: Dict) -> None:
-        """Create an AudioFeature node from audio data."""
-        audio = AudioFeature(id=f"audio_{song_id}", **audio_data)
-        await self._upsert_neo4j_node("AudioFeature", audio.dict())
-        await self._upsert_neo4j_relationship(
-            song_id,
-            audio.id,
-            "HAS_AUDIO_FEATURES",
-        )
-
-    async def _create_artist_node(self, artist_data: Dict) -> None:
-        """Create an Artist node from artist data."""
-        artist = Artist(**artist_data)
-        await self._upsert_neo4j_node("Artist", artist.dict())
-
     async def _create_track_node(self, track_data: Dict) -> None:
         """Create a Track node from track data."""
-        track = Track(**track_data)
+        soundcharts_track_id = track_data["uuid"]  # SoundCharts UUID
+
+        # Fetch lyrics analysis data using the SoundCharts UUID
+        lyrics_analysis = await self.soundcharts_service.get_song_lyrics_analysis(
+            soundcharts_track_id,
+        )
+
+        # Create Track node
+        track = Track(
+            id=str(uuid.uuid4()),  # Generate our own UUIDv4
+            name=track_data["name"],
+            credit_name=track_data.get("creditName"),
+            isrc=track_data.get("isrc"),
+            release_date=track_data.get("releaseDate"),
+            copyright=track_data.get("copyright"),
+            app_url=track_data.get("appUrl"),
+            image_url=track_data.get("imageUrl"),
+            duration=track_data.get("duration"),
+            explicit=track_data.get("explicit"),
+            genres=track_data.get("genres"),
+            composers=track_data.get("composers"),
+            producers=track_data.get("producers"),
+            labels=track_data.get("labels"),
+            language_code=track_data.get("languageCode"),
+            soundcharts={
+                "uuid": soundcharts_track_id,  # Store SoundCharts UUID
+                "slug": track_data.get("slug"),
+            },
+            audio=track_data.get("audio"),  # Embed audio features directly
+            lyrics_analysis=lyrics_analysis,  # Embed lyrics analysis
+        )
         await self._upsert_neo4j_node("Track", track.dict())
+
+    async def _create_album_node(self, album_data: Dict) -> None:
+        """Create an Album node from album data."""
+        album = Album(
+            id=str(uuid.uuid4()),  # Generate our own UUIDv4
+            name=album_data["name"],
+            credit_name=album_data.get("creditName"),
+            upc=album_data.get("upc"),
+            release_date=album_data.get("releaseDate"),
+            total_tracks=album_data.get("totalTracks"),
+            copyright=album_data.get("copyright"),
+            image_url=album_data.get("imageUrl"),
+            labels=album_data.get("labels"),
+            type=album_data.get("type"),
+            soundcharts={
+                "uuid": album_data["uuid"],  # Store SoundCharts UUID for reference
+                "slug": album_data.get("slug"),
+            },
+        )
+        await self._upsert_neo4j_node("Album", album.dict())
 
     async def _process_related_entities(
         self,
@@ -498,3 +682,29 @@ class APIService:
             logger.info("✅ Neo4j driver closed successfully")
         except Exception as e:
             logger.error("❌ Failed to close Neo4j driver", error=str(e))
+
+    async def _create_artist_node(self, artist_data: Dict) -> None:
+        """Create an Artist node from artist data."""
+        soundcharts_artist_id = artist_data["uuid"]  # SoundCharts UUID
+
+        # Create Artist node
+        artist = Artist(
+            id=str(uuid.uuid4()),  # Generate our own UUIDv4
+            name=artist_data["name"],
+            credit_name=artist_data.get("creditName"),
+            country_code=artist_data.get("countryCode"),
+            genres=artist_data.get("genres"),
+            biography=artist_data.get("biography"),
+            isni=artist_data.get("isni"),
+            ipi=artist_data.get("ipi"),
+            gender=artist_data.get("gender"),
+            type=artist_data.get("type"),
+            birth_date=artist_data.get("birthDate"),
+            soundcharts={
+                "uuid": soundcharts_artist_id,  # Store SoundCharts UUID
+                "slug": artist_data["slug"],
+                "app_url": artist_data.get("appUrl"),
+                "image_url": artist_data.get("imageUrl"),
+            },
+        )
+        await self._upsert_neo4j_node("Artist", artist.dict())

@@ -11,6 +11,7 @@ async def main():
 
     # Initialize API service
     api_service = APIService(settings)
+    await api_service.startup()  # Explicitly call startup
 
     # Test artist ingestion
     artist_name = "Kanye West"
