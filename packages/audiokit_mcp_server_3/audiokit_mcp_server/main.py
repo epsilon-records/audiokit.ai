@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -10,6 +11,7 @@ from structlog.stdlib import add_log_level, filter_by_level
 from ..config import settings
 from .config import Settings
 from .mcp import MCPRouter
+from .services import APIService
 from .utils.redis import setup_redis_cache
 
 
@@ -100,3 +102,23 @@ def setup_cache():
 
 # Call this during app initialization
 setup_cache()
+
+
+async def main() -> None:
+    """Main application entry point."""
+    settings = Settings()
+    api_service = APIService(settings)
+
+    try:
+        # Run the ingestion process
+        result = await api_service.ingest_soundcharts_api("Billie Eilish")
+        logger.info("🎉 Ingestion completed successfully", result=result)
+    except Exception as e:
+        logger.error("🚨 Ingestion failed", error=str(e))
+    finally:
+        # Ensure resources are closed
+        await api_service.close()
+
+
+if __name__ == "__main__":
+    asyncio.run(main())

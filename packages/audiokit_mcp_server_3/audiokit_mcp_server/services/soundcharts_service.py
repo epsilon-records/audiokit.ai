@@ -5,6 +5,7 @@ from structlog import get_logger
 
 from ..cache import redis_cache
 from ..config import settings
+from ..models import Track
 
 
 logger = get_logger()
@@ -626,12 +627,13 @@ class SoundChartsService:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 response = await client.get(url, headers=self.headers)
                 response.raise_for_status()
+                data = response.json()
                 logger.info(
-                    "🎵 Song metadata retrieved",
+                    "✅ Song metadata retrieved",
                     song_id=song_id,
                     status_code=response.status_code,
                 )
-                return response.json()
+                return Track(**data["object"]).dict()
         except httpx.HTTPStatusError as e:
             logger.error(
                 "❌ Failed to fetch song metadata",

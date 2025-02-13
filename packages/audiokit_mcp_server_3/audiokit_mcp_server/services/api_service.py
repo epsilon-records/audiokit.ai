@@ -4,6 +4,15 @@ import httpx
 from neo4j import AsyncGraphDatabase
 from structlog import get_logger
 
+from ..models import (
+    Album,
+    Artist,
+    AudioFeature,
+    Genre,
+    Label,
+    Role,
+    Track,
+)
 from .soundcharts_service import SoundChartsService
 
 
@@ -21,20 +30,40 @@ class APIService:
         )
 
     async def _upsert_neo4j_node(self, label: str, properties: Dict) -> None:
-        """
-        Upsert a Neo4j node using MERGE.
-        If node exists, updates its properties. If not, creates it.
-        """
+        """Upsert a Neo4j node with error handling."""
+        # Validate properties based on label
+        if label == "Artist":
+            Artist(**properties)
+        elif label == "Track":
+            Track(**properties)
+        elif label == "Album":
+            Album(**properties)
+        elif label == "Genre":
+            Genre(**properties)
+        elif label == "Label":
+            Label(**properties)
+        elif label == "AudioFeature":
+            AudioFeature(**properties)
+        elif label == "Role":
+            Role(**properties)
+        else:
+            raise ValueError(f"Invalid label: {label}")
+
         query = f"""
         MERGE (n:{label} {{id: $id}})
         SET n += $props
         """
-        async with self.neo4j_driver.session() as session:
-            await session.run(
-                query,
-                id=properties["id"],
-                props=properties,
+        try:
+            async with self.neo4j_driver.session() as session:
+                await session.run(query, id=properties["id"], props=properties)
+        except Exception as e:
+            logger.error(
+                "❌ Failed to upsert Neo4j node",
+                label=label,
+                properties=properties,
+                error=str(e),
             )
+            raise
 
     async def _upsert_neo4j_relationship(
         self,
@@ -43,23 +72,30 @@ class APIService:
         rel_type: str,
         properties: Optional[Dict] = None,
     ) -> None:
-        """
-        Upsert a Neo4j relationship using MERGE.
-        If relationship exists, updates its properties. If not, creates it.
-        """
+        """Upsert a Neo4j relationship with error handling."""
         query = f"""
         MATCH (a {{id: $from_id}}), (b {{id: $to_id}})
         MERGE (a)-[r:{rel_type}]->(b)
         """
         if properties:
             query += " SET r += $props"
-        async with self.neo4j_driver.session() as session:
-            await session.run(
-                query,
+        try:
+            async with self.neo4j_driver.session() as session:
+                await session.run(
+                    query,
+                    from_id=from_id,
+                    to_id=to_id,
+                    props=properties or {},
+                )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to upsert Neo4j relationship",
                 from_id=from_id,
                 to_id=to_id,
-                props=properties or {},
+                rel_type=rel_type,
+                error=str(e),
             )
+            raise
 
     PENDING_FILES = {
         "artists": "PENDING_ARTISTS.txt",
@@ -179,7 +215,7 @@ class APIService:
         songs = await self.soundcharts_service.get_artist_songs(artist_id)
         for song in songs.get("items", []):
             song_metadata = await self.soundcharts_service.get_song_metadata(
-                song["uuid"]
+                song["uuid"],
             )
             await self._process_song_metadata(song_metadata)
 
@@ -251,57 +287,23 @@ class APIService:
 
     async def _create_audio_node(self, song_id: str, audio_data: Dict) -> None:
         """Create an AudioFeature node from audio data."""
-        audio_node = {
-            "id": f"audio_{song_id}",
-            "acousticness": audio_data.get("acousticness"),
-            "danceability": audio_data.get("danceability"),
-            "energy": audio_data.get("energy"),
-            "instrumentalness": audio_data.get("instrumentalness"),
-            "key": audio_data.get("key"),
-            "liveness": audio_data.get("liveness"),
-            "loudness": audio_data.get("loudness"),
-            "mode": audio_data.get("mode"),
-            "speechiness": audio_data.get("speechiness"),
-            "tempo": audio_data.get("tempo"),
-            "time_signature": audio_data.get("timeSignature"),
-            "valence": audio_data.get("valence"),
-        }
-        await self._upsert_neo4j_node("AudioFeature", audio_node)
+        audio = AudioFeature(id=f"audio_{song_id}", **audio_data)
+        await self._upsert_neo4j_node("AudioFeature", audio.dict())
         await self._upsert_neo4j_relationship(
             song_id,
-            audio_node["id"],
+            audio.id,
             "HAS_AUDIO_FEATURES",
         )
 
     async def _create_artist_node(self, artist_data: Dict) -> None:
         """Create an Artist node from artist data."""
-        artist_node = {
-            "id": artist_data["uuid"],
-            "name": artist_data["name"],
-            "slug": artist_data["slug"],
-            "image_url": artist_data["imageUrl"],
-            "country_code": artist_data["countryCode"],
-            "biography": artist_data["biography"],
-            "isni": artist_data["isni"],
-            "ipi": artist_data["ipi"],
-            "gender": artist_data["gender"],
-            "type": artist_data["type"],
-            "birth_date": artist_data["birthDate"],
-        }
-        await self._upsert_neo4j_node("Artist", artist_node)
+        artist = Artist(**artist_data)
+        await self._upsert_neo4j_node("Artist", artist.dict())
 
     async def _create_track_node(self, track_data: Dict) -> None:
         """Create a Track node from track data."""
-        track_node = {
-            "id": track_data["uuid"],
-            "title": track_data["name"],
-            "release_date": track_data["releaseDate"],
-            "duration": track_data["duration"],
-            "explicit": track_data["explicit"],
-            "language": track_data["languageCode"],
-            "isrc": track_data["isrc"]["value"],
-        }
-        await self._upsert_neo4j_node("Track", track_node)
+        track = Track(**track_data)
+        await self._upsert_neo4j_node("Track", track.dict())
 
     async def _process_related_entities(
         self, entity_data: Dict, entity_id: str
@@ -310,64 +312,84 @@ class APIService:
         # Process artists
         if "artists" in entity_data:
             for artist in entity_data["artists"]:
-                self._add_to_pending_list("artists", artist["uuid"])
+                artist_model = Artist(**artist)
+                self._add_to_pending_list("artists", artist_model.id)
+                await self._upsert_neo4j_node("Artist", artist_model.dict())
                 await self._upsert_neo4j_relationship(
                     entity_id,
-                    artist["uuid"],
+                    artist_model.id,
                     "HAS_ARTIST",
+                )
+                # Add artist role
+                await self._upsert_neo4j_node(
+                    "Role", {"id": "role_artist", "name": "artist"}
+                )
+                await self._upsert_neo4j_relationship(
+                    artist_model.id,
+                    "role_artist",
+                    "HAS_ROLE",
                 )
 
         # Process genres
         if "genres" in entity_data:
             for genre in entity_data["genres"]:
-                genre_node = {
-                    "id": f"genre_{genre['root']}",
-                    "root": genre["root"],
-                    "sub": genre["sub"],
-                }
-                await self._upsert_neo4j_node("Genre", genre_node)
+                genre_model = Genre(id=f"genre_{genre['root']}", **genre)
+                await self._upsert_neo4j_node("Genre", genre_model.dict())
                 await self._upsert_neo4j_relationship(
                     entity_id,
-                    genre_node["id"],
+                    genre_model.id,
                     "HAS_GENRE",
                 )
 
         # Process labels
         if "labels" in entity_data:
             for label in entity_data["labels"]:
-                self._add_to_pending_list("labels", label["uuid"])
+                label_model = Label(**label)
+                self._add_to_pending_list("labels", label_model.id)
                 await self._upsert_neo4j_relationship(
                     entity_id,
-                    label["uuid"],
+                    label_model.id,
                     "HAS_LABEL",
                 )
 
         # Process producers
         if "producers" in entity_data:
             for producer in entity_data["producers"]:
-                producer_node = {
-                    "id": f"producer_{producer}",
-                    "name": producer,
-                }
-                await self._upsert_neo4j_node("Producer", producer_node)
+                producer_model = Artist(id=producer, name=producer)
+                await self._upsert_neo4j_node("Artist", producer_model.dict())
                 await self._upsert_neo4j_relationship(
                     entity_id,
-                    producer_node["id"],
+                    producer_model.id,
                     "HAS_PRODUCER",
+                )
+                # Add producer role
+                await self._upsert_neo4j_node(
+                    "Role", {"id": "role_producer", "name": "producer"}
+                )
+                await self._upsert_neo4j_relationship(
+                    producer_model.id,
+                    "role_producer",
+                    "HAS_ROLE",
                 )
 
         # Process composers
         if "composers" in entity_data:
             for composer in entity_data["composers"]:
-                composer_node = {
-                    "id": f"composer_{composer}",
-                    "name": composer,
-                }
-                await self._upsert_neo4j_node("Composer", composer_node)
+                composer_model = Artist(id=composer, name=composer)
+                await self._upsert_neo4j_node("Artist", composer_model.dict())
                 await self._upsert_neo4j_relationship(
                     entity_id,
-                    composer_node["id"],
+                    composer_model.id,
                     "HAS_COMPOSER",
+                )
+                # Add composer role
+                await self._upsert_neo4j_node(
+                    "Role", {"id": "role_composer", "name": "composer"}
+                )
+                await self._upsert_neo4j_relationship(
+                    composer_model.id,
+                    "role_composer",
+                    "HAS_ROLE",
                 )
 
         # Process featured artists
@@ -379,3 +401,11 @@ class APIService:
                     entity_id,
                     "FEATURED_ON",
                 )
+
+    async def close(self) -> None:
+        """Close all resources."""
+        try:
+            await self.neo4j_driver.close()
+            logger.info("✅ Neo4j driver closed successfully")
+        except Exception as e:
+            logger.error("❌ Failed to close Neo4j driver", error=str(e))
