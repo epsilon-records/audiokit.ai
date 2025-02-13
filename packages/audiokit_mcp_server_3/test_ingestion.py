@@ -5,7 +5,7 @@ import traceback
 from aiocache import caches
 from audiokit_mcp_server.config import settings
 from audiokit_mcp_server.services.api_service import APIService
-from audiokit_mcp_server.services.deduplication_queue import DeduplicationQueue
+from audiokit_mcp_server.utils.deduplication_queue import DeduplicationQueue
 from audiokit_mcp_server.utils.redis import setup_redis_cache
 from loguru import logger
 
