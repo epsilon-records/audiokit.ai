@@ -4,9 +4,8 @@ from typing import Dict, List, Optional
 import httpx
 from structlog import get_logger
 
-from ..cache import cache
+from ..cache import Cache, cache
 from ..models import Artist  # Import from models.py
-from ..utils.cache import Cache
 
 
 logger = get_logger()
@@ -375,7 +374,9 @@ class SoundChartsService:
             return response.json()
         except Exception as e:
             logger.error(
-                "Failed to get artist metadata", artist_id=artist_id, error=str(e)
+                "Failed to get artist metadata",
+                artist_id=artist_id,
+                error=str(e),
             )
             raise
 
