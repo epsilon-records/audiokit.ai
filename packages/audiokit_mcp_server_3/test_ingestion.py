@@ -7,7 +7,9 @@ from audiokit_mcp_server.utils.redis import setup_redis_cache
 from structlog import get_logger
 
 
+# Initialize logger with config level
 logger = get_logger()
+logger.setLevel(settings.log_level)  # Use log level from settings
 
 
 async def main():
