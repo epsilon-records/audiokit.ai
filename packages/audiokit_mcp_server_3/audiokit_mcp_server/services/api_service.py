@@ -685,18 +685,26 @@ class APIService:
             name=artist_data["name"],
             credit_name=artist_data.get("creditName"),
             country_code=artist_data.get("countryCode"),
-            genres=artist_data.get("genres"),  # Pass genres directly
             biography=artist_data.get("biography"),
             isni=artist_data.get("isni"),
             ipi=artist_data.get("ipi"),
             gender=artist_data.get("gender"),
             type=artist_data.get("type"),
             birth_date=artist_data.get("birthDate"),
-            soundcharts={
-                "uuid": soundcharts_artist_id,  # Store SoundCharts UUID
-                "slug": artist_data["slug"],
-                "app_url": artist_data.get("appUrl"),
-                "image_url": artist_data.get("imageUrl"),
-            },
+            soundcharts_uuid=soundcharts_artist_id,  # Store SoundCharts UUID
+            soundcharts_slug=artist_data.get("slug"),
+            soundcharts_app_url=artist_data.get("appUrl"),
+            soundcharts_image_url=artist_data.get("imageUrl"),
         )
         await self._upsert_neo4j_node("Artist", artist.dict())
+
+        # Process genres
+        if "genres" in artist_data:
+            for genre in artist_data["genres"]:
+                genre_model = Genre(id=f"genre_{genre['root']}", **genre)
+                await self._upsert_neo4j_node("Genre", genre_model.dict())
+                await self._upsert_neo4j_relationship(
+                    artist.id,
+                    genre_model.id,
+                    "HAS_GENRE",
+                )

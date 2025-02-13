@@ -14,16 +14,16 @@ class Artist(BaseModel):
     name: str
     credit_name: Optional[str] = None
     country_code: Optional[str] = None
-    genres: Optional[List[GenreData]] = (
-        None  # List of genre objects with root and sub fields
-    )
     biography: Optional[str] = None
     isni: Optional[str] = None
     ipi: Optional[str] = None
     gender: Optional[str] = None
     type: Optional[str] = None
     birth_date: Optional[datetime] = None
-    soundcharts: Optional[Dict] = None  # Namespace for SoundCharts-specific data
+    soundcharts_uuid: Optional[str] = None  # Store SoundCharts UUID
+    soundcharts_slug: Optional[str] = None  # Store SoundCharts slug
+    soundcharts_app_url: Optional[str] = None  # Store SoundCharts app URL
+    soundcharts_image_url: Optional[str] = None  # Store SoundCharts image URL
 
 
 class Track(BaseModel):
