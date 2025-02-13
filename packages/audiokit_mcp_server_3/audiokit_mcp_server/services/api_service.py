@@ -251,48 +251,37 @@ class APIService:
             raise
 
     async def _process_album_metadata(self, album_metadata: Dict) -> None:
-        """Process album metadata and create nodes/relationships."""
+        """Process album metadata with robust validation."""
         try:
-            logger.debug(
-                "Processing album metadata",
-                album_metadata=album_metadata,
-            )
-
-            # Validate response structure
+            # Validate basic structure
             if not isinstance(album_metadata, dict):
-                logger.error(
-                    "Invalid album metadata: expected dict",
-                    album_metadata=album_metadata,
-                )
-                raise ValueError("Invalid album metadata: expected dict")
+                raise ValueError("Album data must be a dictionary")
 
-            # Directly use album_metadata since it's already the album object
-            album_object = album_metadata
-            logger.debug(
-                "Processing album object",
-                album_object=album_object,
-            )
+            # Extract required fields with defaults
+            album_data = {
+                "name": album_metadata.get("name", "Unknown Album"),
+                "creditName": album_metadata.get("creditName", ""),
+                "releaseDate": self._parse_release_date(
+                    album_metadata.get("releaseDate"),
+                ),
+                "uuid": album_metadata.get("uuid"),
+                "type": album_metadata.get("type", "album"),
+                "upc": album_metadata.get("upc", ""),
+                "totalTracks": album_metadata.get("totalTracks", 0),
+                "labels": album_metadata.get("labels", []),
+                "imageUrl": album_metadata.get("imageUrl", ""),
+            }
 
             # Validate required fields
-            if "uuid" not in album_object:
-                logger.error(
-                    "Missing required field: uuid",
-                    album_object=album_object,
-                )
+            if not album_data["uuid"]:
                 raise ValueError("Missing required field: uuid")
 
-            soundcharts_album_id = album_object["uuid"]
-            logger.debug(
-                "Found album UUID",
-                album_id=soundcharts_album_id,
-            )
-
-            # Create Album node and get internal ID
-            internal_album_id = await self._create_album_node(album_object)
+            # Process album
+            internal_album_id = await self._create_album_node(album_data)
 
             # Process tracklisting with internal IDs
             tracklisting = await self.soundcharts_service.get_album_tracklisting(
-                soundcharts_album_id,
+                album_data["uuid"],
             )
             for track in tracklisting.get("tracks", []):
                 # Create Track node and get internal ID
@@ -309,15 +298,31 @@ class APIService:
                 await self._process_related_entities(track, internal_track_id)
 
             # Process album relationships using internal ID
-            await self._process_related_entities(album_object, internal_album_id)
+            await self._process_related_entities(album_data, internal_album_id)
 
         except Exception as e:
             logger.error(
                 "❌ Failed to process album metadata",
                 error=str(e),
+                album_data=album_metadata,
                 stack_trace=traceback.format_exc(),
             )
             raise
+
+    def _parse_release_date(self, date_str: Optional[str]) -> Optional[datetime]:
+        """Safely parse release date from various formats."""
+        if not date_str:
+            return None
+
+        try:
+            # Handle ISO format
+            if "T" in date_str:
+                return datetime.fromisoformat(date_str)
+            # Handle other formats as needed
+            return datetime.strptime(date_str, "%Y-%m-%d")
+        except ValueError:
+            logger.warning("Invalid date format", date_str=date_str)
+            return None
 
     async def _process_artist_metadata(self, artist_metadata: Dict) -> None:
         """Process artist metadata and create nodes."""
