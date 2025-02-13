@@ -50,7 +50,14 @@ async def main():
         result = await api_service.ingest_soundcharts_api(artist_name)
         logger.info("🎉 Ingestion completed successfully", result=result)
     except Exception as e:
-        logger.error("🚨 Ingestion failed", artist=artist_name, error=str(e))
+        import traceback
+
+        logger.error(
+            "🚨 Ingestion failed",
+            artist=artist_name,
+            error=str(e),
+            stack_trace=traceback.format_exc(),
+        )
     finally:
         # Ensure resources are closed
         logger.debug("🛑 Shutting down API service")

@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime
 from typing import Dict, List, Optional
 
@@ -24,15 +25,13 @@ class SoundChartsService:
             "x-app-id": settings.soundcharts_app_id,
             "x-api-key": settings.soundcharts_api_key,
         }
-        logger.debug(
-            "🔑 API credentials configured",
-            app_id=settings.soundcharts_app_id,
-        )
+        logger.debug("API headers configured", headers=self.headers)
         self.cache_ttl = settings.redis_cache_ttl
         self.cache = Cache(settings)  # Initialize cache
         self.redis = self.cache.redis  # Expose Redis connection
         self.client = httpx.AsyncClient(
-            base_url=self.base_url, headers=self.headers
+            base_url=self.base_url,
+            headers=self.headers,
         )  # Initialize HTTP client
 
     # Artist Endpoints
@@ -364,22 +363,60 @@ class SoundChartsService:
     async def get_artist_metadata(self, artist_id: str) -> Dict:
         """Get artist metadata from SoundCharts API."""
         try:
-            logger.debug("Fetching artist metadata", artist_id=artist_id)
+            url = f"/api/v2.9/artist/{artist_id}"
+            logger.debug("Fetching artist metadata", artist_id=artist_id, url=url)
             start_time = datetime.utcnow()
-            response = await self.client.get(f"/artist/{artist_id}")
+            response = await self.client.get(url)
             duration = (datetime.utcnow() - start_time).total_seconds()
+
+            logger.debug(
+                "Received artist metadata response",
+                artist_id=artist_id,
+                status_code=response.status_code,
+                duration=duration,
+            )
+
+            # Check for 404 or other errors
+            if response.status_code == 404:
+                logger.error(
+                    "Artist not found",
+                    artist_id=artist_id,
+                    status_code=response.status_code,
+                    url=url,
+                )
+                raise ValueError(f"Artist not found: {artist_id} (URL: {url})")
+
+            # Validate response
+            data = response.json()
+            logger.debug(
+                "Parsed artist metadata",
+                artist_id=artist_id,
+                data=data,
+            )
+
+            if not isinstance(data, dict) or "object" not in data:
+                logger.error(
+                    "Invalid artist metadata structure",
+                    artist_id=artist_id,
+                    response=data,
+                    url=url,
+                )
+                raise ValueError("Invalid artist metadata structure")
+
             logger.debug(
                 "Artist metadata retrieved",
                 artist_id=artist_id,
                 status_code=response.status_code,
                 duration=duration,
             )
-            return response.json()
+            return data
         except Exception as e:
             logger.error(
                 "Failed to get artist metadata",
                 artist_id=artist_id,
                 error=str(e),
+                stack_trace=traceback.format_exc(),
+                url=url,
             )
             raise
 

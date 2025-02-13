@@ -290,14 +290,67 @@ class APIService:
 
     async def _process_artist_metadata(self, artist_metadata: Dict) -> None:
         """Process artist metadata and create nodes/relationships."""
-        artist_object = artist_metadata["object"]
-        soundcharts_artist_id = artist_object["uuid"]
+        try:
+            logger.debug(
+                "Processing artist metadata",
+                artist_metadata=artist_metadata,
+            )
 
-        # Create Artist node
-        await self._create_artist_node(artist_object)
+            # Validate response structure
+            if not isinstance(artist_metadata, dict):
+                logger.error(
+                    "Invalid artist metadata: expected dict",
+                    artist_metadata=artist_metadata,
+                )
+                raise ValueError("Invalid artist metadata: expected dict")
 
-        # Process genres, platform IDs, popularity data, stats, audience data, and similar artists
-        await self._process_related_entities(artist_object, soundcharts_artist_id)
+            if "object" not in artist_metadata:
+                logger.error(
+                    "Missing 'object' key in artist metadata",
+                    artist_metadata=artist_metadata,
+                )
+                raise ValueError("Missing 'object' key in artist metadata")
+
+            artist_object = artist_metadata["object"]
+            logger.debug(
+                "Extracted artist object",
+                artist_object=artist_object,
+            )
+
+            # Validate required fields
+            if "uuid" not in artist_object:
+                logger.error(
+                    "Missing required field: uuid",
+                    artist_object=artist_object,
+                )
+                raise ValueError("Missing required field: uuid")
+
+            soundcharts_artist_id = artist_object["uuid"]
+            logger.debug(
+                "Found artist UUID",
+                artist_id=soundcharts_artist_id,
+            )
+
+            # Create Artist node
+            await self._create_artist_node(artist_object)
+            logger.debug(
+                "Created artist node",
+                artist_id=soundcharts_artist_id,
+            )
+
+            # Process related entities
+            await self._process_related_entities(artist_object, soundcharts_artist_id)
+            logger.debug(
+                "Processed related entities",
+                artist_id=soundcharts_artist_id,
+            )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process artist metadata",
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
 
     async def _process_lyrics_metadata(self, lyrics_metadata: Dict) -> None:
         """Process lyrics metadata and create nodes/relationships."""
