@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime
 from typing import Dict, List, Optional
 
+import aioredis
 import httpx
 from neo4j import AsyncGraphDatabase
 from structlog import get_logger
@@ -33,28 +34,40 @@ logger = get_logger()
 
 class APIService:
     def __init__(self, settings):
-        """Initialize API Service with API keys."""
+        """Initialize API service with required configurations."""
         self.settings = settings
+        self.neo4j_driver = None
+        self.redis = None
+        self.deduplication_queue = None
         self.soundcharts_service = SoundChartsService(settings)
+
+    async def startup(self):
+        """Initialize required resources."""
+        # Initialize Neo4j driver
         self.neo4j_driver = AsyncGraphDatabase.driver(
             self.settings.neo4j_uri,
             auth=(self.settings.neo4j_user, self.settings.neo4j_password),
+            # Remove the 'ssl' parameter and use 'encrypted' instead
+            encrypted=True,  # Use 'encrypted' for SSL/TLS
         )
-        # Reuse the Redis connection from the cache
-        self.deduplication_queue = DeduplicationQueue(
-            redis_url=settings.redis_url,
-            ttl=settings.redis_cache_ttl,
-            redis_connection=self.soundcharts_service.cache.redis,  # Reuse cache connection
-        )
+        logger.info("✅ Neo4j driver initialized")
 
-    async def startup(self) -> None:
-        """Perform asynchronous initialization tasks."""
-        try:
-            await self.deduplication_queue.connect()
-            await self._add_unique_constraints()
-        except Exception as e:
-            logger.error("❌ Failed to initialize API service", error=str(e))
-            raise
+        # Initialize Redis
+        self.redis = await aioredis.from_url(
+            self.settings.redis_url,
+            decode_responses=True,
+            ssl=self.settings.redis_ssl,
+        )
+        logger.info("✅ Redis connection established")
+
+        # Initialize deduplication queue
+        self.deduplication_queue = DeduplicationQueue(
+            self.settings.redis_url,
+            ttl=self.settings.redis_cache_ttl,
+            redis_connection=self.redis,
+        )
+        await self.deduplication_queue.connect()
+        logger.info("✅ Deduplication queue initialized")
 
     async def _add_unique_constraints(self) -> None:
         """Add unique constraints to Neo4j if they don't already exist."""
