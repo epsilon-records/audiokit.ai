@@ -71,30 +71,47 @@ class APIService:
         # Create Artist node with namespaced data
         artist_node = {
             "id": artist_id,
-            "soundcharts_name": artist_metadata.get("name"),
-            "soundcharts_genre": artist_metadata.get("genre"),
-            "soundcharts_country": artist_metadata.get("country"),
-            "soundcharts_spotify_id": artist_ids.get("spotify"),
-            "soundcharts_lastfm_id": artist_ids.get("lastfm"),
-            "soundcharts_chartmetric_id": artist_ids.get("chartmetric"),
-            "soundcharts_popularity_score": artist_popularity.get("score"),
-            "soundcharts_follower_count": artist_metadata.get("followerCount"),
-            "soundcharts_monthly_listeners": artist_metadata.get("monthlyListeners"),
-            "soundcharts_biography": artist_metadata.get("biography"),
-            "soundcharts_active_since": artist_metadata.get("activeSince"),
-            "soundcharts_social_links": artist_metadata.get("socialLinks"),
+            "name": artist_metadata.get("name"),
+            "soundcharts:genre": artist_metadata.get("genre"),
+            "soundcharts:country": artist_metadata.get("country"),
+            "soundcharts:spotify_id": artist_ids.get("spotify"),
+            "soundcharts:lastfm_id": artist_ids.get("lastfm"),
+            "soundcharts:chartmetric_id": artist_ids.get("chartmetric"),
+            "soundcharts:follower_count": artist_metadata.get("followerCount"),
+            "soundcharts:monthly_listeners": artist_metadata.get("monthlyListeners"),
+            "soundcharts:biography": artist_metadata.get("biography"),
+            "soundcharts:active_since": artist_metadata.get("activeSince"),
+            "soundcharts:social_links": artist_metadata.get("socialLinks"),
         }
         await self._create_neo4j_node("Artist", artist_node)
+
+        # Process popularity data with namespacing
+        if artist_popularity:
+            for platform, data in artist_popularity.items():
+                popularity_node = {
+                    "id": f"popularity_{artist_id}_{platform}",
+                    "platform": platform,
+                    "soundcharts:score": data.get("score"),
+                    "soundcharts:rank": data.get("rank"),
+                    "soundcharts:date": data.get("date"),
+                }
+                await self._create_neo4j_node("Popularity", popularity_node)
+                await self._create_neo4j_relationship(
+                    artist_id,
+                    popularity_node["id"],
+                    "HAS_POPULARITY",
+                    {"platform": platform},
+                )
 
         # Process stats with namespacing
         if artist_stats:
             stats_node = {
                 "id": f"stats_{artist_id}",
-                "soundcharts_stream_count": artist_stats.get("streamCount"),
-                "soundcharts_peak_position": artist_stats.get("peakPosition"),
-                "soundcharts_chart_appearances": artist_stats.get("chartAppearances"),
-                "soundcharts_playlist_adds": artist_stats.get("playlistAdds"),
-                "soundcharts_radio_spins": artist_stats.get("radioSpins"),
+                "soundcharts:stream_count": artist_stats.get("streamCount"),
+                "soundcharts:peak_position": artist_stats.get("peakPosition"),
+                "soundcharts:chart_appearances": artist_stats.get("chartAppearances"),
+                "soundcharts:playlist_adds": artist_stats.get("playlistAdds"),
+                "soundcharts:radio_spins": artist_stats.get("radioSpins"),
             }
             await self._create_neo4j_node("StreamingData", stats_node)
             await self._create_neo4j_relationship(
@@ -107,13 +124,13 @@ class APIService:
         if artist_audience:
             audience_node = {
                 "id": f"audience_{artist_id}",
-                "soundcharts_country": artist_audience.get("country"),
-                "soundcharts_age_group": artist_audience.get("ageGroup"),
-                "soundcharts_gender_distribution": artist_audience.get(
+                "soundcharts:country": artist_audience.get("country"),
+                "soundcharts:age_group": artist_audience.get("ageGroup"),
+                "soundcharts:gender_distribution": artist_audience.get(
                     "genderDistribution",
                 ),
-                "soundcharts_top_cities": artist_audience.get("topCities"),
-                "soundcharts_listener_affinity": artist_audience.get(
+                "soundcharts:top_cities": artist_audience.get("topCities"),
+                "soundcharts:listener_affinity": artist_audience.get(
                     "listenerAffinity",
                 ),
             }
@@ -135,15 +152,15 @@ class APIService:
             # Create Track node with namespaced data
             track_node = {
                 "id": song_id,
-                "soundcharts_title": song_metadata.get("title"),
-                "soundcharts_release_date": song_metadata.get("releaseDate"),
-                "soundcharts_duration": song_metadata.get("duration"),
-                "soundcharts_bpm": song_metadata.get("bpm"),
-                "soundcharts_key": song_metadata.get("key"),
-                "soundcharts_isrc": song_metadata.get("isrc"),
-                "soundcharts_explicit": song_metadata.get("explicit"),
-                "soundcharts_language": song_metadata.get("language"),
-                "soundcharts_popularity": song_metadata.get("popularity"),
+                "title": song_metadata.get("title"),
+                "soundcharts:release_date": song_metadata.get("releaseDate"),
+                "soundcharts:duration": song_metadata.get("duration"),
+                "soundcharts:bpm": song_metadata.get("bpm"),
+                "soundcharts:key": song_metadata.get("key"),
+                "soundcharts:isrc": song_metadata.get("isrc"),
+                "soundcharts:explicit": song_metadata.get("explicit"),
+                "soundcharts:language": song_metadata.get("language"),
+                "soundcharts:popularity": song_metadata.get("popularity"),
             }
             await self._create_neo4j_node("Track", track_node)
             await self._create_neo4j_relationship(artist_id, song_id, "PERFORMED")
@@ -153,10 +170,10 @@ class APIService:
             if lyrics:
                 lyrics_node = {
                     "id": f"lyrics_{song_id}",
-                    "soundcharts_text": lyrics.get("text"),
-                    "soundcharts_language": lyrics.get("language"),
-                    "soundcharts_sentiment": lyrics.get("sentiment"),
-                    "soundcharts_topics": lyrics.get("topics"),
+                    "soundcharts:text": lyrics.get("text"),
+                    "soundcharts:language": lyrics.get("language"),
+                    "soundcharts:sentiment": lyrics.get("sentiment"),
+                    "soundcharts:topics": lyrics.get("topics"),
                 }
                 await self._create_neo4j_node("Lyrics", lyrics_node)
                 await self._create_neo4j_relationship(
@@ -176,13 +193,13 @@ class APIService:
             # Create Album node with namespaced data
             album_node = {
                 "id": album_id,
-                "soundcharts_title": album_metadata.get("title"),
-                "soundcharts_release_date": album_metadata.get("releaseDate"),
-                "soundcharts_upc": album_metadata.get("upc"),
-                "soundcharts_label": album_metadata.get("label"),
-                "soundcharts_type": album_metadata.get("type"),
-                "soundcharts_track_count": album_metadata.get("trackCount"),
-                "soundcharts_popularity": album_metadata.get("popularity"),
+                "title": album_metadata.get("title"),
+                "soundcharts:release_date": album_metadata.get("releaseDate"),
+                "soundcharts:upc": album_metadata.get("upc"),
+                "soundcharts:label": album_metadata.get("label"),
+                "soundcharts:type": album_metadata.get("type"),
+                "soundcharts:track_count": album_metadata.get("trackCount"),
+                "soundcharts:popularity": album_metadata.get("popularity"),
             }
             await self._create_neo4j_node("Album", album_node)
             await self._create_neo4j_relationship(artist_id, album_id, "PRODUCED_BY")

@@ -22,5 +22,7 @@ class Settings(BaseSettings):
     lastfm_api_key: str
     soundcharts_api_key: str
     spotify_api_key: str
+    soundcharts_api_base: str
+    soundcharts_app_id: str
 
     model_config = SettingsConfigDict(env_file=".env")

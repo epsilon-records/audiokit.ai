@@ -13,7 +13,7 @@ async def main():
     api_service = APIService(settings)
 
     # Test with a real artist
-    artist_name = "Kanye West"  # Replace with the artist you want to test
+    artist_name = "Taylor Swift"  # Replace with the artist you want to test
     print(f"Ingesting data for artist: {artist_name}")
 
     try:
