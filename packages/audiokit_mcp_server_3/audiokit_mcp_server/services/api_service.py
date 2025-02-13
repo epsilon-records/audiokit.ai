@@ -561,27 +561,11 @@ class APIService:
             image_url=track_data.get("imageUrl"),
             duration=track_data.get("duration"),
             explicit=track_data.get("explicit"),
-            genres=track_data.get("genres"),
-            composers=track_data.get("composers"),
-            producers=track_data.get("producers"),
+            composers=track_data.get("composers", []),
+            producers=track_data.get("producers", []),
             language_code=track_data.get("languageCode"),
         )
         await self._upsert_neo4j_node("Track", track.dict())
-
-        # Create ISRC node and relationship
-        if "isrc" in track_data:
-            isrc = ISRC(
-                id=f"isrc_{track_data['isrc']['value']}",
-                value=track_data["isrc"]["value"],
-                country_code=track_data["isrc"]["countryCode"],
-                country_name=track_data["isrc"]["countryName"],
-            )
-            await self._upsert_neo4j_node("ISRC", isrc.dict())
-            await self._upsert_neo4j_relationship(
-                track.id,
-                isrc.id,
-                "HAS_ISRC",
-            )
 
         # Create SoundCharts node and relationship
         soundcharts = SoundCharts(
@@ -599,22 +583,26 @@ class APIService:
             "HAS_SOUNDCHARTS",
         )
 
-        # Create Audio node and relationship
-        if "audio" in track_data:
+        # Create ISRC node and relationship only if ISRC data exists
+        if track_data.get("isrc") and isinstance(track_data["isrc"], dict):
+            isrc = ISRC(
+                id=f"isrc_{track_data['isrc']['value']}",
+                value=track_data["isrc"]["value"],
+                country_code=track_data["isrc"]["countryCode"],
+                country_name=track_data["isrc"]["countryName"],
+            )
+            await self._upsert_neo4j_node("ISRC", isrc.dict())
+            await self._upsert_neo4j_relationship(
+                track.id,
+                isrc.id,
+                "HAS_ISRC",
+            )
+
+        # Process audio features if they exist
+        if track_data.get("audio"):
             audio = Audio(
                 id=f"audio_{track.id}",
-                danceability=track_data["audio"].get("danceability"),
-                energy=track_data["audio"].get("energy"),
-                key=track_data["audio"].get("key"),
-                loudness=track_data["audio"].get("loudness"),
-                mode=track_data["audio"].get("mode"),
-                speechiness=track_data["audio"].get("speechiness"),
-                acousticness=track_data["audio"].get("acousticness"),
-                instrumentalness=track_data["audio"].get("instrumentalness"),
-                liveness=track_data["audio"].get("liveness"),
-                valence=track_data["audio"].get("valence"),
-                tempo=track_data["audio"].get("tempo"),
-                time_signature=track_data["audio"].get("timeSignature"),
+                **track_data["audio"],
             )
             await self._upsert_neo4j_node("Audio", audio.dict())
             await self._upsert_neo4j_relationship(
@@ -623,38 +611,7 @@ class APIService:
                 "HAS_AUDIO",
             )
 
-        # Create LyricsAnalysis node and relationship
-        lyrics_analysis = await self.soundcharts_service.get_song_lyrics_analysis(
-            soundcharts_track_id,
-        )
-        if lyrics_analysis:
-            lyrics = LyricsAnalysis(
-                id=f"lyrics_{track.id}",
-                themes=lyrics_analysis.get("themes"),
-                moods=lyrics_analysis.get("moods"),
-                cultural_reference_people=lyrics_analysis.get(
-                    "culturalReferencePeople",
-                ),
-                cultural_reference_non_people=lyrics_analysis.get(
-                    "culturalReferenceNonPeople",
-                ),
-                brands=lyrics_analysis.get("brands"),
-                locations=lyrics_analysis.get("locations"),
-                narrative_style=lyrics_analysis.get("narrativeStyle"),
-                emotional_intensity_score=lyrics_analysis.get(
-                    "emotionalIntensityScore",
-                ),
-                complexity_score=lyrics_analysis.get("complexityScore"),
-                repetitiveness_score=lyrics_analysis.get("repetitivenessScore"),
-                rhyme_scheme_score=lyrics_analysis.get("rhymeSchemeScore"),
-                imagery_score=lyrics_analysis.get("imageryScore"),
-            )
-            await self._upsert_neo4j_node("LyricsAnalysis", lyrics.dict())
-            await self._upsert_neo4j_relationship(
-                track.id,
-                lyrics.id,
-                "HAS_LYRICS_ANALYSIS",
-            )
+        return track.id
 
     async def _create_album_node(self, album_data: Dict) -> None:
         """Create an Album node from album data."""
