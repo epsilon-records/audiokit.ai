@@ -26,11 +26,17 @@ class Artist(BaseModel):
     soundcharts_image_url: Optional[str] = None  # Store SoundCharts image URL
 
 
+class ISRC(BaseModel):
+    value: str
+    country_code: str
+    country_name: str
+
+
 class Track(BaseModel):
     id: str  # Our own UUIDv4
     name: str
     credit_name: Optional[str] = None
-    isrc: Optional[Dict] = None
+    isrc: Optional[ISRC] = None  # Nested ISRC object
     release_date: Optional[datetime] = None
     copyright: Optional[str] = None
     app_url: Optional[str] = None
@@ -40,11 +46,35 @@ class Track(BaseModel):
     genres: Optional[List[Dict[str, List[str]]]] = None
     composers: Optional[List[str]] = None
     producers: Optional[List[str]] = None
-    labels: Optional[List[Dict]] = None
     language_code: Optional[str] = None
-    soundcharts: Optional[Dict] = None  # Namespace for SoundCharts-specific data
-    audio: Optional[Dict] = None  # Audio features stored in a nested object
-    lyrics_analysis: Optional[Dict] = None  # Lyrics analysis embedded directly
+    soundcharts_uuid: Optional[str] = None  # Flattened SoundCharts data
+    soundcharts_slug: Optional[str] = None
+    soundcharts_app_url: Optional[str] = None
+    soundcharts_image_url: Optional[str] = None
+    audio_danceability: Optional[float] = None  # Flattened audio features
+    audio_energy: Optional[float] = None
+    audio_key: Optional[int] = None
+    audio_loudness: Optional[float] = None
+    audio_mode: Optional[int] = None
+    audio_speechiness: Optional[float] = None
+    audio_acousticness: Optional[float] = None
+    audio_instrumentalness: Optional[float] = None
+    audio_liveness: Optional[float] = None
+    audio_valence: Optional[float] = None
+    audio_tempo: Optional[float] = None
+    audio_time_signature: Optional[int] = None
+    lyrics_analysis_themes: Optional[List[str]] = None  # Flattened lyrics analysis
+    lyrics_analysis_moods: Optional[List[str]] = None
+    lyrics_analysis_cultural_reference_people: Optional[List[str]] = None
+    lyrics_analysis_cultural_reference_non_people: Optional[List[str]] = None
+    lyrics_analysis_brands: Optional[List[str]] = None
+    lyrics_analysis_locations: Optional[List[str]] = None
+    lyrics_analysis_narrative_style: Optional[str] = None
+    lyrics_analysis_emotional_intensity_score: Optional[int] = None
+    lyrics_analysis_complexity_score: Optional[int] = None
+    lyrics_analysis_repetitiveness_score: Optional[int] = None
+    lyrics_analysis_rhyme_scheme_score: Optional[int] = None
+    lyrics_analysis_imagery_score: Optional[int] = None
 
 
 class Album(BaseModel):

@@ -500,7 +500,7 @@ class APIService:
             id=str(uuid.uuid4()),  # Generate our own UUIDv4
             name=track_data["name"],
             credit_name=track_data.get("creditName"),
-            isrc=track_data.get("isrc"),
+            isrc=track_data.get("isrc"),  # Pass ISRC object directly
             release_date=track_data.get("releaseDate"),
             copyright=track_data.get("copyright"),
             app_url=track_data.get("appUrl"),
@@ -510,14 +510,43 @@ class APIService:
             genres=track_data.get("genres"),
             composers=track_data.get("composers"),
             producers=track_data.get("producers"),
-            labels=track_data.get("labels"),
             language_code=track_data.get("languageCode"),
-            soundcharts={
-                "uuid": soundcharts_track_id,  # Store SoundCharts UUID
-                "slug": track_data.get("slug"),
-            },
-            audio=track_data.get("audio"),  # Embed audio features directly
-            lyrics_analysis=lyrics_analysis,  # Embed lyrics analysis
+            soundcharts_uuid=soundcharts_track_id,  # Flattened SoundCharts data
+            soundcharts_slug=track_data.get("slug"),
+            soundcharts_app_url=track_data.get("appUrl"),
+            soundcharts_image_url=track_data.get("imageUrl"),
+            audio_danceability=track_data.get("audio", {}).get("danceability"),
+            audio_energy=track_data.get("audio", {}).get("energy"),
+            audio_key=track_data.get("audio", {}).get("key"),
+            audio_loudness=track_data.get("audio", {}).get("loudness"),
+            audio_mode=track_data.get("audio", {}).get("mode"),
+            audio_speechiness=track_data.get("audio", {}).get("speechiness"),
+            audio_acousticness=track_data.get("audio", {}).get("acousticness"),
+            audio_instrumentalness=track_data.get("audio", {}).get("instrumentalness"),
+            audio_liveness=track_data.get("audio", {}).get("liveness"),
+            audio_valence=track_data.get("audio", {}).get("valence"),
+            audio_tempo=track_data.get("audio", {}).get("tempo"),
+            audio_time_signature=track_data.get("audio", {}).get("timeSignature"),
+            lyrics_analysis_themes=lyrics_analysis.get("themes"),
+            lyrics_analysis_moods=lyrics_analysis.get("moods"),
+            lyrics_analysis_cultural_reference_people=lyrics_analysis.get(
+                "culturalReferencePeople",
+            ),
+            lyrics_analysis_cultural_reference_non_people=lyrics_analysis.get(
+                "culturalReferenceNonPeople",
+            ),
+            lyrics_analysis_brands=lyrics_analysis.get("brands"),
+            lyrics_analysis_locations=lyrics_analysis.get("locations"),
+            lyrics_analysis_narrative_style=lyrics_analysis.get("narrativeStyle"),
+            lyrics_analysis_emotional_intensity_score=lyrics_analysis.get(
+                "emotionalIntensityScore",
+            ),
+            lyrics_analysis_complexity_score=lyrics_analysis.get("complexityScore"),
+            lyrics_analysis_repetitiveness_score=lyrics_analysis.get(
+                "repetitivenessScore"
+            ),
+            lyrics_analysis_rhyme_scheme_score=lyrics_analysis.get("rhymeSchemeScore"),
+            lyrics_analysis_imagery_score=lyrics_analysis.get("imageryScore"),
         )
         await self._upsert_neo4j_node("Track", track.dict())
 
