@@ -2,7 +2,7 @@ import fcntl
 import os
 import uuid
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Dict, List, Optional
 
 import httpx
 from neo4j import AsyncGraphDatabase
@@ -220,7 +220,7 @@ class APIService:
             song_object = song_metadata["object"]
 
             # Validate required fields in song_object
-            required_fields = ["uuid", "name", "artists"]
+            required_fields = ["uuid", "name"]
             for field in required_fields:
                 if field not in song_object:
                     logger.error(
@@ -230,23 +230,12 @@ class APIService:
                     )
                     raise ValueError(f"Song object missing required field: {field}")
 
-            # Validate artists array
-            if (
-                not isinstance(song_object["artists"], list)
-                or not song_object["artists"]
-            ):
-                logger.error(
-                    "❌ Invalid artists data in song object",
-                    artists=song_object["artists"],
-                )
-                raise ValueError("Song object must have non-empty artists array")
-
             soundcharts_song_id = song_object["uuid"]  # SoundCharts UUID
 
             # Create Track node
             await self._create_track_node(song_object)
 
-            # Process all related entities (including ISRC)
+            # Process all related entities (including artists)
             await self._process_related_entities(song_object, soundcharts_song_id)
 
         except Exception as e:
@@ -607,14 +596,36 @@ class APIService:
         # Process artists
         if "artists" in entity_data:
             for artist in entity_data["artists"]:
-                artist_model = Artist(id=str(uuid.uuid4()), **artist)
-                self._add_to_pending_list("artists", artist_model.id)
-                await self._upsert_neo4j_node("Artist", artist_model.dict())
-                await self._create_role_relationship(
-                    entity_id,
-                    artist_model.id,
-                    "artist",
-                )
+                try:
+                    # Create basic artist node
+                    artist_node = {
+                        "uuid": artist["uuid"],
+                        "soundcharts_uuid": artist["uuid"],
+                        "name": artist["name"],
+                        "slug": artist.get("slug"),
+                        "app_url": artist.get("appUrl"),
+                        "image_url": artist.get("imageUrl"),
+                    }
+
+                    # Add artist to pending list
+                    self._add_to_pending_list("artists", artist["uuid"])
+
+                    # Create artist node
+                    await self._upsert_neo4j_node("Artist", artist_node)
+
+                    # Create relationship between entity and artist
+                    await self._upsert_neo4j_relationship(
+                        entity_id,
+                        artist["uuid"],
+                        "HAS_ARTIST",
+                    )
+                except Exception as e:
+                    logger.error(
+                        "❌ Failed to process artist",
+                        artist=artist,
+                        error=str(e),
+                    )
+                    continue
 
         # Process genres
         if "genres" in entity_data:
@@ -670,9 +681,9 @@ class APIService:
 
         for platform in platforms:
             try:
+                # Create platform model without explicitly passing 'id'
                 platform_model = Platform(
-                    id=platform["id"],  # Use platform ID directly
-                    **platform,
+                    **platform,  # Just unpack the dictionary
                 )
                 await self._upsert_neo4j_node("Platform", platform_model.dict())
                 logger.debug(
@@ -778,3 +789,69 @@ class APIService:
         )
         await self._upsert_neo4j_node("Role", {"id": f"role_{role}", "name": role})
         await self._upsert_neo4j_relationship(artist_id, f"role_{role}", "HAS_ROLE")
+
+    async def _process_artist_from_song(self, artist_data: dict, song_id: str) -> None:
+        """Process artist data from song metadata."""
+        try:
+            if not isinstance(artist_data, dict):
+                logger.warning(
+                    "Invalid artist data in song object",
+                    artist_data=artist_data,
+                )
+                return
+
+            # Log incoming artist data
+            logger.debug("Processing artist data", artist_data=artist_data)
+
+            # Add artist to pending list
+            self._add_to_pending_list("artists", artist_data["uuid"])
+
+            # Create artist node
+            artist = Artist(
+                id=str(uuid.uuid4()),
+                soundcharts_uuid=artist_data["uuid"],
+                name=artist_data["name"],
+                slug=artist_data.get("slug"),
+                app_url=artist_data.get("appUrl"),
+                image_url=artist_data.get("imageUrl"),
+            )
+
+            # Log the artist model before upsert
+            logger.debug("Created Artist model", artist=artist.dict())
+
+            await self._upsert_neo4j_node("Artist", artist.dict())
+
+            # Process artist relationships
+            await self._upsert_neo4j_relationship(
+                song_id,  # Song ID
+                artist.id,  # Artist ID
+                "HAS_ARTIST",
+            )
+
+        except Exception as e:
+            logger.error("Failed to process artist from song metadata", error=str(e))
+            raise
+
+    async def _process_platform_ids(self, platform_ids: Dict, artist_id: str) -> None:
+        """Process platform IDs for an artist."""
+        try:
+            for platform, identifier in platform_ids.items():
+                # Create platform relationship
+                await self._upsert_neo4j_relationship(
+                    artist_id,
+                    platform,
+                    "ON_PLATFORM",
+                    properties={"identifier": identifier},
+                )
+                logger.debug(
+                    "✅ Created platform relationship",
+                    artist_id=artist_id,
+                    platform=platform,
+                )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process platform IDs",
+                artist_id=artist_id,
+                error=str(e),
+            )
+            raise

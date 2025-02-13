@@ -3,8 +3,8 @@ from typing import Dict, List, Optional
 import httpx
 from structlog import get_logger
 
-from ..cache import redis_cache
-from ..config import settings
+from ..cache import cache
+from ..models import Artist  # Import from models.py
 
 
 logger = get_logger()
@@ -30,7 +30,7 @@ class SoundChartsService:
         self.cache_ttl = settings.redis_cache_ttl
 
     # Artist Endpoints
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_artist_by_platform_id(self, platform: str, identifier: str) -> Dict:
         """Get artist by platform ID"""
         url = f"{self.base_url}/api/v2.9/artist/by-platform/{platform}/{identifier}"
@@ -39,7 +39,7 @@ class SoundChartsService:
             response.raise_for_status()
             return response.json()
 
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_artist_ids(self, artist_id: str) -> Dict:
         """Get artist IDs across platforms"""
         url = f"{self.base_url}/api/v2/artist/{artist_id}/identifiers"
@@ -50,7 +50,7 @@ class SoundChartsService:
                 response = await client.get(url, headers=self.headers)
                 response.raise_for_status()
                 logger.info(
-                    "✔️ Artist platform IDs retrieved",
+                    "✅ Artist platform IDs retrieved",
                     artist_id=artist_id,
                     status_code=response.status_code,
                 )
@@ -65,7 +65,7 @@ class SoundChartsService:
             )
             raise
 
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_artist_popularity(self, artist_id: str) -> Dict:
         """Get artist popularity across all platforms"""
         platforms = await self.get_platforms()
@@ -92,7 +92,7 @@ class SoundChartsService:
                     response.raise_for_status()
                     popularity_data[platform_code] = response.json()
                     logger.info(
-                        "📈 Artist popularity retrieved",
+                        "✅ Artist popularity retrieved",
                         artist_id=artist_id,
                         platform=platform_code,
                         status_code=response.status_code,
@@ -120,7 +120,7 @@ class SoundChartsService:
         return popularity_data
 
     # Song Endpoints
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_song_by_isrc(self, isrc: str) -> Dict:
         """Get song by ISRC"""
         url = f"{self.base_url}/api/v2/song/by-isrc/{isrc}"
@@ -156,7 +156,7 @@ class SoundChartsService:
             )
             raise
 
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_song_lyrics_analysis(self, song_id: str) -> Dict:
         """Get lyrics analysis for a song"""
         url = f"{self.base_url}/api/v2/song/{song_id}/lyrics-analysis"
@@ -193,7 +193,7 @@ class SoundChartsService:
             raise
 
     # Album Endpoints
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_album_by_upc(self, upc: str) -> Dict:
         """Get album by UPC"""
         url = f"{self.base_url}/api/v2/album/by-upc/{upc}"
@@ -207,7 +207,7 @@ class SoundChartsService:
                 response = await client.get(url, headers=self.headers)
                 response.raise_for_status()
                 logger.info(
-                    "📀 Album retrieved by UPC",
+                    "✅ Album retrieved by UPC",
                     upc=upc,
                     status_code=response.status_code,
                 )
@@ -229,7 +229,7 @@ class SoundChartsService:
             )
             raise
 
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_album_tracklisting(self, album_id: str) -> Dict:
         """Get album tracklisting"""
         url = f"{self.base_url}/api/v2/album/{album_id}/tracks"
@@ -266,6 +266,7 @@ class SoundChartsService:
             raise
 
     # Charts Endpoints
+    @cache()  # Uses self.cache_ttl
     async def get_song_ranking(self, slug: str, date: Optional[str] = None) -> Dict:
         """Get song ranking for a specific date or latest"""
         url = f"{self.base_url}/api/v2/chart/song/{slug}/ranking"
@@ -279,6 +280,7 @@ class SoundChartsService:
             return response.json()
 
     # Playlist Endpoints
+    @cache()  # Uses self.cache_ttl
     async def get_playlist_by_platform_id(self, platform: str, identifier: str) -> Dict:
         """Get playlist by platform ID"""
         url = f"{self.base_url}/api/v2/playlist/by-platform/{platform}/{identifier}"
@@ -288,6 +290,7 @@ class SoundChartsService:
             return response.json()
 
     # Radio Endpoints
+    @cache()  # Uses self.cache_ttl
     async def get_radio_spins(self, artist_id: str) -> Dict:
         """Get radio spins for an artist"""
         url = f"{self.base_url}/api/v2/artist/{artist_id}/broadcasts"
@@ -297,6 +300,7 @@ class SoundChartsService:
             return response.json()
 
     # TikTok Endpoints
+    @cache()  # Uses self.cache_ttl
     async def get_tiktok_music_videos(self, artist_id: str) -> Dict:
         """Get TikTok music videos for an artist"""
         url = f"{self.base_url}/api/v2/artist/{artist_id}/shorts/tiktok/api/videos"
@@ -306,6 +310,7 @@ class SoundChartsService:
             return response.json()
 
     # Audience Endpoints
+    @cache()  # Uses self.cache_ttl
     async def get_artist_audience_report(
         self,
         artist_id: str,
@@ -323,6 +328,7 @@ class SoundChartsService:
             response.raise_for_status()
             return response.json()
 
+    @cache()  # Uses self.cache_ttl
     async def search_artist(self, artist_name: str) -> Dict:
         """Search artist by name."""
         url = f"{self.base_url}/api/v2/artist/search/{artist_name}"
@@ -348,6 +354,7 @@ class SoundChartsService:
             )
             raise
 
+    @cache()  # Uses self.cache_ttl
     async def get_artist_metadata(self, artist_id: str) -> Dict:
         """Get artist metadata by ID."""
         url = f"{self.base_url}/api/v2.9/artist/{artist_id}"
@@ -373,6 +380,7 @@ class SoundChartsService:
             )
             raise
 
+    @cache()  # Uses self.cache_ttl
     async def get_artist_songs(
         self,
         artist_id: str,
@@ -397,7 +405,7 @@ class SoundChartsService:
                 data = response.json()
 
                 logger.info(
-                    "🎶 Artist songs retrieved",
+                    "✅ Artist songs retrieved",
                     artist_id=artist_id,
                     status_code=response.status_code,
                 )
@@ -420,6 +428,7 @@ class SoundChartsService:
             )
             raise
 
+    @cache()  # Uses self.cache_ttl
     async def get_artist_albums(
         self,
         artist_id: str,
@@ -444,7 +453,7 @@ class SoundChartsService:
                 data = response.json()
 
                 logger.info(
-                    "📀 Artist albums retrieved",
+                    "✅ Artist albums retrieved",
                     artist_id=artist_id,
                     status_code=response.status_code,
                 )
@@ -466,7 +475,7 @@ class SoundChartsService:
             )
             raise
 
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_artist_stats(self, artist_id: str) -> Dict:
         """Get artist's current stats."""
         url = f"{self.base_url}/api/v2/artist/{artist_id}/current/stats"
@@ -481,7 +490,7 @@ class SoundChartsService:
                 response = await client.get(url, headers=self.headers)
                 response.raise_for_status()
                 logger.info(
-                    "📈 Artist stats retrieved",
+                    "✅ Artist stats retrieved",
                     artist_id=artist_id,
                     status_code=response.status_code,
                 )
@@ -503,7 +512,7 @@ class SoundChartsService:
             )
             raise
 
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_artist_audience(self, artist_id: str) -> Dict:
         """Get artist's audience data across all platforms."""
         platforms = await self.get_platforms()
@@ -555,7 +564,7 @@ class SoundChartsService:
 
         return audience_data
 
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_similar_artists(self, artist_id: str) -> Dict:
         """Get similar artists."""
         url = f"{self.base_url}/api/v2/artist/{artist_id}/related"
@@ -564,7 +573,7 @@ class SoundChartsService:
             response.raise_for_status()
             return response.json()
 
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_platforms(self) -> List[Dict]:
         """Get all platforms from the SoundCharts API."""
         url = f"{self.base_url}/api/v2/referential/platforms"
@@ -604,7 +613,7 @@ class SoundChartsService:
             )
             raise
 
-    @redis_cache(ttl=settings.redis_cache_ttl)
+    @cache()  # Uses self.cache_ttl
     async def get_song_metadata(self, song_id: str) -> Dict:
         """
         Get detailed metadata for a song by its ID.
@@ -697,4 +706,58 @@ class SoundChartsService:
                 track_id=track_id,
                 error=str(e),
             )
+            raise
+
+    async def process_artist_data(self, artist_data: dict) -> Artist:
+        """Process raw artist data from Soundcharts API."""
+        try:
+            # Log the raw response for debugging
+            logger.debug("Raw artist data", data=artist_data)
+
+            # Extract the nested 'object' dictionary
+            artist_object = artist_data.get("object", {})
+
+            # Log the artist object for debugging
+            logger.debug("Artist object", object=artist_object)
+
+            # Validate that uuid exists and is not null
+            if "uuid" not in artist_object:
+                logger.error("Missing uuid in artist data", artist_data=artist_data)
+                raise ValueError("Artist data is missing required field: uuid")
+
+            if artist_object["uuid"] is None:
+                logger.error("Null uuid in artist data", artist_data=artist_data)
+                raise ValueError("Artist data contains null uuid")
+
+            # Transform the data to match the Artist model requirements
+            transformed_data = {
+                "id": artist_object.get("id"),
+                "name": artist_object.get("name"),
+                "soundcharts_uuid": artist_object[
+                    "uuid"
+                ],  # Direct access since we validated
+                "slug": artist_object.get("slug"),
+                "app_url": artist_object.get("appUrl") or "",
+                "image_url": artist_object.get("imageUrl") or "",
+                "credit_name": artist_object.get("creditName"),
+                "country_code": artist_object.get("countryCode"),
+                "biography": artist_object.get("biography"),
+                "isni": artist_object.get("isni"),
+                "ipi": artist_object.get("ipi"),
+                "gender": artist_object.get("gender"),
+                "type": artist_object.get("type"),
+                "birth_date": artist_object.get("birthDate"),
+            }
+
+            # Log the transformed data before creating the Artist
+            logger.debug("Transformed artist data", data=transformed_data)
+
+            artist = Artist(**transformed_data)
+
+            # Log the final Artist model
+            logger.debug("Created Artist model", artist=artist.dict())
+
+            return artist
+        except Exception as e:
+            logger.error("Failed to process artist data", error=str(e))
             raise

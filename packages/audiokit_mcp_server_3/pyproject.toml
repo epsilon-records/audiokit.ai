@@ -26,6 +26,7 @@ python-multipart = "^0.0.20"
 neo4j = "^5.28.1"
 redis = "^5.2.1"
 aiocache = "^0.12.3"
+aioredis = "^2.0.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"

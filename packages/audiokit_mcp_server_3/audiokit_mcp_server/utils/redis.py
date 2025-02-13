@@ -1,55 +1,65 @@
-from aiocache import caches
+from aiocache import RedisCache, caches
 from structlog import get_logger
 
 
 logger = get_logger()
 
 
-def setup_redis_cache(redis_url: str, timeout: int = 5) -> None:
-    """Configure Redis cache with proper URL parsing."""
+def setup_redis_cache(settings):
+    """
+    Configure Redis cache with Upstash connection using all settings.
+
+    Args:
+        settings: Application settings object containing Redis configuration
+    """
     try:
-        if "://" in redis_url:
-            # Remove the redis:// or rediss:// prefix
-            redis_url = redis_url.split("://")[1]
+        logger.debug("🔧 Configuring LOCAL Redis cache")
 
-        # Handle Upstash-style URLs (user:password@host:port)
-        if "@" in redis_url:
-            credentials, host_port = redis_url.split("@")
-            host, port = host_port.split(":")
-        else:
-            host, port = redis_url.split(":")
-
-        # Extract database number if specified
-        if "/" in port:
-            port, db = port.split("/")
-            db = int(db)
-        else:
-            db = 0  # Default to database 0 if not specified
-
-        caches.set_config(
-            {
-                "default": {
-                    "cache": "aiocache.RedisCache",
-                    "endpoint": host,
-                    "port": int(port),
-                    "db": db,
-                    "timeout": timeout,
-                    "serializer": {
-                        "class": "aiocache.serializers.JsonSerializer",
-                    },
+        config = {
+            "default": {
+                "cache": "aiocache.RedisCache",
+                "endpoint": settings.redis_host,
+                "port": settings.redis_port,
+                "timeout": settings.redis_timeout,
+                "serializer": {
+                    "class": "aiocache.serializers.JsonSerializer",
                 },
             },
-        )
-        logger.info(
-            "✅ Redis cache configured",
-            host=host,
-            port=port,
-            db=db,
-            timeout=timeout,
-        )
+        }
+
+        if settings.redis_password:
+            config["default"]["password"] = settings.redis_password
+
+        caches.set_config(config)
+        logger.info("✅ Local Redis cache configured", config=config["default"])
     except Exception as e:
-        logger.error(
-            "❌ Failed to configure Redis cache",
-            error=str(e),
-        )
+        logger.error("❌ Failed to configure Redis cache", error=str(e))
         raise
+
+
+class LoggingRedisCache(RedisCache):
+    async def _set(self, key, value, ttl=None, _conn=None):
+        """Override set operation to add logging"""
+        logger.debug(
+            "📝 Writing to cache",
+            key=key,
+            ttl=ttl,
+            value_type=type(value).__name__,
+        )
+        result = await super()._set(key, value, ttl, _conn)
+        logger.debug(
+            "✅ Cache write successful",
+            key=key,
+            ttl=ttl,
+        )
+        return result
+
+
+class StrictRedisCache(RedisCache):
+    async def _set(self, *args, **kwargs):
+        """Override to disable silent failures"""
+        try:
+            return await super()._set(*args, **kwargs)
+        except Exception as e:
+            logger.error("🔥 Critical cache write failure", error=str(e))
+            raise

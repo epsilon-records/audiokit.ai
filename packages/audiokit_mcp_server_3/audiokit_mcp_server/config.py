@@ -24,12 +24,19 @@ class Settings(BaseSettings):
     spotify_api_key: str
     soundcharts_api_base: str
     soundcharts_app_id: str
-    redis_url: str = "redis://localhost:6379/0"
-    redis_cache_ttl: int = 86400  # 1 day in seconds
-    redis_timeout: int = 5
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+    redis_password: str = ""
+    redis_cache_ttl: int = 3600  # 1 hour
+    redis_ssl: bool = False  # Disable SSL for local
+    redis_timeout: int = 1  # Shorter timeout for local
     log_level: str = "INFO"
 
-    model_config = SettingsConfigDict(env_file=".env")
+    @property
+    def redis_url(self) -> str:
+        return f"rediss://:{self.redis_password}@{self.redis_host}:{self.redis_port}"
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
 
 settings = Settings()

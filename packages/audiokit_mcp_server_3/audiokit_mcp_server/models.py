@@ -10,6 +10,8 @@ class GenreData(BaseModel):
 
 
 class Artist(BaseModel):
+    """Artist model for Soundcharts data."""
+
     id: Optional[str] = None  # Our own UUIDv4
     name: str
     credit_name: Optional[str] = None
@@ -20,12 +22,15 @@ class Artist(BaseModel):
     gender: Optional[str] = None
     type: Optional[str] = None
     birth_date: Optional[datetime] = None
-    soundcharts_uuid: str  # SoundCharts UUID for merging
+    soundcharts_uuid: str  # Required SoundCharts UUID
+    slug: Optional[str] = None
+    app_url: Optional[str] = None
+    image_url: Optional[str] = None
 
     @validator("soundcharts_uuid")
     def validate_soundcharts_uuid(cls, v):
         if not v:
-            raise ValueError("SoundCharts UUID cannot be empty")
+            raise ValueError("SoundCharts UUID cannot be null or empty")
         return v
 
 

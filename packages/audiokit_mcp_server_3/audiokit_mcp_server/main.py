@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -11,7 +10,6 @@ from structlog.stdlib import add_log_level, filter_by_level
 from ..config import settings
 from .config import Settings
 from .mcp import MCPRouter
-from .services import APIService
 from .utils.redis import setup_redis_cache
 
 
@@ -61,6 +59,10 @@ async def lifespan(app: FastAPI):
                 f"******{redacted_settings['openrouter_api_key'][-4:]}"
             )
         logger.info("Loaded settings", settings=redacted_settings)
+
+        # Initialize cache
+        setup_redis_cache(settings)
+
         yield
         logger.info("Shutting down AudioKit MCP Server")
     except Exception as e:
@@ -89,36 +91,18 @@ async def health_check():
 async def cache_health_check():
     try:
         cache = caches.get("default")
+        logger.debug("🏥 Performing Redis health check")
         await cache.ping()
+        logger.debug("✅ Redis health check successful")
         return {"status": "ok"}
     except Exception as e:
-        logger.error("Redis health check failed", error=str(e))
+        logger.error("❌ Redis health check failed", error=str(e))
         raise HTTPException(status_code=500, detail="Redis connection failed")
 
 
-def setup_cache():
-    setup_redis_cache(settings.redis_url, settings.redis_timeout)
-
-
-# Call this during app initialization
-setup_cache()
-
-
-async def main() -> None:
-    """Main application entry point."""
-    settings = Settings()
-    api_service = APIService(settings)
-
-    try:
-        # Run the ingestion process
-        result = await api_service.ingest_soundcharts_api("Billie Eilish")
-        logger.info("🎉 Ingestion completed successfully", result=result)
-    except Exception as e:
-        logger.error("🚨 Ingestion failed", error=str(e))
-    finally:
-        # Ensure resources are closed
-        await api_service.close()
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+@app.get("/cache/test")
+async def cache_test():
+    cache = caches.get("default")
+    await cache.set("test_key", "test_value", ttl=60)
+    value = await cache.get("test_key")
+    return {"status": "success", "value": value}
