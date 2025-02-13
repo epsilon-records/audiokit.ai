@@ -40,16 +40,12 @@ class ISRC(BaseModel):
     country_code: str
     country_name: str
 
-    @validator("value")
-    def validate_value(cls, v):
-        if not v:
-            raise ValueError("ISRC value cannot be empty")
-        return v
-
     @validator("id", always=True)
     def generate_composite_id(cls, v, values):
         if not v:
-            return f"isrc_{values['value']}"
+            # Replace spaces with underscores in the ISRC value
+            clean_value = values["value"].replace(" ", "_")
+            return f"isrc_{clean_value}"
         return v
 
 
@@ -88,11 +84,27 @@ class Genre(BaseModel):
     root: str
     sub: List[str]
 
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            # Replace spaces with underscores in genre root
+            clean_root = values["root"].replace(" ", "_")
+            return f"genre_{clean_root}"
+        return v
+
 
 class Label(BaseModel):
     id: Optional[str] = None  # Our own UUIDv4
     name: str
     type: Optional[str] = None
+
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            # Replace spaces with underscores in label name
+            clean_name = values["name"].replace(" ", "_")
+            return f"label_{clean_name}"
+        return v
 
 
 class Lyrics(BaseModel):
@@ -102,6 +114,14 @@ class Lyrics(BaseModel):
     sentiment: Optional[float] = None
     topics: Optional[List[str]] = None
 
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            # Replace spaces with underscores in language
+            clean_language = values["language"].replace(" ", "_")
+            return f"lyrics_{clean_language}"
+        return v
+
 
 class Annotation(BaseModel):
     id: Optional[str] = None  # Composite ID: "annotation_{uuid}"
@@ -109,10 +129,26 @@ class Annotation(BaseModel):
     start: int
     end: int
 
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            # Replace spaces with underscores in text
+            clean_text = values["text"].replace(" ", "_")
+            return f"annotation_{clean_text}"
+        return v
+
 
 class Platform(BaseModel):
     id: Optional[str] = None  # Use the "code" field from the API
     platform: str  # Use the "name" field from the API
+
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            # Replace spaces with underscores in platform name
+            clean_platform = values["platform"].replace(" ", "_")
+            return f"platform_{clean_platform}"
+        return v
 
 
 class Popularity(BaseModel):
@@ -125,7 +161,9 @@ class Popularity(BaseModel):
     @validator("id", always=True)
     def generate_composite_id(cls, v, values):
         if not v:
-            return f"popularity_{values['artist_id']}_{values['platform']}_{values['date'].isoformat()}"
+            # Replace spaces with underscores in platform name
+            clean_platform = values["platform"].replace(" ", "_")
+            return f"popularity_{values['artist_id']}_{clean_platform}_{values['date'].isoformat()}"
         return v
 
 
@@ -139,7 +177,9 @@ class StreamingData(BaseModel):
     @validator("id", always=True)
     def generate_composite_id(cls, v, values):
         if not v:
-            return f"streaming_{values['artist_id']}_{values['platform']}_{values['date'].isoformat()}"
+            # Replace spaces with underscores in platform name
+            clean_platform = values["platform"].replace(" ", "_")
+            return f"streaming_{values['artist_id']}_{clean_platform}_{values['date'].isoformat()}"
         return v
 
 
@@ -154,10 +194,26 @@ class Audience(BaseModel):
     view_count: Optional[int] = None
     like_count: Optional[int] = None
 
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            # Replace spaces with underscores in platform name
+            clean_platform = values["platform"].replace(" ", "_")
+            return f"audience_{values['artist_id']}_{clean_platform}_{values['date'].isoformat()}"
+        return v
+
 
 class Role(BaseModel):
     id: Optional[str] = None  # Composite ID: "role_{name}"
     name: str  # e.g., "artist", "producer", "composer"
+
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            # Replace spaces with underscores in role name
+            clean_name = values["name"].replace(" ", "_")
+            return f"role_{clean_name}"
+        return v
 
 
 class LyricsAnalysis(BaseModel):
@@ -197,3 +253,9 @@ class Audio(BaseModel):
     valence: Optional[float] = None
     tempo: Optional[float] = None
     time_signature: Optional[int] = None
+
+    @validator("id", always=True)
+    def generate_composite_id(cls, v, values):
+        if not v:
+            return f"audio_{values['track_id']}"
+        return v

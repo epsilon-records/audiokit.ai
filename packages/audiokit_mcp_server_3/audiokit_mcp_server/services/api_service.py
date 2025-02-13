@@ -285,13 +285,13 @@ class APIService:
     async def _process_artist_metadata(self, artist_metadata: Dict) -> None:
         """Process artist metadata and create nodes/relationships."""
         artist_object = artist_metadata["object"]
-        artist_id = artist_object["uuid"]
+        soundcharts_artist_id = artist_object["uuid"]
 
         # Create Artist node
         await self._create_artist_node(artist_object)
 
         # Process genres, platform IDs, popularity data, stats, audience data, and similar artists
-        await self._process_related_entities(artist_object, artist_id)
+        await self._process_related_entities(artist_object, soundcharts_artist_id)
 
     async def _process_lyrics_metadata(self, lyrics_metadata: Dict) -> None:
         """Process lyrics metadata and create nodes/relationships."""
@@ -595,35 +595,55 @@ class APIService:
         """Process related entities for a given entity."""
         # Process artists
         if "artists" in entity_data:
+            logger.debug("Processing artists", count=len(entity_data["artists"]))
             for artist in entity_data["artists"]:
                 try:
+                    logger.debug("Starting artist processing", artist=artist)
+
                     # Create basic artist node
+                    logger.debug("Creating artist node")
                     artist_node = {
+                        "id": str(uuid.uuid4()),  # Generate a new UUID
                         "uuid": artist["uuid"],
                         "soundcharts_uuid": artist["uuid"],
                         "name": artist["name"],
-                        "slug": artist.get("slug"),
-                        "app_url": artist.get("appUrl"),
-                        "image_url": artist.get("imageUrl"),
+                        "slug": artist.get("slug", ""),
+                        "app_url": artist.get("appUrl", ""),
+                        "image_url": artist.get("imageUrl", ""),
                     }
+                    logger.debug("Artist node created", node=artist_node)
 
                     # Add artist to pending list
+                    logger.debug(
+                        "Adding artist to pending list",
+                        artist_id=artist["uuid"],
+                    )
                     self._add_to_pending_list("artists", artist["uuid"])
 
                     # Create artist node
+                    logger.debug("Upserting artist node")
                     await self._upsert_neo4j_node("Artist", artist_node)
+                    logger.debug("Artist node upserted successfully")
 
                     # Create relationship between entity and artist
+                    logger.debug(
+                        "Creating HAS_ARTIST relationship",
+                        from_id=entity_id,
+                        to_id=artist["uuid"],
+                    )
                     await self._upsert_neo4j_relationship(
                         entity_id,
                         artist["uuid"],
                         "HAS_ARTIST",
                     )
+                    logger.debug("HAS_ARTIST relationship created successfully")
+
                 except Exception as e:
                     logger.error(
                         "❌ Failed to process artist",
                         artist=artist,
                         error=str(e),
+                        stack_info=True,
                     )
                     continue
 
@@ -650,19 +670,30 @@ class APIService:
                 )
 
         # Process ISRC
-        if entity_data.get("isrc", {}).get("value"):
+        if "isrc" in entity_data and entity_data["isrc"].get("value"):
             await self._process_isrc(entity_data["isrc"], entity_id)
 
         # Process producers and composers
         for role_type in ["producers", "composers"]:
             if role_type in entity_data:
                 for name in entity_data[role_type]:
-                    artist_model = Artist(id=name, name=name)
-                    await self._upsert_neo4j_node("Artist", artist_model.dict())
-                    await self._create_role_relationship(
+                    # Create basic artist stub with just the name
+                    artist_node = {
+                        "name": name,
+                    }
+                    # Upsert using name as merge key
+                    query = "MERGE (n:Artist {name: $name}) SET n += $props"
+                    async with self.neo4j_driver.session() as session:
+                        await session.run(
+                            query,
+                            name=name,
+                            props=artist_node,
+                        )
+                    # Create role relationship
+                    await self._upsert_neo4j_relationship(
                         entity_id,
-                        artist_model.id,
-                        role_type[:-1],
+                        name,  # Use name as the identifier
+                        f"HAS_{role_type[:-1].upper()}",
                     )
 
         # Process featured artists
