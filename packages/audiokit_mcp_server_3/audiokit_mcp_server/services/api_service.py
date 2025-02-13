@@ -12,7 +12,6 @@ from ..models import (
     Album,
     Artist,
     Audience,
-    AudioFeature,
     Genre,
     Label,
     LyricsAnalysis,
@@ -57,7 +56,6 @@ class APIService:
             ("Album", "id"),
             ("Genre", "id"),
             ("Label", "id"),
-            ("AudioFeature", "id"),
             ("Role", "id"),
         ]
 
@@ -99,8 +97,6 @@ class APIService:
             Genre(**properties)
         elif label == "Label":
             Label(**properties)
-        elif label == "AudioFeature":
-            AudioFeature(**properties)
         elif label == "Role":
             Role(**properties)
         elif label == "Platform":
