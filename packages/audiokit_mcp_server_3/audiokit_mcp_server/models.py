@@ -4,12 +4,19 @@ from typing import Dict, List, Optional
 from pydantic import BaseModel
 
 
+class GenreData(BaseModel):
+    root: str
+    sub: List[str]
+
+
 class Artist(BaseModel):
     id: str  # Our own UUIDv4
     name: str
     credit_name: Optional[str] = None
     country_code: Optional[str] = None
-    genres: Optional[List[Dict[str, List[str]]]] = None  # Match API response structure
+    genres: Optional[List[GenreData]] = (
+        None  # List of genre objects with root and sub fields
+    )
     biography: Optional[str] = None
     isni: Optional[str] = None
     ipi: Optional[str] = None

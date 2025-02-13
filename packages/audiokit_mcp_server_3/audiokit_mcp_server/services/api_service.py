@@ -679,25 +679,13 @@ class APIService:
         """Create an Artist node from artist data."""
         soundcharts_artist_id = artist_data["uuid"]  # SoundCharts UUID
 
-        # Normalize genres data
-        genres = artist_data.get("genres", [])
-        if isinstance(genres, str):
-            genres = [{"root": genres, "sub": [genres]}]
-        elif isinstance(genres, dict):
-            genres = [genres]
-        elif isinstance(genres, list):
-            genres = [
-                {"root": genre, "sub": [genre]} if isinstance(genre, str) else genre
-                for genre in genres
-            ]
-
         # Create Artist node
         artist = Artist(
             id=str(uuid.uuid4()),  # Generate our own UUIDv4
             name=artist_data["name"],
             credit_name=artist_data.get("creditName"),
             country_code=artist_data.get("countryCode"),
-            genres=genres,
+            genres=artist_data.get("genres"),  # Pass genres directly
             biography=artist_data.get("biography"),
             isni=artist_data.get("isni"),
             ipi=artist_data.get("ipi"),
