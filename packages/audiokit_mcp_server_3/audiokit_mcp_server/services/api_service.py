@@ -794,13 +794,6 @@ class APIService:
                             f"HAS_{role_type[:-1].upper()}",
                         )
 
-                        # Add unidirectional WORKED_WITH relationship
-                        await self._upsert_neo4j_relationship(
-                            entity_id,
-                            artist_id,
-                            "WORKED_WITH",
-                        )
-
             # Process featured artists
             if "featured_artists" in entity_data:
                 for artist in entity_data["featured_artists"]:
