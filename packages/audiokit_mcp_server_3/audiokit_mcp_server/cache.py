@@ -1,6 +1,7 @@
 import functools
 import json
 
+import aioredis
 from aiocache import cached, caches
 from aiocache.serializers import JsonSerializer
 from structlog import get_logger
@@ -78,3 +79,18 @@ def cache(key_arg_index: int = 1):
         return wrapper
 
     return decorator
+
+
+class Cache:
+    def __init__(self, settings):
+        self.settings = settings
+        self.redis = None
+
+    async def connect(self):
+        """Connect to Redis."""
+        self.redis = await aioredis.from_url(
+            self.settings.redis_url,
+            decode_responses=True,
+            ssl=False,  # Explicitly disable SSL
+        )
+        logger.info("✅ Connected to Redis cache")

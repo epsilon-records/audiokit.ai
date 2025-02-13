@@ -1,3 +1,4 @@
+import asyncio
 import fcntl
 import os
 import traceback
@@ -39,9 +40,11 @@ class APIService:
             self.settings.neo4j_uri,
             auth=(self.settings.neo4j_user, self.settings.neo4j_password),
         )
+        # Reuse the Redis connection from the cache
         self.deduplication_queue = DeduplicationQueue(
             redis_url=settings.redis_url,
             ttl=settings.redis_cache_ttl,
+            redis_connection=self.soundcharts_service.cache.redis,  # Reuse cache connection
         )
 
     async def startup(self) -> None:
@@ -116,15 +119,20 @@ class APIService:
             SET n += $props, n.last_updated = $now
             """
             async with self.neo4j_driver.session() as session:
-                await session.run(
-                    query,
-                    **{merge_key: properties[merge_key]},
-                    props=properties,
-                    now=datetime.utcnow(),
+                await asyncio.wait_for(
+                    session.run(
+                        query,
+                        **{merge_key: properties[merge_key]},
+                        props=properties,
+                        now=datetime.utcnow(),
+                    ),
+                    timeout=5.0,  # 5-second timeout
                 )
 
             # Mark node as processed
             await self.deduplication_queue.mark_processed(node_id)
+        except asyncio.TimeoutError:
+            logger.error("Neo4j query timed out", label=label, id=node_id)
         except Exception as e:
             logger.error("❌ Failed to upsert Neo4j node", label=label, error=str(e))
             raise

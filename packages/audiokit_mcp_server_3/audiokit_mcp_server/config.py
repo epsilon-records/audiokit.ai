@@ -34,7 +34,7 @@ class Settings(BaseSettings):
 
     @property
     def redis_url(self) -> str:
-        return f"rediss://:{self.redis_password}@{self.redis_host}:{self.redis_port}"
+        return f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

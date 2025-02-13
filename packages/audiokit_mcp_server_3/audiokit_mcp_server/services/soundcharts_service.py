@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Dict, List, Optional
 
 import httpx
@@ -5,6 +6,7 @@ from structlog import get_logger
 
 from ..cache import cache
 from ..models import Artist  # Import from models.py
+from ..utils.cache import Cache
 
 
 logger = get_logger()
@@ -28,6 +30,8 @@ class SoundChartsService:
             app_id=settings.soundcharts_app_id,
         )
         self.cache_ttl = settings.redis_cache_ttl
+        self.cache = Cache(settings)  # Initialize cache
+        self.redis = self.cache.redis  # Expose Redis connection
 
     # Artist Endpoints
     @cache()  # Uses self.cache_ttl
@@ -356,27 +360,22 @@ class SoundChartsService:
 
     @cache()  # Uses self.cache_ttl
     async def get_artist_metadata(self, artist_id: str) -> Dict:
-        """Get artist metadata by ID."""
-        url = f"{self.base_url}/api/v2.9/artist/{artist_id}"
-        logger.info("📄 Fetching artist metadata", artist_id=artist_id, url=url)
-
+        """Get artist metadata from SoundCharts API."""
         try:
-            async with httpx.AsyncClient() as client:
-                response = await client.get(url, headers=self.headers)
-                response.raise_for_status()
-                logger.info(
-                    "✅ Artist metadata retrieved",
-                    artist_id=artist_id,
-                    status_code=response.status_code,
-                )
-                return response.json()
-        except httpx.HTTPStatusError as e:
-            logger.error(
-                "❌ Failed to fetch artist metadata",
+            logger.debug("Fetching artist metadata", artist_id=artist_id)
+            start_time = datetime.utcnow()
+            response = await self.client.get(f"/artist/{artist_id}")
+            duration = (datetime.utcnow() - start_time).total_seconds()
+            logger.debug(
+                "Artist metadata retrieved",
                 artist_id=artist_id,
-                url=e.request.url,
-                status_code=e.response.status_code,
-                error=str(e),
+                status_code=response.status,
+                duration=duration,
+            )
+            return response.json()
+        except Exception as e:
+            logger.error(
+                "Failed to get artist metadata", artist_id=artist_id, error=str(e)
             )
             raise
 
