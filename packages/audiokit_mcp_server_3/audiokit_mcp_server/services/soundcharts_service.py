@@ -397,17 +397,6 @@ class SoundChartsService:
                 response.raise_for_status()
                 data = response.json()
 
-                # Handle missing ISRC codes
-                if "items" in data:
-                    for song in data["items"]:
-                        if "isrc" not in song:
-                            logger.warning(
-                                "⚠️ Missing ISRC for song",
-                                artist_id=artist_id,
-                                song_id=song.get("id"),
-                            )
-                            song["isrc"] = None  # Set default value
-
                 logger.info(
                     "🎶 Artist songs retrieved",
                     artist_id=artist_id,
@@ -454,17 +443,6 @@ class SoundChartsService:
                 response = await client.get(url, params=params, headers=self.headers)
                 response.raise_for_status()
                 data = response.json()
-
-                # Handle missing UPC codes
-                if "items" in data:
-                    for album in data["items"]:
-                        if "upc" not in album:
-                            logger.warning(
-                                "⚠️ Missing UPC for album",
-                                artist_id=artist_id,
-                                album_id=album.get("id"),
-                            )
-                            album["upc"] = None  # Set default value
 
                 logger.info(
                     "📀 Artist albums retrieved",
@@ -663,6 +641,38 @@ class SoundChartsService:
             logger.error(
                 "🚨 Unexpected error fetching song metadata",
                 song_id=song_id,
+                error=str(e),
+            )
+            raise
+
+    async def create_isrc_node(self, isrc_data: Dict, track_id: str) -> None:
+        """Create ISRC node and relationship to track."""
+        try:
+            # Create ISRC node
+            isrc_node = await self.graph.create_node(
+                "ISRC",
+                code=isrc_data["code"],
+                country_code=isrc_data["country_code"],
+                country_name=isrc_data["country_name"],
+            )
+
+            # Create relationship between track and ISRC
+            await self.graph.create_relationship(
+                from_node_id=track_id,
+                to_node_id=isrc_node.id,
+                relationship_type="HAS_ISRC",
+            )
+
+            logger.info(
+                "✅ Created ISRC node and relationship",
+                isrc=isrc_data["code"],
+                track_id=track_id,
+            )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to create ISRC node",
+                isrc=isrc_data["code"],
+                track_id=track_id,
                 error=str(e),
             )
             raise

@@ -202,7 +202,7 @@ class APIService:
         # Create Track node
         await self._create_track_node(song_object)
 
-        # Process artists, genres, labels, producers, composers, and featured artists
+        # Process all related entities (including ISRC)
         await self._process_related_entities(song_object, soundcharts_song_id)
 
     async def _process_album_metadata(self, album_metadata: Dict) -> None:
@@ -689,6 +689,21 @@ class APIService:
                     label_model.id,
                     "HAS_LABEL",
                 )
+
+        # Process ISRC (for tracks)
+        if "isrc" in entity_data and entity_data["isrc"].get("value"):
+            isrc_node = {
+                "id": f"isrc_{entity_data['isrc']['value']}",
+                "code": entity_data["isrc"]["value"],
+                "country_code": entity_data["isrc"]["countryCode"],
+                "country_name": entity_data["isrc"]["countryName"],
+            }
+            await self._upsert_neo4j_node("ISRC", isrc_node)
+            await self._upsert_neo4j_relationship(
+                entity_id,
+                isrc_node["id"],
+                "HAS_ISRC",
+            )
 
         # Process producers
         if "producers" in entity_data:
