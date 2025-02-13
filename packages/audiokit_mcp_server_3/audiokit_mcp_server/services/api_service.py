@@ -723,7 +723,18 @@ class APIService:
             if "labels" in entity_data:
                 for label in entity_data["labels"]:
                     try:
-                        label_model = Label(**label)
+                        # Generate compound ID for the label
+                        label_id = self._generate_composite_id(
+                            "label",
+                            label.get("name", ""),
+                        )
+                        label_data = {
+                            "id": label_id,
+                            "name": label.get("name", ""),
+                            "type": label.get("type", ""),
+                            "country": label.get("country", ""),
+                        }
+                        label_model = Label(**label_data)
                         await self._upsert_neo4j_node("Label", label_model.dict())
                         await self._upsert_neo4j_relationship(
                             entity_id,
