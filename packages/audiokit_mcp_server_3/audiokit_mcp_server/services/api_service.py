@@ -620,9 +620,12 @@ class APIService:
         """Create an Album node from album data."""
         soundcharts_album_id = album_data["uuid"]  # SoundCharts UUID
 
+        # Check if album already exists
+        existing_id = await self._find_existing_node("Album", soundcharts_album_id)
+
         # Create Album node
         album = Album(
-            id=str(uuid.uuid4()),  # Generate our own UUIDv4
+            id=existing_id or str(uuid.uuid4()),  # Use existing ID or generate new one
             name=album_data["name"],
             credit_name=album_data.get("creditName"),
             upc=album_data.get("upc"),
@@ -784,7 +787,14 @@ class APIService:
 
         for platform in platforms:
             try:
-                platform_model = Platform(**platform)
+                # Check if platform already exists
+                existing_id = await self._find_existing_node("Platform", platform["id"])
+
+                platform_model = Platform(
+                    id=existing_id
+                    or str(uuid.uuid4()),  # Use existing ID or generate new one
+                    **platform,
+                )
                 await self._upsert_neo4j_node("Platform", platform_model.dict())
                 logger.debug(
                     "✅ Platform node created",
