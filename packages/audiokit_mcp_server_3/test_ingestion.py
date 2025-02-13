@@ -1,15 +1,32 @@
 import asyncio
+import logging
 
+import structlog
 from aiocache import caches
 from audiokit_mcp_server.config import settings
 from audiokit_mcp_server.services.api_service import APIService
 from audiokit_mcp_server.utils.redis import setup_redis_cache
-from structlog import get_logger
 
 
-# Initialize logger with config level
-logger = get_logger()
-logger.setLevel(settings.log_level)  # Use log level from settings
+# Configure logging with settings
+log_level = getattr(logging, settings.log_level.upper(), logging.INFO)
+logging.basicConfig(level=log_level)
+
+# Configure structlog with the correct log level
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_log_level,
+        structlog.processors.TimeStamper(fmt="iso"),
+        structlog.processors.JSONRenderer(),
+    ],
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    wrapper_class=structlog.make_filtering_bound_logger(log_level),
+    cache_logger_on_first_use=True,
+)
+
+# Create logger
+logger = structlog.get_logger()
 
 
 async def main():
