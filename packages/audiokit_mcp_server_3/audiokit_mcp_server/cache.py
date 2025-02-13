@@ -21,7 +21,10 @@ def redis_cache(ttl: int = 86400) -> Callable:
         @wraps(func)
         @cached(ttl=ttl, serializer=JsonSerializer(), namespace="soundcharts")
         async def wrapper(*args, **kwargs) -> Any:
-            cache_key = f"{func.__module__}:{func.__name__}:{args}:{kwargs}"
+            # Extract the relevant parameters for the cache key
+            # Assuming the first arg after self is the main identifier
+            identifier = args[1] if len(args) > 1 else None
+            cache_key = f"{func.__module__}:{func.__name__}:{identifier}"
 
             try:
                 # Check cache
