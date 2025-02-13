@@ -95,14 +95,34 @@ async def cache_health_check():
 
 def setup_cache():
     try:
+        # Parse Redis URL
+        redis_url = settings.redis_url
+        if "://" in redis_url:
+            # Remove the redis:// or rediss:// prefix
+            redis_url = redis_url.split("://")[1]
+
+        # Handle Upstash-style URLs (user:password@host:port)
+        if "@" in redis_url:
+            credentials, host_port = redis_url.split("@")
+            host, port = host_port.split(":")
+        else:
+            host, port = redis_url.split(":")
+
+        # Extract database number if specified
+        if "/" in port:
+            port, db = port.split("/")
+            db = int(db)
+        else:
+            db = 0  # Default to database 0 if not specified
+
         caches.set_config(
             {
                 "default": {
                     "cache": "aiocache.RedisCache",
-                    "endpoint": settings.redis_url.split("://")[1].split(":")[0],
-                    "port": int(settings.redis_url.split(":")[-1].split("/")[0]),
-                    "db": int(settings.redis_url.split("/")[-1]),
-                    "timeout": 5,
+                    "endpoint": host,
+                    "port": int(port),
+                    "db": db,
+                    "timeout": settings.redis_timeout,
                     "serializer": {
                         "class": "aiocache.serializers.JsonSerializer",
                     },
@@ -111,8 +131,10 @@ def setup_cache():
         )
         logger.info(
             "✅ Redis cache configured",
-            url=settings.redis_url,
-            timeout=5,
+            host=host,
+            port=port,
+            db=db,
+            timeout=settings.redis_timeout,
         )
     except Exception as e:
         logger.error(
