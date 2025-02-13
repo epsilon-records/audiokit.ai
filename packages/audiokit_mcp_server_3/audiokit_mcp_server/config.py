@@ -15,9 +15,9 @@ class Settings(BaseSettings):
     pinecone_api_key: str
     pinecone_environment: str = "us-west1-gcp"
     acoustid_api_key: str
-    neo4j_uri: str
-    neo4j_user: str
-    neo4j_password: str
+    neo4j_uri: str = "bolt+s://localhost:7687"
+    neo4j_user: str = "neo4j"
+    neo4j_password: str = "password"
     genius_api_key: str
     lastfm_api_key: str
     soundcharts_api_key: str

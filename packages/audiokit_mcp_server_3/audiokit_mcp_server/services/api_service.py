@@ -155,13 +155,51 @@ class APIService:
         properties: Optional[Dict] = None,
     ) -> None:
         """Upsert a Neo4j relationship with error handling."""
-        query = f"""
-        MATCH (a {{id: $from_id}}), (b {{id: $to_id}})
-        MERGE (a)-[r:{rel_type}]->(b)
-        """
-        if properties:
-            query += " SET r += $props"
         try:
+            logger.debug(
+                "Creating relationship",
+                from_id=from_id,
+                to_id=to_id,
+                rel_type=rel_type,
+            )
+
+            # Validate IDs
+            if not from_id or not to_id:
+                logger.error(
+                    "Invalid IDs for relationship",
+                    from_id=from_id,
+                    to_id=to_id,
+                )
+                raise ValueError("Invalid IDs for relationship")
+
+            # Check if nodes exist
+            check_query = """
+            MATCH (a {id: $from_id}), (b {id: $to_id})
+            RETURN a, b
+            """
+            async with self.neo4j_driver.session() as session:
+                result = await session.run(
+                    check_query,
+                    from_id=from_id,
+                    to_id=to_id,
+                )
+                nodes = await result.single()
+
+                if not nodes:
+                    logger.error(
+                        "Nodes not found for relationship",
+                        from_id=from_id,
+                        to_id=to_id,
+                    )
+                    raise ValueError("Nodes not found for relationship")
+
+            # Create relationship
+            query = f"""
+            MATCH (a {{id: $from_id}}), (b {{id: $to_id}})
+            MERGE (a)-[r:{rel_type}]->(b)
+            """
+            if properties:
+                query += " SET r += $props"
             async with self.neo4j_driver.session() as session:
                 await session.run(
                     query,
@@ -169,6 +207,12 @@ class APIService:
                     to_id=to_id,
                     props=properties or {},
                 )
+            logger.debug(
+                "✅ Relationship created",
+                from_id=from_id,
+                to_id=to_id,
+                rel_type=rel_type,
+            )
         except Exception as e:
             logger.error(
                 "❌ Failed to upsert Neo4j relationship",
@@ -176,6 +220,7 @@ class APIService:
                 to_id=to_id,
                 rel_type=rel_type,
                 error=str(e),
+                stack_trace=traceback.format_exc(),
             )
             raise
 
@@ -264,39 +309,92 @@ class APIService:
 
     async def _process_album_metadata(self, album_metadata: Dict) -> None:
         """Process album metadata and create nodes/relationships."""
-        album_object = album_metadata["object"]
-        soundcharts_album_id = album_object["uuid"]  # SoundCharts UUID
-
-        # Create Album node
-        album_node = {
-            "id": str(uuid.uuid4()),  # Our own UUIDv4
-            "title": album_object["name"],
-            "release_date": album_object["release_date"],
-            "upc": album_object["upc"],
-            "label": album_object["label"],
-            "type": album_object["type"],
-            "track_count": album_object["track_count"],
-            "soundcharts": {
-                "uuid": soundcharts_album_id,  # Store SoundCharts UUID
-            },
-        }
-        await self._upsert_neo4j_node("Album", album_node)
-
-        # Process related entities
-        await self._process_related_entities(album_object, soundcharts_album_id)
-
-        # Process tracklisting
-        tracklisting = await self.soundcharts_service.get_album_tracklisting(
-            soundcharts_album_id,
-        )
-        for track in tracklisting["tracks"]:
-            soundcharts_track_id = track["uuid"]  # SoundCharts UUID
-            self._add_to_pending_list("tracks", soundcharts_track_id)
-            await self._upsert_neo4j_relationship(
-                soundcharts_album_id,
-                soundcharts_track_id,
-                "CONTAINS",
+        try:
+            logger.debug(
+                "Processing album metadata",
+                album_metadata=album_metadata,
             )
+
+            # Validate response structure
+            if not isinstance(album_metadata, dict):
+                logger.error(
+                    "Invalid album metadata: expected dict",
+                    album_metadata=album_metadata,
+                )
+                raise ValueError("Invalid album metadata: expected dict")
+
+            if "object" not in album_metadata:
+                logger.error(
+                    "Missing 'object' key in album metadata",
+                    album_metadata=album_metadata,
+                )
+                raise ValueError("Missing 'object' key in album metadata")
+
+            album_object = album_metadata["object"]
+            logger.debug(
+                "Extracted album object",
+                album_object=album_object,
+            )
+
+            # Validate required fields
+            if "uuid" not in album_object:
+                logger.error(
+                    "Missing required field: uuid",
+                    album_object=album_object,
+                )
+                raise ValueError("Missing required field: uuid")
+
+            soundcharts_album_id = album_object["uuid"]
+            logger.debug(
+                "Found album UUID",
+                album_id=soundcharts_album_id,
+            )
+
+            # Create Album node
+            album_node = {
+                "id": str(uuid.uuid4()),  # Our own UUIDv4
+                "title": album_object["name"],
+                "release_date": album_object["release_date"],
+                "upc": album_object["upc"],
+                "label": album_object["label"],
+                "type": album_object["type"],
+                "track_count": album_object["track_count"],
+                "soundcharts": {
+                    "uuid": soundcharts_album_id,  # Store SoundCharts UUID
+                },
+            }
+            await self._upsert_neo4j_node("Album", album_node)
+            logger.debug(
+                "Created album node",
+                album_id=soundcharts_album_id,
+            )
+
+            # Process related entities
+            await self._process_related_entities(album_object, soundcharts_album_id)
+            logger.debug(
+                "Processed related entities",
+                album_id=soundcharts_album_id,
+            )
+
+            # Process tracklisting
+            tracklisting = await self.soundcharts_service.get_album_tracklisting(
+                soundcharts_album_id,
+            )
+            for track in tracklisting["tracks"]:
+                soundcharts_track_id = track["uuid"]  # SoundCharts UUID
+                self._add_to_pending_list("tracks", soundcharts_track_id)
+                await self._upsert_neo4j_relationship(
+                    soundcharts_album_id,
+                    soundcharts_track_id,
+                    "CONTAINS",
+                )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process album metadata",
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
 
     async def _process_artist_metadata(self, artist_metadata: Dict) -> None:
         """Process artist metadata and create nodes/relationships."""
@@ -550,39 +648,64 @@ class APIService:
 
     async def ingest_soundcharts_api(self, artist_name: str) -> Dict:
         """Ingest all SoundCharts data for an artist and build Neo4j graph."""
-        # Step 1: Search for artist and get UUID
-        search_results = await self.soundcharts_service.search_artist(artist_name)
-        if not search_results.get("items"):
-            raise ValueError(f"No artist found with name: {artist_name}")
+        try:
+            logger.info("🎤 Starting artist ingestion", artist=artist_name)
+            # Step 1: Search for artist and get UUID
+            search_results = await self.soundcharts_service.search_artist(artist_name)
+            if not search_results.get("items"):
+                logger.error("Artist not found", artist=artist_name)
+                raise ValueError(f"No artist found with name: {artist_name}")
 
-        artist_data = search_results["items"][0]
-        artist_id = artist_data["uuid"]
-
-        # Step 2: Get all artist metadata
-        artist_metadata = await self.soundcharts_service.get_artist_metadata(artist_id)
-        await self._process_artist_metadata(artist_metadata)
-
-        # Step 3: Get and process platforms
-        platforms = await self.soundcharts_service.get_platforms()
-        await self._process_platforms(platforms)
-
-        # Step 4: Get and process artist songs
-        songs = await self.soundcharts_service.get_artist_songs(artist_id)
-        for song in songs.get("items", []):
-            song_metadata = await self.soundcharts_service.get_song_metadata(
-                song["uuid"],
+            artist_data = search_results["items"][0]
+            artist_id = artist_data["uuid"]
+            logger.debug(
+                "Found artist ID",
+                artist_name=artist_name,
+                artist_id=artist_id,
             )
-            await self._process_song_metadata(song_metadata)
 
-        # Step 5: Get and process artist albums
-        albums = await self.soundcharts_service.get_artist_albums(artist_id)
-        for album in albums.get("items", []):
-            album_metadata = await self.soundcharts_service.get_album_by_upc(
-                album["object"]["upc"],
+            # Step 2: Get all artist metadata
+            artist_metadata = await self.soundcharts_service.get_artist_metadata(
+                artist_id,
             )
-            await self._process_album_metadata(album_metadata)
+            await self._process_artist_metadata(artist_metadata)
 
-        return {"status": "success", "artist_id": artist_id}
+            # Step 3: Get and process platforms
+            platforms = await self.soundcharts_service.get_platforms()
+            await self._process_platforms(platforms)
+
+            # Step 4: Get and process artist songs
+            songs = await self.soundcharts_service.get_artist_songs(artist_id)
+            for song in songs.get("items", []):
+                song_metadata = await self.soundcharts_service.get_song_metadata(
+                    song["uuid"],
+                )
+                await self._process_song_metadata(song_metadata)
+
+            # Step 5: Get and process artist albums
+            albums = await self.soundcharts_service.get_artist_albums(artist_id)
+            for album in albums.get("items", []):
+                if not isinstance(album, dict) or "object" not in album:
+                    logger.error(
+                        "Invalid album data",
+                        album=album,
+                    )
+                    continue
+
+                album_metadata = await self.soundcharts_service.get_album_by_upc(
+                    album["object"]["upc"],
+                )
+                await self._process_album_metadata(album_metadata)
+
+            return {"status": "success", "artist_id": artist_id}
+        except Exception as e:
+            logger.error(
+                "🚨 Ingestion failed",
+                artist=artist_name,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
 
     async def query_soundcharts_api(self, artist_name: str) -> Dict:
         """Query SoundCharts API for artist data."""
@@ -696,168 +819,49 @@ class APIService:
         entity_data: Dict,
         entity_id: str,
     ) -> None:
-        """Process related entities for a given entity."""
+        """Process related entities and create relationships."""
         try:
-            # Process artists
-            if "artists" in entity_data:
-                logger.debug("Processing artists", count=len(entity_data["artists"]))
-                for artist in entity_data["artists"]:
-                    try:
-                        logger.debug("Starting artist processing", artist=artist)
-
-                        # Create basic artist node
-                        logger.debug("Creating artist node")
-                        artist_node = {
-                            "id": str(uuid.uuid4()),  # Generate a new UUID
-                            "uuid": artist["uuid"],
-                            "soundcharts_uuid": artist["uuid"],
-                            "name": artist["name"],
-                            "slug": artist.get("slug", ""),
-                            "app_url": artist.get("appUrl", ""),
-                            "image_url": artist.get("imageUrl", ""),
-                        }
-                        logger.debug("Artist node created", node=artist_node)
-
-                        # Add artist to pending list
-                        logger.debug(
-                            "Adding artist to pending list",
-                            artist_id=artist["uuid"],
-                        )
-                        self._add_to_pending_list("artists", artist["uuid"])
-
-                        # Create artist node
-                        logger.debug("Upserting artist node")
-                        await self._upsert_neo4j_node("Artist", artist_node)
-                        logger.debug("Artist node upserted successfully")
-
-                        # Create relationship between entity and artist
-                        logger.debug(
-                            "Creating HAS_ARTIST relationship",
-                            from_id=entity_id,
-                            to_id=artist["uuid"],
-                        )
-                        await self._upsert_neo4j_relationship(
-                            entity_id,
-                            artist["uuid"],
-                            "HAS_ARTIST",
-                        )
-                        logger.debug("HAS_ARTIST relationship created successfully")
-
-                    except Exception as e:
-                        logger.error(
-                            "❌ Failed to process artist",
-                            artist=artist,
-                            error=str(e),
-                            stack_trace=traceback.format_exc(),
-                        )
-                        continue
-
             # Process genres
             if "genres" in entity_data:
                 for genre in entity_data["genres"]:
-                    try:
-                        # Create genre using model's built-in ID generation
-                        genre_model = Genre(
-                            id=f"genre_{genre['root']}",
-                            root=genre["root"],
-                            sub=genre.get("sub", []),
-                        )
+                    genre_node = Genre(
+                        id=f"genre_{genre['root']}",
+                        name=genre["root"],
+                    )
+                    await self._upsert_neo4j_node("Genre", genre_node.dict())
+                    await self._upsert_neo4j_relationship(
+                        entity_id,
+                        f"genre_{genre['root']}",
+                        "HAS_GENRE",
+                    )
 
-                        await self._upsert_neo4j_node("Genre", genre_model.dict())
-                        await self._upsert_neo4j_relationship(
-                            entity_id,
-                            genre_model.id,  # Use sanitized ID from model
-                            "HAS_GENRE",
-                        )
+            # Process platforms
+            if "platforms" in entity_data:
+                for platform in entity_data["platforms"]:
+                    platform_node = Platform(
+                        id=f"platform_{platform['code']}",
+                        platform=platform["name"],
+                    )
+                    await self._upsert_neo4j_node("Platform", platform_node.dict())
+                    await self._upsert_neo4j_relationship(
+                        entity_id,
+                        f"platform_{platform['code']}",
+                        "ON_PLATFORM",
+                    )
 
-                        logger.debug(
-                            "✅ Processed genre",
-                            genre=genre_model.dict(),
-                            entity_id=entity_id,
-                        )
-
-                    except Exception as e:
-                        logger.error(
-                            "❌ Failed to process genre",
-                            genre=genre,
-                            entity_id=entity_id,
-                            error=str(e),
-                            stack_trace=traceback.format_exc(),
-                        )
-                        continue
-
-            # Process labels - modified to always create label nodes
+            # Process labels
             if "labels" in entity_data:
                 for label in entity_data["labels"]:
-                    try:
-                        # Generate compound ID for the label
-                        label_id = self._generate_composite_id(
-                            "label",
-                            label.get("name", ""),
-                        )
-                        label_data = {
-                            "id": label_id,
-                            "name": label.get("name", ""),
-                            "type": label.get("type", ""),
-                            "country": label.get("country", ""),
-                        }
-                        label_model = Label(**label_data)
-                        await self._upsert_neo4j_node("Label", label_model.dict())
-                        await self._upsert_neo4j_relationship(
-                            entity_id,
-                            label_model.id,
-                            "HAS_LABEL",
-                        )
-                        logger.debug(
-                            "✅ Processed label",
-                            label=label_model.dict(),
-                            entity_id=entity_id,
-                        )
-                    except Exception as e:
-                        logger.error(
-                            "❌ Failed to process label",
-                            label=label,
-                            entity_id=entity_id,
-                            error=str(e),
-                            stack_trace=traceback.format_exc(),
-                        )
-                        continue
-
-            # Process ISRC
-            if "isrc" in entity_data:
-                isrc_data = entity_data["isrc"]
-                if isrc_data is not None:
-                    try:
-                        if not isinstance(isrc_data, dict):
-                            logger.warning(
-                                "Invalid ISRC data format",
-                                entity_id=entity_id,
-                                isrc_data=isrc_data,
-                            )
-                            return
-
-                        if not isrc_data.get("value"):
-                            logger.warning(
-                                "Missing required ISRC value",
-                                entity_id=entity_id,
-                                isrc_data=isrc_data,
-                            )
-                            return
-
-                        await self._process_isrc(isrc_data, entity_id)
-                        logger.debug(
-                            "✅ Successfully processed ISRC",
-                            entity_id=entity_id,
-                            isrc_value=isrc_data["value"],
-                        )
-                    except Exception as e:
-                        logger.error(
-                            "❌ Failed to process ISRC",
-                            entity_id=entity_id,
-                            isrc_data=isrc_data,
-                            error=str(e),
-                            stack_trace=traceback.format_exc(),
-                        )
+                    label_node = Label(
+                        id=label["uuid"],
+                        name=label["name"],
+                    )
+                    await self._upsert_neo4j_node("Label", label_node.dict())
+                    await self._upsert_neo4j_relationship(
+                        entity_id,
+                        label["uuid"],
+                        "HAS_LABEL",
+                    )
 
             # Process producers and composers
             for role_type in ["producers", "composers"]:
