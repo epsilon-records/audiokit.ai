@@ -657,6 +657,12 @@ class APIService:
         # Process artists
         if "artists" in entity_data:
             for artist in entity_data["artists"]:
+                # Check if artist already exists
+                existing_id = await self._find_existing_node("Artist", artist["uuid"])
+
+                # Use existing ID or generate new one
+                artist["id"] = existing_id or str(uuid.uuid4())
+
                 artist_model = Artist(**artist)
                 self._add_to_pending_list("artists", artist_model.id)
                 await self._upsert_neo4j_node("Artist", artist_model.dict())
@@ -799,12 +805,15 @@ class APIService:
             logger.error("❌ Failed to close Neo4j driver", error=str(e))
 
     async def _create_artist_node(self, artist_data: Dict) -> None:
-        """Create an Artist node from artist data."""
+        """Create or update an Artist node from artist data."""
         soundcharts_artist_id = artist_data["uuid"]  # SoundCharts UUID
+
+        # Check if artist already exists
+        existing_id = await self._find_existing_node("Artist", soundcharts_artist_id)
 
         # Create Artist node
         artist = Artist(
-            id=str(uuid.uuid4()),  # Generate our own UUIDv4
+            id=existing_id or str(uuid.uuid4()),  # Use existing ID or generate new one
             name=artist_data["name"],
             credit_name=artist_data.get("creditName"),
             country_code=artist_data.get("countryCode"),
@@ -843,3 +852,24 @@ class APIService:
                     genre_model.id,
                     "HAS_GENRE",
                 )
+
+    async def _find_existing_node(self, label: str, uuid: str) -> Optional[str]:
+        """Search for an existing node in the graph using SoundCharts UUID."""
+        query = f"""
+        MATCH (n:{label} {{uuid: $uuid}})
+        RETURN n.id as id
+        LIMIT 1
+        """
+        try:
+            async with self.neo4j_driver.session() as session:
+                result = await session.run(query, uuid=uuid)
+                record = await result.single()
+                return record["id"] if record else None
+        except Exception as e:
+            logger.error(
+                "❌ Failed to search for existing node",
+                label=label,
+                uuid=uuid,
+                error=str(e),
+            )
+            return None
