@@ -20,6 +20,7 @@ class Artist(BaseModel):
     gender: Optional[str] = None
     type: Optional[str] = None
     birth_date: Optional[datetime] = None
+    soundcharts_uuid: str  # SoundCharts UUID for merging
 
 
 class ISRC(BaseModel):
@@ -42,6 +43,7 @@ class Track(BaseModel):
     composers: Optional[List[str]] = None
     producers: Optional[List[str]] = None
     language_code: Optional[str] = None
+    soundcharts_uuid: str  # SoundCharts UUID for merging
 
 
 class Album(BaseModel):
@@ -55,6 +57,7 @@ class Album(BaseModel):
     image_url: Optional[str] = None
     labels: Optional[List[Dict]] = None
     type: Optional[str] = None
+    soundcharts_uuid: str  # SoundCharts UUID for merging
 
 
 class Genre(BaseModel):
@@ -123,7 +126,7 @@ class Role(BaseModel):
 
 
 class LyricsAnalysis(BaseModel):
-    id: Optional[str] = None  # Composite ID: "lyrics_{track_id}"
+    id: Optional[str] = None  # Composite ID: "lyrics_analysis_{track_id}"
     themes: Optional[List[str]] = None
     moods: Optional[List[str]] = None
     cultural_reference_people: Optional[List[str]] = None
@@ -136,15 +139,6 @@ class LyricsAnalysis(BaseModel):
     repetitiveness_score: Optional[int] = None
     rhyme_scheme_score: Optional[int] = None
     imagery_score: Optional[int] = None
-
-
-class SoundCharts(BaseModel):
-    id: Optional[str] = None  # Composite ID: "soundcharts_{uuid}"
-    uuid: str
-    type: str  # Entity type: "artist", "track", "album"
-    slug: Optional[str] = None
-    app_url: Optional[str] = None
-    image_url: Optional[str] = None
 
 
 class Audio(BaseModel):

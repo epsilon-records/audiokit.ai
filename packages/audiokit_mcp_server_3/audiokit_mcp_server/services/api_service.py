@@ -85,42 +85,57 @@ class APIService:
         # Validate properties based on label
         if label == "Artist":
             Artist(**properties)
+            merge_key = "soundcharts_uuid"
         elif label == "Track":
             Track(**properties)
+            merge_key = "soundcharts_uuid"
         elif label == "Album":
             Album(**properties)
+            merge_key = "soundcharts_uuid"
         elif label == "Genre":
             Genre(**properties)
+            merge_key = "id"
         elif label == "Label":
             Label(**properties)
+            merge_key = "name"
         elif label == "Role":
             Role(**properties)
+            merge_key = "id"
         elif label == "Platform":
             Platform(**properties)
+            merge_key = "id"
         elif label == "Audience":
             Audience(**properties)
+            merge_key = "id"
         elif label == "Popularity":
             Popularity(**properties)
+            merge_key = "id"
         elif label == "StreamingData":
             StreamingData(**properties)
+            merge_key = "id"
         elif label == "LyricsAnalysis":
             LyricsAnalysis(**properties)
+            merge_key = "id"
         elif label == "ISRC":
             ISRC(**properties)
-        elif label == "SoundCharts":
-            SoundCharts(**properties)
+            merge_key = "value"
         elif label == "Audio":
             Audio(**properties)
+            merge_key = "id"
         else:
             raise ValueError(f"Invalid label: {label}")
 
         query = f"""
-        MERGE (n:{label} {{id: $id}})
+        MERGE (n:{label} {{{merge_key}: ${merge_key}}})
         SET n += $props
         """
         try:
             async with self.neo4j_driver.session() as session:
-                await session.run(query, id=properties["id"], props=properties)
+                await session.run(
+                    query,
+                    **{merge_key: properties[merge_key]},
+                    props=properties,
+                )
         except Exception as e:
             logger.error(
                 "❌ Failed to upsert Neo4j node",
@@ -821,16 +836,13 @@ class APIService:
         except Exception as e:
             logger.error("❌ Failed to close Neo4j driver", error=str(e))
 
-    async def _create_artist_node(self, artist_data: Dict) -> None:
-        """Create or update an Artist node from artist data."""
+    async def _create_artist_node(self, artist_data: Dict) -> str:
+        """Create an Artist node from artist data."""
         soundcharts_artist_id = artist_data["uuid"]  # SoundCharts UUID
 
-        # Check if artist already exists
-        existing_id = await self._find_existing_node("Artist", soundcharts_artist_id)
-
-        # Create Artist node
+        # Create Artist node with SoundCharts UUID
         artist = Artist(
-            id=existing_id or str(uuid.uuid4()),  # Use existing ID or generate new one
+            id=str(uuid.uuid4()),  # Generate new UUID
             name=artist_data["name"],
             credit_name=artist_data.get("creditName"),
             country_code=artist_data.get("countryCode"),
@@ -840,35 +852,10 @@ class APIService:
             gender=artist_data.get("gender"),
             type=artist_data.get("type"),
             birth_date=artist_data.get("birthDate"),
+            soundcharts_uuid=soundcharts_artist_id,
         )
         await self._upsert_neo4j_node("Artist", artist.dict())
-
-        # Create SoundCharts node and relationship
-        soundcharts = SoundCharts(
-            id=f"soundcharts_{soundcharts_artist_id}",
-            uuid=soundcharts_artist_id,
-            type="artist",  # Entity type
-            slug=artist_data.get("slug"),
-            app_url=artist_data.get("appUrl"),
-            image_url=artist_data.get("imageUrl"),
-        )
-        await self._upsert_neo4j_node("SoundCharts", soundcharts.dict())
-        await self._upsert_neo4j_relationship(
-            artist.id,
-            soundcharts.id,
-            "HAS_SOUNDCHARTS",
-        )
-
-        # Process genres
-        if "genres" in artist_data:
-            for genre in artist_data["genres"]:
-                genre_model = Genre(id=f"genre_{genre['root']}", **genre)
-                await self._upsert_neo4j_node("Genre", genre_model.dict())
-                await self._upsert_neo4j_relationship(
-                    artist.id,
-                    genre_model.id,
-                    "HAS_GENRE",
-                )
+        return artist.id
 
     async def _find_existing_node(
         self,
