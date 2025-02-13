@@ -664,26 +664,9 @@ class APIService:
             if "genres" in entity_data:
                 for genre in entity_data["genres"]:
                     try:
-                        # Validate genre data structure
-                        if not isinstance(genre, dict):
-                            logger.warning(
-                                "Invalid genre data format",
-                                genre=genre,
-                                entity_id=entity_id,
-                            )
-                            continue
-
-                        # Ensure required fields exist
-                        if "root" not in genre:
-                            logger.warning(
-                                "Genre data missing required 'root' field",
-                                genre=genre,
-                                entity_id=entity_id,
-                            )
-                            continue
-
                         # Create genre using model's built-in ID generation
                         genre_model = Genre(
+                            id=f"genre_{genre['root']}",
                             root=genre["root"],
                             sub=genre.get("sub", []),
                         )
