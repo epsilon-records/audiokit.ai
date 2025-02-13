@@ -31,6 +31,9 @@ class SoundChartsService:
         self.cache_ttl = settings.redis_cache_ttl
         self.cache = Cache(settings)  # Initialize cache
         self.redis = self.cache.redis  # Expose Redis connection
+        self.client = httpx.AsyncClient(
+            base_url=self.base_url, headers=self.headers
+        )  # Initialize HTTP client
 
     # Artist Endpoints
     @cache()  # Uses self.cache_ttl
@@ -368,7 +371,7 @@ class SoundChartsService:
             logger.debug(
                 "Artist metadata retrieved",
                 artist_id=artist_id,
-                status_code=response.status,
+                status_code=response.status_code,
                 duration=duration,
             )
             return response.json()
