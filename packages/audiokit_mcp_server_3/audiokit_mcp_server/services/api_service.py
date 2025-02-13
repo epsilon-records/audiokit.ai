@@ -790,10 +790,14 @@ class APIService:
                 # Check if platform already exists
                 existing_id = await self._find_existing_node("Platform", platform["id"])
 
+                # Create platform data without the id if we're using an existing one
+                platform_data = platform.copy()
+                if existing_id:
+                    platform_data.pop("id", None)
+
                 platform_model = Platform(
-                    id=existing_id
-                    or str(uuid.uuid4()),  # Use existing ID or generate new one
-                    **platform,
+                    id=existing_id or platform["id"],  # Use existing ID or platform ID
+                    **platform_data,
                 )
                 await self._upsert_neo4j_node("Platform", platform_model.dict())
                 logger.debug(
