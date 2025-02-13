@@ -741,11 +741,15 @@ class APIService:
                     "HAS_LABEL",
                 )
 
-        # Process ISRC (for tracks)
-        if "isrc" in entity_data and entity_data["isrc"].get("value"):
+        # Process ISRC (for tracks) - only if isrc exists and has a value
+        if (
+            "isrc" in entity_data
+            and entity_data["isrc"]
+            and entity_data["isrc"].get("value")
+        ):
             isrc_node = {
                 "id": f"isrc_{entity_data['isrc']['value']}",
-                "code": entity_data["isrc"]["value"],
+                "value": entity_data["isrc"]["value"],
                 "country_code": entity_data["isrc"]["countryCode"],
                 "country_name": entity_data["isrc"]["countryName"],
             }
