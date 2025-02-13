@@ -120,6 +120,7 @@ class SoundChartsService:
         return popularity_data
 
     # Song Endpoints
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_song_by_isrc(self, isrc: str) -> Dict:
         """Get song by ISRC"""
         url = f"{self.base_url}/api/v2/song/by-isrc/{isrc}"
@@ -155,6 +156,7 @@ class SoundChartsService:
             )
             raise
 
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_song_lyrics_analysis(self, song_id: str) -> Dict:
         """Get lyrics analysis for a song"""
         url = f"{self.base_url}/api/v2/song/{song_id}/lyrics-analysis"
@@ -191,6 +193,7 @@ class SoundChartsService:
             raise
 
     # Album Endpoints
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_album_by_upc(self, upc: str) -> Dict:
         """Get album by UPC"""
         url = f"{self.base_url}/api/v2/album/by-upc/{upc}"
@@ -226,6 +229,7 @@ class SoundChartsService:
             )
             raise
 
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_album_tracklisting(self, album_id: str) -> Dict:
         """Get album tracklisting"""
         url = f"{self.base_url}/api/v2/album/{album_id}/tracks"
@@ -484,6 +488,7 @@ class SoundChartsService:
             )
             raise
 
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_artist_stats(self, artist_id: str) -> Dict:
         """Get artist's current stats."""
         url = f"{self.base_url}/api/v2/artist/{artist_id}/current/stats"
@@ -520,6 +525,7 @@ class SoundChartsService:
             )
             raise
 
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_artist_audience(self, artist_id: str) -> Dict:
         """Get artist's audience data across all platforms."""
         platforms = await self.get_platforms()
@@ -571,6 +577,7 @@ class SoundChartsService:
 
         return audience_data
 
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_similar_artists(self, artist_id: str) -> Dict:
         """Get similar artists."""
         url = f"{self.base_url}/api/v2/artist/{artist_id}/related"
@@ -579,6 +586,7 @@ class SoundChartsService:
             response.raise_for_status()
             return response.json()
 
+    @redis_cache(ttl=settings.redis_cache_ttl)
     async def get_platforms(self) -> Dict:
         """Get all available platforms from Soundcharts API"""
         url = f"{self.base_url}/api/v2/referential/platforms"
@@ -598,6 +606,45 @@ class SoundChartsService:
                 "❌ Failed to fetch platforms",
                 url=e.request.url,
                 status_code=e.response.status_code,
+                error=str(e),
+            )
+            raise
+
+    @redis_cache(ttl=settings.redis_cache_ttl)
+    async def get_song_metadata(self, song_id: str) -> Dict:
+        """
+        Get detailed metadata for a song by its ID.
+
+        Args:
+            song_id: The UUID of the song.
+
+        Returns:
+            Dictionary containing song metadata.
+        """
+        url = f"{self.base_url}/api/v2.25/song/{song_id}"
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(url, headers=self.headers)
+                response.raise_for_status()
+                logger.info(
+                    "🎵 Song metadata retrieved",
+                    song_id=song_id,
+                    status_code=response.status_code,
+                )
+                return response.json()
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                "❌ Failed to fetch song metadata",
+                song_id=song_id,
+                url=e.request.url,
+                status_code=e.response.status_code,
+                error=str(e),
+            )
+            raise
+        except Exception as e:
+            logger.error(
+                "🚨 Unexpected error fetching song metadata",
+                song_id=song_id,
                 error=str(e),
             )
             raise

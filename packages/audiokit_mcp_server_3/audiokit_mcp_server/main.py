@@ -10,6 +10,7 @@ from structlog.stdlib import add_log_level, filter_by_level
 from ..config import settings
 from .config import Settings
 from .mcp import MCPRouter
+from .utils.redis import setup_redis_cache
 
 
 def setup_logging(log_level: str = "INFO"):
@@ -94,54 +95,7 @@ async def cache_health_check():
 
 
 def setup_cache():
-    try:
-        # Parse Redis URL
-        redis_url = settings.redis_url
-        if "://" in redis_url:
-            # Remove the redis:// or rediss:// prefix
-            redis_url = redis_url.split("://")[1]
-
-        # Handle Upstash-style URLs (user:password@host:port)
-        if "@" in redis_url:
-            credentials, host_port = redis_url.split("@")
-            host, port = host_port.split(":")
-        else:
-            host, port = redis_url.split(":")
-
-        # Extract database number if specified
-        if "/" in port:
-            port, db = port.split("/")
-            db = int(db)
-        else:
-            db = 0  # Default to database 0 if not specified
-
-        caches.set_config(
-            {
-                "default": {
-                    "cache": "aiocache.RedisCache",
-                    "endpoint": host,
-                    "port": int(port),
-                    "db": db,
-                    "timeout": settings.redis_timeout,
-                    "serializer": {
-                        "class": "aiocache.serializers.JsonSerializer",
-                    },
-                },
-            },
-        )
-        logger.info(
-            "✅ Redis cache configured",
-            host=host,
-            port=port,
-            db=db,
-            timeout=settings.redis_timeout,
-        )
-    except Exception as e:
-        logger.error(
-            "❌ Failed to configure Redis cache",
-            error=str(e),
-        )
-        raise
+    setup_redis_cache(settings.redis_url, settings.redis_timeout)
 
 
 # Call this during app initialization

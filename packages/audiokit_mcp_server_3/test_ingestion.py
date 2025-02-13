@@ -1,26 +1,13 @@
 import asyncio
 
-from aiocache import caches
 from audiokit_mcp_server.config import settings
 from audiokit_mcp_server.services.api_service import APIService
+from audiokit_mcp_server.utils.redis import setup_redis_cache
 
 
 async def main():
     # Initialize Redis cache
-    caches.set_config(
-        {
-            "default": {
-                "cache": "aiocache.RedisCache",
-                "endpoint": settings.redis_url.split("://")[1].split(":")[0],
-                "port": int(settings.redis_url.split(":")[-1].split("/")[0]),
-                "db": int(settings.redis_url.split("/")[-1]),
-                "timeout": settings.redis_timeout,
-                "serializer": {
-                    "class": "aiocache.serializers.JsonSerializer",
-                },
-            },
-        }
-    )
+    setup_redis_cache(settings.redis_url, settings.redis_timeout)
 
     # Initialize API service
     api_service = APIService(settings)

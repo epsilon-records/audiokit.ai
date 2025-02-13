@@ -40,10 +40,11 @@ def redis_cache(ttl: int = 86400) -> Callable:
                 # Store result in cache
                 try:
                     await wrapper.cache.set(cache_key, result, ttl=ttl)
-                    logger.debug(
+                    logger.info(
                         "💾 Cached result",
                         cache_key=cache_key,
                         ttl=ttl,
+                        function=func.__name__,
                     )
                 except Exception as e:
                     logger.error(
@@ -51,6 +52,7 @@ def redis_cache(ttl: int = 86400) -> Callable:
                         cache_key=cache_key,
                         error=str(e),
                     )
+                    raise
 
                 return result
             except Exception as e:
@@ -59,7 +61,7 @@ def redis_cache(ttl: int = 86400) -> Callable:
                     cache_key=cache_key,
                     error=str(e),
                 )
-                return await func(*args, **kwargs)
+                raise
 
         return wrapper
 

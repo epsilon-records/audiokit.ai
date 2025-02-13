@@ -61,6 +61,116 @@ class APIService:
                 props=properties or {},
             )
 
+    async def _process_song_metadata(self, song_metadata: Dict) -> None:
+        """Process song metadata and create nodes/relationships."""
+        song_object = song_metadata["object"]
+        song_id = song_object["uuid"]
+
+        # Create Track node
+        track_node = {
+            "id": song_id,
+            "title": song_object["name"],
+            "release_date": song_object["releaseDate"],
+            "duration": song_object["duration"],
+            "explicit": song_object["explicit"],
+            "language": song_object["languageCode"],
+            "isrc": song_object["isrc"]["value"],
+        }
+        await self._upsert_neo4j_node("Track", track_node)
+
+        # Process artists
+        for artist in song_object["artists"]:
+            artist_node = {
+                "id": artist["uuid"],
+                "name": artist["name"],
+                "slug": artist["slug"],
+                "image_url": artist["imageUrl"],
+            }
+            await self._upsert_neo4j_node("Artist", artist_node)
+            await self._upsert_neo4j_relationship(
+                song_id,
+                artist["uuid"],
+                "HAS_ARTIST",
+            )
+
+        # Process genres
+        for genre in song_object["genres"]:
+            genre_node = {
+                "id": f"genre_{genre['root']}",
+                "root": genre["root"],
+                "sub": genre["sub"],
+            }
+            await self._upsert_neo4j_node("Genre", genre_node)
+            await self._upsert_neo4j_relationship(
+                song_id,
+                genre_node["id"],
+                "HAS_GENRE",
+            )
+
+        # Process labels
+        for label in song_object["labels"]:
+            label_node = {
+                "id": f"label_{label['name']}",
+                "name": label["name"],
+                "type": label["type"],
+            }
+            await self._upsert_neo4j_node("Label", label_node)
+            await self._upsert_neo4j_relationship(
+                song_id,
+                label_node["id"],
+                "HAS_LABEL",
+            )
+
+        # Process audio features
+        audio_features = song_object["audio"]
+        audio_node = {
+            "id": f"audio_{song_id}",
+            "acousticness": audio_features["acousticness"],
+            "danceability": audio_features["danceability"],
+            "energy": audio_features["energy"],
+            "instrumentalness": audio_features["instrumentalness"],
+            "key": audio_features["key"],
+            "liveness": audio_features["liveness"],
+            "loudness": audio_features["loudness"],
+            "mode": audio_features["mode"],
+            "speechiness": audio_features["speechiness"],
+            "tempo": audio_features["tempo"],
+            "time_signature": audio_features["timeSignature"],
+            "valence": audio_features["valence"],
+        }
+        await self._upsert_neo4j_node("AudioFeature", audio_node)
+        await self._upsert_neo4j_relationship(
+            song_id,
+            audio_node["id"],
+            "HAS_AUDIO_FEATURES",
+        )
+
+        # Process composers
+        for composer in song_object["composers"]:
+            composer_node = {
+                "id": f"composer_{composer}",
+                "name": composer,
+            }
+            await self._upsert_neo4j_node("Composer", composer_node)
+            await self._upsert_neo4j_relationship(
+                song_id,
+                composer_node["id"],
+                "HAS_COMPOSER",
+            )
+
+        # Process producers
+        for producer in song_object["producers"]:
+            producer_node = {
+                "id": f"producer_{producer}",
+                "name": producer,
+            }
+            await self._upsert_neo4j_node("Producer", producer_node)
+            await self._upsert_neo4j_relationship(
+                song_id,
+                producer_node["id"],
+                "HAS_PRODUCER",
+            )
+
     async def ingest_soundcharts_api(self, artist_name: str) -> Dict:
         """Ingest all SoundCharts data for an artist and build Neo4j graph"""
         # Step 1: Search for artist and get UUID
@@ -160,41 +270,7 @@ class APIService:
 
             # Get full song metadata using song ID
             song_metadata = await self.soundcharts_service.get_song_metadata(song_id)
-            song_object = song_metadata.get("object", {})
-
-            # Create Track node with namespaced data
-            track_node = {
-                "id": song_id,
-                "title": song_object.get("name"),
-                "soundcharts:release_date": song_object.get("releaseDate"),
-                "soundcharts:duration": song_object.get("duration"),
-                "soundcharts:explicit": song_object.get("explicit"),
-                "soundcharts:language": song_object.get("languageCode"),
-                "soundcharts:popularity": song_object.get("popularity"),
-                "soundcharts:isrc": song_object.get("isrc", {}).get("value"),
-            }
-
-            # Add audio features
-            if audio := song_object.get("audio"):
-                track_node.update(
-                    {
-                        "soundcharts:acousticness": audio.get("acousticness"),
-                        "soundcharts:danceability": audio.get("danceability"),
-                        "soundcharts:energy": audio.get("energy"),
-                        "soundcharts:instrumentalness": audio.get("instrumentalness"),
-                        "soundcharts:key": audio.get("key"),
-                        "soundcharts:liveness": audio.get("liveness"),
-                        "soundcharts:loudness": audio.get("loudness"),
-                        "soundcharts:mode": audio.get("mode"),
-                        "soundcharts:speechiness": audio.get("speechiness"),
-                        "soundcharts:tempo": audio.get("tempo"),
-                        "soundcharts:time_signature": audio.get("timeSignature"),
-                        "soundcharts:valence": audio.get("valence"),
-                    },
-                )
-
-            await self._upsert_neo4j_node("Track", track_node)
-            await self._upsert_neo4j_relationship(artist_id, song_id, "PERFORMED")
+            await self._process_song_metadata(song_metadata)
 
             # Process lyrics with namespacing
             lyrics = await self.soundcharts_service.get_song_lyrics_analysis(song_id)
