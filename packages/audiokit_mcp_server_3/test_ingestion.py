@@ -1,32 +1,35 @@
 import asyncio
-import logging
+import sys
+import traceback
 
-import structlog
 from aiocache import caches
 from audiokit_mcp_server.config import settings
 from audiokit_mcp_server.services.api_service import APIService
 from audiokit_mcp_server.utils.redis import setup_redis_cache
+from loguru import logger
 
 
-# Configure logging with settings
-log_level = getattr(logging, settings.log_level.upper(), logging.INFO)
-logging.basicConfig(level=log_level)
-
-# Configure structlog with the correct log level
-structlog.configure(
-    processors=[
-        structlog.stdlib.filter_by_level,
-        structlog.stdlib.add_log_level,
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.JSONRenderer(),
-    ],
-    logger_factory=structlog.stdlib.LoggerFactory(),
-    wrapper_class=structlog.make_filtering_bound_logger(log_level),
-    cache_logger_on_first_use=True,
+# Configure loguru with the correct log level
+logger.remove()  # Remove default logger
+logger.add(
+    sys.stdout,
+    level=settings.log_level.upper(),
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
+    "<level>{level.icon} {level}</level> | "
+    "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+    colorize=True,
+    backtrace=True,
+    diagnose=True,
 )
 
-# Create logger
-logger = structlog.get_logger()
+# Add emojis to log levels
+logger.level("INFO", icon="ℹ️")
+logger.level("DEBUG", icon="🐛")
+logger.level("WARNING", icon="⚠️")
+logger.level("ERROR", icon="❌")
+logger.level("CRITICAL", icon="💥")
+logger.level("SUCCESS", icon="✅")
+logger.level("TRACE", icon="🔍")
 
 
 async def main():
@@ -37,9 +40,9 @@ async def main():
     # Verify cache backend
     cache = caches.get("default")
     logger.debug(
-        "🔍 Cache backend verification",
-        type=type(cache).__name__,
-        redis_connected=cache.endpoint == settings.redis_host,
+        "🔍 Cache backend verification - type: {}, redis_connected: {}",
+        type(cache).__name__,
+        cache.endpoint == settings.redis_host,
     )
 
     # Test direct write/read
@@ -47,15 +50,15 @@ async def main():
     await cache.set(test_key, "test_value", ttl=10)  # Explicit 10s TTL
     value = await cache.get(test_key)
     logger.debug(
-        "🧪 Direct cache test",
-        key=test_key,
-        stored_value=value,
-        redis_exists=await cache.exists(test_key),
+        "🧪 Direct cache test - key: {}, stored_value: {}, redis_exists: {}",
+        test_key,
+        value,
+        await cache.exists(test_key),
     )
 
     # After cache setup
     info = await cache.raw("info", "memory")
-    logger.debug("🧠 Redis Memory Info", memory_info=info)
+    logger.debug("🧠 Redis Memory Info: {}", info)
 
     # Initialize API service
     logger.debug("🚀 Initializing API service")
@@ -65,17 +68,35 @@ async def main():
     # Test artist ingestion
     artist_name = "Kanye West"
     try:
-        logger.info("🎤 Starting artist ingestion", artist=artist_name)
+        logger.info("🎤 Starting artist ingestion - artist: {}", artist_name)
         result = await api_service.ingest_soundcharts_api(artist_name)
-        logger.info("🎉 Ingestion completed successfully", result=result)
+        logger.info("🎉 Ingestion completed successfully - result: {}", result)
     except Exception as e:
-        import traceback
+        # Extract more detailed error information
+        error_details = str(e)
+        if hasattr(e, "errors"):
+            error_details = "\n".join(
+                f"Field: {'.'.join(map(str, err['loc']))} - {err['msg']}"
+                for err in getattr(e, "errors", list)()
+            )
 
         logger.error(
-            "🚨 Ingestion failed",
-            artist=artist_name,
-            error=str(e),
-            stack_trace=traceback.format_exc(),
+            "🚨 Ingestion failed - artist: {}\nValidation Errors:\n{}\nStack Trace:\n{}",
+            artist_name,
+            error_details,
+            traceback.format_exc(),
+        )
+        # Add additional debug information
+        logger.debug(
+            "Failed artist data structure: {}",
+            {
+                "artist_name": artist_name,
+                "error_type": type(e).__name__,
+                "error_fields": getattr(e, "fields", None),
+                "input_data": getattr(
+                    e, "input_data", None
+                ),  # Add input data if available
+            },
         )
     finally:
         # Ensure resources are closed

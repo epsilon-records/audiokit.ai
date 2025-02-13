@@ -1,8 +1,9 @@
+import structlog
 from aiocache import RedisCache, caches
-from structlog import get_logger
 
 
-logger = get_logger()
+# Use structlog consistently with the rest of the application
+logger = structlog.get_logger()
 
 
 def setup_redis_cache(settings):
@@ -27,13 +28,23 @@ def setup_redis_cache(settings):
             },
         }
 
+        # Keep the password handling
         if settings.redis_password:
             config["default"]["password"] = settings.redis_password
 
         caches.set_config(config)
-        logger.info("✅ Local Redis cache configured", config=config["default"])
+        logger.info(
+            "✅ Local Redis cache configured",
+            host=settings.redis_host,
+            port=settings.redis_port,
+            has_password=bool(settings.redis_password),
+        )
     except Exception as e:
-        logger.error("❌ Failed to configure Redis cache", error=str(e))
+        logger.error(
+            "❌ Failed to configure Redis cache",
+            error=str(e),
+            host=settings.redis_host,
+        )
         raise
 
 

@@ -165,6 +165,8 @@ class Audio(BaseModel):
 
 def sanitize_id_string(input_str: str) -> str:
     """Sanitize strings for ID generation by replacing special characters."""
-    return "".join(
-        c if c.isalnum() or c in ("_", "-") else "_" for c in input_str.strip()
-    ).strip("_")
+    return (
+        "".join(c if c.isalnum() or c in ("_", "-") else "_" for c in input_str.strip())
+        .strip("_")
+        .lower()
+    )
