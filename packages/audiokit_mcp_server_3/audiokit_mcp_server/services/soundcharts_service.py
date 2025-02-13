@@ -650,7 +650,6 @@ class SoundChartsService:
                     status_code=response.status_code,
                 )
                 return data
-
         except httpx.HTTPStatusError as e:
             logger.error(
                 "❌ Failed to fetch song metadata",

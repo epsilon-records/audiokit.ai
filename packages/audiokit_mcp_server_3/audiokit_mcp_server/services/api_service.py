@@ -2,7 +2,7 @@ import fcntl
 import os
 import uuid
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Dict, Optional
 
 import httpx
 from neo4j import AsyncGraphDatabase
@@ -50,11 +50,9 @@ class APIService:
     async def _add_unique_constraints(self) -> None:
         """Add unique constraints to Neo4j if they don't already exist."""
         constraints = [
-            # Models with SoundCharts UUID
             ("Artist", "soundcharts_uuid"),
             ("Track", "soundcharts_uuid"),
             ("Album", "soundcharts_uuid"),
-            # Models with composite IDs
             ("Genre", "id"),
             ("Label", "name"),
             ("Role", "id"),
@@ -65,7 +63,6 @@ class APIService:
             ("LyricsAnalysis", "id"),
             ("ISRC", "value"),
             ("Audio", "id"),
-            # Additional constraints
             ("Artist", "id"),
             ("Track", "id"),
             ("Album", "id"),
@@ -73,7 +70,6 @@ class APIService:
 
         for label, property in constraints:
             try:
-                # Create constraint if it doesn't exist
                 query = f"""
                 CREATE CONSTRAINT {label.lower()}_{property}_unique IF NOT EXISTS
                 FOR (n:{label}) REQUIRE n.{property} IS UNIQUE
@@ -89,7 +85,6 @@ class APIService:
                 logger.error(
                     "❌ Failed to add unique constraint",
                     label=label,
-                    property=property,
                     error=str(e),
                 )
                 raise
@@ -97,81 +92,43 @@ class APIService:
     async def _upsert_neo4j_node(self, label: str, properties: Dict) -> None:
         """Upsert a Neo4j node with error handling."""
         try:
-            logger.debug(
-                "Upserting node",
-                label=label,
-                id=properties.get("id"),
-                merge_key=self._get_merge_key(label),
-            )
-            # Validate properties based on label
-            if label == "Artist":
-                Artist(**properties)
-                merge_key = "soundcharts_uuid"
-            elif label == "Track":
-                Track(**properties)
-                merge_key = "soundcharts_uuid"
-            elif label == "Album":
-                Album(**properties)
-                merge_key = "soundcharts_uuid"
-            elif label == "Genre":
-                Genre(**properties)
-                merge_key = "id"
-            elif label == "Label":
-                Label(**properties)
-                merge_key = "name"
-            elif label == "Role":
-                Role(**properties)
-                merge_key = "id"
-            elif label == "Platform":
-                Platform(**properties)
-                merge_key = "id"
-            elif label == "Audience":
-                Audience(**properties)
-                merge_key = "id"
-            elif label == "Popularity":
-                Popularity(**properties)
-                merge_key = "id"
-            elif label == "StreamingData":
-                StreamingData(**properties)
-                merge_key = "id"
-            elif label == "LyricsAnalysis":
-                LyricsAnalysis(**properties)
-                merge_key = "id"
-            elif label == "ISRC":
-                ISRC(**properties)
-                merge_key = "value"
-            elif label == "Audio":
-                Audio(**properties)
-                merge_key = "id"
-            else:
+            logger.debug("Upserting node", label=label, id=properties.get("id"))
+
+            # Validate model based on label
+            model_classes = {
+                "Artist": Artist,
+                "Track": Track,
+                "Album": Album,
+                "Genre": Genre,
+                "Label": Label,
+                "Role": Role,
+                "Platform": Platform,
+                "Audience": Audience,
+                "Popularity": Popularity,
+                "StreamingData": StreamingData,
+                "LyricsAnalysis": LyricsAnalysis,
+                "ISRC": ISRC,
+                "Audio": Audio,
+            }
+
+            if label not in model_classes:
                 raise ValueError(f"Invalid label: {label}")
 
-            query = f"""
-            MERGE (n:{label} {{{merge_key}: ${merge_key}}})
-            SET n += $props
-            """
-            try:
-                async with self.neo4j_driver.session() as session:
-                    await session.run(
-                        query,
-                        **{merge_key: properties[merge_key]},
-                        props=properties,
-                    )
-            except Exception as e:
-                logger.error(
-                    "❌ Failed to upsert Neo4j node",
-                    label=label,
-                    properties=properties,
-                    error=str(e),
+            model_classes[label](**properties)
+
+            # Get merge key and execute query
+            merge_key = self._get_merge_key(label)
+            query = f"MERGE (n:{label} {{{merge_key}: ${merge_key}}}) SET n += $props"
+
+            async with self.neo4j_driver.session() as session:
+                await session.run(
+                    query,
+                    **{merge_key: properties[merge_key]},
+                    props=properties,
                 )
-                raise
+
         except Exception as e:
-            logger.error(
-                "❌ Failed to upsert Neo4j node",
-                label=label,
-                properties=properties,
-                error=str(e),
-            )
+            logger.error("❌ Failed to upsert Neo4j node", label=label, error=str(e))
             raise
 
     async def _upsert_neo4j_relationship(
@@ -602,8 +559,9 @@ class APIService:
     async def _create_track_node(self, track_data: Dict) -> str:
         """Create a Track node from track data."""
         soundcharts_track_id = track_data["uuid"]
+
         track = Track(
-            id=str(uuid.uuid4()),  # Generate new UUID
+            id=str(uuid.uuid4()),  # Always generate new UUID
             name=track_data["name"],
             credit_name=track_data.get("creditName"),
             release_date=track_data.get("releaseDate"),
@@ -620,16 +578,12 @@ class APIService:
         await self._upsert_neo4j_node("Track", track.dict())
         return track.id
 
-    async def _create_album_node(self, album_data: Dict) -> None:
+    async def _create_album_node(self, album_data: Dict) -> str:
         """Create an Album node from album data."""
-        soundcharts_album_id = album_data["uuid"]  # SoundCharts UUID
+        soundcharts_album_id = album_data["uuid"]
 
-        # Check if album already exists
-        existing_id = await self._find_existing_node("Album", soundcharts_album_id)
-
-        # Create Album node
         album = Album(
-            id=existing_id or str(uuid.uuid4()),  # Use existing ID or generate new one
+            id=str(uuid.uuid4()),  # Always generate new UUID
             name=album_data["name"],
             credit_name=album_data.get("creditName"),
             upc=album_data.get("upc"),
@@ -642,22 +596,7 @@ class APIService:
             soundcharts_uuid=soundcharts_album_id,
         )
         await self._upsert_neo4j_node("Album", album.dict())
-
-        # Create SoundCharts node and relationship
-        soundcharts = SoundCharts(
-            id=f"soundcharts_{soundcharts_album_id}",
-            uuid=soundcharts_album_id,
-            type="album",  # Entity type
-            slug=album_data.get("slug"),
-            app_url=album_data.get("appUrl"),
-            image_url=album_data.get("imageUrl"),
-        )
-        await self._upsert_neo4j_node("SoundCharts", soundcharts.dict())
-        await self._upsert_neo4j_relationship(
-            album.id,
-            soundcharts.id,
-            "HAS_SOUNDCHARTS",
-        )
+        return album.id
 
     async def _process_related_entities(
         self,
@@ -668,29 +607,13 @@ class APIService:
         # Process artists
         if "artists" in entity_data:
             for artist in entity_data["artists"]:
-                # Check if artist already exists
-                existing_id = await self._find_existing_node("Artist", artist["uuid"])
-
-                # Use existing ID or generate new one
-                artist["id"] = existing_id or str(uuid.uuid4())
-
-                artist_model = Artist(**artist)
+                artist_model = Artist(id=str(uuid.uuid4()), **artist)
                 self._add_to_pending_list("artists", artist_model.id)
                 await self._upsert_neo4j_node("Artist", artist_model.dict())
-                await self._upsert_neo4j_relationship(
+                await self._create_role_relationship(
                     entity_id,
                     artist_model.id,
-                    "HAS_ARTIST",
-                )
-                # Add artist role
-                await self._upsert_neo4j_node(
-                    "Role",
-                    {"id": "role_artist", "name": "artist"},
-                )
-                await self._upsert_neo4j_relationship(
-                    artist_model.id,
-                    "role_artist",
-                    "HAS_ROLE",
+                    "artist",
                 )
 
         # Process genres
@@ -715,55 +638,21 @@ class APIService:
                     "HAS_LABEL",
                 )
 
-        # Process ISRC (for tracks) - only if isrc exists and has a value
-        if (
-            "isrc" in entity_data
-            and entity_data["isrc"]
-            and entity_data["isrc"].get("value")
-        ):
+        # Process ISRC
+        if entity_data.get("isrc", {}).get("value"):
             await self._process_isrc(entity_data["isrc"], entity_id)
 
-        # Process producers
-        if "producers" in entity_data:
-            for producer in entity_data["producers"]:
-                producer_model = Artist(id=producer, name=producer)
-                await self._upsert_neo4j_node("Artist", producer_model.dict())
-                await self._upsert_neo4j_relationship(
-                    entity_id,
-                    producer_model.id,
-                    "HAS_PRODUCER",
-                )
-                # Add producer role
-                await self._upsert_neo4j_node(
-                    "Role",
-                    {"id": "role_producer", "name": "producer"},
-                )
-                await self._upsert_neo4j_relationship(
-                    producer_model.id,
-                    "role_producer",
-                    "HAS_ROLE",
-                )
-
-        # Process composers
-        if "composers" in entity_data:
-            for composer in entity_data["composers"]:
-                composer_model = Artist(id=composer, name=composer)
-                await self._upsert_neo4j_node("Artist", composer_model.dict())
-                await self._upsert_neo4j_relationship(
-                    entity_id,
-                    composer_model.id,
-                    "HAS_COMPOSER",
-                )
-                # Add composer role
-                await self._upsert_neo4j_node(
-                    "Role",
-                    {"id": "role_composer", "name": "composer"},
-                )
-                await self._upsert_neo4j_relationship(
-                    composer_model.id,
-                    "role_composer",
-                    "HAS_ROLE",
-                )
+        # Process producers and composers
+        for role_type in ["producers", "composers"]:
+            if role_type in entity_data:
+                for name in entity_data[role_type]:
+                    artist_model = Artist(id=name, name=name)
+                    await self._upsert_neo4j_node("Artist", artist_model.dict())
+                    await self._create_role_relationship(
+                        entity_id,
+                        artist_model.id,
+                        role_type[:-1],
+                    )
 
         # Process featured artists
         if "featured_artists" in entity_data:
@@ -781,17 +670,9 @@ class APIService:
 
         for platform in platforms:
             try:
-                # Check if platform already exists
-                existing_id = await self._find_existing_node("Platform", platform["id"])
-
-                # Create platform data without the id if we're using an existing one
-                platform_data = platform.copy()
-                if existing_id:
-                    platform_data.pop("id", None)
-
                 platform_model = Platform(
-                    id=existing_id or platform["id"],  # Use existing ID or platform ID
-                    **platform_data,
+                    id=platform["id"],  # Use platform ID directly
+                    **platform,
                 )
                 await self._upsert_neo4j_node("Platform", platform_model.dict())
                 logger.debug(
@@ -817,7 +698,6 @@ class APIService:
 
     async def _create_artist_node(self, artist_data: Dict) -> str:
         """Create an Artist node from artist data."""
-        self._validate_ids(artist_data, ["uuid"])
         soundcharts_artist_id = artist_data["uuid"]
 
         artist = Artist(
@@ -836,34 +716,6 @@ class APIService:
         await self._upsert_neo4j_node("Artist", artist.dict())
         return artist.id
 
-    async def _find_existing_node(
-        self,
-        label: str,
-        soundcharts_uuid: str,
-    ) -> Optional[str]:
-        """
-        Search for an existing node in the graph using SoundCharts UUID.
-        Returns the ID of the main entity node if found.
-        """
-        query = f"""
-        MATCH (n:{label})-[:HAS_SOUNDCHARTS]->(s:SoundCharts {{uuid: $uuid}})
-        RETURN n.id as id
-        LIMIT 1
-        """
-        try:
-            async with self.neo4j_driver.session() as session:
-                result = await session.run(query, uuid=soundcharts_uuid)
-                record = await result.single()
-                return record["id"] if record else None
-        except Exception as e:
-            logger.error(
-                "❌ Failed to search for existing node",
-                label=label,
-                uuid=soundcharts_uuid,
-                error=str(e),
-            )
-            return None
-
     def _generate_composite_id(self, prefix: str, *parts: str) -> str:
         """Generate a consistent composite ID from parts."""
         if not parts:
@@ -877,23 +729,14 @@ class APIService:
 
         return f"{prefix}_{'_'.join(clean_parts)}"
 
-    def _validate_ids(self, properties: Dict, required_ids: List[str]) -> None:
-        """Validate that required IDs are present in properties."""
-        missing_ids = [id for id in required_ids if id not in properties]
-        if missing_ids:
-            raise ValueError(f"Missing required IDs: {missing_ids}")
-
     def _get_merge_key(self, label: str) -> str:
         """Get the merge key for a given label."""
-        merge_keys = {
-            "Artist": "soundcharts_uuid",
-            "Track": "soundcharts_uuid",
-            "Album": "soundcharts_uuid",
-            "Genre": "id",
-            "Label": "name",
-            # ... other labels
-        }
-        return merge_keys.get(label, "id")
+        # Special cases for Artist, Track, and Album
+        if label in ["Artist", "Track", "Album"]:
+            return "soundcharts_uuid"
+
+        # Default to "id" for all other nodes
+        return "id"
 
     async def _create_lyrics_analysis_node(
         self,
@@ -920,3 +763,18 @@ class APIService:
             value=value,
         )
         await self._upsert_neo4j_node("Popularity", popularity.dict())
+
+    async def _create_role_relationship(
+        self,
+        entity_id: str,
+        artist_id: str,
+        role: str,
+    ) -> None:
+        """Create role relationship between entity and artist."""
+        await self._upsert_neo4j_relationship(
+            entity_id,
+            artist_id,
+            f"HAS_{role.upper()}",
+        )
+        await self._upsert_neo4j_node("Role", {"id": f"role_{role}", "name": role})
+        await self._upsert_neo4j_relationship(artist_id, f"role_{role}", "HAS_ROLE")
