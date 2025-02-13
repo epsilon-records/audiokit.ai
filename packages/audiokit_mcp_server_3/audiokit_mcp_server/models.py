@@ -39,7 +39,6 @@ class Track(BaseModel):
     image_url: Optional[str] = None
     duration: Optional[int] = None
     explicit: Optional[bool] = None
-    genres: Optional[List[Dict[str, List[str]]]] = None
     composers: Optional[List[str]] = None
     producers: Optional[List[str]] = None
     language_code: Optional[str] = None
