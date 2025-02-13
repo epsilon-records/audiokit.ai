@@ -105,12 +105,23 @@ class APIService:
     }
 
     def _add_to_pending_list(self, node_type: str, node_id: str) -> None:
-        """Add a node ID to the appropriate pending list."""
+        """Add a node ID to the appropriate pending list if it doesn't already exist."""
         if node_type not in self.PENDING_FILES:
             raise ValueError(f"Invalid node type: {node_type}")
 
-        with open(self.PENDING_FILES[node_type], "a") as f:
-            f.write(f"{node_id}\n")
+        # For producers and composers, use the artists list
+        if node_type in ["producers", "composers"]:
+            node_type = "artists"
+
+        file_path = self.PENDING_FILES[node_type]
+
+        # Check if the node_id is already in the file
+        with open(file_path) as f:
+            existing_ids = set(line.strip() for line in f.readlines())
+
+        if node_id not in existing_ids:
+            with open(file_path, "a") as f:
+                f.write(f"{node_id}\n")
 
     async def _process_song_metadata(self, song_metadata: Dict) -> None:
         """Process song metadata and create nodes/relationships."""
@@ -306,7 +317,9 @@ class APIService:
         await self._upsert_neo4j_node("Track", track.dict())
 
     async def _process_related_entities(
-        self, entity_data: Dict, entity_id: str
+        self,
+        entity_data: Dict,
+        entity_id: str,
     ) -> None:
         """Process related entities for a given entity."""
         # Process artists
@@ -322,7 +335,8 @@ class APIService:
                 )
                 # Add artist role
                 await self._upsert_neo4j_node(
-                    "Role", {"id": "role_artist", "name": "artist"}
+                    "Role",
+                    {"id": "role_artist", "name": "artist"},
                 )
                 await self._upsert_neo4j_relationship(
                     artist_model.id,
@@ -364,7 +378,8 @@ class APIService:
                 )
                 # Add producer role
                 await self._upsert_neo4j_node(
-                    "Role", {"id": "role_producer", "name": "producer"}
+                    "Role",
+                    {"id": "role_producer", "name": "producer"},
                 )
                 await self._upsert_neo4j_relationship(
                     producer_model.id,
@@ -384,7 +399,8 @@ class APIService:
                 )
                 # Add composer role
                 await self._upsert_neo4j_node(
-                    "Role", {"id": "role_composer", "name": "composer"}
+                    "Role",
+                    {"id": "role_composer", "name": "composer"},
                 )
                 await self._upsert_neo4j_relationship(
                     composer_model.id,
