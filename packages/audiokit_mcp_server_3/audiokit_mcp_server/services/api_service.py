@@ -534,6 +534,9 @@ class APIService:
 
     async def _create_album_node(self, album_data: Dict) -> None:
         """Create an Album node from album data."""
+        soundcharts_album_id = album_data["uuid"]  # SoundCharts UUID
+
+        # Create Album node
         album = Album(
             id=str(uuid.uuid4()),  # Generate our own UUIDv4
             name=album_data["name"],
@@ -546,7 +549,7 @@ class APIService:
             labels=album_data.get("labels"),
             type=album_data.get("type"),
             soundcharts={
-                "uuid": album_data["uuid"],  # Store SoundCharts UUID for reference
+                "uuid": soundcharts_album_id,  # Store SoundCharts UUID
                 "slug": album_data.get("slug"),
             },
         )
