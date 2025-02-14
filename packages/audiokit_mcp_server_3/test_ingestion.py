@@ -1,6 +1,5 @@
 import asyncio
 import sys
-import traceback
 
 from aiocache import caches
 from audiokit_mcp_server.config import settings
@@ -78,43 +77,34 @@ async def main():
     # Initialize API service
     logger.debug("🚀 Initializing API service")
     api_service = APIService(settings)
-    await api_service.startup()  # Explicitly call startup
+    await api_service.startup()
 
-    # Test artist ingestion
-    artist_name = "Kanye West"
+    # Add artists to the queue
+    artists = ["Kanye West", "Taylor Swift"]  # Example artists
+    for artist in artists:
+        await api_service.redis.sadd("pending:artists", artist)
+        logger.debug(f"🎤 Added artist to queue: {artist}")
+
+    input("Press Enter to continue...")
+    # Process artists from the queue
     try:
-        logger.info("🎤 Starting artist ingestion - artist: {}", artist_name)
-        result = await api_service.ingest_soundcharts_api(artist_name)
-        logger.info("🎉 Ingestion completed successfully - result: {}", result)
-    except Exception as e:
-        # Extract more detailed error information
-        error_details = str(e)
-        if hasattr(e, "errors"):
-            error_details = "\n".join(
-                f"Field: {'.'.join(map(str, err['loc']))} - {err['msg']}"
-                for err in getattr(e, "errors", list)()
-            )
+        while True:
+            # Get next artist from queue
+            artist = await api_service.redis.spop("pending:artists")
+            if not artist:
+                logger.debug("🏁 Artist queue is empty")
+                break
 
-        logger.error(
-            "🚨 Ingestion failed - artist: {}\nValidation Errors:\n{}\nStack Trace:\n{}",
-            artist_name,
-            error_details,
-            traceback.format_exc(),
-        )
-        # Add additional debug information
-        logger.debug(
-            "Failed artist data structure: {}",
-            {
-                "artist_name": artist_name,
-                "error_type": type(e).__name__,
-                "error_fields": getattr(e, "fields", None),
-                "input_data": getattr(
-                    e,
-                    "input_data",
-                    None,
-                ),  # Add input data if available
-            },
-        )
+            logger.debug(f"🎶 Processing artist: {artist}")
+            result = await api_service.ingest_soundcharts_api(artist)
+            logger.debug(f"✅ Processed artist {artist}: {result}")
+
+            # Optional: Add delay between processing if needed
+            await asyncio.sleep(1)
+
+        logger.success("🎉 All artists processed successfully")
+    except asyncio.CancelledError:
+        logger.info("Shutting down gracefully...")
     finally:
         # Ensure resources are closed
         logger.debug("🛑 Shutting down API service")

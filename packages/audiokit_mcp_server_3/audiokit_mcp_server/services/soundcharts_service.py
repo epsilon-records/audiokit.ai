@@ -1,5 +1,4 @@
 import traceback
-from datetime import datetime
 from typing import Dict, List, Optional
 
 import httpx
@@ -368,64 +367,12 @@ class SoundChartsService:
 
     @cache()  # Uses self.cache_ttl
     async def get_artist_metadata(self, artist_id: str) -> Dict:
-        """Get artist metadata from SoundCharts API."""
-        try:
-            url = f"/api/v2.9/artist/{artist_id}"
-            logger.debug("Fetching artist metadata", artist_id=artist_id, url=url)
-            start_time = datetime.utcnow()
-            response = await self.client.get(url)
-            duration = (datetime.utcnow() - start_time).total_seconds()
-
-            logger.debug(
-                "Received artist metadata response",
-                artist_id=artist_id,
-                status_code=response.status_code,
-                duration=duration,
-            )
-
-            # Check for 404 or other errors
-            if response.status_code == 404:
-                logger.error(
-                    "Artist not found",
-                    artist_id=artist_id,
-                    status_code=response.status_code,
-                    url=url,
-                )
-                raise ValueError(f"Artist not found: {artist_id} (URL: {url})")
-
-            # Validate response
-            data = response.json()
-            logger.debug(
-                "Parsed artist metadata",
-                artist_id=artist_id,
-                data=data,
-            )
-
-            if not isinstance(data, dict) or "object" not in data:
-                logger.error(
-                    "Invalid artist metadata structure",
-                    artist_id=artist_id,
-                    response=data,
-                    url=url,
-                )
-                raise ValueError("Invalid artist metadata structure")
-
-            logger.debug(
-                "Artist metadata retrieved",
-                artist_id=artist_id,
-                status_code=response.status_code,
-                duration=duration,
-            )
-            return data
-        except Exception as e:
-            logger.error(
-                "Failed to get artist metadata",
-                artist_id=artist_id,
-                error=str(e),
-                stack_trace=traceback.format_exc(),
-                url=url,
-            )
-            raise
+        """Get artist metadata by ID."""
+        url = f"{self.base_url}/api/v2/artist/{artist_id}"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=self.headers)
+            response.raise_for_status()
+            return response.json()
 
     @cache()  # Uses self.cache_ttl
     async def get_artist_songs(
@@ -801,9 +748,49 @@ class SoundChartsService:
 
     @cache()  # Uses self.cache_ttl
     async def get_artist_streaming_data(self, artist_id: str) -> Dict:
-        """Get streaming data for an artist."""
-        url = f"{self.base_url}/api/v2/artist/{artist_id}/streaming"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, headers=self.headers)
-            response.raise_for_status()
-            return response.json()
+        """Get streaming data for an artist across all platforms."""
+        try:
+            # Get platforms
+            platforms = await self.get_platforms()
+            if not isinstance(platforms, list):
+                logger.error("Invalid platforms data", platforms=platforms)
+                raise ValueError("Platforms data must be a list")
+
+            streaming_data = {}
+            for platform in platforms:
+                platform_code = platform.get("code")
+                if not platform_code:
+                    continue
+
+                url = f"{self.base_url}/api/v2/artist/{artist_id}/streaming/{platform_code}"
+                try:
+                    async with httpx.AsyncClient() as client:
+                        response = await client.get(url, headers=self.headers)
+                        response.raise_for_status()
+                        platform_data = response.json()
+                        streaming_data[platform_code] = platform_data
+                except httpx.HTTPStatusError as e:
+                    if e.response.status_code == 404:
+                        logger.warning(
+                            "⚠️ Streaming data not found for platform",
+                            artist_id=artist_id,
+                            platform=platform_code,
+                        )
+                    else:
+                        logger.error(
+                            "❌ Failed to fetch streaming data for platform",
+                            artist_id=artist_id,
+                            platform=platform_code,
+                            error=str(e),
+                        )
+                    continue
+
+            return streaming_data
+        except Exception as e:
+            logger.error(
+                "❌ Failed to fetch artist streaming data",
+                artist_id=artist_id,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise

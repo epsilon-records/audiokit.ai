@@ -1,6 +1,4 @@
 import asyncio
-import fcntl
-import os
 import traceback
 import uuid
 from datetime import datetime
@@ -197,36 +195,58 @@ class APIService:
             )
             raise
 
-    PENDING_FILES = {
-        "artists": "PENDING_ARTISTS.txt",
-        "tracks": "PENDING_TRACKS.txt",
-        "albums": "PENDING_ALBUMS.txt",
-    }
+    async def _add_to_pending_list(self, artist_name: str) -> None:
+        """Add an artist to the pending queue for later processing."""
+        # Skip empty strings
+        if not artist_name or not artist_name.strip():
+            logger.debug("Skipping empty artist name")
+            return
 
-    def _add_to_pending_list(self, node_type: str, node_id: str) -> None:
-        """Add a node ID to the appropriate pending list if it doesn't already exist."""
-        if node_type not in self.PENDING_FILES:
-            raise ValueError(f"Invalid node type: {node_type}")
+        await self.redis.sadd("pending:artists", artist_name)
+        logger.debug(f"Added artist to pending queue: {artist_name}")
 
-        # For producers and composers, use the artists list
-        if node_type in ["producers", "composers"]:
-            node_type = "artists"
+    async def _process_queued_artists(self) -> None:
+        """Process artists queued during ingestion using Redis."""
+        try:
+            # Get all pending artist names from Redis
+            artist_names = await self.redis.smembers(PENDING_ARTISTS_KEY)
 
-        file_path = self.PENDING_FILES[node_type]
+            # Process each artist
+            for artist_name in artist_names:
+                try:
+                    # Search for artist to get UUID
+                    search_results = await self.soundcharts_service.search_artist(
+                        artist_name,
+                    )
+                    if not search_results.get("items"):
+                        logger.error("Artist not found", artist=artist_name)
+                        continue
 
-        # Create the file if it doesn't exist
-        if not os.path.exists(file_path):
-            with open(file_path, "w") as f:
-                pass
+                    artist_data = search_results["items"][0]
+                    artist_metadata = (
+                        await self.soundcharts_service.get_artist_metadata(
+                            artist_data["uuid"],
+                        )
+                    )
+                    await self._process_artist_metadata(artist_metadata)
+                except Exception as e:
+                    logger.error(
+                        "❌ Failed to process queued artist",
+                        artist_name=artist_name,
+                        error=str(e),
+                        stack_trace=traceback.format_exc(),
+                    )
 
-        # Use file locking to prevent concurrent writes
-        with open(file_path, "r+") as f:
-            fcntl.flock(f, fcntl.LOCK_EX)  # Acquire an exclusive lock
-            existing_ids = set(line.strip() for line in f.readlines())
-
-            if node_id not in existing_ids:
-                f.write(f"{node_id}\n")
-            fcntl.flock(f, fcntl.LOCK_UN)  # Release the lock
+            # Clear the pending list in Redis
+            await self.redis.delete(PENDING_ARTISTS_KEY)
+            logger.info("✅ Processed queued artists")
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process queued artists",
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
 
     async def _process_song_metadata(self, song_metadata: Dict) -> None:
         """Process song metadata and create nodes/relationships."""
@@ -645,7 +665,10 @@ class APIService:
             )
             await self._process_streaming_data(streaming_data, artist_id)
 
-            return {"status": "success", "artist_id": artist_id}
+            # Return success status immediately
+            result = {"status": "success", "artist_id": artist_id}
+
+            return result
         except Exception as e:
             logger.error(
                 "🚨 Ingestion failed",
@@ -833,10 +856,12 @@ class APIService:
 
                             if not record:
                                 logger.debug(
-                                    "Artist not found, skipping",
+                                    "Artist not found, adding to pending queue",
                                     name=name,
                                     role_type=role_type,
                                 )
+                                # Add to pending artists queue
+                                await self._add_to_pending_list(name)
                                 continue
 
                             internal_artist_id = record["artist_id"]
@@ -850,7 +875,7 @@ class APIService:
             # Process featured artists
             if "featured_artists" in entity_data:
                 for artist in entity_data["featured_artists"]:
-                    self._add_to_pending_list("artists", artist["uuid"])
+                    await self._add_to_pending_list(artist["name"])
                     await self._upsert_neo4j_relationship(
                         artist["uuid"],
                         entity_id,
@@ -962,7 +987,7 @@ class APIService:
             logger.debug("Processing artist data", artist_data=artist_data)
 
             # Add artist to pending list
-            self._add_to_pending_list("artists", artist_data["uuid"])
+            await self._add_to_pending_list(artist_data["name"])
 
             # Create artist node
             artist = Artist(
@@ -1127,3 +1152,7 @@ class APIService:
                 stack_trace=traceback.format_exc(),
             )
             raise
+
+    async def get_pending_artists(self) -> List[str]:
+        """Get the list of pending artists from Redis."""
+        return await self.redis.smembers(PENDING_ARTISTS_KEY)
