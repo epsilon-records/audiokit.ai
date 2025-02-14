@@ -44,7 +44,7 @@ async def main():
     await api_service.startup()
 
     # Add artists to the queue
-    artists = ["Kanye West", "Taylor Swift"]  # Example artists
+    artists = ["Vozz Rich"]  # Example artists
     for artist in artists:
         await api_service.redis.sadd("pending:artists", artist)
         logger.debug(f"🎤 Added artist to queue: {artist}")

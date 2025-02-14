@@ -62,7 +62,6 @@ class APIService:
 
         # Clear using queue's own method
         await self.deduplication_queue.clear()
-        logger.info("🧹 Cleared Redis deduplication queue on startup")
 
     async def _add_unique_constraints(self) -> None:
         """Add unique constraints to Neo4j."""
@@ -249,22 +248,22 @@ class APIService:
             raise
 
     async def _process_song_metadata(self, song_metadata: Dict) -> None:
-        """Process song metadata and create nodes/relationships."""
+        """Process song metadata and create nodes."""
         try:
             song_object = song_metadata["object"]
 
-            # Create Track node and get internal ID
-            internal_track_id = await self._create_track_node(song_object)
+            # First create the track node
+            track_id = await self._create_track_node(song_object)
 
-            # Process audio features if available and not None
-            if "audio" in song_object and song_object["audio"] is not None:
+            # Then process related entities
+            await self._process_related_entities(song_object, track_id)
+
+            # Finally process audio features
+            if "audioFeatures" in song_object:
                 await self._process_audio_features(
-                    song_object["audio"],
-                    internal_track_id,
+                    song_object["audioFeatures"],
+                    track_id,
                 )
-
-            # Process all related entities using internal ID
-            await self._process_related_entities(song_object, internal_track_id)
 
         except Exception as e:
             logger.error(
@@ -869,13 +868,6 @@ class APIService:
                             record = await result.single()
 
                             if not record:
-                                logger.debug(
-                                    "Artist not found, adding to pending queue",
-                                    name=name,
-                                    role_type=role_type,
-                                )
-                                # Add to pending artists queue
-                                await self._add_to_pending_list(name)
                                 continue
 
                             internal_artist_id = record["artist_id"]

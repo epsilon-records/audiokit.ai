@@ -60,8 +60,20 @@ class DeduplicationQueue:
         """Clear all entries from the deduplication queue."""
         if not self.redis:
             raise RuntimeError("Redis connection not established")
+
         try:
+            # Ask user for confirmation
+            response = (
+                input("⚠️  Clear the entire Redis database? [y/N]: ").strip().lower()
+            )
+            if response != "y":
+                logger.info("Skipping Redis cache clearance")
+                return
+
             await asyncio.wait_for(self.redis.flushdb(), timeout=5.0)
             logger.info("🧹 Cleared deduplication queue")
         except asyncio.TimeoutError:
             logger.warning("Redis flush operation timed out")
+        except Exception as e:
+            logger.error("Failed to clear Redis cache", error=str(e))
+            raise
