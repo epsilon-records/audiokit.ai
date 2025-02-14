@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -60,7 +60,6 @@ class Album(BaseModel):
     total_tracks: Optional[int] = None
     copyright: Optional[str] = None
     image_url: Optional[str] = None
-    labels: Optional[List[Dict]] = None
     type: Optional[str] = None
     soundcharts_uuid: str  # SoundCharts UUID for merging
 

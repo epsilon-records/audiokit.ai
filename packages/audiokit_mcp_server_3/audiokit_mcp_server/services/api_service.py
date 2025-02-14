@@ -255,7 +255,7 @@ class APIService:
         try:
             # Validate basic structure
             if not isinstance(album_metadata, dict):
-                raise ValueError("Album data must be a dictionary")
+                raise ValueError("Album data must be dictionary")
 
             # Extract the nested 'object' dictionary
             album_object = album_metadata.get("object", {})
@@ -273,7 +273,6 @@ class APIService:
                 "type": album_object.get("type", "album"),
                 "upc": album_object.get("upc", ""),
                 "totalTracks": album_object.get("totalTracks", 0),
-                "labels": album_object.get("labels", []),
                 "imageUrl": album_object.get("imageUrl", ""),
             }
 
@@ -283,6 +282,12 @@ class APIService:
 
             # Process album
             internal_album_id = await self._create_album_node(album_data)
+
+            # Process labels as separate nodes
+            raw_labels = album_object.get("labels", [])
+            for label in raw_labels:
+                if label.get("name"):
+                    await self._process_label(label, internal_album_id)
 
             # Process tracklisting with internal IDs
             tracklisting = await self.soundcharts_service.get_album_tracklisting(
@@ -703,8 +708,6 @@ class APIService:
             total_tracks=album_data.get("totalTracks"),
             copyright=album_data.get("copyright"),
             image_url=album_data.get("imageUrl"),
-            labels=album_data.get("labels"),
-            type=album_data.get("type"),
         )
         await self._upsert_neo4j_node("Album", album.dict())
         return album.id  # Return the internal UUID
@@ -988,3 +991,28 @@ class APIService:
                 error=str(e),
             )
             return False
+
+    async def _process_label(self, label_data: Dict, album_id: str) -> None:
+        """Process label data and create relationship to album."""
+        try:
+            # Create label node
+            label_node = {
+                "name": label_data.get("name"),
+                "type": label_data.get("type"),
+            }
+            internal_label_id = await self._upsert_neo4j_node("Label", label_node)
+
+            # Create relationship between album and label
+            await self._upsert_neo4j_relationship(
+                album_id,
+                internal_label_id,
+                "HAS_LABEL",
+            )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process label",
+                label=label_data,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
