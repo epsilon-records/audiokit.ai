@@ -265,7 +265,7 @@ class SoundChartsService:
     @cache()  # Uses self.cache_ttl
     async def get_album_tracklisting(self, album_id: str) -> Dict:
         """Get album tracklisting"""
-        url = f"{self.base_url}/api/v2/album/{album_id}/tracks"
+        url = f"{self.base_url}/api/v2.26/album/{album_id}/tracks"
         logger.info(
             "📋 Fetching album tracklisting",
             album_id=album_id,
