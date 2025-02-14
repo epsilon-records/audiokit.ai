@@ -257,19 +257,24 @@ class APIService:
             if not isinstance(album_metadata, dict):
                 raise ValueError("Album data must be a dictionary")
 
+            # Extract the nested 'object' dictionary
+            album_object = album_metadata.get("object", {})
+            if not album_object:
+                raise ValueError("Missing album object in metadata")
+
             # Extract required fields with defaults
             album_data = {
-                "name": album_metadata.get("name", "Unknown Album"),
-                "creditName": album_metadata.get("creditName", ""),
+                "name": album_object.get("name", "Unknown Album"),
+                "creditName": album_object.get("creditName", ""),
                 "releaseDate": self._parse_release_date(
-                    album_metadata.get("releaseDate"),
+                    album_object.get("releaseDate"),
                 ),
-                "uuid": album_metadata.get("uuid"),
-                "type": album_metadata.get("type", "album"),
-                "upc": album_metadata.get("upc", ""),
-                "totalTracks": album_metadata.get("totalTracks", 0),
-                "labels": album_metadata.get("labels", []),
-                "imageUrl": album_metadata.get("imageUrl", ""),
+                "uuid": album_object.get("uuid"),
+                "type": album_object.get("type", "album"),
+                "upc": album_object.get("upc", ""),
+                "totalTracks": album_object.get("totalTracks", 0),
+                "labels": album_object.get("labels", []),
+                "imageUrl": album_object.get("imageUrl", ""),
             }
 
             # Validate required fields
