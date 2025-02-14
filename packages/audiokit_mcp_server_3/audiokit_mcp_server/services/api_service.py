@@ -754,7 +754,7 @@ class APIService:
             if "labels" in entity_data:
                 for label in entity_data["labels"]:
                     label_node = Label(
-                        id=f"label_{label['name']}",
+                        id=f"label_{sanitize_id_string(label['name'])}",
                         name=label["name"],
                         type=label["type"],
                     )
@@ -995,9 +995,11 @@ class APIService:
     async def _process_label(self, label_data: Dict, album_id: str) -> None:
         """Process label data and create relationship to album."""
         try:
-            # Create label node
+            # Create label node with generated ID
+            label_name = label_data.get("name")
             label_node = {
-                "name": label_data.get("name"),
+                "id": f"label_{sanitize_id_string(label_name)}",  # Generate ID from name
+                "name": label_name,
                 "type": label_data.get("type"),
             }
             internal_label_id = await self._upsert_neo4j_node("Label", label_node)
