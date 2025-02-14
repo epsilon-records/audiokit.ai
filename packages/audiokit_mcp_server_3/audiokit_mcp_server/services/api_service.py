@@ -12,16 +12,13 @@ from neo4j import AsyncGraphDatabase
 from structlog import get_logger
 
 from ..models import (
-    ISRC,
     Album,
     Artist,
-    Audience,
     Genre,
     Label,
     LyricsAnalysis,
     Platform,
     Popularity,
-    StreamingData,
     Track,
     sanitize_id_string,
 )
@@ -368,176 +365,194 @@ class APIService:
         await self._upsert_neo4j_node("Lyrics", lyrics_node)
 
         # Process annotations
-        for annotation in lyrics_metadata.get("annotations", []):
-            annotation_node = {
-                "id": f"annotation_{annotation['uuid']}",
-                "text": annotation["text"],
-                "start": annotation["start"],
-                "end": annotation["end"],
-            }
-            await self._upsert_neo4j_node("Annotation", annotation_node)
-            await self._upsert_neo4j_relationship(
-                lyrics_id,
-                annotation_node["id"],
-                "HAS_ANNOTATION",
-            )
+        await self._process_annotations(
+            lyrics_metadata.get("annotations", []), lyrics_id
+        )
 
-    async def _process_audience_data(
-        self,
-        artist_id: str,
-        platform: str,
-        audience_data: Dict,
+    async def _process_annotations(
+        self, annotations: List[Dict], lyrics_id: str
     ) -> None:
-        """Process audience data and create nodes."""
-        for item in audience_data["items"]:
-            audience_id = f"audience_{artist_id}_{platform}_{item['date']}"
-            audience_model = Audience(
-                id=audience_id,
+        """Process annotations for lyrics."""
+        try:
+            for annotation in annotations:
+                annotation_node = {
+                    "id": f"annotation_{annotation['uuid']}",
+                    "text": annotation["text"],
+                    "start": annotation["start"],
+                    "end": annotation["end"],
+                }
+                await self._upsert_neo4j_node("Annotation", annotation_node)
+                await self._upsert_neo4j_relationship(
+                    lyrics_id,
+                    annotation_node["id"],
+                    "HAS_ANNOTATION",
+                )
+                logger.debug(
+                    "✅ Processed annotation",
+                    lyrics_id=lyrics_id,
+                    annotation_id=annotation_node["id"],
+                )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process annotations",
+                lyrics_id=lyrics_id,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
+
+    async def _process_audience_data(self, audience_data: Dict, artist_id: str) -> None:
+        """Process audience data for an artist."""
+        try:
+            for platform, metrics in audience_data.items():
+                audience_node = {
+                    "id": f"audience_{artist_id}_{platform}",
+                    "artist_id": artist_id,
+                    "platform": platform,
+                    "follower_count": metrics.get("follower_count"),
+                    "following_count": metrics.get("following_count"),
+                    "post_count": metrics.get("post_count"),
+                    "view_count": metrics.get("view_count"),
+                    "like_count": metrics.get("like_count"),
+                }
+                await self._upsert_neo4j_node("Audience", audience_node)
+                logger.debug(
+                    "✅ Processed audience data",
+                    artist_id=artist_id,
+                    platform=platform,
+                )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process audience data",
                 artist_id=artist_id,
-                platform=platform,
-                date=item["date"],
-                follower_count=item.get("followerCount"),
-                following_count=item.get("followingCount"),
-                post_count=item.get("postCount"),
-                view_count=item.get("viewCount"),
-                like_count=item.get("likeCount"),
+                error=str(e),
+                stack_trace=traceback.format_exc(),
             )
-            await self._upsert_neo4j_node("Audience", audience_model.dict())
-            await self._upsert_neo4j_relationship(
-                artist_id,
-                audience_id,
-                "HAS_AUDIENCE",
-            )
-            await self._upsert_neo4j_relationship(
-                platform,
-                audience_id,
-                "ON_PLATFORM",
-            )
+            raise
 
     async def _process_popularity_data(
         self,
-        artist_id: str,
-        platform: str,
         popularity_data: Dict,
+        artist_id: str,
     ) -> None:
-        """Process popularity data and create nodes."""
-        for item in popularity_data["items"]:
-            popularity_id = f"popularity_{artist_id}_{platform}_{item['date']}"
-            popularity_model = Popularity(
-                id=popularity_id,
+        """Process popularity metrics for an artist."""
+        try:
+            for platform, metrics in popularity_data.items():
+                popularity_node = {
+                    "id": f"popularity_{artist_id}_{platform}",
+                    "artist_id": artist_id,
+                    "platform": platform,
+                    "date": metrics.get("date"),
+                    "value": metrics.get("value"),
+                }
+                await self._upsert_neo4j_node("Popularity", popularity_node)
+                logger.debug(
+                    "✅ Processed popularity data",
+                    artist_id=artist_id,
+                    platform=platform,
+                )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process popularity data",
                 artist_id=artist_id,
-                platform=platform,
-                date=item["date"],
-                value=item.get("value"),
+                error=str(e),
+                stack_trace=traceback.format_exc(),
             )
-            await self._upsert_neo4j_node("Popularity", popularity_model.dict())
-            await self._upsert_neo4j_relationship(
-                artist_id,
-                popularity_id,
-                "HAS_POPULARITY",
-            )
-            await self._upsert_neo4j_relationship(
-                platform,
-                popularity_id,
-                "ON_PLATFORM",
-            )
+            raise
 
     async def _process_streaming_data(
-        self,
-        artist_id: str,
-        platform: str,
-        streaming_data: Dict,
+        self, streaming_data: Dict, artist_id: str
     ) -> None:
-        """Process streaming data and create nodes."""
-        for item in streaming_data["items"]:
-            streaming_id = f"streaming_{artist_id}_{platform}_{item['date']}"
-            streaming_model = StreamingData(
-                id=streaming_id,
+        """Process streaming metrics for an artist."""
+        try:
+            for platform, metrics in streaming_data.items():
+                streaming_node = {
+                    "id": f"streaming_{artist_id}_{platform}",
+                    "artist_id": artist_id,
+                    "platform": platform,
+                    "date": metrics.get("date"),
+                    "value": metrics.get("value"),
+                }
+                await self._upsert_neo4j_node("StreamingData", streaming_node)
+                logger.debug(
+                    "✅ Processed streaming data",
+                    artist_id=artist_id,
+                    platform=platform,
+                )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process streaming data",
                 artist_id=artist_id,
-                platform=platform,
-                date=item["date"],
-                value=item.get("value"),
+                error=str(e),
+                stack_trace=traceback.format_exc(),
             )
-            await self._upsert_neo4j_node("StreamingData", streaming_model.dict())
-            await self._upsert_neo4j_relationship(
-                artist_id,
-                streaming_id,
-                "HAS_STREAMING",
-            )
-            await self._upsert_neo4j_relationship(
-                platform,
-                streaming_id,
-                "ON_PLATFORM",
-            )
+            raise
 
     async def _process_lyrics_analysis(
-        self,
-        track_id: str,
-        lyrics_analysis: Dict,
+        self, lyrics_analysis: Dict, track_id: str
     ) -> None:
-        """Process lyrics analysis data and create nodes."""
-        analysis_model = LyricsAnalysis(
-            id=f"lyrics_analysis_{track_id}",
-            themes=lyrics_analysis.get("themes", []),
-            moods=lyrics_analysis.get("moods", []),
-            cultural_reference_people=lyrics_analysis.get(
-                "culturalReferencePeople",
-                [],
-            ),
-            cultural_reference_non_people=lyrics_analysis.get(
-                "culturalReferenceNonPeople",
-                [],
-            ),
-            brands=lyrics_analysis.get("brands", []),
-            locations=lyrics_analysis.get("locations", []),
-            narrative_style=lyrics_analysis.get("narrativeStyle", ""),
-            emotional_intensity_score=lyrics_analysis.get("emotionalIntensityScore", 0),
-            complexity_score=lyrics_analysis.get("complexityScore", 0),
-            repetitiveness_score=lyrics_analysis.get("repetitivenessScore", 0),
-            rhyme_scheme_score=lyrics_analysis.get("rhymeSchemeScore", 0),
-            imagery_score=lyrics_analysis.get("imageryScore", 0),
-        )
-        await self._upsert_neo4j_node("LyricsAnalysis", analysis_model.dict())
-        await self._upsert_neo4j_relationship(
-            track_id,
-            analysis_model.id,
-            "HAS_LYRICS_ANALYSIS",
-        )
-
-    async def _process_isrc(self, isrc_data: Dict, track_id: str) -> None:
-        if not isinstance(isrc_data, dict):
-            logger.warning(
-                "Invalid ISRC data format",
+        """Process lyrics analysis for a track."""
+        try:
+            analysis_node = {
+                "id": f"lyrics_analysis_{track_id}",
+                "track_id": track_id,
+                "themes": lyrics_analysis.get("themes"),
+                "moods": lyrics_analysis.get("moods"),
+                "cultural_reference_people": lyrics_analysis.get(
+                    "cultural_reference_people"
+                ),
+                "cultural_reference_non_people": lyrics_analysis.get(
+                    "cultural_reference_non_people"
+                ),
+                "brands": lyrics_analysis.get("brands"),
+                "locations": lyrics_analysis.get("locations"),
+                "narrative_style": lyrics_analysis.get("narrative_style"),
+                "emotional_intensity_score": lyrics_analysis.get(
+                    "emotional_intensity_score"
+                ),
+                "complexity_score": lyrics_analysis.get("complexity_score"),
+                "repetitiveness_score": lyrics_analysis.get("repetitiveness_score"),
+                "rhyme_scheme_score": lyrics_analysis.get("rhyme_scheme_score"),
+                "imagery_score": lyrics_analysis.get("imagery_score"),
+            }
+            await self._upsert_neo4j_node("LyricsAnalysis", analysis_node)
+            logger.debug("✅ Processed lyrics analysis", track_id=track_id)
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process lyrics analysis",
                 track_id=track_id,
-                isrc_data=isrc_data,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
             )
-            return
+            raise
 
-        if not isrc_data.get("value"):
-            logger.warning(
-                "Missing required ISRC value",
+    async def _process_isrc_codes(self, isrc_data: Dict, track_id: str) -> None:
+        """Process ISRC codes for a track."""
+        try:
+            for isrc in isrc_data:
+                isrc_node = {
+                    "id": f"isrc_{isrc['value']}",
+                    "value": isrc["value"],
+                    "country_code": isrc["country_code"],
+                    "country_name": isrc["country_name"],
+                }
+                await self._upsert_neo4j_node("ISRC", isrc_node)
+                await self._upsert_neo4j_relationship(
+                    track_id,
+                    isrc_node["id"],
+                    "HAS_ISRC",
+                )
+                logger.debug(
+                    "✅ Processed ISRC code", track_id=track_id, isrc=isrc["value"]
+                )
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process ISRC codes",
                 track_id=track_id,
-                isrc_data=isrc_data,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
             )
-            return
-
-        isrc = ISRC(
-            id=f"isrc_{isrc_data['value']}",
-            value=isrc_data["value"],
-            country_code=isrc_data["countryCode"],
-            country_name=isrc_data["countryName"],
-        )
-        await self._upsert_neo4j_node("ISRC", isrc.dict())
-        await self._upsert_neo4j_relationship(
-            track_id,
-            isrc.id,
-            "HAS_ISRC",
-        )
-        logger.debug(
-            "✅ Successfully processed ISRC",
-            track_id=track_id,
-            isrc_value=isrc_data["value"],
-        )
+            raise
 
     async def ingest_soundcharts_api(self, artist_name: str) -> Dict:
         """Ingest all SoundCharts data for an artist and build Neo4j graph."""
@@ -591,6 +606,12 @@ class APIService:
                     album["uuid"],
                 )
                 await self._process_album_metadata(album_metadata)
+
+            # Step 6: Get and process audience data
+            audience_data = await self.soundcharts_service.get_artist_audience(
+                artist_id,
+            )
+            await self._process_audience_data(audience_data, artist_id)
 
             return {"status": "success", "artist_id": artist_id}
         except Exception as e:
@@ -1028,6 +1049,61 @@ class APIService:
             logger.error(
                 "❌ Failed to process label",
                 label=label_data,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
+
+    async def _process_audio_features(
+        self, audio_features: Dict, track_id: str
+    ) -> None:
+        """Process audio features for a track."""
+        try:
+            audio_node = {
+                "id": f"audio_{track_id}",
+                "danceability": audio_features.get("danceability"),
+                "energy": audio_features.get("energy"),
+                "key": audio_features.get("key"),
+                "loudness": audio_features.get("loudness"),
+                "mode": audio_features.get("mode"),
+                "speechiness": audio_features.get("speechiness"),
+                "acousticness": audio_features.get("acousticness"),
+                "instrumentalness": audio_features.get("instrumentalness"),
+                "liveness": audio_features.get("liveness"),
+                "valence": audio_features.get("valence"),
+                "tempo": audio_features.get("tempo"),
+                "time_signature": audio_features.get("time_signature"),
+            }
+            await self._upsert_neo4j_node("Audio", audio_node)
+            logger.debug("✅ Processed audio features", track_id=track_id)
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process audio features",
+                track_id=track_id,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
+
+    async def _process_roles(self, roles: List[Dict], track_id: str) -> None:
+        """Process roles for a track."""
+        try:
+            for role in roles:
+                role_node = {
+                    "id": f"role_{sanitize_id_string(role['name'])}",
+                    "name": role["name"],
+                }
+                await self._upsert_neo4j_node("Role", role_node)
+                await self._upsert_neo4j_relationship(
+                    track_id,
+                    role_node["id"],
+                    "HAS_ROLE",
+                )
+                logger.debug("✅ Processed role", track_id=track_id, role=role["name"])
+        except Exception as e:
+            logger.error(
+                "❌ Failed to process roles",
+                track_id=track_id,
                 error=str(e),
                 stack_trace=traceback.format_exc(),
             )
