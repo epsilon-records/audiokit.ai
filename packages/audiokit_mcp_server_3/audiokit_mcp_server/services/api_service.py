@@ -108,14 +108,17 @@ class APIService:
         try:
             node_id = properties["id"]
 
-            # Check if node has been recently processed
-            if await self.deduplication_queue.is_processed(node_id):
-                logger.debug(
-                    "Node recently processed, skipping",
-                    label=label,
-                    id=node_id,
-                )
-                return
+            # Check deduplication queue using soundcharts_uuid
+            if "soundcharts_uuid" in properties:
+                if await self.deduplication_queue.is_processed(
+                    properties["soundcharts_uuid"],
+                ):
+                    logger.debug(
+                        "Node already processed",
+                        label=label,
+                        soundcharts_uuid=properties["soundcharts_uuid"],
+                    )
+                    return
 
             # Proceed with upsert
             merge_key = self._get_merge_key(label)
@@ -131,11 +134,8 @@ class APIService:
                         props=properties,
                         now=datetime.utcnow(),
                     ),
-                    timeout=5.0,  # 5-second timeout
+                    timeout=60,
                 )
-
-            # Mark node as processed
-            await self.deduplication_queue.mark_processed(node_id)
         except asyncio.TimeoutError:
             logger.error("Neo4j query timed out", label=label, id=node_id)
         except Exception as e:
@@ -368,7 +368,6 @@ class APIService:
 
             # Process related entities using internal ID
             await self._process_related_entities(artist_object, internal_artist_id)
-
         except Exception as e:
             logger.error(
                 "❌ Failed to process artist metadata",
@@ -736,8 +735,11 @@ class APIService:
 
     async def _create_track_node(self, track_data: Dict) -> str:
         """Create a Track node and return its internal UUID."""
+        # Generate ID with prefix
+        track_id = f"track_{uuid.uuid4()}"
+
         track = Track(
-            id=f"track_{uuid.uuid4()}",  # Add prefix here
+            id=track_id,
             soundcharts_uuid=track_data["uuid"],
             name=track_data["name"],
             credit_name=track_data.get("creditName"),
@@ -752,12 +754,17 @@ class APIService:
             language_code=track_data.get("languageCode"),
         )
         await self._upsert_neo4j_node("Track", track.dict())
-        return track.id
+        # Use soundcharts_uuid for deduplication
+        await self.deduplication_queue.mark_processed(track_data["uuid"])
+        return track_id
 
     async def _create_artist_node(self, artist_data: Dict) -> str:
         """Create an Artist node and return its internal UUID."""
+        # Generate ID with prefix
+        artist_id = f"artist_{uuid.uuid4()}"
+
         artist = Artist(
-            id=f"artist_{uuid.uuid4()}",  # Add prefix here
+            id=artist_id,
             soundcharts_uuid=artist_data["uuid"],
             name=artist_data["name"],
             credit_name=artist_data.get("creditName"),
@@ -770,12 +777,17 @@ class APIService:
             birth_date=artist_data.get("birthDate"),
         )
         await self._upsert_neo4j_node("Artist", artist.dict())
-        return artist.id
+        # Use soundcharts_uuid for deduplication
+        await self.deduplication_queue.mark_processed(artist_data["uuid"])
+        return artist_id
 
     async def _create_album_node(self, album_data: Dict) -> str:
         """Create an Album node and return its internal UUID."""
+        # Generate ID with prefix
+        album_id = f"album_{uuid.uuid4()}"
+
         album = Album(
-            id=f"album_{uuid.uuid4()}",  # Add prefix here
+            id=album_id,
             soundcharts_uuid=album_data["uuid"],
             name=album_data["name"],
             credit_name=album_data.get("creditName"),
@@ -786,7 +798,9 @@ class APIService:
             image_url=album_data.get("imageUrl"),
         )
         await self._upsert_neo4j_node("Album", album.dict())
-        return album.id
+        # Use soundcharts_uuid for deduplication
+        await self.deduplication_queue.mark_processed(album_data["uuid"])
+        return album_id
 
     async def _process_related_entities(
         self,
@@ -816,8 +830,8 @@ class APIService:
             if "platforms" in entity_data:
                 for platform in entity_data["platforms"]:
                     platform_node = Platform(
-                        id=f"platform_{platform['code']}",
-                        platform=platform["name"],
+                        id=f"platform_{platform['id']}",
+                        platform=platform["platform"],
                     )
                     await self._upsert_neo4j_node("Platform", platform_node.dict())
                     await self._upsert_neo4j_relationship(
@@ -896,9 +910,10 @@ class APIService:
 
         for platform in platforms:
             try:
-                # Create platform model without explicitly passing 'id'
+                # Create platform model with prefixed ID
                 platform_model = Platform(
-                    **platform,  # Just unpack the dictionary
+                    id=f"platform_{platform['id']}",  # Add prefix here
+                    platform=platform["platform"],
                 )
                 await self._upsert_neo4j_node("Platform", platform_model.dict())
                 logger.debug(
@@ -983,11 +998,13 @@ class APIService:
                 )
                 return
 
-            # Log incoming artist data
-            logger.debug("Processing artist data", artist_data=artist_data)
-
-            # Add artist to pending list
-            await self._add_to_pending_list(artist_data["name"])
+            # Check if artist has already been processed
+            if await self.deduplication_queue.is_processed(artist_data["uuid"]):
+                logger.debug(
+                    "Artist already processed",
+                    soundcharts_uuid=artist_data["uuid"],
+                )
+                return
 
             # Create artist node
             artist = Artist(
@@ -998,11 +1015,8 @@ class APIService:
                 app_url=artist_data.get("appUrl"),
                 image_url=artist_data.get("imageUrl"),
             )
-
-            # Log the artist model before upsert
-            logger.debug("Created Artist model", artist=artist.dict())
-
             await self._upsert_neo4j_node("Artist", artist.dict())
+            await self.deduplication_queue.mark_processed(artist_data["uuid"])
 
             # Process artist relationships
             await self._upsert_neo4j_relationship(
@@ -1010,7 +1024,6 @@ class APIService:
                 artist.id,  # Artist ID
                 "HAS_ARTIST",
             )
-
         except Exception as e:
             logger.error("Failed to process artist from song metadata", error=str(e))
             raise
