@@ -12,7 +12,7 @@ class GenreData(BaseModel):
 class Artist(BaseModel):
     """Artist model for Soundcharts data."""
 
-    id: Optional[str] = None  # Our own UUIDv4
+    id: Optional[str] = None  # Keep it simple
     name: str
     credit_name: Optional[str] = None
     country_code: Optional[str] = None
@@ -36,7 +36,7 @@ class ISRC(BaseModel):
 
 
 class Track(BaseModel):
-    id: Optional[str] = None  # Our own UUIDv4
+    id: Optional[str] = None  # Keep it simple
     name: str
     credit_name: Optional[str] = None
     release_date: Optional[datetime] = None
@@ -52,7 +52,7 @@ class Track(BaseModel):
 
 
 class Album(BaseModel):
-    id: Optional[str] = None  # Our own UUIDv4
+    id: Optional[str] = None  # Keep it simple
     name: str
     credit_name: Optional[str] = None
     upc: Optional[str] = None

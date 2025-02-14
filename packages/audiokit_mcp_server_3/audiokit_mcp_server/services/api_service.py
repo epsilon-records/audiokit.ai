@@ -598,7 +598,7 @@ class APIService:
             search_results = await self.soundcharts_service.search_artist(artist_name)
             if not search_results.get("items"):
                 logger.error("Artist not found", artist=artist_name)
-                raise ValueError(f"No artist found with name: {artist_name}")
+                return {"status": "skipped", "reason": "artist not found"}
 
             artist_data = search_results["items"][0]
             artist_id = artist_data["uuid"]
@@ -737,7 +737,7 @@ class APIService:
     async def _create_track_node(self, track_data: Dict) -> str:
         """Create a Track node and return its internal UUID."""
         track = Track(
-            id=str(uuid.uuid4()),  # Generate internal UUID
+            id=f"track_{uuid.uuid4()}",  # Add prefix here
             soundcharts_uuid=track_data["uuid"],
             name=track_data["name"],
             credit_name=track_data.get("creditName"),
@@ -752,12 +752,12 @@ class APIService:
             language_code=track_data.get("languageCode"),
         )
         await self._upsert_neo4j_node("Track", track.dict())
-        return track.id  # Return the internal UUID
+        return track.id
 
     async def _create_artist_node(self, artist_data: Dict) -> str:
         """Create an Artist node and return its internal UUID."""
         artist = Artist(
-            id=str(uuid.uuid4()),  # Generate internal UUID
+            id=f"artist_{uuid.uuid4()}",  # Add prefix here
             soundcharts_uuid=artist_data["uuid"],
             name=artist_data["name"],
             credit_name=artist_data.get("creditName"),
@@ -770,12 +770,12 @@ class APIService:
             birth_date=artist_data.get("birthDate"),
         )
         await self._upsert_neo4j_node("Artist", artist.dict())
-        return artist.id  # Return the internal UUID
+        return artist.id
 
     async def _create_album_node(self, album_data: Dict) -> str:
         """Create an Album node and return its internal UUID."""
         album = Album(
-            id=str(uuid.uuid4()),  # Generate internal UUID
+            id=f"album_{uuid.uuid4()}",  # Add prefix here
             soundcharts_uuid=album_data["uuid"],
             name=album_data["name"],
             credit_name=album_data.get("creditName"),
@@ -786,7 +786,7 @@ class APIService:
             image_url=album_data.get("imageUrl"),
         )
         await self._upsert_neo4j_node("Album", album.dict())
-        return album.id  # Return the internal UUID
+        return album.id
 
     async def _process_related_entities(
         self,
@@ -991,7 +991,7 @@ class APIService:
 
             # Create artist node
             artist = Artist(
-                id=str(uuid.uuid4()),
+                id=f"artist_{uuid.uuid4()}",
                 soundcharts_uuid=artist_data["uuid"],
                 name=artist_data["name"],
                 slug=artist_data.get("slug"),

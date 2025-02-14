@@ -23,25 +23,30 @@ class DeduplicationQueue:
             logger.info("✅ Connected to Redis deduplication queue")
 
     async def is_processed(self, node_id: str) -> bool:
-        """Check if a node has been recently processed."""
+        """Check if a node has been processed."""
         if not self.redis:
             raise RuntimeError("Redis connection not established")
         try:
-            return await asyncio.wait_for(self.redis.exists(node_id), timeout=1.0)
+            return await asyncio.wait_for(
+                self.redis.sismember("deduplication_queue", node_id),
+                timeout=1.0,
+            )
         except asyncio.TimeoutError:
             logger.warning("Redis operation timed out", node_id=node_id)
             return False
 
     async def mark_processed(self, node_id: str):
-        """Mark a node as processed."""
+        """Mark a node as processed by adding it to the deduplication queue."""
         if not self.redis:
             raise RuntimeError("Redis connection not established")
         try:
             await asyncio.wait_for(
-                self.redis.set(node_id, "1", ex=self.ttl),
+                self.redis.sadd("deduplication_queue", node_id),
                 timeout=1.0,
             )
-            logger.debug("Marked node as processed", node_id=node_id)
+            # Set TTL for the entire queue
+            await self.redis.expire("deduplication_queue", self.ttl)
+            logger.debug("Added node to deduplication queue", node_id=node_id)
         except asyncio.TimeoutError:
             logger.warning("Redis operation timed out", node_id=node_id)
 

@@ -1,10 +1,8 @@
 import asyncio
 import sys
 
-from aiocache import caches
 from audiokit_mcp_server.config import settings
 from audiokit_mcp_server.services.api_service import APIService
-from audiokit_mcp_server.utils.deduplication_queue import DeduplicationQueue
 from audiokit_mcp_server.utils.redis import setup_redis_cache
 from loguru import logger
 
@@ -36,43 +34,9 @@ async def main():
     # Initialize Redis
     setup_redis_cache(settings)
 
-    # Create temp queue instance for cleanup
-    dq = DeduplicationQueue(settings.redis_url)
-    await dq.connect()
-    await dq.clear()  # Use queue's clear method
-    await dq.close()
-
     # Initialize Redis cache with simpler config
     logger.debug("🔧 Initializing LOCAL Redis cache")
     setup_redis_cache(settings)
-
-    # Clear queue before starting
-    cache = caches.get("default")
-    await cache.raw("flushdb")
-    logger.debug("🧪 Cleared Redis cache for test ingestion")
-
-    # Verify cache backend
-    cache = caches.get("default")
-    logger.debug(
-        "🔍 Cache backend verification - type: {}, redis_connected: {}",
-        type(cache).__name__,
-        cache.endpoint == settings.redis_host,
-    )
-
-    # Test direct write/read
-    test_key = "validation_key"
-    await cache.set(test_key, "test_value", ttl=10)  # Explicit 10s TTL
-    value = await cache.get(test_key)
-    logger.debug(
-        "🧪 Direct cache test - key: {}, stored_value: {}, redis_exists: {}",
-        test_key,
-        value,
-        await cache.exists(test_key),
-    )
-
-    # After cache setup
-    info = await cache.raw("info", "memory")
-    logger.debug("🧠 Redis Memory Info: {}", info)
 
     # Initialize API service
     logger.debug("🚀 Initializing API service")
@@ -97,7 +61,13 @@ async def main():
 
             logger.debug(f"🎶 Processing artist: {artist}")
             result = await api_service.ingest_soundcharts_api(artist)
-            logger.debug(f"✅ Processed artist {artist}: {result}")
+
+            if result["status"] == "error":
+                logger.error(f"❌ Failed to process artist {artist}: {result['error']}")
+            elif result["status"] == "skipped":
+                logger.warning(f"⚠️ Skipped artist {artist}: {result['reason']}")
+            else:
+                logger.debug(f"✅ Processed artist {artist}: {result}")
 
             # Optional: Add delay between processing if needed
             await asyncio.sleep(1)
