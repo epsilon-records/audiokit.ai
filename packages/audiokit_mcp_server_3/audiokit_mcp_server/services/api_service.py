@@ -236,6 +236,13 @@ class APIService:
             # Create Track node and get internal ID
             internal_track_id = await self._create_track_node(song_object)
 
+            # Process audio features if available and not None
+            if "audio" in song_object and song_object["audio"] is not None:
+                await self._process_audio_features(
+                    song_object["audio"],
+                    internal_track_id,
+                )
+
             # Process all related entities using internal ID
             await self._process_related_entities(song_object, internal_track_id)
 
@@ -366,11 +373,14 @@ class APIService:
 
         # Process annotations
         await self._process_annotations(
-            lyrics_metadata.get("annotations", []), lyrics_id
+            lyrics_metadata.get("annotations", []),
+            lyrics_id,
         )
 
     async def _process_annotations(
-        self, annotations: List[Dict], lyrics_id: str
+        self,
+        annotations: List[Dict],
+        lyrics_id: str,
     ) -> None:
         """Process annotations for lyrics."""
         try:
@@ -461,7 +471,9 @@ class APIService:
             raise
 
     async def _process_streaming_data(
-        self, streaming_data: Dict, artist_id: str
+        self,
+        streaming_data: Dict,
+        artist_id: str,
     ) -> None:
         """Process streaming metrics for an artist."""
         try:
@@ -489,7 +501,9 @@ class APIService:
             raise
 
     async def _process_lyrics_analysis(
-        self, lyrics_analysis: Dict, track_id: str
+        self,
+        lyrics_analysis: Dict,
+        track_id: str,
     ) -> None:
         """Process lyrics analysis for a track."""
         try:
@@ -499,16 +513,16 @@ class APIService:
                 "themes": lyrics_analysis.get("themes"),
                 "moods": lyrics_analysis.get("moods"),
                 "cultural_reference_people": lyrics_analysis.get(
-                    "cultural_reference_people"
+                    "cultural_reference_people",
                 ),
                 "cultural_reference_non_people": lyrics_analysis.get(
-                    "cultural_reference_non_people"
+                    "cultural_reference_non_people",
                 ),
                 "brands": lyrics_analysis.get("brands"),
                 "locations": lyrics_analysis.get("locations"),
                 "narrative_style": lyrics_analysis.get("narrative_style"),
                 "emotional_intensity_score": lyrics_analysis.get(
-                    "emotional_intensity_score"
+                    "emotional_intensity_score",
                 ),
                 "complexity_score": lyrics_analysis.get("complexity_score"),
                 "repetitiveness_score": lyrics_analysis.get("repetitiveness_score"),
@@ -543,7 +557,9 @@ class APIService:
                     "HAS_ISRC",
                 )
                 logger.debug(
-                    "✅ Processed ISRC code", track_id=track_id, isrc=isrc["value"]
+                    "✅ Processed ISRC code",
+                    track_id=track_id,
+                    isrc=isrc["value"],
                 )
         except Exception as e:
             logger.error(
@@ -590,10 +606,15 @@ class APIService:
                 )
                 await self._process_song_metadata(song_metadata)
 
+                # Process lyrics analysis
+                lyrics_analysis = await self.soundcharts_service.get_lyrics_analysis(
+                    song["uuid"],
+                )
+                await self._process_lyrics_analysis(lyrics_analysis, song["uuid"])
+
             # Step 5: Get and process artist albums
             albums = await self.soundcharts_service.get_artist_albums(artist_id)
             for album in albums.get("items", []):
-                # Check for UUID instead of UPC
                 if not album.get("uuid"):
                     logger.error(
                         "Album missing UUID, skipping",
@@ -601,7 +622,6 @@ class APIService:
                     )
                     continue
 
-                # Get album by UUID instead of UPC
                 album_metadata = await self.soundcharts_service.get_album_metadata(
                     album["uuid"],
                 )
@@ -612,6 +632,18 @@ class APIService:
                 artist_id,
             )
             await self._process_audience_data(audience_data, artist_id)
+
+            # Step 7: Get and process popularity data
+            popularity_data = await self.soundcharts_service.get_artist_popularity(
+                artist_id,
+            )
+            await self._process_popularity_data(popularity_data, artist_id)
+
+            # Step 8: Get and process streaming data
+            streaming_data = await self.soundcharts_service.get_artist_streaming_data(
+                artist_id,
+            )
+            await self._process_streaming_data(streaming_data, artist_id)
 
             return {"status": "success", "artist_id": artist_id}
         except Exception as e:
@@ -916,21 +948,6 @@ class APIService:
         )
         await self._upsert_neo4j_node("Popularity", popularity.dict())
 
-    async def _create_role_relationship(
-        self,
-        entity_id: str,
-        artist_id: str,
-        role: str,
-    ) -> None:
-        """Create role relationship between entity and artist."""
-        await self._upsert_neo4j_relationship(
-            entity_id,
-            artist_id,
-            f"HAS_{role.upper()}",
-        )
-        await self._upsert_neo4j_node("Role", {"id": f"role_{role}", "name": role})
-        await self._upsert_neo4j_relationship(artist_id, f"role_{role}", "HAS_ROLE")
-
     async def _process_artist_from_song(self, artist_data: dict, song_id: str) -> None:
         """Process artist data from song metadata."""
         try:
@@ -1055,7 +1072,9 @@ class APIService:
             raise
 
     async def _process_audio_features(
-        self, audio_features: Dict, track_id: str
+        self,
+        audio_features: Dict,
+        track_id: str,
     ) -> None:
         """Process audio features for a track."""
         try:

@@ -72,57 +72,36 @@ class SoundChartsService:
 
     @cache()  # Uses self.cache_ttl
     async def get_artist_popularity(self, artist_id: str) -> Dict:
-        """Get artist popularity across all platforms"""
-        platforms = await self.get_platforms()
-        popularity_data = {}
+        """Get popularity data for an artist."""
+        try:
+            # Get platforms
+            platforms = await self.get_platforms()
+            if not isinstance(platforms, list):
+                logger.error("Invalid platforms data", platforms=platforms)
+                raise ValueError("Platforms data must be a list")
 
-        for platform in platforms.get("items", []):
-            platform_code = platform.get("code")
-            if not platform_code:
-                continue
+            popularity_data = {}
+            for platform in platforms:
+                platform_code = platform.get("code")
+                if not platform_code:
+                    continue
 
-            url = (
-                f"{self.base_url}/api/v2/artist/{artist_id}/popularity/{platform_code}"
-            )
-            logger.info(
-                "📊 Fetching artist popularity",
-                artist_id=artist_id,
-                platform=platform_code,
-                url=url,
-            )
-
-            try:
+                url = f"{self.base_url}/api/v2/artist/{artist_id}/popularity/{platform_code}"
                 async with httpx.AsyncClient() as client:
                     response = await client.get(url, headers=self.headers)
                     response.raise_for_status()
-                    popularity_data[platform_code] = response.json()
-                    logger.info(
-                        "✅ Artist popularity retrieved",
-                        artist_id=artist_id,
-                        platform=platform_code,
-                        status_code=response.status_code,
-                    )
-            except httpx.HTTPStatusError as e:
-                if e.response.status_code == 404:
-                    logger.warning(
-                        "⚠️ Platform not found for artist popularity",
-                        artist_id=artist_id,
-                        platform=platform_code,
-                        url=e.request.url,
-                    )
-                else:
-                    logger.error(
-                        "📉 Failed to fetch artist popularity",
-                        artist_id=artist_id,
-                        platform=platform_code,
-                        url=e.request.url,
-                        status_code=e.response.status_code,
-                        error=str(e),
-                    )
-                # Continue with next platform even if one fails
-                continue
+                    platform_data = response.json()
+                    popularity_data[platform_code] = platform_data
 
-        return popularity_data
+            return popularity_data
+        except Exception as e:
+            logger.error(
+                "❌ Failed to fetch artist popularity data",
+                artist_id=artist_id,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
 
     # Song Endpoints
     @cache()  # Uses self.cache_ttl
@@ -582,55 +561,36 @@ class SoundChartsService:
 
     @cache()  # Uses self.cache_ttl
     async def get_artist_audience(self, artist_id: str) -> Dict:
-        """Get artist's audience data across all platforms."""
-        platforms = await self.get_platforms()
-        audience_data = {}
+        """Get audience data for an artist."""
+        try:
+            # Get platforms
+            platforms = await self.get_platforms()
+            if not isinstance(platforms, list):
+                logger.error("Invalid platforms data", platforms=platforms)
+                raise ValueError("Platforms data must be a list")
 
-        for platform in platforms.get("items", []):
-            platform_code = platform.get("code")
-            if not platform_code:
-                continue
+            audience_data = {}
+            for platform in platforms:
+                platform_code = platform.get("code")
+                if not platform_code:
+                    continue
 
-            url = f"{self.base_url}/api/v2/artist/{artist_id}/audience/{platform_code}"
-            logger.info(
-                "👥 Fetching artist audience",
-                artist_id=artist_id,
-                platform=platform_code,
-                url=url,
-            )
-
-            try:
+                url = f"{self.base_url}/api/v2/artist/{artist_id}/audience/{platform_code}"
                 async with httpx.AsyncClient() as client:
                     response = await client.get(url, headers=self.headers)
                     response.raise_for_status()
-                    audience_data[platform_code] = response.json()
-                    logger.info(
-                        "✅ Artist audience retrieved",
-                        artist_id=artist_id,
-                        platform=platform_code,
-                        status_code=response.status_code,
-                    )
-            except httpx.HTTPStatusError as e:
-                if e.response.status_code == 404:
-                    logger.warning(
-                        "⚠️ Platform not found for artist audience",
-                        artist_id=artist_id,
-                        platform=platform_code,
-                        url=e.request.url,
-                    )
-                else:
-                    logger.error(
-                        "❌ Failed to fetch artist audience",
-                        artist_id=artist_id,
-                        platform=platform_code,
-                        url=e.request.url,
-                        status_code=e.response.status_code,
-                        error=str(e),
-                    )
-                # Continue with next platform even if one fails
-                continue
+                    platform_data = response.json()
+                    audience_data[platform_code] = platform_data
 
-        return audience_data
+            return audience_data
+        except Exception as e:
+            logger.error(
+                "❌ Failed to fetch artist audience data",
+                artist_id=artist_id,
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise
 
     @cache()  # Uses self.cache_ttl
     async def get_similar_artists(self, artist_id: str) -> Dict:
@@ -829,3 +789,21 @@ class SoundChartsService:
         except Exception as e:
             logger.error("Failed to process artist data", error=str(e))
             raise
+
+    @cache()  # Uses self.cache_ttl
+    async def get_lyrics_analysis(self, track_id: str) -> Dict:
+        """Get lyrics analysis for a track."""
+        url = f"{self.base_url}/api/v2/song/{track_id}/lyrics-analysis"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=self.headers)
+            response.raise_for_status()
+            return response.json()
+
+    @cache()  # Uses self.cache_ttl
+    async def get_artist_streaming_data(self, artist_id: str) -> Dict:
+        """Get streaming data for an artist."""
+        url = f"{self.base_url}/api/v2/artist/{artist_id}/streaming"
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, headers=self.headers)
+            response.raise_for_status()
+            return response.json()
