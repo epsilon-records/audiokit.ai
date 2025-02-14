@@ -997,18 +997,32 @@ class APIService:
         try:
             # Create label node with generated ID
             label_name = label_data.get("name")
-            label_node = {
-                "id": f"label_{sanitize_id_string(label_name)}",  # Generate ID from name
-                "name": label_name,
-                "type": label_data.get("type"),
-            }
-            internal_label_id = await self._upsert_neo4j_node("Label", label_node)
+            if not label_name:
+                logger.warning("Label missing name, skipping", label=label_data)
+                return
+
+            label_id = f"label_{sanitize_id_string(label_name)}"
+
+            # Check if label node exists, create if not
+            if not await self._neo4j_node_exists(label_id):
+                label_node = {
+                    "id": label_id,
+                    "name": label_name,
+                    "type": label_data.get("type"),
+                }
+                await self._upsert_neo4j_node("Label", label_node)
+                logger.debug("✅ Created label node", label_id=label_id)
 
             # Create relationship between album and label
             await self._upsert_neo4j_relationship(
                 album_id,
-                internal_label_id,
+                label_id,
                 "HAS_LABEL",
+            )
+            logger.debug(
+                "✅ Created label relationship",
+                album_id=album_id,
+                label_id=label_id,
             )
         except Exception as e:
             logger.error(
