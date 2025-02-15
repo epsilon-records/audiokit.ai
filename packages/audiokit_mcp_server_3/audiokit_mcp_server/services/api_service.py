@@ -552,9 +552,6 @@ class APIService:
         """Ingest all SoundCharts data for an artist and build Neo4j graph."""
         try:
             logger.info("🎤 Starting artist ingestion", artist=artist_name)
-            # Add artist to pending list before processing
-            await self._add_to_pending_list(artist_name)
-
             # Step 1: Search for artist and get UUID
             search_results = await self.soundcharts_service.search_artist(artist_name)
             if not search_results.get("items"):
@@ -1302,17 +1299,17 @@ class APIService:
                     break
 
                 artist_name = artist[0]
-                logger.debug(f"�� Processing artist: {artist_name}")
+                logger.debug(f"🔁 Processing artist: {artist_name}")
 
                 try:
                     result = await self.ingest_soundcharts_api(artist_name)
                     if result["status"] == "error":
                         logger.error(
-                            f"❌ Failed to process artist {artist_name}: {result['error']}"
+                            f"❌ Failed to process artist {artist_name}: {result['error']}",
                         )
                     elif result["status"] == "skipped":
                         logger.warning(
-                            f"⚠️ Skipped artist {artist_name}: {result['reason']}"
+                            f"⚠️ Skipped artist {artist_name}: {result['reason']}",
                         )
                     else:
                         logger.debug(f"✅ Processed artist {artist_name}: {result}")
