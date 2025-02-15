@@ -71,7 +71,7 @@ class DeduplicationQueue:
                 return
 
             await asyncio.wait_for(self.redis.flushdb(), timeout=5.0)
-            logger.info("🧹 Cleared deduplication queue")
+            logger.info("🧹 Cleared deduplication queue and cache")
         except asyncio.TimeoutError:
             logger.warning("Redis flush operation timed out")
         except Exception as e:
