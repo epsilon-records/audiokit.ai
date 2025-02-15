@@ -53,6 +53,8 @@ async def main():
         await api_service._add_to_pending_list(artist)
         logger.debug(f"🎤 Added artist to queue: {artist}")
 
+    input("Press Enter to continue...")
+
     # Process artists from the queue
     await api_service.process_pending_artists()
 
