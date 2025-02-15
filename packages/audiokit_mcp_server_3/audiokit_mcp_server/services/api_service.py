@@ -208,7 +208,7 @@ class APIService:
         """Process artists queued during ingestion using Redis."""
         try:
             # Get all pending artist names from Redis
-            artist_names = await self.redis.smembers(PENDING_ARTISTS_KEY)
+            artist_names = await self.redis.smembers("pending:artists")
 
             # Process each artist
             for artist_name in artist_names:
@@ -237,7 +237,7 @@ class APIService:
                     )
 
             # Clear the pending list in Redis
-            await self.redis.delete(PENDING_ARTISTS_KEY)
+            await self.redis.delete("pending:artists")
             logger.info("✅ Processed queued artists")
         except Exception as e:
             logger.error(
@@ -255,15 +255,8 @@ class APIService:
             # First create the track node
             track_id = await self._create_track_node(song_object)
 
-            # Then process related entities
+            # Then process all related entities including audio features
             await self._process_related_entities(song_object, track_id)
-
-            # Finally process audio features
-            if "audioFeatures" in song_object:
-                await self._process_audio_features(
-                    song_object["audioFeatures"],
-                    track_id,
-                )
 
         except Exception as e:
             logger.error(
@@ -612,10 +605,6 @@ class APIService:
             )
             await self._process_artist_metadata(artist_metadata)
 
-            # Step 3: Get and process platforms
-            platforms = await self.soundcharts_service.get_platforms()
-            await self._process_platforms(platforms)
-
             # Step 4: Get and process artist songs
             songs = await self.soundcharts_service.get_artist_songs(artist_id)
             for song in songs.get("items", []):
@@ -623,12 +612,6 @@ class APIService:
                     song["uuid"],
                 )
                 await self._process_song_metadata(song_metadata)
-
-                # Process lyrics analysis
-                lyrics_analysis = await self.soundcharts_service.get_lyrics_analysis(
-                    song["uuid"],
-                )
-                await self._process_lyrics_analysis(lyrics_analysis, song["uuid"])
 
             # Step 5: Get and process artist albums
             albums = await self.soundcharts_service.get_artist_albums(artist_id)
@@ -644,24 +627,6 @@ class APIService:
                     album["uuid"],
                 )
                 await self._process_album_metadata(album_metadata)
-
-            # Step 6: Get and process audience data
-            audience_data = await self.soundcharts_service.get_artist_audience(
-                artist_id,
-            )
-            await self._process_audience_data(audience_data, artist_id)
-
-            # Step 7: Get and process popularity data
-            popularity_data = await self.soundcharts_service.get_artist_popularity(
-                artist_id,
-            )
-            await self._process_popularity_data(popularity_data, artist_id)
-
-            # Step 8: Get and process streaming data
-            streaming_data = await self.soundcharts_service.get_artist_streaming_data(
-                artist_id,
-            )
-            await self._process_streaming_data(streaming_data, artist_id)
 
             # Return success status immediately
             result = {"status": "success", "artist_id": artist_id}
@@ -734,12 +699,16 @@ class APIService:
 
     async def _create_track_node(self, track_data: Dict) -> str:
         """Create a Track node and return its internal UUID."""
-        # Generate ID with prefix
-        track_id = f"track_{uuid.uuid4()}"
+        soundcharts_uuid = track_data["uuid"]
+
+        # Check deduplication queue first
+        if await self.deduplication_queue.is_processed(soundcharts_uuid):
+            logger.debug("Track already processed", soundcharts_uuid=soundcharts_uuid)
+            return await self._get_track_id_by_uuid(soundcharts_uuid)
 
         track = Track(
-            id=track_id,
-            soundcharts_uuid=track_data["uuid"],
+            id=f"track_{uuid.uuid4()}",
+            soundcharts_uuid=soundcharts_uuid,
             name=track_data["name"],
             credit_name=track_data.get("creditName"),
             release_date=track_data.get("releaseDate"),
@@ -752,19 +721,68 @@ class APIService:
             producers=track_data.get("producers"),
             language_code=track_data.get("languageCode"),
         )
-        await self._upsert_neo4j_node("Track", track.dict())
-        # Use soundcharts_uuid for deduplication
-        await self.deduplication_queue.mark_processed(track_data["uuid"])
-        return track_id
+
+        # Use transaction to ensure node exists before relationships
+        async with self.neo4j_driver.session() as session:
+            # First create the track node
+            await session.execute_write(
+                lambda tx: tx.run(
+                    """
+                    MERGE (t:Track {soundcharts_uuid: $uuid})
+                    ON CREATE SET t = $props
+                    ON MATCH SET t += $update_props, 
+                                 t.last_updated = $now
+                    """,
+                    uuid=soundcharts_uuid,
+                    props=track.dict(),
+                    update_props={k: v for k, v in track.dict().items() if k != "id"},
+                    now=datetime.utcnow(),
+                ),
+            )
+
+            # Verify node existence in the same transaction
+            result = await session.run(
+                "MATCH (t:Track {soundcharts_uuid: $uuid}) RETURN t.id AS track_id",
+                uuid=soundcharts_uuid,
+            )
+            record = await result.single()
+            created_id = record["track_id"]
+
+        # Only mark processed after successful creation
+        await self.deduplication_queue.mark_processed(soundcharts_uuid)
+        return created_id
+
+    async def _get_track_id_by_uuid(self, soundcharts_uuid: str) -> Optional[str]:
+        """Get track ID by soundcharts_uuid if it exists."""
+        try:
+            query = """
+            MATCH (t:Track {soundcharts_uuid: $uuid})
+            RETURN t.id AS track_id
+            """
+            async with self.neo4j_driver.session() as session:
+                result = await session.run(query, uuid=soundcharts_uuid)
+                record = await result.single()
+                return record["track_id"] if record else None
+        except Exception as e:
+            logger.error(
+                "Failed to get track by UUID",
+                uuid=soundcharts_uuid,
+                error=str(e),
+            )
+            return None
 
     async def _create_artist_node(self, artist_data: Dict) -> str:
         """Create an Artist node and return its internal UUID."""
-        # Generate ID with prefix
-        artist_id = f"artist_{uuid.uuid4()}"
+        soundcharts_uuid = artist_data["uuid"]
+
+        # Check deduplication queue first
+        if await self.deduplication_queue.is_processed(soundcharts_uuid):
+            logger.debug("Artist already processed", soundcharts_uuid=soundcharts_uuid)
+            return await self._get_artist_id_by_uuid(soundcharts_uuid)
 
         artist = Artist(
-            id=artist_id,
-            soundcharts_uuid=artist_data["uuid"],
+            id=f"artist_{uuid.uuid4()}",
+            soundcharts_uuid=soundcharts_uuid,
             name=artist_data["name"],
             credit_name=artist_data.get("creditName"),
             country_code=artist_data.get("countryCode"),
@@ -775,19 +793,48 @@ class APIService:
             type=artist_data.get("type"),
             birth_date=artist_data.get("birthDate"),
         )
-        await self._upsert_neo4j_node("Artist", artist.dict())
-        # Use soundcharts_uuid for deduplication
-        await self.deduplication_queue.mark_processed(artist_data["uuid"])
-        return artist_id
+
+        # Use transaction to ensure node exists
+        async with self.neo4j_driver.session() as session:
+            await session.execute_write(
+                lambda tx: tx.run(
+                    """
+                    MERGE (a:Artist {soundcharts_uuid: $uuid})
+                    ON CREATE SET a = $props
+                    ON MATCH SET a += $update_props, 
+                                 a.last_updated = $now
+                    """,
+                    uuid=soundcharts_uuid,
+                    props=artist.dict(),
+                    update_props={k: v for k, v in artist.dict().items() if k != "id"},
+                    now=datetime.utcnow(),
+                ),
+            )
+
+            # Verify node existence in the same transaction
+            result = await session.run(
+                "MATCH (a:Artist {soundcharts_uuid: $uuid}) RETURN a.id AS artist_id",
+                uuid=soundcharts_uuid,
+            )
+            record = await result.single()
+            created_id = record["artist_id"]
+
+        # Only mark processed after successful creation
+        await self.deduplication_queue.mark_processed(soundcharts_uuid)
+        return created_id
 
     async def _create_album_node(self, album_data: Dict) -> str:
         """Create an Album node and return its internal UUID."""
-        # Generate ID with prefix
-        album_id = f"album_{uuid.uuid4()}"
+        soundcharts_uuid = album_data["uuid"]
+
+        # Check deduplication queue first
+        if await self.deduplication_queue.is_processed(soundcharts_uuid):
+            logger.debug("Album already processed", soundcharts_uuid=soundcharts_uuid)
+            return await self._get_album_id_by_uuid(soundcharts_uuid)
 
         album = Album(
-            id=album_id,
-            soundcharts_uuid=album_data["uuid"],
+            id=f"album_{uuid.uuid4()}",
+            soundcharts_uuid=soundcharts_uuid,
             name=album_data["name"],
             credit_name=album_data.get("creditName"),
             upc=album_data.get("upc"),
@@ -796,10 +843,54 @@ class APIService:
             copyright=album_data.get("copyright"),
             image_url=album_data.get("imageUrl"),
         )
-        await self._upsert_neo4j_node("Album", album.dict())
-        # Use soundcharts_uuid for deduplication
-        await self.deduplication_queue.mark_processed(album_data["uuid"])
-        return album_id
+
+        # Use transaction to ensure node exists
+        async with self.neo4j_driver.session() as session:
+            await session.execute_write(
+                lambda tx: tx.run(
+                    """
+                    MERGE (a:Album {soundcharts_uuid: $uuid})
+                    ON CREATE SET a = $props
+                    ON MATCH SET a += $update_props, 
+                                 a.last_updated = $now
+                    """,
+                    uuid=soundcharts_uuid,
+                    props=album.dict(),
+                    update_props={k: v for k, v in album.dict().items() if k != "id"},
+                    now=datetime.utcnow(),
+                ),
+            )
+
+            # Verify node existence in the same transaction
+            result = await session.run(
+                "MATCH (a:Album {soundcharts_uuid: $uuid}) RETURN a.id AS album_id",
+                uuid=soundcharts_uuid,
+            )
+            record = await result.single()
+            created_id = record["album_id"]
+
+        # Only mark processed after successful creation
+        await self.deduplication_queue.mark_processed(soundcharts_uuid)
+        return created_id
+
+    async def _get_album_id_by_uuid(self, soundcharts_uuid: str) -> Optional[str]:
+        """Get album ID by soundcharts_uuid if it exists."""
+        try:
+            query = """
+            MATCH (a:Album {soundcharts_uuid: $uuid})
+            RETURN a.id AS album_id
+            """
+            async with self.neo4j_driver.session() as session:
+                result = await session.run(query, uuid=soundcharts_uuid)
+                record = await result.single()
+                return record["album_id"] if record else None
+        except Exception as e:
+            logger.error(
+                "Failed to get album by UUID",
+                uuid=soundcharts_uuid,
+                error=str(e),
+            )
+            return None
 
     async def _process_related_entities(
         self,
@@ -808,6 +899,66 @@ class APIService:
     ) -> None:
         """Process all related entities for a given entity."""
         try:
+            # Process audio features if available
+            if "audio" in entity_data and entity_data["audio"] is not None:
+                audio_node = {
+                    "id": f"audio_{entity_id}",
+                    "danceability": entity_data["audio"].get("danceability"),
+                    "energy": entity_data["audio"].get("energy"),
+                    "key": entity_data["audio"].get("key"),
+                    "loudness": entity_data["audio"].get("loudness"),
+                    "mode": entity_data["audio"].get("mode"),
+                    "speechiness": entity_data["audio"].get("speechiness"),
+                    "acousticness": entity_data["audio"].get("acousticness"),
+                    "instrumentalness": entity_data["audio"].get("instrumentalness"),
+                    "liveness": entity_data["audio"].get("liveness"),
+                    "valence": entity_data["audio"].get("valence"),
+                    "tempo": entity_data["audio"].get("tempo"),
+                    "time_signature": entity_data["audio"].get("time_signature"),
+                }
+                await self._upsert_neo4j_node("Audio", audio_node)
+                await self._upsert_neo4j_relationship(
+                    entity_id,
+                    audio_node["id"],
+                    "HAS_AUDIO_FEATURES",
+                )
+                logger.debug("✅ Processed audio features", track_id=entity_id)
+
+            # Process album artists if available
+            if "artists" in entity_data:
+                for artist in entity_data["artists"]:
+                    # Check if artist already exists
+                    existing_artist_id = await self._get_artist_id_by_uuid(
+                        artist["uuid"],
+                    )
+
+                    if existing_artist_id:
+                        artist_id = existing_artist_id
+                    else:
+                        # Create new artist node if it doesn't exist
+                        artist_id = f"artist_{artist['uuid']}"
+                        artist_node = {
+                            "id": artist_id,
+                            "soundcharts_uuid": artist["uuid"],
+                            "name": artist["name"],
+                            "credit_name": artist.get("creditName"),
+                        }
+                        await self._upsert_neo4j_node("Artist", artist_node)
+                        # Add artist to pending queue for further processing
+                        await self._add_to_pending_list(artist["name"])
+
+                    # Create relationship between album and artist
+                    await self._upsert_neo4j_relationship(
+                        entity_id,
+                        artist_id,
+                        "HAS_ARTIST",
+                    )
+                    logger.debug(
+                        "✅ Processed album artist",
+                        album_id=entity_id,
+                        artist_id=artist_id,
+                    )
+
             # Process genres
             if "genres" in entity_data:
                 for genre in entity_data["genres"]:
@@ -1101,39 +1252,6 @@ class APIService:
             )
             raise
 
-    async def _process_audio_features(
-        self,
-        audio_features: Dict,
-        track_id: str,
-    ) -> None:
-        """Process audio features for a track."""
-        try:
-            audio_node = {
-                "id": f"audio_{track_id}",
-                "danceability": audio_features.get("danceability"),
-                "energy": audio_features.get("energy"),
-                "key": audio_features.get("key"),
-                "loudness": audio_features.get("loudness"),
-                "mode": audio_features.get("mode"),
-                "speechiness": audio_features.get("speechiness"),
-                "acousticness": audio_features.get("acousticness"),
-                "instrumentalness": audio_features.get("instrumentalness"),
-                "liveness": audio_features.get("liveness"),
-                "valence": audio_features.get("valence"),
-                "tempo": audio_features.get("tempo"),
-                "time_signature": audio_features.get("time_signature"),
-            }
-            await self._upsert_neo4j_node("Audio", audio_node)
-            logger.debug("✅ Processed audio features", track_id=track_id)
-        except Exception as e:
-            logger.error(
-                "❌ Failed to process audio features",
-                track_id=track_id,
-                error=str(e),
-                stack_trace=traceback.format_exc(),
-            )
-            raise
-
     async def _process_roles(self, roles: List[Dict], track_id: str) -> None:
         """Process roles for a track."""
         try:
@@ -1160,4 +1278,23 @@ class APIService:
 
     async def get_pending_artists(self) -> List[str]:
         """Get the list of pending artists from Redis."""
-        return await self.redis.smembers(PENDING_ARTISTS_KEY)
+        return await self.redis.smembers("pending:artists")
+
+    async def _get_artist_id_by_uuid(self, soundcharts_uuid: str) -> Optional[str]:
+        """Get artist ID by soundcharts_uuid if it exists."""
+        try:
+            query = """
+            MATCH (a:Artist {soundcharts_uuid: $uuid})
+            RETURN a.id AS artist_id
+            """
+            async with self.neo4j_driver.session() as session:
+                result = await session.run(query, uuid=soundcharts_uuid)
+                record = await result.single()
+                return record["artist_id"] if record else None
+        except Exception as e:
+            logger.error(
+                "Failed to get artist by UUID",
+                uuid=soundcharts_uuid,
+                error=str(e),
+            )
+            return None
