@@ -1029,15 +1029,6 @@ class APIService:
                                 f"HAS_{role_type[:-1].upper()}",
                             )
 
-            # Process featured artists
-            if "featured_artists" in entity_data:
-                for artist in entity_data["featured_artists"]:
-                    await self._add_to_pending_list(artist["name"])
-                    await self._upsert_neo4j_relationship(
-                        artist["uuid"],
-                        entity_id,
-                        "FEATURED_ON",
-                    )
         except Exception as e:
             logger.error(
                 "❌ Failed to process related entities",
