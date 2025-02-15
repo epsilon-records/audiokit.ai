@@ -325,9 +325,6 @@ class APIService:
         try:
             artist_object = artist_metadata["object"]
 
-            # Add artist to pending list
-            await self._add_to_pending_list(artist_object.get("name"))
-
             # Create artist node and get internal ID
             internal_artist_id = await self._create_artist_node(artist_object)
 
@@ -925,6 +922,10 @@ class APIService:
                         entity_id,
                         "ARTIST_OF",
                     )
+
+                    # Add artist to pending list
+                    await self._add_to_pending_list(artist.get("name"))
+
                     logger.debug(
                         "✅ Processed album artist",
                         entity_id=entity_id,
