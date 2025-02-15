@@ -45,10 +45,12 @@ async def main():
 
     # Add artists to the queue
     artists = [
-        "Carl Cox",
+        "Rich Sibley",
+        "Vozz Rich",
+        "Dirty Freud",
     ]  # Example artists
     for artist in artists:
-        await api_service.redis.sadd("pending:artists", artist)
+        await api_service.redis.lpush("pending:artists", artist)
         logger.debug(f"🎤 Added artist to queue: {artist}")
 
     input("Press Enter to continue...")
@@ -56,7 +58,7 @@ async def main():
     try:
         while True:
             # Get next artist from queue
-            artist = await api_service.redis.spop("pending:artists")
+            artist = await api_service.redis.rpop("pending:artists")
             if not artist:
                 logger.debug("🏁 Artist queue is empty")
                 break

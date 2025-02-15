@@ -63,6 +63,10 @@ class APIService:
         # Clear using queue's own method
         await self.deduplication_queue.clear()
 
+        # Add this after initializing neo4j_driver
+        await self._add_unique_constraints()
+        logger.info("✅ Neo4j constraints ensured")
+
     async def _add_unique_constraints(self) -> None:
         """Add unique constraints to Neo4j."""
         constraints = [
@@ -201,51 +205,8 @@ class APIService:
             logger.debug("Skipping empty artist name")
             return
 
-        await self.redis.sadd("pending:artists", artist_name)
+        await self.redis.lpush("pending:artists", artist_name)
         logger.debug(f"Added artist to pending queue: {artist_name}")
-
-    async def _process_queued_artists(self) -> None:
-        """Process artists queued during ingestion using Redis."""
-        try:
-            # Get all pending artist names from Redis
-            artist_names = await self.redis.smembers("pending:artists")
-
-            # Process each artist
-            for artist_name in artist_names:
-                try:
-                    # Search for artist to get UUID
-                    search_results = await self.soundcharts_service.search_artist(
-                        artist_name,
-                    )
-                    if not search_results.get("items"):
-                        logger.error("Artist not found", artist=artist_name)
-                        continue
-
-                    artist_data = search_results["items"][0]
-                    artist_metadata = (
-                        await self.soundcharts_service.get_artist_metadata(
-                            artist_data["uuid"],
-                        )
-                    )
-                    await self._process_artist_metadata(artist_metadata)
-                except Exception as e:
-                    logger.error(
-                        "❌ Failed to process queued artist",
-                        artist_name=artist_name,
-                        error=str(e),
-                        stack_trace=traceback.format_exc(),
-                    )
-
-            # Clear the pending list in Redis
-            await self.redis.delete("pending:artists")
-            logger.info("✅ Processed queued artists")
-        except Exception as e:
-            logger.error(
-                "❌ Failed to process queued artists",
-                error=str(e),
-                stack_trace=traceback.format_exc(),
-            )
-            raise
 
     async def _process_song_metadata(self, song_metadata: Dict) -> None:
         """Process song metadata and create nodes."""
@@ -354,6 +315,9 @@ class APIService:
         """Process artist metadata and create nodes."""
         try:
             artist_object = artist_metadata["object"]
+
+            # Add artist to pending list
+            await self._add_to_pending_list(artist_object.get("name"))
 
             # Create artist node and get internal ID
             internal_artist_id = await self._create_artist_node(artist_object)
@@ -585,6 +549,9 @@ class APIService:
         """Ingest all SoundCharts data for an artist and build Neo4j graph."""
         try:
             logger.info("🎤 Starting artist ingestion", artist=artist_name)
+            # Add artist to pending list before processing
+            await self._add_to_pending_list(artist_name)
+
             # Step 1: Search for artist and get UUID
             search_results = await self.soundcharts_service.search_artist(artist_name)
             if not search_results.get("items"):
@@ -932,27 +899,16 @@ class APIService:
             # Process album artists if available
             if "artists" in entity_data:
                 for artist in entity_data["artists"]:
-                    # Check if artist already exists
-                    existing_artist_id = await self._get_artist_id_by_uuid(
-                        artist["uuid"],
+                    # Use proper artist creation method
+                    artist_id = await self._create_artist_node(
+                        {
+                            "uuid": artist["uuid"],
+                            "name": artist["name"],
+                            "creditName": artist.get("creditName"),
+                        },
                     )
 
-                    if existing_artist_id:
-                        artist_id = existing_artist_id
-                    else:
-                        # Create new artist node if it doesn't exist
-                        artist_id = f"artist_{artist['uuid']}"
-                        artist_node = {
-                            "id": artist_id,
-                            "soundcharts_uuid": artist["uuid"],
-                            "name": artist["name"],
-                            "credit_name": artist.get("creditName"),
-                        }
-                        await self._upsert_neo4j_node("Artist", artist_node)
-                        # Add artist to pending queue for further processing
-                        await self._add_to_pending_list(artist["name"])
-
-                    # Create relationship between album and artist
+                    # Create relationship between entity and artist
                     await self._upsert_neo4j_relationship(
                         entity_id,
                         artist_id,
@@ -965,7 +921,7 @@ class APIService:
                     )
                     logger.debug(
                         "✅ Processed album artist",
-                        album_id=entity_id,
+                        entity_id=entity_id,
                         artist_id=artist_id,
                     )
 
@@ -1312,10 +1268,6 @@ class APIService:
                 stack_trace=traceback.format_exc(),
             )
             raise
-
-    async def get_pending_artists(self) -> List[str]:
-        """Get the list of pending artists from Redis."""
-        return await self.redis.smembers("pending:artists")
 
     async def _get_artist_id_by_uuid(self, soundcharts_uuid: str) -> Optional[str]:
         """Get artist ID by soundcharts_uuid if it exists."""
