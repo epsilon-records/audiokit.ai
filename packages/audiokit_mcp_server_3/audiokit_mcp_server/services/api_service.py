@@ -1,4 +1,5 @@
 import asyncio
+import time
 import traceback
 import uuid
 from datetime import datetime
@@ -205,7 +206,9 @@ class APIService:
             logger.debug("Skipping empty artist name")
             return
 
-        await self.redis.lpush("pending:artists", artist_name)
+        # Use a sorted set for FIFO behavior with timestamps as scores
+        timestamp = time.time()
+        await self.redis.zadd("pending:artists", {artist_name: timestamp})
         logger.debug(f"Added artist to pending queue: {artist_name}")
 
     async def _process_song_metadata(self, song_metadata: Dict) -> None:
@@ -1287,3 +1290,44 @@ class APIService:
                 error=str(e),
             )
             return None
+
+    async def process_pending_artists(self) -> None:
+        """Process artists from the pending queue."""
+        try:
+            while True:
+                # Get the oldest artist from the sorted set
+                artist = await self.redis.zrange("pending:artists", 0, 0)
+                if not artist:
+                    logger.debug("🏁 Artist queue is empty")
+                    break
+
+                artist_name = artist[0]
+                logger.debug(f"�� Processing artist: {artist_name}")
+
+                try:
+                    result = await self.ingest_soundcharts_api(artist_name)
+                    if result["status"] == "error":
+                        logger.error(
+                            f"❌ Failed to process artist {artist_name}: {result['error']}"
+                        )
+                    elif result["status"] == "skipped":
+                        logger.warning(
+                            f"⚠️ Skipped artist {artist_name}: {result['reason']}"
+                        )
+                    else:
+                        logger.debug(f"✅ Processed artist {artist_name}: {result}")
+
+                    # Remove the processed artist from the sorted set
+                    await self.redis.zrem("pending:artists", artist_name)
+                except Exception as e:
+                    logger.error(f"❌ Error processing artist {artist_name}: {e!s}")
+                    # Optionally, you could move failed artists to a separate set for retry
+                    await self.redis.zadd("failed:artists", {artist_name: time.time()})
+                    await self.redis.zrem("pending:artists", artist_name)
+
+                # Optional: Add delay between processing if needed
+                await asyncio.sleep(1)
+
+            logger.success("🎉 All artists processed successfully")
+        except asyncio.CancelledError:
+            logger.info("Shutting down gracefully...")

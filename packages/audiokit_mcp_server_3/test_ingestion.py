@@ -50,39 +50,11 @@ async def main():
         "Dirty Freud",
     ]  # Example artists
     for artist in artists:
-        await api_service.redis.lpush("pending:artists", artist)
+        await api_service._add_to_pending_list(artist)
         logger.debug(f"🎤 Added artist to queue: {artist}")
 
-    input("Press Enter to continue...")
     # Process artists from the queue
-    try:
-        while True:
-            # Get next artist from queue
-            artist = await api_service.redis.rpop("pending:artists")
-            if not artist:
-                logger.debug("🏁 Artist queue is empty")
-                break
-
-            logger.debug(f"🎶 Processing artist: {artist}")
-            result = await api_service.ingest_soundcharts_api(artist)
-
-            if result["status"] == "error":
-                logger.error(f"❌ Failed to process artist {artist}: {result['error']}")
-            elif result["status"] == "skipped":
-                logger.warning(f"⚠️ Skipped artist {artist}: {result['reason']}")
-            else:
-                logger.debug(f"✅ Processed artist {artist}: {result}")
-
-            # Optional: Add delay between processing if needed
-            await asyncio.sleep(1)
-
-        logger.success("🎉 All artists processed successfully")
-    except asyncio.CancelledError:
-        logger.info("Shutting down gracefully...")
-    finally:
-        # Ensure resources are closed
-        logger.debug("🛑 Shutting down API service")
-        await api_service.close()
+    await api_service.process_pending_artists()
 
 
 if __name__ == "__main__":
