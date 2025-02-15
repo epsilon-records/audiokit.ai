@@ -922,6 +922,11 @@ class APIService:
                     audio_node["id"],
                     "HAS_AUDIO_FEATURES",
                 )
+                await self._upsert_neo4j_relationship(
+                    audio_node["id"],
+                    entity_id,
+                    "AUDIO_FEATURES_FOR",
+                )
                 logger.debug("✅ Processed audio features", track_id=entity_id)
 
             # Process album artists if available
@@ -953,6 +958,11 @@ class APIService:
                         artist_id,
                         "HAS_ARTIST",
                     )
+                    await self._upsert_neo4j_relationship(
+                        artist_id,
+                        entity_id,
+                        "ARTIST_OF",
+                    )
                     logger.debug(
                         "✅ Processed album artist",
                         album_id=entity_id,
@@ -975,6 +985,11 @@ class APIService:
                         genre_id,
                         "HAS_GENRE",
                     )
+                    await self._upsert_neo4j_relationship(
+                        genre_id,
+                        entity_id,
+                        "GENRE_OF",
+                    )
 
             # Process platforms
             if "platforms" in entity_data:
@@ -988,6 +1003,11 @@ class APIService:
                         entity_id,
                         platform_node.id,
                         "ON_PLATFORM",
+                    )
+                    await self._upsert_neo4j_relationship(
+                        platform_node.id,
+                        entity_id,
+                        "HOSTS",
                     )
 
             # Process labels
@@ -1003,6 +1023,11 @@ class APIService:
                         entity_id,
                         label_node.id,
                         "HAS_LABEL",
+                    )
+                    await self._upsert_neo4j_relationship(
+                        label_node.id,
+                        entity_id,
+                        "LABEL_FOR",
                     )
 
             # Process producers and composers
@@ -1027,6 +1052,11 @@ class APIService:
                                 entity_id,
                                 internal_artist_id,
                                 f"HAS_{role_type[:-1].upper()}",
+                            )
+                            await self._upsert_neo4j_relationship(
+                                internal_artist_id,
+                                entity_id,
+                                f"{role_type[:-1].upper()}_OF",
                             )
 
         except Exception as e:
@@ -1158,6 +1188,11 @@ class APIService:
                 artist.id,  # Artist ID
                 "HAS_ARTIST",
             )
+            await self._upsert_neo4j_relationship(
+                artist.id,
+                song_id,
+                "ARTIST_OF",
+            )
         except Exception as e:
             logger.error("Failed to process artist from song metadata", error=str(e))
             raise
@@ -1171,6 +1206,12 @@ class APIService:
                     artist_id,
                     platform,
                     "ON_PLATFORM",
+                    properties={"identifier": identifier},
+                )
+                await self._upsert_neo4j_relationship(
+                    platform,
+                    artist_id,
+                    "HOSTS",
                     properties={"identifier": identifier},
                 )
                 logger.debug(
@@ -1228,6 +1269,11 @@ class APIService:
                 album_id,
                 label_id,
                 "HAS_LABEL",
+            )
+            await self._upsert_neo4j_relationship(
+                label_id,
+                album_id,
+                "LABEL_FOR",
             )
             logger.debug(
                 "✅ Created label relationship",
