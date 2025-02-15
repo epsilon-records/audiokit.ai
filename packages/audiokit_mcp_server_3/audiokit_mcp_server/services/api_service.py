@@ -206,6 +206,12 @@ class APIService:
             logger.debug("Skipping empty artist name")
             return
 
+        # Check if artist is already in the queue
+        score = await self.redis.zscore("pending:artists", artist_name)
+        if score is not None:
+            logger.debug(f"Artist already in queue: {artist_name}")
+            return
+
         # Use a sorted set for FIFO behavior with timestamps as scores
         timestamp = time.time()
         await self.redis.zadd("pending:artists", {artist_name: timestamp})
