@@ -832,12 +832,11 @@ class APIService:
                     """
                     MERGE (a:Artist {soundcharts_uuid: $uuid})
                     ON CREATE SET a = $props
-                    ON MATCH SET a += $update_props, 
+                    ON MATCH SET a += $props,
                                  a.last_updated = $now
                     """,
                     uuid=soundcharts_uuid,
-                    props=artist.dict(),
-                    update_props={k: v for k, v in artist.dict().items() if k != "id"},
+                    props=artist.dict(exclude={"id"}),
                     now=datetime.utcnow(),
                 ),
             )
