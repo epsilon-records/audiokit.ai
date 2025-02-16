@@ -822,6 +822,9 @@ class APIService:
             type=artist_data.get("type"),
             birth_date=artist_data.get("birthDate"),
             weight=artist_data.get("weight", 0.0),
+            slug=artist_data.get("slug"),
+            app_url=artist_data.get("appUrl"),
+            image_url=artist_data.get("imageUrl"),
         )
 
         # Use transaction to ensure node exists
