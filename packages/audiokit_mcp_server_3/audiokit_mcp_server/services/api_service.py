@@ -1455,6 +1455,7 @@ class APIService:
 
             # Get all artists from the pending queue
             artists = await self.redis.zrange("pending:artists", 0, -1, withscores=True)
+            logger.debug("Found artists in queue", count=len(artists))
 
             # Create a dictionary to store artist streaming scores
             streaming_scores = {}
@@ -1462,6 +1463,11 @@ class APIService:
             # Fetch streaming data for each artist
             for artist_value, _ in artists:
                 artist_name, soundcharts_uuid = artist_value.split("|")
+                logger.debug(
+                    "Processing artist",
+                    artist_name=artist_name,
+                    soundcharts_uuid=soundcharts_uuid,
+                )
 
                 # Get streaming data from SoundCharts
                 streaming_data = (
@@ -1469,33 +1475,90 @@ class APIService:
                         soundcharts_uuid,
                     )
                 )
+                logger.debug(
+                    "Received streaming data",
+                    artist_name=artist_name,
+                    platforms=list(streaming_data.keys()),
+                )
 
                 # Calculate an overall streaming score using the highest platform value
-                if streaming_data:
-                    # Find the maximum value across all platforms
-                    max_value = 0
-                    for platform_data in streaming_data.values():
-                        if (
-                            platform_data
-                            and "items" in platform_data
-                            and platform_data["items"]
-                        ):
-                            # Get the most recent value for this platform
-                            platform_value = platform_data["items"][-1]["value"]
-                            max_value = max(max_value, platform_value)
-                    streaming_scores[artist_value] = max_value
-                else:
-                    # If no streaming data, use a default low score
-                    streaming_scores[artist_value] = 0
+                max_value = 0
+                max_platform = None
+
+                for platform_code, platform_response in streaming_data.items():
+                    logger.debug(
+                        "Processing platform",
+                        artist_name=artist_name,
+                        platform=platform_code,
+                    )
+
+                    if not platform_response:
+                        logger.debug(
+                            "Empty platform response",
+                            artist_name=artist_name,
+                            platform=platform_code,
+                        )
+                        continue
+
+                    if "items" not in platform_response:
+                        logger.debug(
+                            "Missing items in platform response",
+                            artist_name=artist_name,
+                            platform=platform_code,
+                        )
+                        continue
+
+                    if not platform_response["items"]:
+                        logger.debug(
+                            "Empty items array in platform response",
+                            artist_name=artist_name,
+                            platform=platform_code,
+                        )
+                        continue
+
+                    # Get the most recent value for this platform
+                    most_recent = platform_response["items"][-1]
+                    platform_value = most_recent["value"]
+                    logger.debug(
+                        "Platform value",
+                        artist_name=artist_name,
+                        platform=platform_code,
+                        value=platform_value,
+                        date=most_recent["date"],
+                    )
+
+                    if platform_value > max_value:
+                        max_value = platform_value
+                        max_platform = platform_code
+                        logger.debug(
+                            "New max value found",
+                            artist_name=artist_name,
+                            platform=platform_code,
+                            value=platform_value,
+                        )
+
+                streaming_scores[artist_value] = max_value
+                logger.info(
+                    "Calculated final streaming score",
+                    artist_name=artist_name,
+                    score=max_value,
+                    platform=max_platform,
+                )
 
             # Remove all artists from the current queue
             await self.redis.delete("pending:artists")
+            logger.debug("Cleared existing artist queue")
 
             # Add artists back with their streaming scores
             for artist_value, streaming_score in streaming_scores.items():
                 await self.redis.zadd(
                     "pending:artists",
                     {artist_value: streaming_score},
+                )
+                logger.debug(
+                    "Added artist to queue with score",
+                    artist=artist_value.split("|")[0],
+                    score=streaming_score,
                 )
 
             logger.info(

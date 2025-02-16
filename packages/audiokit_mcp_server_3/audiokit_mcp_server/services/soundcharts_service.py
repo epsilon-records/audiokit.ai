@@ -748,49 +748,58 @@ class SoundChartsService:
 
     @cache()  # Uses self.cache_ttl
     async def get_artist_streaming_data(self, artist_uuid: str) -> Dict:
-        """Get streaming data for an artist across all platforms."""
+        """Get streaming data for an artist from Spotify."""
         try:
-            # Get platforms
-            platforms = await self.get_platforms()
-            if not isinstance(platforms, list):
-                logger.error("Invalid platforms data", platforms=platforms)
-                raise ValueError("Platforms data must be a list")
-
             streaming_data = {}
-            for platform in platforms:
-                platform_code = platform.get("code")  # Use 'code' directly
-                if not platform_code:
-                    continue
+            platform_code = "spotify"  # Hardcode to only use Spotify
 
-                url = f"{self.base_url}/api/v2/artist/{artist_uuid}/streaming/{platform_code}"
-                try:
-                    async with httpx.AsyncClient() as client:
-                        response = await client.get(url, headers=self.headers)
-                        response.raise_for_status()
-                        platform_data = response.json()
+            url = (
+                f"{self.base_url}/api/v2/artist/{artist_uuid}/streaming/{platform_code}"
+            )
+            logger.debug(
+                "Fetching Spotify streaming data",
+                artist_uuid=artist_uuid,
+                url=url,
+            )
+
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.get(url, headers=self.headers)
+                    response.raise_for_status()
+                    platform_data = response.json()
+                    logger.debug(
+                        "Received Spotify data",
+                        artist_uuid=artist_uuid,
+                        status_code=response.status_code,
+                        has_data=bool(platform_data),
+                    )
+                    if platform_data:  # Store even if empty
                         streaming_data[platform_code] = platform_data
-                except httpx.HTTPStatusError as e:
-                    if e.response.status_code == 404:
-                        logger.warning(
-                            "⚠️ Streaming data not found for platform",
-                            artist_id=artist_id,
-                            platform=platform_code,
-                        )
-                    else:
-                        logger.error(
-                            "❌ Failed to fetch streaming data for platform",
-                            artist_id=artist_id,
-                            platform=platform_code,
-                            error=str(e),
-                        )
-                    continue
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 404:
+                    logger.debug(
+                        "No Spotify streaming data found",
+                        artist_uuid=artist_uuid,
+                    )
+                else:
+                    logger.warning(
+                        "Failed to fetch Spotify streaming data",
+                        artist_uuid=artist_uuid,
+                        status_code=e.response.status_code,
+                        error=str(e),
+                    )
 
+            logger.debug(
+                "Completed Spotify streaming data fetch",
+                artist_uuid=artist_uuid,
+                has_data=bool(streaming_data),
+            )
             return streaming_data
         except Exception as e:
             logger.error(
-                "❌ Failed to fetch artist streaming data",
-                artist_id=artist_id,
+                "❌ Failed to fetch Spotify streaming data",
+                artist_uuid=artist_uuid,
                 error=str(e),
                 stack_trace=traceback.format_exc(),
             )
-            raise
+            return {}
