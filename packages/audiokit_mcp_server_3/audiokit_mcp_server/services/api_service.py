@@ -1396,7 +1396,7 @@ class APIService:
 
             while True:
                 # Get the highest priority artist from the sorted set
-                artist_value = await self.redis.zrange("pending:artists", 0, 0)
+                artist_value = await self.redis.zrevrange("pending:artists", 0, 0)
                 if not artist_value:
                     logger.debug("🏁 Artist queue is empty")
                     break
