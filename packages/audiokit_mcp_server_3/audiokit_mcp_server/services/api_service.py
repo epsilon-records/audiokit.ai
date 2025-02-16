@@ -810,9 +810,6 @@ class APIService:
             logger.debug("Artist already processed", soundcharts_uuid=soundcharts_uuid)
             return await self._get_artist_id_by_uuid(soundcharts_uuid)
 
-        # Get weight from artist_data if available
-        weight = artist_data.get("weight", 0)
-
         artist = Artist(
             id=f"artist_{uuid.uuid4()}",
             soundcharts_uuid=soundcharts_uuid,
@@ -825,7 +822,7 @@ class APIService:
             gender=artist_data.get("gender"),
             type=artist_data.get("type"),
             birth_date=artist_data.get("birthDate"),
-            weight=weight,  # Add weight property
+            weight=artist_data.get("weight"),
         )
 
         # Use transaction to ensure node exists
