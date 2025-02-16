@@ -1391,10 +1391,10 @@ class APIService:
     async def process_pending_artists(self) -> None:
         """Process artists from the pending queue, sorted by streaming popularity."""
         try:
-            # Always sort by streaming popularity before processing
-            await self.sort_pending_artists_by_popularity()
-
             while True:
+                # Resort the entire list before processing each artist
+                await self.sort_pending_artists_by_popularity()
+
                 # Get the highest priority artist from the sorted set
                 artist_value = await self.redis.zrevrange("pending:artists", 0, 0)
                 if not artist_value:
