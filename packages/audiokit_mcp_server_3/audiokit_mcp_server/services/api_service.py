@@ -752,9 +752,8 @@ class APIService:
             language_code=track_data.get("languageCode"),
         )
 
-        # Use transaction to ensure node exists before relationships
+        # Use transaction to ensure node exists
         async with self.neo4j_driver.session() as session:
-            # First create the track node
             await session.execute_write(
                 lambda tx: tx.run(
                     """
@@ -822,7 +821,7 @@ class APIService:
             gender=artist_data.get("gender"),
             type=artist_data.get("type"),
             birth_date=artist_data.get("birthDate"),
-            weight=artist_data.get("weight"),
+            weight=artist_data.get("weight", 0.0),
         )
 
         # Use transaction to ensure node exists
@@ -832,11 +831,12 @@ class APIService:
                     """
                     MERGE (a:Artist {soundcharts_uuid: $uuid})
                     ON CREATE SET a = $props
-                    ON MATCH SET a += $props,
+                    ON MATCH SET a += $update_props, 
                                  a.last_updated = $now
                     """,
                     uuid=soundcharts_uuid,
-                    props=artist.dict(exclude={"id"}),
+                    props=artist.dict(),
+                    update_props={k: v for k, v in artist.dict().items() if k != "id"},
                     now=datetime.utcnow(),
                 ),
             )

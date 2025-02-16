@@ -26,6 +26,8 @@ class Artist(BaseModel):
     slug: Optional[str] = None
     app_url: Optional[str] = None
     image_url: Optional[str] = None
+    weight: Optional[float] = None
+    last_updated: Optional[datetime] = None
 
 
 class ISRC(BaseModel):
@@ -49,6 +51,7 @@ class Track(BaseModel):
     producers: Optional[List[str]] = None
     language_code: Optional[str] = None
     soundcharts_uuid: str  # SoundCharts UUID for merging
+    last_updated: Optional[datetime] = None
 
 
 class Album(BaseModel):
@@ -62,6 +65,7 @@ class Album(BaseModel):
     image_url: Optional[str] = None
     type: Optional[str] = None
     soundcharts_uuid: str  # SoundCharts UUID for merging
+    last_updated: Optional[datetime] = None
 
 
 class Genre(BaseModel):
