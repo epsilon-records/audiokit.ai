@@ -57,23 +57,30 @@ class DeduplicationQueue:
             logger.info("✅ Closed Redis deduplication queue")
 
     async def clear(self) -> None:
-        """Clear all entries from the deduplication queue."""
-        if not self.redis:
-            raise RuntimeError("Redis connection not established")
-
+        """Clear the deduplication queue and pending artists."""
         try:
             # Ask user for confirmation
             response = (
-                input("⚠️  Clear the entire Redis database? [y/N]: ").strip().lower()
+                input("⚠️  Clear the deduplication queue and pending artists? [y/N]: ")
+                .strip()
+                .lower()
             )
             if response != "y":
-                logger.info("Skipping Redis cache clearance")
+                logger.info("Skipping queue clearance")
                 return
 
-            await asyncio.wait_for(self.redis.flushdb(), timeout=5.0)
-            logger.info("🧹 Cleared deduplication queue and cache")
+            # Clear deduplication queue
+            await asyncio.wait_for(
+                self.redis.delete("deduplication_queue"),
+                timeout=5.0,
+            )
+
+            # Clear pending artists
+            await asyncio.wait_for(self.redis.delete("pending:artists"), timeout=5.0)
+
+            logger.info("🧹 Cleared deduplication queue and pending artists")
         except asyncio.TimeoutError:
-            logger.warning("Redis flush operation timed out")
+            logger.warning("Redis delete operation timed out")
         except Exception as e:
-            logger.error("Failed to clear Redis cache", error=str(e))
+            logger.error("Failed to clear queues", error=str(e))
             raise

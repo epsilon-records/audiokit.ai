@@ -327,7 +327,11 @@ class APIService:
             logger.warning("Invalid date format", date_str=date_str)
             return None
 
-    async def _process_artist_metadata(self, artist_metadata: Dict) -> None:
+    async def _process_artist_metadata(
+        self,
+        artist_metadata: Dict,
+        weight: float = 0,
+    ) -> None:
         """Process artist metadata and create nodes."""
         try:
             logger.debug("Processing artist metadata", metadata=artist_metadata)
@@ -344,6 +348,9 @@ class APIService:
             if "uuid" not in artist_object:
                 logger.error("Missing required field: uuid")
                 return
+
+            # Add weight to artist data
+            artist_object["weight"] = weight
 
             # Create artist node and get internal ID
             internal_artist_id = await self._create_artist_node(artist_object)
@@ -577,7 +584,11 @@ class APIService:
             )
             raise
 
-    async def ingest_soundcharts_api(self, soundcharts_uuid: str) -> Dict:
+    async def ingest_soundcharts_api(
+        self,
+        soundcharts_uuid: str,
+        weight: float = 0,
+    ) -> Dict:
         """Ingest all SoundCharts data for an artist and build Neo4j graph."""
         try:
             # Get artist metadata to include name in logs
@@ -593,9 +604,10 @@ class APIService:
                 "🎤 Starting artist ingestion",
                 artist_name=artist_name,
                 soundcharts_uuid=soundcharts_uuid,
+                weight=weight,
             )
 
-            await self._process_artist_metadata(artist_metadata)
+            await self._process_artist_metadata(artist_metadata, weight)
 
             # Process songs
             songs = await self.soundcharts_service.get_artist_songs(soundcharts_uuid)
@@ -638,12 +650,14 @@ class APIService:
                 "status": "success",
                 "artist_name": artist_name,
                 "soundcharts_uuid": soundcharts_uuid,
+                "weight": weight,
             }
 
             logger.info(
                 "✅ Successfully processed artist",
                 artist_name=artist_name,
                 soundcharts_uuid=soundcharts_uuid,
+                weight=weight,
             )
             return result
 
@@ -796,6 +810,9 @@ class APIService:
             logger.debug("Artist already processed", soundcharts_uuid=soundcharts_uuid)
             return await self._get_artist_id_by_uuid(soundcharts_uuid)
 
+        # Get weight from artist_data if available
+        weight = artist_data.get("weight", 0)
+
         artist = Artist(
             id=f"artist_{uuid.uuid4()}",
             soundcharts_uuid=soundcharts_uuid,
@@ -808,6 +825,7 @@ class APIService:
             gender=artist_data.get("gender"),
             type=artist_data.get("type"),
             birth_date=artist_data.get("birthDate"),
+            weight=weight,  # Add weight property
         )
 
         # Use transaction to ensure node exists
@@ -1396,25 +1414,36 @@ class APIService:
                 await self.sort_pending_artists_by_popularity()
 
                 # Get the highest priority artist from the sorted set
-                artist_value = await self.redis.zrevrange("pending:artists", 0, 0)
+                artist_value = await self.redis.zrevrange(
+                    "pending:artists",
+                    0,
+                    0,
+                    withscores=True,
+                )
                 if not artist_value:
                     logger.debug("🏁 Artist queue is empty")
                     break
 
-                # Split the stored value into name and UUID
-                artist_name, soundcharts_uuid = artist_value[0].split("|")
+                # Split the stored value into name and UUID, and get the score
+                artist_name, soundcharts_uuid = artist_value[0][0].split("|")
+                weight = artist_value[0][1]  # Get the score as weight
                 logger.debug(
-                    f"🔁 Processing artist: {artist_name} ({soundcharts_uuid})",
+                    f"🔁 Processing artist: {artist_name} ({soundcharts_uuid}) with weight {weight}",
                 )
 
                 try:
-                    result = await self.ingest_soundcharts_api(soundcharts_uuid)
+                    # Pass weight to ingestion
+                    result = await self.ingest_soundcharts_api(
+                        soundcharts_uuid,
+                        weight=weight,
+                    )
 
                     if result["status"] == "success":
                         logger.info(
                             "✅ Successfully processed artist",
                             artist_name=artist_name,
                             soundcharts_uuid=soundcharts_uuid,
+                            weight=weight,
                         )
                     else:
                         logger.error(
@@ -1425,7 +1454,7 @@ class APIService:
                         )
 
                     # Remove the processed artist from the sorted set
-                    await self.redis.zrem("pending:artists", artist_value[0])
+                    await self.redis.zrem("pending:artists", artist_value[0][0])
 
                 except Exception as e:
                     logger.error(
@@ -1437,9 +1466,9 @@ class APIService:
                     # Optionally, you could move failed artists to a separate set for retry
                     await self.redis.zadd(
                         "failed:artists",
-                        {artist_value[0]: time.time()},
+                        {artist_value[0][0]: time.time()},
                     )
-                    await self.redis.zrem("pending:artists", artist_value[0])
+                    await self.redis.zrem("pending:artists", artist_value[0][0])
 
                 # Optional: Add delay between processing if needed
                 await asyncio.sleep(1)
