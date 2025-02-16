@@ -199,23 +199,30 @@ class APIService:
             )
             raise
 
-    async def _add_to_pending_list(self, artist_name: str) -> None:
+    async def _add_to_pending_list(
+        self,
+        artist_name: str,
+        soundcharts_uuid: str,
+    ) -> None:
         """Add an artist to the pending queue for later processing."""
         # Skip empty strings
-        if not artist_name or not artist_name.strip():
-            logger.debug("Skipping empty artist name")
+        if not artist_name or not artist_name.strip() or not soundcharts_uuid:
+            logger.debug("Skipping empty artist name or UUID")
             return
 
         # Check if artist is already in the queue
-        score = await self.redis.zscore("pending:artists", artist_name)
+        value = f"{artist_name}|{soundcharts_uuid}"
+        score = await self.redis.zscore("pending:artists", value)
         if score is not None:
-            logger.debug(f"Artist already in queue: {artist_name}")
+            logger.debug(f"Artist already in queue: {artist_name} ({soundcharts_uuid})")
             return
 
-        # Use a sorted set for FIFO behavior with timestamps as scores
-        timestamp = time.time()
-        await self.redis.zadd("pending:artists", {artist_name: timestamp})
-        logger.debug(f"Added artist to pending queue: {artist_name}")
+        # Add artist with initial score of 0
+        # The score will be updated when we sort by popularity
+        await self.redis.zadd("pending:artists", {value: 0})
+        logger.debug(
+            f"Added artist to pending queue: {artist_name} ({soundcharts_uuid})",
+        )
 
     async def _process_song_metadata(self, song_metadata: Dict) -> None:
         """Process song metadata and create nodes."""
@@ -323,13 +330,32 @@ class APIService:
     async def _process_artist_metadata(self, artist_metadata: Dict) -> None:
         """Process artist metadata and create nodes."""
         try:
-            artist_object = artist_metadata["object"]
+            logger.debug("Processing artist metadata", metadata=artist_metadata)
+
+            # Verify the artist object exists
+            artist_object = artist_metadata.get("object")
+            if not artist_object:
+                logger.error("Missing artist object in metadata")
+                return
+
+            logger.debug("Artist object found", artist_object=artist_object)
+
+            # Verify required fields
+            if "uuid" not in artist_object:
+                logger.error("Missing required field: uuid")
+                return
 
             # Create artist node and get internal ID
             internal_artist_id = await self._create_artist_node(artist_object)
+            logger.debug("Created artist node", artist_id=internal_artist_id)
 
             # Process related entities using internal ID
             await self._process_related_entities(artist_object, internal_artist_id)
+            logger.debug(
+                "Processed related entities for artist",
+                artist_id=internal_artist_id,
+            )
+
         except Exception as e:
             logger.error(
                 "❌ Failed to process artist metadata",
@@ -551,45 +577,54 @@ class APIService:
             )
             raise
 
-    async def ingest_soundcharts_api(self, artist_name: str) -> Dict:
+    async def ingest_soundcharts_api(self, soundcharts_uuid: str) -> Dict:
         """Ingest all SoundCharts data for an artist and build Neo4j graph."""
         try:
-            logger.info("🎤 Starting artist ingestion", artist=artist_name)
-            # Step 1: Search for artist and get UUID
-            search_results = await self.soundcharts_service.search_artist(artist_name)
-            if not search_results.get("items"):
-                logger.error("Artist not found", artist=artist_name)
+            # Get artist metadata to include name in logs
+            artist_metadata = await self.soundcharts_service.get_artist_metadata(
+                soundcharts_uuid,
+            )
+            if not artist_metadata:
+                logger.error("Artist not found", soundcharts_uuid=soundcharts_uuid)
                 return {"status": "skipped", "reason": "artist not found"}
 
-            artist_data = search_results["items"][0]
-            artist_id = artist_data["uuid"]
-            logger.debug(
-                "Found artist ID",
+            artist_name = artist_metadata["object"].get("name", "Unknown Artist")
+            logger.info(
+                "🎤 Starting artist ingestion",
                 artist_name=artist_name,
-                artist_id=artist_id,
+                soundcharts_uuid=soundcharts_uuid,
             )
 
-            # Step 2: Get all artist metadata
-            artist_metadata = await self.soundcharts_service.get_artist_metadata(
-                artist_id,
-            )
             await self._process_artist_metadata(artist_metadata)
 
-            # Step 4: Get and process artist songs
-            songs = await self.soundcharts_service.get_artist_songs(artist_id)
+            # Process songs
+            songs = await self.soundcharts_service.get_artist_songs(soundcharts_uuid)
+            logger.debug(
+                "Processing artist songs",
+                artist_name=artist_name,
+                soundcharts_uuid=soundcharts_uuid,
+                count=len(songs.get("items", [])),
+            )
             for song in songs.get("items", []):
                 song_metadata = await self.soundcharts_service.get_song_metadata(
                     song["uuid"],
                 )
                 await self._process_song_metadata(song_metadata)
 
-            # Step 5: Get and process artist albums
-            albums = await self.soundcharts_service.get_artist_albums(artist_id)
+            # Process albums
+            albums = await self.soundcharts_service.get_artist_albums(soundcharts_uuid)
+            logger.debug(
+                "Processing artist albums",
+                artist_name=artist_name,
+                soundcharts_uuid=soundcharts_uuid,
+                count=len(albums.get("items", [])),
+            )
             for album in albums.get("items", []):
                 if not album.get("uuid"):
                     logger.error(
                         "Album missing UUID, skipping",
-                        album=album,
+                        artist_name=artist_name,
+                        soundcharts_uuid=soundcharts_uuid,
                     )
                     continue
 
@@ -598,14 +633,25 @@ class APIService:
                 )
                 await self._process_album_metadata(album_metadata)
 
-            # Return success status immediately
-            result = {"status": "success", "artist_id": artist_id}
+            # Return success status
+            result = {
+                "status": "success",
+                "artist_name": artist_name,
+                "soundcharts_uuid": soundcharts_uuid,
+            }
 
+            logger.info(
+                "✅ Successfully processed artist",
+                artist_name=artist_name,
+                soundcharts_uuid=soundcharts_uuid,
+            )
             return result
+
         except Exception as e:
             logger.error(
                 "🚨 Ingestion failed",
-                artist=artist_name,
+                artist_name=artist_name,
+                soundcharts_uuid=soundcharts_uuid,
                 error=str(e),
                 stack_trace=traceback.format_exc(),
             )
@@ -869,8 +915,14 @@ class APIService:
     ) -> None:
         """Process all related entities for a given entity."""
         try:
+            logger.debug("Starting to process related entities", entity_id=entity_id)
+
+            # Log all available data
+            logger.debug("Entity data keys", keys=list(entity_data.keys()))
+
             # Process audio features if available
             if "audio" in entity_data and entity_data["audio"] is not None:
+                logger.debug("Processing audio features", entity_id=entity_id)
                 audio_node = {
                     "id": f"audio_{entity_id}",
                     "danceability": entity_data["audio"].get("danceability"),
@@ -897,10 +949,15 @@ class APIService:
                     entity_id,
                     "AUDIO_FEATURES_FOR",
                 )
-                logger.debug("✅ Processed audio features", track_id=entity_id)
+                logger.debug("✅ Processed audio features", entity_id=entity_id)
 
             # Process album artists if available
             if "artists" in entity_data:
+                logger.debug(
+                    "Processing artists",
+                    entity_id=entity_id,
+                    count=len(entity_data["artists"]),
+                )
                 for artist in entity_data["artists"]:
                     # Use proper artist creation method
                     artist_id = await self._create_artist_node(
@@ -924,7 +981,7 @@ class APIService:
                     )
 
                     # Add artist to pending list
-                    await self._add_to_pending_list(artist.get("name"))
+                    await self._add_to_pending_list(artist.get("name"), artist["uuid"])
 
                     logger.debug(
                         "✅ Processed album artist",
@@ -934,6 +991,11 @@ class APIService:
 
             # Process genres
             if "genres" in entity_data:
+                logger.debug(
+                    "Processing genres",
+                    entity_id=entity_id,
+                    count=len(entity_data["genres"]),
+                )
                 for genre in entity_data["genres"]:
                     genre_id = f"genre_{sanitize_id_string(genre['root'])}"
                     genre_node = Genre(
@@ -956,6 +1018,11 @@ class APIService:
 
             # Process platforms
             if "platforms" in entity_data:
+                logger.debug(
+                    "Processing platforms",
+                    entity_id=entity_id,
+                    count=len(entity_data["platforms"]),
+                )
                 for platform in entity_data["platforms"]:
                     platform_node = Platform(
                         id=f"platform_{platform['id']}",
@@ -975,6 +1042,11 @@ class APIService:
 
             # Process labels
             if "labels" in entity_data:
+                logger.debug(
+                    "Processing labels",
+                    entity_id=entity_id,
+                    count=len(entity_data["labels"]),
+                )
                 for label in entity_data["labels"]:
                     label_node = Label(
                         id=f"label_{sanitize_id_string(label['name'])}",
@@ -996,6 +1068,11 @@ class APIService:
             # Process producers and composers
             for role_type in ["producers", "composers"]:
                 if role_type in entity_data:
+                    logger.debug(
+                        f"Processing {role_type}",
+                        entity_id=entity_id,
+                        count=len(entity_data[role_type]),
+                    )
                     for name in entity_data[role_type]:
                         # Check if artist exists first and get UUID
                         check_query = """
@@ -1059,8 +1136,24 @@ class APIService:
     async def close(self) -> None:
         """Close all resources."""
         try:
-            await self.deduplication_queue.close()
-            await self.neo4j_driver.close()
+            if self.deduplication_queue:
+                try:
+                    await self.deduplication_queue.close()
+                except Exception as e:
+                    logger.warning("Error closing deduplication queue", error=str(e))
+
+            if self.neo4j_driver:
+                try:
+                    await self.neo4j_driver.close()
+                except Exception as e:
+                    logger.warning("Error closing Neo4j driver", error=str(e))
+
+            if self.redis:
+                try:
+                    await self.redis.close()
+                except Exception as e:
+                    logger.warning("Error closing Redis connection", error=str(e))
+
             logger.info("✅ Resources closed successfully")
         except Exception as e:
             logger.error("❌ Failed to close resources", error=str(e))
@@ -1296,42 +1389,123 @@ class APIService:
             return None
 
     async def process_pending_artists(self) -> None:
-        """Process artists from the pending queue."""
+        """Process artists from the pending queue, sorted by streaming popularity."""
         try:
+            # Always sort by streaming popularity before processing
+            await self.sort_pending_artists_by_popularity()
+
             while True:
-                # Get the oldest artist from the sorted set
-                artist = await self.redis.zrange("pending:artists", 0, 0)
-                if not artist:
+                # Get the highest priority artist from the sorted set
+                artist_value = await self.redis.zrange("pending:artists", 0, 0)
+                if not artist_value:
                     logger.debug("🏁 Artist queue is empty")
                     break
 
-                artist_name = artist[0]
-                logger.debug(f"🔁 Processing artist: {artist_name}")
+                # Split the stored value into name and UUID
+                artist_name, soundcharts_uuid = artist_value[0].split("|")
+                logger.debug(
+                    f"🔁 Processing artist: {artist_name} ({soundcharts_uuid})",
+                )
 
                 try:
-                    result = await self.ingest_soundcharts_api(artist_name)
-                    if result["status"] == "error":
-                        logger.error(
-                            f"❌ Failed to process artist {artist_name}: {result['error']}",
-                        )
-                    elif result["status"] == "skipped":
-                        logger.warning(
-                            f"⚠️ Skipped artist {artist_name}: {result['reason']}",
+                    result = await self.ingest_soundcharts_api(soundcharts_uuid)
+
+                    if result["status"] == "success":
+                        logger.info(
+                            "✅ Successfully processed artist",
+                            artist_name=artist_name,
+                            soundcharts_uuid=soundcharts_uuid,
                         )
                     else:
-                        logger.debug(f"✅ Processed artist {artist_name}: {result}")
+                        logger.error(
+                            "❌ Failed to process artist",
+                            artist_name=artist_name,
+                            soundcharts_uuid=soundcharts_uuid,
+                            error=result.get("error", "Unknown error"),
+                        )
 
                     # Remove the processed artist from the sorted set
-                    await self.redis.zrem("pending:artists", artist_name)
+                    await self.redis.zrem("pending:artists", artist_value[0])
+
                 except Exception as e:
-                    logger.error(f"❌ Error processing artist {artist_name}: {e!s}")
+                    logger.error(
+                        "❌ Error processing artist",
+                        artist_name=artist_name,
+                        soundcharts_uuid=soundcharts_uuid,
+                        error=str(e),
+                    )
                     # Optionally, you could move failed artists to a separate set for retry
-                    await self.redis.zadd("failed:artists", {artist_name: time.time()})
-                    await self.redis.zrem("pending:artists", artist_name)
+                    await self.redis.zadd(
+                        "failed:artists",
+                        {artist_value[0]: time.time()},
+                    )
+                    await self.redis.zrem("pending:artists", artist_value[0])
 
                 # Optional: Add delay between processing if needed
                 await asyncio.sleep(1)
 
-            logger.success("🎉 All artists processed successfully")
+            logger.info("🎉 All artists processed successfully")
         except asyncio.CancelledError:
             logger.info("Shutting down gracefully...")
+
+    async def sort_pending_artists_by_popularity(self) -> None:
+        """Resort the pending artist list based on streaming popularity."""
+        try:
+            logger.info("🔄 Resorting pending artists by streaming popularity")
+
+            # Get all artists from the pending queue
+            artists = await self.redis.zrange("pending:artists", 0, -1, withscores=True)
+
+            # Create a dictionary to store artist streaming scores
+            streaming_scores = {}
+
+            # Fetch streaming data for each artist
+            for artist_value, _ in artists:
+                artist_name, soundcharts_uuid = artist_value.split("|")
+
+                # Get streaming data from SoundCharts
+                streaming_data = (
+                    await self.soundcharts_service.get_artist_streaming_data(
+                        soundcharts_uuid,
+                    )
+                )
+
+                # Calculate an overall streaming score using the highest platform value
+                if streaming_data:
+                    # Find the maximum value across all platforms
+                    max_value = 0
+                    for platform_data in streaming_data.values():
+                        if (
+                            platform_data
+                            and "items" in platform_data
+                            and platform_data["items"]
+                        ):
+                            # Get the most recent value for this platform
+                            platform_value = platform_data["items"][-1]["value"]
+                            max_value = max(max_value, platform_value)
+                    streaming_scores[artist_value] = max_value
+                else:
+                    # If no streaming data, use a default low score
+                    streaming_scores[artist_value] = 0
+
+            # Remove all artists from the current queue
+            await self.redis.delete("pending:artists")
+
+            # Add artists back with their streaming scores
+            for artist_value, streaming_score in streaming_scores.items():
+                await self.redis.zadd(
+                    "pending:artists",
+                    {artist_value: streaming_score},
+                )
+
+            logger.info(
+                "✅ Successfully resorted pending artists by streaming popularity",
+            )
+
+        except Exception as e:
+            logger.error(
+                "❌ Failed to resort pending artists by streaming popularity",
+                error=str(e),
+                stack_trace=traceback.format_exc(),
+            )
+            raise

@@ -31,33 +31,40 @@ logger.level("TRACE", icon="🔍")
 
 
 async def main():
-    # Initialize Redis
-    setup_redis_cache(settings)
+    api_service = None
+    try:
+        # Initialize Redis
+        setup_redis_cache(settings)
 
-    # Initialize Redis cache with simpler config
-    logger.debug("🔧 Initializing LOCAL Redis cache")
-    setup_redis_cache(settings)
+        # Initialize API service
+        logger.debug("🚀 Initializing API service")
+        api_service = APIService(settings)
+        await api_service.startup()
 
-    # Initialize API service
-    logger.debug("🚀 Initializing API service")
-    api_service = APIService(settings)
-    await api_service.startup()
+        # Create test artist data
+        test_artist = {
+            "name": "Rich Sibley",
+            "uuid": "63788d70-924b-4f6a-9329-bbb34b8e771e",
+        }
 
-    # Add artists to the queue
-    artists = [
-        "Rich Sibley",
-        "Vozz Rich",
-        "Dirty Freud",
-    ]  # Example artists
-    for artist in artists:
-        await api_service._add_to_pending_list(artist)
-        logger.debug(f"🎤 Added artist to queue: {artist}")
+        # Add artist to queue
+        await api_service._add_to_pending_list(test_artist["name"], test_artist["uuid"])
 
-    input("Press Enter to continue...")
+        input("Press Enter to continue...")
 
-    # Process artists from the queue
-    await api_service.process_pending_artists()
+        # Process artists from the queue
+        await api_service.process_pending_artists()
+
+    except Exception as e:
+        logger.error("Error during main execution", error=str(e))
+    finally:
+        if api_service:
+            await api_service.close()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except RuntimeError as e:
+        if "Event loop is closed" not in str(e):
+            raise

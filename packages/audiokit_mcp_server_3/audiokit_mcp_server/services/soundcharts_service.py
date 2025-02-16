@@ -747,7 +747,7 @@ class SoundChartsService:
             return response.json()
 
     @cache()  # Uses self.cache_ttl
-    async def get_artist_streaming_data(self, artist_id: str) -> Dict:
+    async def get_artist_streaming_data(self, artist_uuid: str) -> Dict:
         """Get streaming data for an artist across all platforms."""
         try:
             # Get platforms
@@ -758,11 +758,11 @@ class SoundChartsService:
 
             streaming_data = {}
             for platform in platforms:
-                platform_code = platform.get("code")
+                platform_code = platform.get("code")  # Use 'code' directly
                 if not platform_code:
                     continue
 
-                url = f"{self.base_url}/api/v2/artist/{artist_id}/streaming/{platform_code}"
+                url = f"{self.base_url}/api/v2/artist/{artist_uuid}/streaming/{platform_code}"
                 try:
                     async with httpx.AsyncClient() as client:
                         response = await client.get(url, headers=self.headers)
