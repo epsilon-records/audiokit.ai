@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docs — AudioKit API v1</title>
+<meta name="description" content="AudioKit API v1 reference: authentication, jobs, operations, webhooks and errors.">
+<meta name="theme-color" content="#0c0e11">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap-wide nav" aria-label="Main">
+    <a class="brand" href="/">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" fill="none" stroke="#ffb547" stroke-width="2.4" stroke-linecap="round"><path d="M4 14v0M9 9v10M14 4v20M19 9v10M24 12v4"/></svg>
+      AudioKit <small>Docs</small>
+    </a>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a class="btn btn-primary" href="/#access">Get a key</a>
+    </div>
+  </nav>
+</header>
+
+<div class="wrap-wide docs">
+  <nav class="docs-nav" aria-label="Docs">
+    <div>
+      <p>Start</p>
+      <a href="#quickstart">Quickstart</a>
+      <a href="#auth">Authentication</a>
+    </div>
+    <div>
+      <p>Jobs</p>
+      <a href="#request">Job request</a>
+      <a href="#job">Job object</a>
+      <a href="#idempotency">Idempotency</a>
+      <a href="#cancel">Cancellation</a>
+    </div>
+    <div>
+      <p>Reference</p>
+      <a href="#endpoints">Endpoints</a>
+      <a href="#operations">Operations</a>
+      <a href="#webhooks">Webhooks</a>
+      <a href="#errors">Errors</a>
+    </div>
+  </nav>
+
+  <main id="main" class="docs-main">
+
+    <section id="quickstart">
+      <p class="eyebrow">Quickstart</p>
+      <h1>Measure a file's loudness</h1>
+      <p>Give AudioKit a signed URL to the file and the file's sha256. You get <code>202 Accepted</code> straight away and a signed webhook when the job finishes.</p>
+      <div class="panel">
+        <div class="panel-bar"><span>shell</span></div>
+<pre class="code">curl https://api.audiokit.ai/v1/jobs \
+  -H "Authorization: Bearer $AUDIOKIT_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "job_id": "master-0193",
+    "operation": "loudness",
+    "input": { "url": "https://…/master.wav", "sha256": "837d2e9c…", "filename": "master.wav" },
+    "webhook": { "url": "https://you.example/audiokit/webhook" }
+  }'</pre>
+      </div>
+      <div class="panel">
+        <div class="panel-bar"><span>result, in the job.succeeded event</span></div>
+<pre class="code">"result": {
+  "integrated_lufs": -22.02,
+  "loudness_range_lu": 0.0,
+  "true_peak_dbtp": -21.33,
+  "sample_peak_dbfs": -21.33,
+  "sample_rate": 44100,
+  "channels": 2,
+  "duration_seconds": 5.0
+}</pre>
+      </div>
+      <p>Hash the exact bytes your URL serves, for example <code>sha256sum master.wav</code>. A different file, or a transfer that changes it, fails with <code>input_hash_mismatch</code> before any processing.</p>
+    </section>
+
+    <section id="auth">
+      <h2>Authentication</h2>
+      <p>Send your API key as <code>Authorization: Bearer ak_…</code> on every job request. AudioKit stores only a hash of each key. <code>/v1/health</code> and <code>/v1/capabilities</code> need no key. Each client sees only its own jobs: another client's job ID returns <code>404</code>.</p>
+    </section>
+
+    <section id="request">
+      <h2>Job request</h2>
+      <p><code>POST /v1/jobs</code> takes this JSON body. Unknown fields are rejected with <code>422 invalid_request</code>.</p>
+      <div class="table-box">
+        <table style="min-width: 640px">
+          <thead><tr><th scope="col">Field</th><th scope="col">Required</th><th scope="col">Meaning</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">job_id</td><td>yes</td><td class="soft">Your own ID, 1–200 printable ASCII characters, no spaces. Also the idempotency key.</td></tr>
+            <tr><td class="mono">operation</td><td>yes</td><td class="soft"><code>probe</code> or <code>loudness</code></td></tr>
+            <tr><td class="mono">input.url</td><td>yes</td><td class="soft">Signed GET URL. Must be https and resolve to a public address, including after redirects.</td></tr>
+            <tr><td class="mono">input.sha256</td><td>yes</td><td class="soft">64 hex characters</td></tr>
+            <tr><td class="mono">input.filename</td><td>no</td><td class="soft">Original filename, used only as a format hint</td></tr>
+            <tr><td class="mono">params</td><td>no</td><td class="soft">Operation settings, an object. None are defined yet.</td></tr>
+            <tr><td class="mono">webhook.url</td><td>no</td><td class="soft">Where to POST the result. Same URL rules as input.url.</td></tr>
+            <tr><td class="mono">authorization</td><td>no</td><td class="soft"><code>{ "decision_id", "purpose" }</code>, a reference to your own rights decision. Stored with the job for provenance; AudioKit never needs the underlying documents.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="job">
+      <h2>Job object</h2>
+      <p>Returned by submit, status and cancel, and sent as <code>data</code> in webhook events.</p>
+      <div class="panel">
+<pre class="code">{
+  "provider_job_id": "01a19981-fb9f-774e-b139-7cc6ac648659",
+  "job_id": "master-0193",
+  "operation": "loudness",
+  "status": "succeeded",
+  "result": { "integrated_lufs": -22.02, "…": "…" },
+  "provenance": {
+    "input_sha256": "837d2e9cc6a5ef10…",
+    "audiokit_version": "0.1.0",
+    "operation": "loudness",
+    "params": {}
+  },
+  "created_at": "2026-11-01T23:46:35.039517Z",
+  "started_at": "2026-11-01T23:46:35.044170Z",
+  "finished_at": "2026-11-01T23:46:35.730192Z"
+}</pre>
+      </div>
+      <p><code>status</code> is <code>queued</code>, <code>running</code>, <code>succeeded</code>, <code>failed</code> or <code>canceled</code>. A failed job has <code>error: { "code", "message" }</code> in place of <code>result</code>.</p>
+    </section>
+
+    <section id="idempotency">
+      <h2>Idempotency</h2>
+      <p>Submitting the same body with the same <code>job_id</code> again returns the existing job with <code>200 OK</code>, so retries after a timeout are safe. A different body with a <code>job_id</code> you've already used returns <code>409 idempotency_conflict</code>. To run the same file again, use a new <code>job_id</code>.</p>
+    </section>
+
+    <section id="cancel">
+      <h2>Cancellation</h2>
+      <p><code>POST /v1/jobs/{provider_job_id}/cancel</code> cancels a queued job at once (<code>200</code>) and sends a <code>job.canceled</code> event. A running job stops at its next checkpoint (<code>202</code>). A finished job is returned unchanged (<code>200</code>).</p>
+    </section>
+
+    <section id="endpoints">
+      <h2>Endpoints</h2>
+      <div class="table-box">
+        <table style="min-width: 620px">
+          <thead><tr><th scope="col">Method</th><th scope="col">Path</th><th scope="col">Does</th></tr></thead>
+          <tbody>
+            <tr><td class="mono m-get">GET</td><td class="mono">/v1/health</td><td class="soft">Liveness and version</td></tr>
+            <tr><td class="mono m-get">GET</td><td class="mono">/v1/capabilities</td><td class="soft">Operations that work end to end</td></tr>
+            <tr><td class="mono m-post">POST</td><td class="mono">/v1/jobs</td><td class="soft">Submit. 202 new · 200 same request again · 409 same job_id, different request</td></tr>
+            <tr><td class="mono m-get">GET</td><td class="mono">/v1/jobs/{id}</td><td class="soft">Status, result, error, provenance</td></tr>
+            <tr><td class="mono m-post">POST</td><td class="mono">/v1/jobs/{id}/cancel</td><td class="soft">200 canceled or already finished · 202 stopping</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Errors from the API itself look like <code>{ "error": { "code": "…", "message": "…" } }</code>: <code>401 unauthorized</code>, <code>404 not_found</code>, <code>409 idempotency_conflict</code>, <code>422 invalid_request</code>, <code>503 unavailable</code>.</p>
+    </section>
+
+    <section id="operations">
+      <h2>Operations</h2>
+      <h3><code>probe</code></h3>
+      <p>Decodes the whole file. Returns <code>container</code>, <code>codec</code>, <code>sample_rate</code>, <code>channels</code>, <code>bits_per_sample</code>, <code>frames</code>, <code>duration_seconds</code>, <code>size_bytes</code>, <code>decode_errors</code> and <code>valid</code> (true when every packet decoded).</p>
+      <h3><code>loudness</code></h3>
+      <p>EBU R128. Returns <code>integrated_lufs</code>, <code>loudness_range_lu</code>, <code>true_peak_dbtp</code>, <code>sample_peak_dbfs</code>, <code>sample_rate</code>, <code>channels</code> and <code>duration_seconds</code>. Values are rounded to two decimals; silence gives <code>null</code>.</p>
+      <p>Readable formats: WAV, AIFF, FLAC, MP3, AAC and ALAC in MP4, Ogg Vorbis, CAF and MKV/WebM audio.</p>
+    </section>
+
+    <section id="webhooks">
+      <h2>Webhooks</h2>
+      <p>When a job finishes, AudioKit POSTs <code>{ "event_id", "type", "created_at", "data" }</code> to the job's webhook URL. <code>type</code> is <code>job.succeeded</code>, <code>job.failed</code> or <code>job.canceled</code>; <code>data</code> is the job object. Drop any <code>event_id</code> you've already handled.</p>
+      <p>Any 2xx response counts as delivered. Otherwise AudioKit retries after 10 s, 1 min, 5 min, 30 min, 2 h and 6 h, then gives up. <code>GET /v1/jobs/{id}</code> always has the final state.</p>
+      <p>Every event carries <code>X-Signature: t=&lt;unix seconds&gt;,v1=&lt;hex&gt;</code>: an HMAC-SHA256 of <code>"{t}.{raw_body}"</code> with your webhook secret. Reject signatures more than 300 seconds old, and verify against the raw body before parsing it.</p>
+      <div class="panel">
+        <div class="panel-bar"><span>verify · node</span></div>
+<pre class="code">import crypto from "node:crypto";
+
+export function verify(secret, rawBody, header) {
+  const parts = Object.fromEntries(header.split(",").map((p) =&gt; p.split("=")));
+  const t = Number(parts.t);
+  if (!t || Math.abs(Date.now() / 1000 - t) &gt; 300) return false;
+  const mac = crypto.createHmac("sha256", secret).update(`${t}.${rawBody}`).digest("hex");
+  return mac.length === parts.v1?.length &amp;&amp;
+    crypto.timingSafeEqual(Buffer.from(mac), Buffer.from(parts.v1));
+}</pre>
+      </div>
+      <div class="panel">
+        <div class="panel-bar"><span>verify · python</span></div>
+<pre class="code">import hashlib, hmac, time
+
+def verify(secret: bytes, raw_body: bytes, header: str) -&gt; bool:
+    parts = dict(p.split("=", 1) for p in header.split(",") if "=" in p)
+    t = int(parts.get("t", 0))
+    if abs(time.time() - t) &gt; 300:
+        return False
+    mac = hmac.new(secret, f"{t}.".encode() + raw_body, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(mac, parts.get("v1", ""))</pre>
+      </div>
+      <div class="callout">
+        <strong>Test vector</strong>
+<pre class="code" style="padding: 0">secret  whsec_test
+body    {"event_id":"evt-1"}
+header  t=1793440800,v1=27d3e5b970e7b39136241354c673e7849a3bceccff29da0b09c76a1d9b73b822</pre>
+        <p class="prose" style="font-size: 15px">The timestamp is fixed, so skip the age check when testing against it.</p>
+      </div>
+    </section>
+
+    <section id="errors">
+      <h2>Job errors</h2>
+      <p>A failed job's <code>error.code</code> is one of these.</p>
+      <div class="table-box">
+        <table class="no-head" style="min-width: 560px">
+          <tbody>
+            <tr><td class="mono">input_url_rejected</td><td class="soft">The URL isn't https or points at a non-public address</td></tr>
+            <tr><td class="mono">input_unreachable</td><td class="soft">The download failed or returned a non-2xx status</td></tr>
+            <tr><td class="mono">input_too_large</td><td class="soft">The file is over the size limit</td></tr>
+            <tr><td class="mono">input_hash_mismatch</td><td class="soft">The downloaded bytes don't match input.sha256</td></tr>
+            <tr><td class="mono">unsupported_format</td><td class="soft">Not a readable audio file, or no audio track</td></tr>
+            <tr><td class="mono">unsupported_codec</td><td class="soft">The audio track's codec can't be decoded</td></tr>
+            <tr><td class="mono">corrupt_input</td><td class="soft">Decoding failed partway through</td></tr>
+            <tr><td class="mono">internal</td><td class="soft">AudioKit's fault. Safe to resubmit with a new job_id</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</div>
+
+<footer class="site-footer">
+  <div class="wrap-wide footer">
+    <span>© 2026 AudioKit</span>
+    <nav aria-label="Footer"><a href="/">Home</a></nav>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AudioKit — audio intelligence API</title>
+<meta name="description" content="Send AudioKit a file and a job type. It checks the file, does the work and calls your webhook. Loudness, format checks and more, with provenance on every result.">
+<meta property="og:title" content="AudioKit — audio intelligence API">
+<meta property="og:description" content="Loudness, format checks and more, by API. Every result traceable to the exact file that produced it.">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#0c0e11">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <nav class="wrap nav" aria-label="Main">
+    <a class="brand" href="/">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true" fill="none" stroke="#ffb547" stroke-width="2.4" stroke-linecap="round"><path d="M4 14v0M9 9v10M14 4v20M19 9v10M24 12v4"/></svg>
+      AudioKit
+    </a>
+    <div class="nav-links">
+      <a href="/docs/">Docs</a>
+      <a href="#operations">Operations</a>
+      <a href="#roadmap">Roadmap</a>
+      <a class="btn btn-primary" href="#access">Request API access</a>
+    </div>
+  </nav>
+</header>
+
+<main id="main">
+  <section class="wrap hero">
+    <div class="hero-copy">
+      <p class="eyebrow">API · v1 · early access</p>
+      <h1>Audio intelligence,<br>one API call away.</h1>
+      <p class="lede">Send AudioKit a file and a job type. It checks the file, does the work and calls your webhook. Originals are never changed, and every result records exactly what produced it.</p>
+      <div class="actions">
+        <a class="btn btn-primary btn-lg" href="#access">Request API access</a>
+        <a class="btn btn-ghost btn-lg" href="/docs/">Read the docs</a>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-bar"><span>POST /v1/jobs</span><span class="ok">202 Accepted</span></div>
+<pre class="code"><span class="dim">$</span> curl https://api.audiokit.ai/v1/jobs \
+  -H "Authorization: Bearer $AUDIOKIT_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "job_id": "master-0193",
+    "operation": "loudness",
+    "input": {
+      "url": "https://…signed…/master.wav",
+      "sha256": "837d2e9c…"
+    },
+    "webhook": { "url": "https://you.example/hook" }
+  }'</pre>
+      <div class="panel-foot">
+        <p>webhook · job.succeeded</p>
+        <div class="meters">
+          <div class="meter"><p>Integrated</p><p>−22.0 <span>LUFS</span></p></div>
+          <div class="meter"><p>True peak</p><p>−21.3 <span>dBTP</span></p></div>
+          <div class="meter"><p>Range</p><p>0.0 <span>LU</span></p></div>
+        </div>
+        <svg class="wave" viewBox="0 0 701 56" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="21.0" width="8" height="14.0" rx="2" fill="#4a5360"/><rect x="11" y="15.2" width="8" height="25.5" rx="2" fill="#4a5360"/><rect x="22" y="11.4" width="8" height="33.3" rx="2" fill="#4a5360"/><rect x="33" y="9.8" width="8" height="36.5" rx="2" fill="#4a5360"/><rect x="44" y="10.4" width="8" height="35.2" rx="2" fill="#4a5360"/><rect x="55" y="12.8" width="8" height="30.5" rx="2" fill="#4a5360"/><rect x="66" y="15.9" width="8" height="24.2" rx="2" fill="#4a5360"/><rect x="77" y="18.8" width="8" height="18.4" rx="2" fill="#4a5360"/><rect x="88" y="20.6" width="8" height="14.7" rx="2" fill="#4a5360"/><rect x="99" y="20.9" width="8" height="14.2" rx="2" fill="#4a5360"/><rect x="110" y="19.6" width="8" height="16.9" rx="2" fill="#4a5360"/><rect x="121" y="17.0" width="8" height="22.0" rx="2" fill="#4a5360"/><rect x="132" y="14.1" width="8" height="27.8" rx="2" fill="#4a5360"/><rect x="143" y="11.8" width="8" height="32.5" rx="2" fill="#4a5360"/><rect x="154" y="10.9" width="8" height="34.2" rx="2" fill="#4a5360"/><rect x="165" y="12.2" width="8" height="31.7" rx="2" fill="#4a5360"/><rect x="176" y="15.7" width="8" height="24.6" rx="2" fill="#4a5360"/><rect x="187" y="20.9" width="8" height="14.2" rx="2" fill="#4a5360"/><rect x="198" y="14.4" width="8" height="27.1" rx="2" fill="#4a5360"/><rect x="209" y="8.1" width="8" height="39.7" rx="2" fill="#4a5360"/><rect x="220" y="3.2" width="8" height="49.6" rx="2" fill="#ffb547"/><rect x="231" y="0.6" width="8" height="54.7" rx="2" fill="#ffb547"/><rect x="242" y="1.0" width="8" height="54.0" rx="2" fill="#ffb547"/><rect x="253" y="4.4" width="8" height="47.3" rx="2" fill="#4a5360"/><rect x="264" y="10.1" width="8" height="35.7" rx="2" fill="#4a5360"/><rect x="275" y="17.4" width="8" height="21.1" rx="2" fill="#4a5360"/><rect x="286" y="17.1" width="8" height="21.7" rx="2" fill="#4a5360"/><rect x="297" y="10.8" width="8" height="34.5" rx="2" fill="#4a5360"/><rect x="308" y="6.5" width="8" height="43.0" rx="2" fill="#4a5360"/><rect x="319" y="4.9" width="8" height="46.3" rx="2" fill="#4a5360"/><rect x="330" y="5.9" width="8" height="44.3" rx="2" fill="#4a5360"/><rect x="341" y="8.9" width="8" height="38.1" rx="2" fill="#4a5360"/><rect x="352" y="13.2" width="8" height="29.6" rx="2" fill="#4a5360"/><rect x="363" y="17.6" width="8" height="20.8" rx="2" fill="#4a5360"/><rect x="374" y="20.9" width="8" height="14.2" rx="2" fill="#4a5360"/><rect x="385" y="18.9" width="8" height="18.1" rx="2" fill="#4a5360"/><rect x="396" y="18.8" width="8" height="18.4" rx="2" fill="#4a5360"/><rect x="407" y="20.2" width="8" height="15.6" rx="2" fill="#4a5360"/><rect x="418" y="19.6" width="8" height="16.8" rx="2" fill="#4a5360"/><rect x="429" y="17.4" width="8" height="21.1" rx="2" fill="#4a5360"/><rect x="440" y="16.3" width="8" height="23.4" rx="2" fill="#4a5360"/><rect x="451" y="16.9" width="8" height="22.3" rx="2" fill="#4a5360"/><rect x="462" y="19.3" width="8" height="17.4" rx="2" fill="#4a5360"/><rect x="473" y="18.6" width="8" height="18.9" rx="2" fill="#4a5360"/><rect x="484" y="13.4" width="8" height="29.1" rx="2" fill="#4a5360"/><rect x="495" y="8.4" width="8" height="39.2" rx="2" fill="#4a5360"/><rect x="506" y="4.5" width="8" height="47.0" rx="2" fill="#4a5360"/><rect x="517" y="2.8" width="8" height="50.4" rx="2" fill="#ffb547"/><rect x="528" y="3.9" width="8" height="48.2" rx="2" fill="#ffb547"/><rect x="539" y="7.8" width="8" height="40.5" rx="2" fill="#4a5360"/><rect x="550" y="13.9" width="8" height="28.1" rx="2" fill="#4a5360"/><rect x="561" y="20.6" width="8" height="14.9" rx="2" fill="#4a5360"/><rect x="572" y="13.0" width="8" height="30.0" rx="2" fill="#4a5360"/><rect x="583" y="6.7" width="8" height="42.6" rx="2" fill="#4a5360"/><rect x="594" y="2.6" width="8" height="50.7" rx="2" fill="#ffb547"/><rect x="605" y="1.4" width="8" height="53.1" rx="2" fill="#ffb547"/><rect x="616" y="3.1" width="8" height="49.7" rx="2" fill="#ffb547"/><rect x="627" y="7.3" width="8" height="41.4" rx="2" fill="#4a5360"/><rect x="638" y="12.8" width="8" height="30.3" rx="2" fill="#4a5360"/><rect x="649" y="18.6" width="8" height="18.7" rx="2" fill="#4a5360"/><rect x="660" y="18.4" width="8" height="19.3" rx="2" fill="#4a5360"/><rect x="671" y="15.1" width="8" height="25.9" rx="2" fill="#4a5360"/><rect x="682" y="13.8" width="8" height="28.4" rx="2" fill="#4a5360"/><rect x="693" y="14.6" width="8" height="26.9" rx="2" fill="#4a5360"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" aria-label="How it works">
+    <div class="wrap steps">
+      <div class="step"><p class="num">01 · submit</p><h2>One request per job</h2><p>Your job ID is the idempotency key. Retry freely: the same request never runs twice.</p></div>
+      <div class="step"><p class="num">02 · verify</p><h2>Checked before it runs</h2><p>AudioKit downloads from your signed URL and rejects any file whose sha256 doesn't match.</p></div>
+      <div class="step"><p class="num">03 · process</p><h2>Originals untouched</h2><p>Results carry provenance: input hash, AudioKit version, operation and settings.</p></div>
+      <div class="step"><p class="num">04 · deliver</p><h2>Signed webhooks</h2><p>HMAC-signed events, retried for hours if your endpoint is down. Status is always one GET away.</p></div>
+    </div>
+  </section>
+
+  <section id="operations" class="wrap section">
+    <div class="section-head">
+      <h2>Operations</h2>
+      <p>Listed at <code>GET /v1/capabilities</code> once they work end to end.</p>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <div class="card-head"><h3>loudness</h3><span class="tag tag-live">Live</span></div>
+        <p>EBU R128 integrated loudness, loudness range, true peak and sample peak, for delivery specs and normalisation.</p>
+      </article>
+      <article class="card">
+        <div class="card-head"><h3>probe</h3><span class="tag tag-live">Live</span></div>
+        <p>Decodes the whole file and reports container, codec, sample rate, channels, bit depth, duration and whether it decodes cleanly.</p>
+      </article>
+      <article class="card soon">
+        <div class="card-head"><h3>transcode · preview · waveform</h3><span class="tag tag-next">Next</span></div>
+        <p>WAV, FLAC, MP3 and AAC outputs, short previews and waveform data, written straight to your storage.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="roadmap" class="rule-top">
+    <div class="wrap section">
+      <h2>Roadmap</h2>
+      <div class="table-box">
+        <table class="roadmap">
+          <thead><tr><th scope="col">Wave</th><th scope="col">Scope</th><th scope="col">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="mono">1</td><td>Jobs API, signed webhooks, probe, loudness, transcode, previews, waveform</td><td class="status-now">In progress</td></tr>
+            <tr><td class="mono">2</td><td>BPM and beat grid, musical key, audio fingerprint, genre and mood tags</td><td class="status-later">Planned</td></tr>
+            <tr><td class="mono">3</td><td>Stem separation, loudness normalisation, cleanup, DJ edits, reference mastering</td><td class="status-later">Planned</td></tr>
+            <tr><td class="mono">4</td><td>Consent-gated voice tools, MCP server for agents</td><td class="status-later">Planned</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="access" class="band">
+    <div class="wrap section access">
+      <h2>Get an API key</h2>
+      <p>AudioKit is in early access for labels, distributors and developers. Tell us what you'd process.</p>
+      <form class="access-form" name="access" method="POST" action="/thanks" data-netlify="true" netlify-honeypot="bot-field">
+        <p class="hidden"><label>Leave this empty: <input name="bot-field"></label></p>
+        <label for="email" class="sr-only">Work email</label>
+        <input class="input" id="email" name="email" type="email" autocomplete="email" placeholder="you@label.com" required>
+        <button class="btn btn-primary btn-lg" type="submit">Request access</button>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer">
+    <span>© 2026 AudioKit</span>
+    <nav aria-label="Footer"><a href="/docs/">Docs</a></nav>
+  </div>
+</footer>
+</body>
+</html>
